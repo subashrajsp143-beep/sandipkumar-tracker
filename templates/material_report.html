@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Material Wise Report - {{ selected_material.name if selected_material else 'Materials' }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Selector Bar -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm no-print">
+        <form method="GET" action="{{ url_for('material_report') }}" class="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div class="flex-grow">
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Select Material to Track (270+ Materials Available)
+                </label>
+                <select name="material_id" onchange="this.form.submit()" class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+                    {% for m in materials %}
+                    <option value="{{ m.id }}" {% if m.id == selected_mat_id %}selected{% endif %}>
+                        {{ m.name }} (₹{{ m.rate }} / {{ m.unit }}) - [{{ m.category }}]
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="py-2.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm transition">
+                <i class="fa-solid fa-search"></i> Track Material
+            </button>
+        </form>
+    </div>
+
+    {% if selected_material %}
+    <!-- Material Card & Overview -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold uppercase">{{ selected_material.category }}</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800 mt-1">{{ selected_material.name }}</h1>
+            <div class="flex items-center gap-4 text-xs text-slate-500 mt-2">
+                <span>Standard Unit: <strong class="text-slate-700 font-mono">{{ selected_material.unit }}</strong></span>
+                <span>Standard Rate: <strong class="text-slate-700 font-mono">₹{{ "{:,.2f}".format(selected_material.rate) }}</strong></span>
+            </div>
+        </div>
+
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-2 no-print self-start md:self-auto">
+            <i class="fa-solid fa-print"></i> Print
+        </button>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kul Istemal (Total Quantity)</span>
+            <p class="text-2xl font-black text-indigo-700 mt-1 font-mono">
+                {{ total_qty }} <span class="text-sm font-normal text-slate-500">{{ selected_material.unit }}</span>
+            </p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Consumed Value</span>
+            <p class="text-2xl font-black text-emerald-700 mt-1 font-mono">₹{{ "{:,.2f}".format(total_cost) }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kitne Sites Par Laga</span>
+            <p class="text-2xl font-black text-blue-800 mt-1">{{ sites_usage|length }} / 19 Sites</p>
+        </div>
+    </div>
+
+    <!-- Site Distribution Cards -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-blue-600"></i>
+            Kis Site Par Kitna Material Laga (Site Breakdown)
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for su in sites_usage %}
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/20 transition flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-xs font-bold text-slate-500">{{ su.site_code }}</span>
+                    <a href="{{ url_for('site_report', site_id=su.site_id) }}" class="text-[11px] text-blue-600 hover:underline">
+                        Site Report &rarr;
+                    </a>
+                </div>
+                <div class="mt-2">
+                    <h3 class="font-bold text-slate-800 text-sm">{{ su.site_name }}</h3>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block uppercase">Consumed</span>
+                        <span class="font-mono font-bold text-slate-800 text-sm">{{ su.total_quantity }} {{ selected_material.unit }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block uppercase">Amount</span>
+                        <span class="font-mono font-bold text-emerald-700 text-sm">₹{{ "{:,.2f}".format(su.total_cost) }}</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full py-8 text-center text-slate-400 text-xs">
+                Yeh material abhi kisi bhi site par use nahi hua hai.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+        <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+                Material Ka Pura Usage Itihas (Complete Log History)
+            </h2>
+            <a href="{{ url_for('item_history', material_id=selected_material.id) }}" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-timeline text-amber-600"></i> Date-Wise Timeline View &rarr;
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 border-y border-slate-200 text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="py-3 px-3 w-10 text-center">#</th>
+                        <th class="py-3 px-3">Tareekh (Date)</th>
+                        <th class="py-3 px-3">Site Name</th>
+                        <th class="py-3 px-3 text-right">Quantity</th>
+                        <th class="py-3 px-3 text-center">Unit</th>
+                        <th class="py-3 px-3 text-right">Rate (₹)</th>
+                        <th class="py-3 px-3 text-right">Amount (₹)</th>
+                        <th class="py-3 px-3">Work Purpose / Remarks</th>
+                        <th class="py-3 px-3">Supervisor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for log in logs %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-2.5 px-3 text-center text-slate-400 font-mono">{{ loop.index }}</td>
+                        <td class="py-2.5 px-3 whitespace-nowrap">
+                            <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 font-mono font-bold text-xs border border-blue-100">
+                                📅 {{ log.usage_date }}
+                            </span>
+                        </td>
+                        <td class="py-2.5 px-3 font-semibold text-blue-700">
+                            <a href="{{ url_for('site_report', site_id=log.site_id) }}" class="hover:underline">
+                                {{ log.site_name }}
+                            </a>
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">{{ log.quantity }}</td>
+                        <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-100 font-mono text-[10px]">{{ selected_material.unit }}</span></td>
+                        <td class="py-2.5 px-3 text-right font-mono text-slate-500">₹{{ log.rate }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(log.total_amount) }}</td>
+                        <td class="py-2.5 px-3 text-slate-600">{{ log.purpose or '-' }}</td>
+                        <td class="py-2.5 px-3 text-slate-500">{{ log.entered_by or '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="py-8 text-center text-slate-400">Koi log nahi mila.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Sites Directory - M/S SANDIP KUMAR{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Controls -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-building-circle-check"></i> M/S SANDIP KUMAR
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Sites Directory & In-Charge Details</h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Sabhi project sites ke naam, supervisors, incharge ke phone numbers aur naya site jodne ki suvidha.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Search bar -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="siteSearchInput" onkeyup="filterSites()" placeholder="Site ya supervisor search karein..." class="pl-8 pr-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-48 sm:w-64">
+            </div>
+            
+            <div class="px-3 py-2 rounded-xl bg-slate-100 text-xs font-semibold text-slate-700">
+                Total: <span id="siteCount" class="font-bold text-blue-700 font-mono">{{ sites|length }} Sites</span>
+            </div>
+
+            <!-- Add Site Button -->
+            <button onclick="openAddSiteModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-sm"></i>
+                <span>+ Nayi Site Jodein</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sites Grid Cards -->
+    <div id="sitesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for s in sites %}
+        <div class="site-card bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:border-blue-400 hover:shadow-md transition flex flex-col justify-between"
+             data-name="{{ s.name|lower }}" 
+             data-supervisor="{{ (s.supervisor or '')|lower }}" 
+             data-incharge="{{ (s.incharge or '')|lower }}" 
+             data-code="{{ s.code|lower }}"
+             data-location="{{ (s.location or '')|lower }}">
+            <div>
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-mono text-xs font-bold">{{ s.code }} (Sl. {{ s.id }})</span>
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold">Active Site</span>
+                </div>
+                
+                <h3 class="text-lg font-bold text-slate-800 mt-3 flex items-center gap-2">
+                    <i class="fa-solid fa-location-dot text-rose-500 text-sm"></i>
+                    <span>{{ s.name }}</span>
+                </h3>
+                {% if s.location %}
+                <p class="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-map-pin text-[10px]"></i> {{ s.location }}
+                </p>
+                {% endif %}
+
+                <!-- Personnel Details -->
+                <div class="space-y-2.5 mt-4 text-xs">
+                    
+                    <!-- Supervisor -->
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Supervisor</span>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span class="font-bold text-slate-800">{{ s.supervisor or 'N/A' }}</span>
+                            {% if s.contact %}
+                            <a href="tel:{{ s.contact }}" class="text-blue-600 font-mono font-bold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-phone text-[10px]"></i> {{ s.contact }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Site Incharge -->
+                    {% if s.incharge %}
+                    <div class="p-2.5 rounded-xl bg-indigo-50/50 border border-indigo-100">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">Site Incharge</span>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span class="font-bold text-slate-800">{{ s.incharge }}</span>
+                            {% if s.incharge_phone %}
+                            <a href="tel:{{ s.incharge_phone }}" class="text-indigo-600 font-mono font-bold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-phone text-[10px]"></i> {{ s.incharge_phone }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                <a href="{{ url_for('site_report', site_id=s.id) }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    <i class="fa-solid fa-file-invoice"></i> Material Hisab Dekhein &rarr;
+                </a>
+                <button onclick='openEditSiteModal({{ s|tojson }})' class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No results fallback -->
+    <div id="noResultsMsg" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
+        <i class="fa-solid fa-magnifying-glass text-3xl text-slate-300 mb-2"></i>
+        <p class="text-slate-500 text-sm font-medium">Koi site match nahi hui.</p>
+    </div>
+
+</div>
+
+<!-- Add New Site Modal -->
+<div id="addSiteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 transform transition-all">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Nayi Construction Site Jodein</h3>
+                    <p class="text-[11px] text-slate-400">M/S SANDIP KUMAR Site List me naya project add karein</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAddSiteModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form id="addSiteForm" method="POST" action="{{ url_for('add_site') }}" class="space-y-3.5">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Site Ka Naam (Project / Location) <span class="text-rose-500">*</span></label>
+                <input type="text" name="name" required placeholder="Udaharan: Guthani Phase 2, Marhowrah, Maharajganj-2, etc." class="w-full rounded-xl border border-slate-300 py-2.5 px-3.5 text-xs text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Site Code (Optional)</label>
+                    <input type="text" name="code" placeholder="Auto: SITE-{{ '%02d' % (sites|length + 1) }}" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Khaali chhodenge toh auto SITE-XX banega</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Location / Gaon / Block</label>
+                    <input type="text" name="location" placeholder="e.g. Siwan, Saran, Madhubani" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor Ka Naam</label>
+                    <input type="text" name="supervisor" placeholder="Supervisor Name" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor Phone</label>
+                    <input type="text" name="contact" placeholder="10 Digit Mobile No." class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Site Incharge Ka Naam</label>
+                    <input type="text" name="incharge" placeholder="Site Incharge Name" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Incharge Phone</label>
+                    <input type="text" name="incharge_phone" placeholder="10 Digit Mobile No." class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeAddSiteModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Radd Karein (Cancel)</button>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-plus-circle"></i> Nayi Site Add Karein
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Site Modal -->
+<div id="editSiteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">Site Details Update Karein</h3>
+            </div>
+            <button type="button" onclick="closeEditSiteModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form id="editSiteForm" method="POST" action="" class="space-y-3.5">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Site Name <span class="text-rose-500">*</span></label>
+                    <input type="text" id="siteName" name="name" required class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Location / Gaon</label>
+                    <input type="text" id="siteLocation" name="location" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor Name</label>
+                    <input type="text" id="siteSupervisor" name="supervisor" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor Phone</label>
+                    <input type="text" id="siteContact" name="contact" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Site Incharge</label>
+                    <input type="text" id="siteIncharge" name="incharge" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Incharge Phone</label>
+                    <input type="text" id="siteInchargePhone" name="incharge_phone" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button type="button" onclick="deleteCurrentSite()" class="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> Delete Site
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeEditSiteModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition">Save Changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Hidden Delete Form -->
+<form id="deleteSiteForm" method="POST" action="" class="hidden"></form>
+
+<script>
+    const addSiteModal = document.getElementById('addSiteModal');
+    const editSiteModal = document.getElementById('editSiteModal');
+    let currentEditingSiteId = null;
+
+    function openAddSiteModal() {
+        addSiteModal.classList.remove('hidden');
+    }
+
+    function closeAddSiteModal() {
+        addSiteModal.classList.add('hidden');
+    }
+
+    function openEditSiteModal(site) {
+        currentEditingSiteId = site.id;
+        document.getElementById('editSiteForm').action = `/api/sites/${site.id}/edit`;
+        document.getElementById('deleteSiteForm').action = `/api/sites/${site.id}/delete`;
+        document.getElementById('siteName').value = site.name;
+        document.getElementById('siteLocation').value = site.location || '';
+        document.getElementById('siteSupervisor').value = site.supervisor || '';
+        document.getElementById('siteContact').value = site.contact || '';
+        document.getElementById('siteIncharge').value = site.incharge || '';
+        document.getElementById('siteInchargePhone').value = site.incharge_phone || '';
+        editSiteModal.classList.remove('hidden');
+    }
+
+    function closeEditSiteModal() {
+        editSiteModal.classList.add('hidden');
+    }
+
+    function deleteCurrentSite() {
+        if (!currentEditingSiteId) return;
+        if (confirm("Kya aap sach me is site ko delete karna chahte hain?\n(Note: Agar is site par koi daily material hisab darj hai to delete nahi hoga)")) {
+            document.getElementById('deleteSiteForm').submit();
+        }
+    }
+
+    // Live search filter
+    function filterSites() {
+        const query = document.getElementById('siteSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.site-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const name = card.dataset.name || '';
+            const supervisor = card.dataset.supervisor || '';
+            const incharge = card.dataset.incharge || '';
+            const code = card.dataset.code || '';
+            const location = card.dataset.location || '';
+
+            if (name.includes(query) || supervisor.includes(query) || incharge.includes(query) || code.includes(query) || location.includes(query)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const noResults = document.getElementById('noResultsMsg');
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    // Close modals on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAddSiteModal();
+            closeEditSiteModal();
+        }
+    });
+</script>
+{% endblock %}

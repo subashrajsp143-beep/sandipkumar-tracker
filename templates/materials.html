@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}Material Master Catalog - 19 Sites Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-boxes-stacked"></i> Master Catalog
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Materials & Rate Master List</h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Total <strong>{{ materials|length }}</strong> materials pre-loaded hain photos aur rates ke sath.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+            <a href="{{ url_for('material_store') }}" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black shadow transition flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping"></i> Material Store Dekhein
+            </a>
+            <button onclick="openAddModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> + Naya Material Jodein
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div class="relative w-full sm:w-80">
+            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="matSearchInput" placeholder="Material ka naam ya category khojein..." class="w-full rounded-xl border border-slate-300 pl-8 pr-4 py-2 text-xs text-slate-800 focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div class="text-xs text-slate-500 font-medium">
+            <span id="filteredCount" class="font-bold text-blue-600 font-mono">{{ materials|length }}</span> materials dikh rahe hain
+        </div>
+    </div>
+
+    <!-- Materials Table -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse" id="materialsTable">
+                <thead class="bg-slate-50 border-y border-slate-200 text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="py-3 px-3 w-10 text-center">#</th>
+                        <th class="py-3 px-3 w-16 text-center">Photo</th>
+                        <th class="py-3 px-3">Material Description</th>
+                        <th class="py-3 px-3">Category</th>
+                        <th class="py-3 px-3 text-center">Unit</th>
+                        <th class="py-3 px-3 text-right">Standard Rate (₹)</th>
+                        <th class="py-3 px-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for m in materials %}
+                    <tr class="hover:bg-slate-50/80 transition mat-row" data-name="{{ m.name|lower }}" data-cat="{{ m.category|lower }}">
+                        <td class="py-2.5 px-3 text-center text-slate-400 font-mono">{{ loop.index }}</td>
+                        <td class="py-2 px-3 text-center">
+                            <div class="relative group/img inline-block cursor-pointer" onclick='openPhotoModal({{ m|tojson }})' title="Photo badlein ya online dekhein">
+                                <img src="{{ m.image_url or '/uploads/materials/fittings.jpg' }}" 
+                                     id="tbl-img-{{ m.id }}"
+                                     class="w-10 h-10 rounded-lg object-cover mx-auto border border-slate-200 group-hover/img:opacity-80 transition"
+                                     loading="lazy"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.src='/uploads/materials/fittings.jpg'">
+                                <div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition text-white text-[10px]">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-2.5 px-3 font-semibold text-slate-800 mat-title">{{ m.name }}</td>
+                        <td class="py-2.5 px-3">
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium text-[10px]">{{ m.category }}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-600">{{ m.unit }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(m.rate) }}</td>
+                        <td class="py-2.5 px-3 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick='openPhotoModal({{ m|tojson }})' class="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium text-[11px] transition flex items-center gap-1" title="Photo Badlein">
+                                    <i class="fa-solid fa-camera text-xs"></i> Photo
+                                </button>
+                                <button onclick='openEditModal({{ m|tojson }})' class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium text-[11px] transition flex items-center gap-1">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i> Edit
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Add Material Modal -->
+<div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Naya Material Jodein</h3>
+        <form method="POST" action="{{ url_for('add_material') }}" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Material Name <span class="text-rose-500">*</span></label>
+                <input type="text" name="name" required placeholder="e.g. 50MM HDPE PIPE" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Unit <span class="text-rose-500">*</span></label>
+                    <input type="text" name="unit" required placeholder="MTR, NOS, PCS..." class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Standard Rate (₹)</label>
+                    <input type="number" step="any" min="0" name="rate" placeholder="0.00" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                <input type="text" name="category" placeholder="Pipes, Valves, Electrical..." class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Save Material</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Material Modal -->
+<div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Material Edit Karein</h3>
+        <form id="editForm" method="POST" action="" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Material Name <span class="text-rose-500">*</span></label>
+                <input type="text" id="editName" name="name" required class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Unit</label>
+                    <input type="text" id="editUnit" name="unit" required class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Rate (₹)</label>
+                    <input type="number" step="any" min="0" id="editRate" name="rate" required class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                <input type="text" id="editCategory" name="category" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Update Material</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Photo Manager Modal (Online View, Search & Upload) -->
+<div id="photoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Material Photo Badlein / Online Dekhein</h3>
+                    <p class="text-[11px] text-slate-400" id="photoModalMaterialName">Item Name</p>
+                </div>
+            </div>
+            <button onclick="closePhotoModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Live Preview -->
+            <div class="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                <div class="w-24 h-24 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 border border-slate-300">
+                    <img id="modalPreviewImg" src="" alt="Preview" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.src='/uploads/materials/fittings.jpg'">
+                </div>
+                <div class="text-xs">
+                    <span class="font-bold text-slate-700 block">Current Photo Preview</span>
+                    <span class="text-[11px] text-slate-400 block mt-0.5" id="photoModalCategory">Category</span>
+                    <p class="text-[10px] text-blue-600 mt-2 font-medium">
+                        Online Google par dekh kar link paste karein ya device se upload karein!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Option 1: Google Images Search -->
+            <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold text-indigo-900 block">Google Images Me Dekhein</span>
+                    <p class="text-[11px] text-indigo-700 mt-0.5">Online photo search karke link copy karein</p>
+                </div>
+                <a id="googleSearchBtn" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-brands fa-google"></i> Search Photo
+                </a>
+            </div>
+
+            <!-- Option 2: Paste Online Image URL -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">Online Photo Link (URL) Paste Karein</label>
+                <div class="flex gap-2">
+                    <input type="url" id="modalImageUrlInput" oninput="onUrlInput(this.value)" placeholder="https://... (Flipkart, IndiaMART, Google Images link)" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                    <button onclick="applyUrlPreview()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Preview</button>
+                </div>
+            </div>
+
+            <!-- Option 3: Standard Presets -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">Stock Photo Chunein (1-Click)</label>
+                <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 text-center text-[10px]">
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/hdpe_pipe.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-lines-leaning text-blue-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">HDPE Pipe</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/submersible_motor.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-water-ladder text-emerald-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Motor</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/starter_panel.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-bolt text-amber-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Starter</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/brass_gate_valve.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-faucet-drip text-rose-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Gate Valve</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/upvc_ball_valve.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-circle-dot text-indigo-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Ball Valve</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/sintex_water_tank.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-oil-well text-cyan-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Sintex Tank</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/cable.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-plug text-purple-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Cable Wire</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/fittings.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-wrench text-slate-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Fittings</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/teflon_tape.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-tape text-rose-500 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Teflon Tape</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/hardware_consumables.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-flask text-amber-700 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Solvent</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/water_tap.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-faucet text-sky-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Nal (Tap)</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/tools.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-hammer text-orange-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Breaker</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Option 4: Local Upload -->
+            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                <label class="block text-xs font-bold text-slate-700">Mobile / Computer Se Upload Karein</label>
+                <input type="file" id="modalFileInput" accept="image/*" onchange="onFileSelected(this)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700">
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closePhotoModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                <button type="button" id="savePhotoBtn" onclick="saveMaterialPhoto()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition">
+                    Photo Save Karein
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Search filter
+    const searchInput = document.getElementById('matSearchInput');
+    const rows = document.querySelectorAll('.mat-row');
+    const filteredCount = document.getElementById('filteredCount');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        let match = 0;
+        rows.forEach(r => {
+            const name = r.getAttribute('data-name');
+            const cat = r.getAttribute('data-cat');
+            if (name.includes(query) || cat.includes(query)) {
+                r.style.display = '';
+                match++;
+            } else {
+                r.style.display = 'none';
+            }
+        });
+        filteredCount.textContent = match;
+    });
+
+    // Modals
+    const addModal = document.getElementById('addModal');
+    const editModal = document.getElementById('editModal');
+    let currentPhotoMat = null;
+
+    function openAddModal() { addModal.classList.remove('hidden'); }
+    function closeAddModal() { addModal.classList.add('hidden'); }
+
+    function openEditModal(mat) {
+        document.getElementById('editForm').action = `/api/materials/${mat.id}/edit`;
+        document.getElementById('editName').value = mat.name;
+        document.getElementById('editUnit').value = mat.unit;
+        document.getElementById('editRate').value = mat.rate;
+        document.getElementById('editCategory').value = mat.category || 'General';
+        editModal.classList.remove('hidden');
+    }
+    function closeEditModal() { editModal.classList.add('hidden'); }
+
+    // Photo Modal
+    function extractClientImgUrl(url) {
+        if (!url) return '';
+        url = url.trim();
+        if (url.includes('google.') && (url.includes('imgres') || url.includes('imgurl='))) {
+            try {
+                const u = new URL(url);
+                const imgurl = u.searchParams.get('imgurl');
+                if (imgurl) return decodeURIComponent(imgurl);
+            } catch(e) {}
+        }
+        return url;
+    }
+
+    function openPhotoModal(material) {
+        currentPhotoMat = material;
+        document.getElementById('photoModalMaterialName').textContent = material.name;
+        document.getElementById('photoModalCategory').textContent = `Category: ${material.category} | Rate: ₹${material.rate}/${material.unit}`;
+        
+        const curImg = material.image_url || '/uploads/materials/fittings.jpg';
+        document.getElementById('modalPreviewImg').src = curImg;
+        document.getElementById('modalImageUrlInput').value = material.image_url || '';
+        document.getElementById('modalFileInput').value = '';
+
+        const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(material.name + ' plumbing construction water supply')}`;
+        document.getElementById('googleSearchBtn').href = googleUrl;
+
+        document.getElementById('photoModal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').classList.add('hidden');
+        currentPhotoMat = null;
+    }
+
+    function onUrlInput(url) {
+        const clean = extractClientImgUrl(url);
+        if (clean && (clean.startsWith('http') || clean.startsWith('/uploads/'))) {
+            document.getElementById('modalPreviewImg').src = clean;
+        }
+    }
+
+    function applyUrlPreview() {
+        let url = document.getElementById('modalImageUrlInput').value.trim();
+        const clean = extractClientImgUrl(url);
+        if (clean && clean !== url) {
+            document.getElementById('modalImageUrlInput').value = clean;
+        }
+        if (clean) document.getElementById('modalPreviewImg').src = clean;
+    }
+
+    function setPresetPhoto(url) {
+        document.getElementById('modalImageUrlInput').value = url;
+        document.getElementById('modalPreviewImg').src = url;
+    }
+
+    function onFileSelected(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('modalPreviewImg').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function saveMaterialPhoto() {
+        if (!currentPhotoMat) return;
+
+        const fileInput = document.getElementById('modalFileInput');
+        const urlInput = document.getElementById('modalImageUrlInput');
+        const saveBtn = document.getElementById('savePhotoBtn');
+
+        const formData = new FormData();
+        if (fileInput.files && fileInput.files[0]) {
+            formData.append('photo', fileInput.files[0]);
+        } else if (urlInput.value.trim()) {
+            formData.append('image_url', urlInput.value.trim());
+        } else {
+            alert("Kripya photo link paste karein ya file select karein!");
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+        try {
+            const res = await fetch(`/api/materials/${currentPhotoMat.id}/photo`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const newImg = data.image_url;
+                const timestampedUrl = newImg.startsWith('/uploads/') ? `${newImg}?t=${Date.now()}` : newImg;
+                const tblImg = document.getElementById(`tbl-img-${currentPhotoMat.id}`);
+                if (tblImg) tblImg.src = timestampedUrl;
+                currentPhotoMat.image_url = newImg;
+                alert("✅ Photo safalta se update ho gayi!");
+                closePhotoModal();
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            alert("Save error: " + err);
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `Photo Save Karein`;
+        }
+    }
+</script>
+{% endblock %}

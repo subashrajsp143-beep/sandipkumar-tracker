@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Material Usage Entry - 19 Sites Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-circle-plus"></i> Daily Consumption Voucher
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Roj Ka Material Use Entry (Daily Log)</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                Koun se site par kis din kya kya use hua, niche form bharein aur ek sath multiple materials save karein.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('site_report') }}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-file-lines"></i> View Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- AI Photo / Parchi Scanner Banner -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-xl shrink-0">
+                <i class="fa-solid fa-camera-retro"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">AI Photo OCR Scanner</span>
+                </div>
+                <h2 class="text-base font-bold text-white mt-0.5">Haath Se Likhi Parchi / Paper Ki Photo Se Direct Entry</h2>
+                <p class="text-xs text-blue-200 mt-0.5">Kagaz par likhe samaan ki photo khinch kar upload karein, software apne aap saara item aur quantity padh kar table me bhar dega!</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <a href="{{ url_for('material_store') }}" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-cart-shopping"></i> 🛒 Material Store (+ ADD)
+            </a>
+            <button type="button" id="openScannerBtn" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-file-arrow-up"></i> Photo Upload Karein
+            </button>
+            <button type="button" id="openTextPasteBtn" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm border border-white/20 transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp Text
+            </button>
+        </div>
+    </div>
+
+    <!-- Entry Form Card -->
+    <form id="dailyEntryForm" class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        
+        <!-- Top Metadata Row: Site, Date, Supervisor, Purpose -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-xl bg-slate-50 border border-slate-100">
+            
+            <!-- Site Selection (1 of 19) -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Site Select Karein <span class="text-rose-500">*</span>
+                </label>
+                <select id="siteSelect" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+                    <option value="">-- 19 Sites Me Se Chunein --</option>
+                    {% for site in sites %}
+                    <option value="{{ site.id }}" data-supervisor="{{ site.supervisor or '' }}">
+                        {{ site.code }} - {{ site.name }} {% if site.location %}({{ site.location }}){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Date Picker -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Tareekh (Date) <span class="text-rose-500">*</span>
+                </label>
+                <input type="date" id="entryDate" value="{{ today }}" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+            </div>
+
+            <!-- Supervisor / In-Charge -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Supervisor / In-Charge
+                </label>
+                <input type="text" id="enteredBy" placeholder="Supervisor Name" class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+            </div>
+
+            <!-- General Purpose / Work Detail -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Kaam Ka Vivaran (Work Task)
+                </label>
+                <input type="text" id="workPurpose" placeholder="e.g. Pipeline Laying, Motor Fit" class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+            </div>
+
+        </div>
+
+        <!-- Materials Table (Multi-Item Dynamic List) -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-blue-600"></i>
+                        Materials List (Koun sa saman kitna use hua)
+                    </h3>
+                    <p class="text-xs text-slate-500">Ek hi voucher me jitne chahein utne materials add kar sakte hain</p>
+                </div>
+                <button type="button" id="addRowBtn" class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 border border-blue-200 cursor-pointer">
+                    <i class="fa-solid fa-plus"></i> + Naya Item Jodein
+                </button>
+            </div>
+
+            <!-- Items Table -->
+            <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-left text-xs border-collapse" id="itemsTable">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-2 w-10 text-center">#</th>
+                            <th class="py-3 px-2 w-14 text-center">Photo</th>
+                            <th class="py-3 px-3 min-w-[260px]">Material Name (Chunein ya Type karein)</th>
+                            <th class="py-3 px-3 w-24 text-center">Unit</th>
+                            <th class="py-3 px-3 w-28 text-right">Quantity</th>
+                            <th class="py-3 px-3 w-28 text-right">Rate (₹)</th>
+                            <th class="py-3 px-3 w-32 text-right">Total Amount (₹)</th>
+                            <th class="py-3 px-3 min-w-[140px]">Specific Remarks</th>
+                            <th class="py-3 px-2 w-12 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody" class="divide-y divide-slate-100 bg-white">
+                        <!-- Dynamic rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Grand Total Summary & Submit Action -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200">
+            <div class="p-4 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center gap-6">
+                <div>
+                    <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Kul Items Count</span>
+                    <span id="totalItemsCount" class="text-lg font-bold text-blue-900">0</span>
+                </div>
+                <div class="border-l border-blue-200 pl-6">
+                    <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Grand Total Value</span>
+                    <span id="grandTotalDisplay" class="text-xl font-extrabold text-blue-900">₹0.00</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="reset" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition cursor-pointer">
+                    Reset
+                </button>
+                <button type="submit" id="saveBtn" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i> Entry Save Karein
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<!-- MODAL 1: AI Photo / Parchi Scanner Modal -->
+<div id="slipScannerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">AI Parchi / Slip Scanner</h3>
+                    <p class="text-[11px] text-slate-500">Haath se likhe notebook / paper ki photo se automatic entry</p>
+                </div>
+            </div>
+            <button type="button" id="closeScannerBtn" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Upload Box -->
+        <div class="p-6 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 text-center space-y-3">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500"></i>
+            <div>
+                <p class="text-xs font-bold text-slate-700">Mobile se khinchi photo ya paper slip upload karein</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Supports: JPG, PNG, Mobile Camera Snapshots</p>
+            </div>
+            <input type="file" id="slipFileInput" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+        </div>
+
+        <!-- Image Preview Container -->
+        <div id="previewContainer" class="hidden space-y-3">
+            <div class="max-h-48 overflow-hidden rounded-xl border border-slate-200 flex justify-center bg-slate-900/5">
+                <img id="imagePreview" src="" alt="Slip Preview" class="max-h-48 object-contain">
+            </div>
+            <button type="button" id="scanSlipActionBtn" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Photo Scan Karein Aur Samaan Padhien
+            </button>
+        </div>
+
+        <!-- Scan Status Loader -->
+        <div id="scanStatus" class="hidden p-3 rounded-xl bg-blue-50 text-center"></div>
+
+        <!-- Scan Results -->
+        <div id="scanResultsContainer" class="hidden space-y-3 pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    Parchi Me Se Yeh Materials Mile Hain:
+                </h4>
+                <span class="text-[10px] text-slate-400">Checkbox uncheck karke hata bhi sakte hain</span>
+            </div>
+
+            <div id="scannedItemsList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button type="button" id="cancelScannerBtn" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="applyScannedBtn" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-check-double"></i> Table Me Add Karein (Apply)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: WhatsApp Text Parser Modal -->
+<div id="textPasteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <i class="fa-brands fa-whatsapp text-emerald-500 text-xl"></i>
+                <h3 class="text-base font-bold text-slate-900">WhatsApp Text Paste Karein</h3>
+            </div>
+            <button type="button" id="closeTextPasteBtn" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <p class="text-xs text-slate-500">
+            Agar supervisor ne WhatsApp par samaan ki list likh kar bheji hai, to use yahan paste karein:
+        </p>
+
+        <textarea id="whatsappText" rows="6" placeholder="Jaise:&#10;HDPE PIPE 63MM 50 MTR&#10;SUBMERSIBLE MOTOR 5 HP 1 NOS&#10;TEFLON TAPE 5 PCS" class="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800 focus:border-blue-500"></textarea>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <button type="button" id="cancelTextPasteBtn" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Cancel</button>
+            <button type="button" id="parseTextActionBtn" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold cursor-pointer">Items Detect Karein</button>
+        </div>
+    </div>
+</div>
+
+<!-- Datalist for fast material autocomplete -->
+<datalist id="materialsDataList">
+    {% for mat in materials %}
+    <option value="{{ mat.name }}" data-id="{{ mat.id }}" data-unit="{{ mat.unit }}" data-rate="{{ mat.rate }}" data-category="{{ mat.category }}">
+        {{ mat.name }} (₹{{ mat.rate }} / {{ mat.unit }})
+    </option>
+    {% endfor %}
+</datalist>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const materialsData = {{ materials|tojson }};
+    const matLookupByName = {};
+    const matLookupById = {};
+    materialsData.forEach(m => {
+        matLookupByName[m.name.toLowerCase().trim()] = m;
+        matLookupById[m.id] = m;
+    });
+
+    const itemsTableBody = document.getElementById('itemsTableBody');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const form = document.getElementById('dailyEntryForm');
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    const totalItemsCount = document.getElementById('totalItemsCount');
+    const siteSelect = document.getElementById('siteSelect');
+    const enteredBy = document.getElementById('enteredBy');
+
+    // Modals & Controls
+    const slipScannerModal = document.getElementById('slipScannerModal');
+    const textPasteModal = document.getElementById('textPasteModal');
+    const openScannerBtn = document.getElementById('openScannerBtn');
+    const closeScannerBtn = document.getElementById('closeScannerBtn');
+    const cancelScannerBtn = document.getElementById('cancelScannerBtn');
+    const openTextPasteBtn = document.getElementById('openTextPasteBtn');
+    const closeTextPasteBtn = document.getElementById('closeTextPasteBtn');
+    const cancelTextPasteBtn = document.getElementById('cancelTextPasteBtn');
+
+    const slipFileInput = document.getElementById('slipFileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('previewContainer');
+    const scanSlipActionBtn = document.getElementById('scanSlipActionBtn');
+    const scanStatus = document.getElementById('scanStatus');
+    const scanResultsContainer = document.getElementById('scanResultsContainer');
+    const scannedItemsList = document.getElementById('scannedItemsList');
+    const applyScannedBtn = document.getElementById('applyScannedBtn');
+    const parseTextActionBtn = document.getElementById('parseTextActionBtn');
+    const whatsappText = document.getElementById('whatsappText');
+
+    let currentScannedItems = [];
+    let rowIndex = 0;
+
+    // Open/Close Modal Functions
+    function openSlipScanner() {
+        slipScannerModal.classList.remove('hidden');
+        resetScanner();
+    }
+    function closeSlipScanner() {
+        slipScannerModal.classList.add('hidden');
+    }
+
+    function openTextPaste() {
+        textPasteModal.classList.remove('hidden');
+    }
+    function closeTextPaste() {
+        textPasteModal.classList.add('hidden');
+    }
+
+    function resetScanner() {
+        slipFileInput.value = '';
+        previewContainer.classList.add('hidden');
+        scanResultsContainer.classList.add('hidden');
+        scanStatus.classList.add('hidden');
+        currentScannedItems = [];
+    }
+
+    // Modal button event bindings
+    if (openScannerBtn) openScannerBtn.addEventListener('click', openSlipScanner);
+    if (closeScannerBtn) closeScannerBtn.addEventListener('click', closeSlipScanner);
+    if (cancelScannerBtn) cancelScannerBtn.addEventListener('click', closeSlipScanner);
+
+    if (openTextPasteBtn) openTextPasteBtn.addEventListener('click', openTextPaste);
+    if (closeTextPasteBtn) closeTextPasteBtn.addEventListener('click', closeTextPaste);
+    if (cancelTextPasteBtn) cancelTextPasteBtn.addEventListener('click', closeTextPaste);
+
+    // Image preview on file selection
+    slipFileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                imagePreview.src = evt.target.result;
+                previewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Process slip scan
+    scanSlipActionBtn.addEventListener('click', async function() {
+        const file = slipFileInput.files[0];
+        if (!file) {
+            alert("Kripya pehle parchi ya bill ki photo select karein!");
+            return;
+        }
+
+        scanStatus.classList.remove('hidden');
+        scanStatus.innerHTML = '<div class="flex items-center justify-center gap-2 text-blue-600 font-bold py-2"><i class="fa-solid fa-spinner fa-spin"></i> Native AI OCR se photo scan ho rahi hai... Kripya 2 second rukein...</div>';
+        scanResultsContainer.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        try {
+            const res = await fetch('/api/scan-slip', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            scanStatus.classList.add('hidden');
+
+            if (data.success && data.detected_items && data.detected_items.length > 0) {
+                currentScannedItems = data.detected_items;
+                renderScannedItems(currentScannedItems);
+                scanResultsContainer.classList.remove('hidden');
+            } else {
+                alert(data.message || "Photo se text detect nahi ho paya. Kripya saaf photo upload karein ya WhatsApp Text option use karein.");
+            }
+        } catch (err) {
+            scanStatus.classList.add('hidden');
+            alert("Scan failed: " + err);
+        }
+    });
+
+    function renderScannedItems(items) {
+        scannedItemsList.innerHTML = '';
+        items.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = "p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs";
+            div.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" checked id="chk-${idx}" class="item-chk rounded text-blue-600 w-4 h-4 cursor-pointer">
+                    <div>
+                        <span class="font-bold text-slate-800 block">${item.material_name}</span>
+                        <span class="text-[10px] text-slate-400">Match confidence: ${item.confidence}%</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500">Qty:</span>
+                    <input type="number" step="any" value="${item.quantity}" id="qty-${idx}" class="w-20 p-1 text-right font-bold text-slate-800 border rounded-lg bg-white">
+                    <span class="font-mono text-slate-600">${item.unit}</span>
+                </div>
+            `;
+            scannedItemsList.appendChild(div);
+        });
+    }
+
+    // Apply Scanned Items to Daily Entry Table
+    applyScannedBtn.addEventListener('click', function() {
+        const toAdd = [];
+        currentScannedItems.forEach((item, idx) => {
+            const chk = document.getElementById(`chk-${idx}`);
+            const qtyInput = document.getElementById(`qty-${idx}`);
+            if (chk && chk.checked) {
+                const qtyVal = parseFloat(qtyInput.value) || item.quantity;
+                toAdd.push({
+                    material_id: item.material_id,
+                    material_name: item.material_name,
+                    quantity: qtyVal,
+                    unit: item.unit,
+                    rate: item.rate
+                });
+            }
+        });
+
+        if (toAdd.length === 0) {
+            alert("Kam se kam ek item select karein!");
+            return;
+        }
+
+        // Clean out empty existing rows
+        const existingRows = itemsTableBody.querySelectorAll('.item-row');
+        existingRows.forEach(r => {
+            const m = r.querySelector('.mat-input').value.trim();
+            if (!m) r.remove();
+        });
+
+        // Add each scanned item to the table
+        toAdd.forEach(item => {
+            rowIndex++;
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50/50 transition item-row bg-emerald-50/30";
+            tr.id = `row-${rowIndex}`;
+
+            const itemMat = matLookupById[item.material_id];
+            const matImg = (itemMat && itemMat.image_url) ? itemMat.image_url : '/uploads/materials/fittings.jpg';
+
+            tr.innerHTML = `
+                <td class="py-2.5 px-2 text-center text-slate-400 font-mono row-num"></td>
+                <td class="py-2 px-2 text-center">
+                    <img src="${matImg}" class="w-9 h-9 rounded-lg object-cover mx-auto border border-slate-200 row-mat-img shadow-xs" onerror="this.src='/uploads/materials/fittings.jpg'">
+                </td>
+                <td class="py-2.5 px-3">
+                    <input type="text" list="materialsDataList" required value="${item.material_name}"
+                        class="w-full rounded-lg border-emerald-300 py-1.5 px-2.5 text-xs font-semibold text-slate-800 border focus:border-blue-500 mat-input">
+                    <input type="hidden" class="mat-id-input" value="${item.material_id}">
+                </td>
+                <td class="py-2.5 px-3 text-center">
+                    <span class="unit-badge px-2 py-1 rounded bg-slate-100 text-slate-600 font-mono text-[11px]">${item.unit}</span>
+                </td>
+                <td class="py-2.5 px-3 text-right">
+                    <input type="number" step="any" min="0.001" required value="${item.quantity}" 
+                        class="w-full text-right rounded-lg border-emerald-300 py-1.5 px-2 text-xs font-bold text-slate-800 border focus:border-blue-500 qty-input">
+                </td>
+                <td class="py-2.5 px-3 text-right">
+                    <input type="number" step="any" min="0" value="${item.rate}" 
+                        class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-mono text-slate-700 border focus:border-blue-500 rate-input">
+                </td>
+                <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700 row-amount">
+                    ₹${(item.quantity * item.rate).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </td>
+                <td class="py-2.5 px-3">
+                    <input type="text" placeholder="Remarks" value="Auto-scanned from parchi"
+                        class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
+                </td>
+                <td class="py-2.5 px-2 text-center">
+                    <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Hatao">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+
+            itemsTableBody.appendChild(tr);
+
+            // Re-bind row events
+            const qtyInput = tr.querySelector('.qty-input');
+            const rateInput = tr.querySelector('.rate-input');
+            const rowAmount = tr.querySelector('.row-amount');
+            const delBtn = tr.querySelector('.delete-row-btn');
+
+            function updateRowTotal() {
+                const q = parseFloat(qtyInput.value) || 0;
+                const r = parseFloat(rateInput.value) || 0;
+                rowAmount.textContent = "₹" + (q * r).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                recalcGrandTotal();
+            }
+            qtyInput.addEventListener('input', updateRowTotal);
+            rateInput.addEventListener('input', updateRowTotal);
+            delBtn.addEventListener('click', function() {
+                tr.remove();
+                recalcRowNumbers();
+                recalcGrandTotal();
+            });
+        });
+
+        recalcRowNumbers();
+        recalcGrandTotal();
+        closeSlipScanner();
+        alert(`${toAdd.length} items photo se padhkar table me bhar diye gaye hain!`);
+    });
+
+    // WhatsApp Text Parse Handler
+    parseTextActionBtn.addEventListener('click', async function() {
+        const text = whatsappText.value.trim();
+        if (!text) {
+            alert("Kripya text dalein!");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/parse-text', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: text})
+            });
+            const data = await res.json();
+            if (data.success && data.detected_items && data.detected_items.length > 0) {
+                currentScannedItems = data.detected_items;
+                closeTextPaste();
+                openSlipScanner();
+                renderScannedItems(currentScannedItems);
+                scanResultsContainer.classList.remove('hidden');
+            } else {
+                alert("Text se koi matching material nahi mila. Kripya check karein.");
+            }
+        } catch (e) {
+            alert("Error: " + e);
+        }
+    });
+
+    // Auto supervisor fill on site select
+    siteSelect.addEventListener('change', function() {
+        const selectedOpt = this.options[this.selectedIndex];
+        const sup = selectedOpt.getAttribute('data-supervisor');
+        if (sup && !enteredBy.value) {
+            enteredBy.value = sup;
+        }
+    });
+
+    function addRow() {
+        rowIndex++;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 transition item-row";
+        tr.id = `row-${rowIndex}`;
+
+        tr.innerHTML = `
+            <td class="py-2.5 px-2 text-center text-slate-400 font-mono row-num"></td>
+            <td class="py-2 px-2 text-center">
+                <img src="/uploads/materials/fittings.jpg" class="w-9 h-9 rounded-lg object-cover mx-auto border border-slate-200 row-mat-img shadow-xs" onerror="this.src='/uploads/materials/fittings.jpg'">
+            </td>
+            <td class="py-2.5 px-3">
+                <input type="text" list="materialsDataList" required placeholder="Material search karein..." 
+                    class="w-full rounded-lg border-slate-300 py-1.5 px-2.5 text-xs text-slate-800 border focus:border-blue-500 focus:ring-blue-500 mat-input">
+                <input type="hidden" class="mat-id-input" value="">
+            </td>
+            <td class="py-2.5 px-3 text-center">
+                <span class="unit-badge px-2 py-1 rounded bg-slate-100 text-slate-600 font-mono text-[11px]">-</span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+                <input type="number" step="any" min="0.001" required placeholder="Qty" 
+                    class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-bold text-slate-800 border focus:border-blue-500 focus:ring-blue-500 qty-input">
+            </td>
+            <td class="py-2.5 px-3 text-right">
+                <input type="number" step="any" min="0" placeholder="0.00" 
+                    class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-mono text-slate-700 border focus:border-blue-500 focus:ring-blue-500 rate-input">
+            </td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700 row-amount">
+                ₹0.00
+            </td>
+            <td class="py-2.5 px-3">
+                <input type="text" placeholder="Remarks" 
+                    class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
+            </td>
+            <td class="py-2.5 px-2 text-center">
+                <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Hatao">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </td>
+        `;
+
+        itemsTableBody.appendChild(tr);
+        recalcRowNumbers();
+
+        const rowMatImg = tr.querySelector('.row-mat-img');
+        const matInput = tr.querySelector('.mat-input');
+        const matIdInput = tr.querySelector('.mat-id-input');
+        const unitBadge = tr.querySelector('.unit-badge');
+        const rateInput = tr.querySelector('.rate-input');
+        const qtyInput = tr.querySelector('.qty-input');
+        const rowAmount = tr.querySelector('.row-amount');
+        const delBtn = tr.querySelector('.delete-row-btn');
+
+        matInput.addEventListener('input', function() {
+            const val = this.value.trim().toLowerCase();
+            const matched = matLookupByName[val];
+            if (matched) {
+                matIdInput.value = matched.id;
+                unitBadge.textContent = matched.unit;
+                rateInput.value = matched.rate || 0;
+                if (rowMatImg) rowMatImg.src = matched.image_url || '/uploads/materials/fittings.jpg';
+            } else {
+                matIdInput.value = "";
+                unitBadge.textContent = "-";
+                if (rowMatImg) rowMatImg.src = '/uploads/materials/fittings.jpg';
+            }
+            updateRowTotal();
+        });
+
+        function updateRowTotal() {
+            const q = parseFloat(qtyInput.value) || 0;
+            const r = parseFloat(rateInput.value) || 0;
+            const total = q * r;
+            rowAmount.textContent = "₹" + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            recalcGrandTotal();
+        }
+
+        qtyInput.addEventListener('input', updateRowTotal);
+        rateInput.addEventListener('input', updateRowTotal);
+
+        delBtn.addEventListener('click', function() {
+            tr.remove();
+            recalcRowNumbers();
+            recalcGrandTotal();
+        });
+    }
+
+    function recalcRowNumbers() {
+        const rows = itemsTableBody.querySelectorAll('.item-row');
+        rows.forEach((row, idx) => {
+            row.querySelector('.row-num').textContent = idx + 1;
+        });
+        totalItemsCount.textContent = rows.length;
+    }
+
+    function recalcGrandTotal() {
+        let total = 0;
+        const rows = itemsTableBody.querySelectorAll('.item-row');
+        rows.forEach(row => {
+            const q = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const r = parseFloat(row.querySelector('.rate-input').value) || 0;
+            total += (q * r);
+        });
+        grandTotalDisplay.textContent = "₹" + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    addRowBtn.addEventListener('click', addRow);
+
+    // Initial 2 blank rows
+    addRow();
+    addRow();
+
+    // Form submit
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const siteId = siteSelect.value;
+        const usageDate = document.getElementById('entryDate').value;
+        const enteredByName = enteredBy.value.trim();
+        const purpose = document.getElementById('workPurpose').value.trim();
+
+        if (!siteId) {
+            alert("Kripya Site select karein!");
+            siteSelect.focus();
+            return;
+        }
+
+        const items = [];
+        const rows = itemsTableBody.querySelectorAll('.item-row');
+        
+        for (let row of rows) {
+            const matName = row.querySelector('.mat-input').value.trim();
+            const matId = row.querySelector('.mat-id-input').value;
+            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const remarks = row.querySelector('.remarks-input').value.trim();
+
+            if (!matName || qty <= 0) continue;
+
+            let actualMatId = matId;
+            if (!actualMatId && matLookupByName[matName.toLowerCase()]) {
+                actualMatId = matLookupByName[matName.toLowerCase()].id;
+            }
+
+            if (!actualMatId) {
+                alert(`"${matName}" material list me nahi mila. Kripya list se select karein.`);
+                return;
+            }
+
+            items.push({
+                material_id: actualMatId,
+                quantity: qty,
+                rate: rate,
+                remarks: remarks
+            });
+        }
+
+        if (items.length === 0) {
+            alert("Kam se kam ek valid material aur quantity add karein!");
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        const payload = {
+            site_id: siteId,
+            usage_date: usageDate,
+            purpose: purpose,
+            entered_by: enteredByName,
+            items: items,
+            created_at: new Date().toISOString()
+        };
+
+        // If explicitly offline, save to offline queue immediately
+        if (!navigator.onLine) {
+            const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
+            queue.push(payload);
+            localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
+            alert("🕒 OFFLINE SAVED (नेटवर्क नहीं है):
+
+Entry आपके फोन में सुरक्षित सेव हो गई है!
+जैसे ही थोड़ा सा भी इंटरनेट मिलेगा, यह अपने आप मुख्य सर्वर पर सिंक हो जाएगी और बाकी 20-30 सुपरवाइजर्स को दिखने लगेगी।");
+            window.location.href = `/reports/sites?site_id=${siteId}`;
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/entries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                alert("Shaandaar! " + result.message);
+                window.location.href = `/reports/sites?site_id=${siteId}`;
+            } else {
+                alert("Error: " + result.message);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Entry Save Karein';
+            }
+        } catch (err) {
+            console.warn("Network fetch failed, saving to offline queue:", err);
+            const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
+            queue.push(payload);
+            localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
+            alert("🕒 OFFLINE SAVED (नेटवर्क कमजोर है):
+
+Entry आपके फोन में सुरक्षित सेव हो गई है!
+इंटरनेट कनेक्ट होते ही यह अपने आप सर्वर पर सिंक हो जाएगी।");
+            window.location.href = `/reports/sites?site_id=${siteId}`;
+        }
+    });
+
+    // Make functions globally available as fallback
+    window.openSlipScanner = openSlipScanner;
+    window.closeSlipScanner = closeSlipScanner;
+    window.openTextPaste = openTextPaste;
+    window.closeTextPaste = closeTextPaste;
+});
+</script>
+{% endblock %}

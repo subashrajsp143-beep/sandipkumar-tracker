@@ -1,0 +1,883 @@
+{% extends "base.html" %}
+
+{% block title %}Material Store & Catalog - M/S SANDIP KUMAR{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-24">
+
+    <!-- Top Brand Header -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black uppercase tracking-wider mb-3 shadow">
+                    <i class="fa-solid fa-boxes-stacked"></i> M/S SANDIP KUMAR - MATERIAL STORE
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2">
+                    M/S SANDIP KUMAR Material Catalog
+                    <span class="text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30 px-2.5 py-1 rounded-full font-medium">270+ Products</span>
+                </h1>
+                <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
+                    Yahan se sabhi materials ki photo dekhkar <strong>"+ ADD"</strong> karke kisi bhi site par ek sath issue (entry) kar sakte hain. Online photo badalne ki suvidha bhi upalabdh hai!
+                </p>
+            </div>
+
+            <!-- Quick Cart Widget in Header -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex items-center gap-4 text-xs">
+                <div class="w-12 h-12 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-xl font-bold shadow-md">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
+                </div>
+                <div>
+                    <span class="text-blue-200 uppercase font-semibold text-[10px] tracking-wider block">Selected Items</span>
+                    <span class="text-lg font-black text-white font-mono" id="headerCartCount">0 Items</span>
+                    <span class="text-amber-300 font-bold font-mono block text-xs" id="headerCartTotal">₹0.00</span>
+                </div>
+                <button onclick="openCartDrawer()" class="ml-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow transition">
+                    Cart Dekhein &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4 sticky top-16 z-30">
+        <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <!-- Search Bar -->
+            <div class="relative w-full sm:w-96">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="storeSearchInput" onkeyup="filterProducts()" placeholder="Search material name, size, category (e.g. 63mm, motor, valve)..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition">
+            </div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                <span class="text-xs text-slate-500 font-medium">
+                    Dikhaye ja rahe hain: <strong id="visibleProductsCount" class="text-blue-600 font-mono font-bold">{{ materials|length }}</strong> Materials
+                </span>
+                <button onclick="clearSearch()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 underline">
+                    Clear Filter
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Pills (Horizontal Scroll) -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+            <button onclick="selectCategory('ALL')" class="category-pill active whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-bold transition bg-blue-600 text-white shadow-sm" data-category="ALL">
+                ⚡ Sabhi Materials ({{ materials|length }})
+            </button>
+            {% for cat in categories %}
+            <button onclick="selectCategory('{{ cat }}')" class="category-pill whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition bg-slate-100 text-slate-700 hover:bg-slate-200" data-category="{{ cat }}">
+                {{ cat }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Products Grid (Flipkart Style Cards) -->
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for m in materials %}
+        <div class="product-card bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
+             data-id="{{ m.id }}"
+             data-name="{{ m.name|lower }}"
+             data-category="{{ m.category }}"
+             data-unit="{{ m.unit }}"
+             data-rate="{{ m.rate }}"
+             data-img="{{ m.image_url or '' }}">
+            
+            <!-- Product Image Container -->
+            <div class="relative bg-slate-100 aspect-[4/3] overflow-hidden flex items-center justify-center">
+                <img src="{{ m.image_url or '/uploads/materials/fittings.jpg' }}" 
+                     alt="{{ m.name }}"
+                     id="img-{{ m.id }}"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                     loading="lazy"
+                     referrerpolicy="no-referrer"
+                     onerror="this.src='/uploads/materials/fittings.jpg'">
+                
+                <!-- Category Badge -->
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold">
+                    {{ m.category }}
+                </span>
+
+                <!-- Unit Badge -->
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-mono font-bold shadow">
+                    {{ m.unit }}
+                </span>
+
+                <!-- Change Photo Button (Hover / Click) -->
+                <button onclick='openPhotoModal({{ m|tojson }})' title="Photo Badlein ya Online Dekhein" class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-white/90 hover:bg-white text-slate-800 text-[11px] font-bold shadow-md backdrop-blur-sm transition flex items-center gap-1.5 opacity-90 hover:opacity-100">
+                    <i class="fa-solid fa-camera text-blue-600"></i>
+                    <span>Photo</span>
+                </button>
+            </div>
+
+            <!-- Product Details -->
+            <div class="p-4 flex-grow flex flex-col justify-between">
+                <div>
+                    <!-- Sandip Kumar Assured Badge -->
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-certificate text-amber-500"></i> M/S SANDIP KUMAR ASSURED
+                    </div>
+
+                    <!-- Material Name -->
+                    <h3 class="text-sm font-bold text-slate-800 line-clamp-2 leading-snug" title="{{ m.name }}">
+                        {{ m.name }}
+                    </h3>
+                </div>
+
+                <!-- Price & Add Section -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Standard Rate</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-base sm:text-lg font-black text-emerald-600 font-mono">₹{{ "%.2f"|format(m.rate) }}</span>
+                            <span class="text-[10px] text-slate-500 font-medium">/ {{ m.unit }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Button: + ADD or Stepper -->
+                    <div id="action-container-{{ m.id }}">
+                        <button onclick="addToCart({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', {{ m.rate }}, '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-plus text-[10px]"></i> ADD
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No results message -->
+    <div id="noStoreResults" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200">
+        <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
+        <h3 class="text-base font-bold text-slate-700">Koi material match nahi hua</h3>
+        <p class="text-xs text-slate-400 mt-1">Kripya alag spelling ya keyword type karke check karein.</p>
+        <button onclick="clearSearch()" class="mt-4 px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold">
+            Sabhi Materials Dekhein
+        </button>
+    </div>
+
+</div>
+
+<!-- Sticky Flipkart Floating Cart Bar (Bottom) -->
+<div id="floatingCartBar" class="hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md text-white border-t border-slate-800 shadow-2xl py-3 px-4 sm:px-8 transition-transform">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center text-lg font-black shadow-md">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-300">Selected Materials:</span>
+                    <span id="barCartCount" class="px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-300 font-mono text-xs font-bold">0 Items</span>
+                </div>
+                <div class="flex items-baseline gap-1 mt-0.5">
+                    <span class="text-xs text-slate-400">Total Bill:</span>
+                    <span id="barCartTotal" class="text-base sm:text-lg font-black text-amber-300 font-mono">₹0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="clearCart()" class="hidden sm:inline-flex px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                Clear Cart
+            </button>
+            <button onclick="openCartDrawer()" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs sm:text-sm font-black shadow-lg transition flex items-center gap-2 active:scale-95">
+                <span>Cart Dekhein & Site Par Issue Karein</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Slide-in Cart Drawer / Requisition Modal -->
+<div id="cartModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-150">
+        
+        <!-- Cart Header -->
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-900 to-indigo-900 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-black text-lg">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Site Material Issue / Requisition Cart</h3>
+                    <p class="text-xs text-blue-200">Chune gaye materials ko kisi bhi site par record karein</p>
+                </div>
+            </div>
+            <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-lg text-white/80 hover:text-white hover:bg-white/10 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Cart Body -->
+        <div class="p-6 overflow-y-auto space-y-5 flex-grow">
+            
+            <!-- Site & Date Selection Section -->
+            <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-3">
+                <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-rose-500"></i> Step 1: Site aur Tareekh Chunein
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Koun Se Site Par? <span class="text-rose-500">*</span></label>
+                        <select id="checkoutSite" onchange="onSiteSelect()" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-blue-500 bg-white">
+                            <option value="">-- Site Chunein (1 to 19+) --</option>
+                            {% for s in sites %}
+                            <option value="{{ s.id }}" data-supervisor="{{ s.supervisor or '' }}" data-contact="{{ s.contact or '' }}">
+                                {{ s.code }} - {{ s.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Tareekh (Date) <span class="text-rose-500">*</span></label>
+                        <input type="date" id="checkoutDate" value="{{ today }}" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor (Auto)</label>
+                        <input type="text" id="checkoutSupervisor" readonly placeholder="Auto-populated" class="w-full rounded-xl border border-slate-200 py-2 px-3 text-xs text-slate-600 bg-slate-100">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Karye ka Vivaran (Purpose)</label>
+                        <input type="text" id="checkoutPurpose" placeholder="e.g. Main pipeline extension, submersible boring" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Entry Karne Wale Ka Naam</label>
+                        <input type="text" id="checkoutEnteredBy" placeholder="Aapka naam ya supervisor" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500 bg-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Table Section -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-list-check text-blue-600"></i> Step 2: Selected Materials List (<span id="cartItemsCount">0</span>)</span>
+                    <button onclick="clearCart()" class="text-[11px] text-rose-600 hover:underline font-semibold">Khali Karein</button>
+                </h4>
+                <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Material</th>
+                                <th class="p-3 text-right">Rate</th>
+                                <th class="p-3 text-center w-36">Quantity</th>
+                                <th class="p-3 text-right">Total Amount</th>
+                                <th class="p-3 text-center w-12">Hatao</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody" class="divide-y divide-slate-100">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bill Summary Box -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 block font-medium">Kul Lagat (Total Bill Value)</span>
+                    <span class="text-xs text-slate-600 font-semibold" id="checkoutItemsCountText">0 materials</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl font-black text-emerald-600 font-mono" id="checkoutGrandTotal">₹0.00</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <button onclick="closeCartDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition">
+                Aur Items Jodein (Back)
+            </button>
+            <button id="submitIssueBtn" onclick="submitRequisition()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Site Par Material Issue Karein</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Photo Manager Modal (Online View, Search & Upload) -->
+<div id="photoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800">Material Photo Badlein / Online Dekhein</h3>
+                    <p class="text-[11px] text-slate-400" id="photoModalMaterialName">Item Name</p>
+                </div>
+            </div>
+            <button onclick="closePhotoModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4">
+            
+            <!-- Live Preview -->
+            <div class="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                <div class="w-24 h-24 rounded-xl bg-slate-200 overflow-hidden flex-shrink-0 border border-slate-300">
+                    <img id="modalPreviewImg" src="" alt="Preview" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.src='/uploads/materials/fittings.jpg'">
+                </div>
+                <div class="text-xs">
+                    <span class="font-bold text-slate-700 block">Current Photo Preview</span>
+                    <span class="text-[11px] text-slate-400 block mt-0.5" id="photoModalCategory">Category</span>
+                    <p class="text-[10px] text-blue-600 mt-2 font-medium">
+                        Aap neeche diye gaye kisi bhi tareeqe se naya photo set kar sakte hain!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Option 1: 1-Click Google Images Search -->
+            <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-900 block">Tareeqa 1: Online Google Images Me Dekhein</span>
+                        <p class="text-[11px] text-indigo-700 mt-0.5">Is material ki photos Google par dekh kar link copy karein</p>
+                    </div>
+                    <a id="googleSearchBtn" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition">
+                        <i class="fa-brands fa-google"></i> Search Photo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Option 2: Paste Online Image URL -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">Tareeqa 2: Kisi Bhi Photo Ka Online Link (URL) Paste Karein</label>
+                <div class="flex gap-2">
+                    <input type="url" id="modalImageUrlInput" oninput="onUrlInput(this.value)" placeholder="https://... (Flipkart, IndiaMART, Google Images, Unsplash link)" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                    <button onclick="applyUrlPreview()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold whitespace-nowrap">
+                        Preview
+                    </button>
+                </div>
+            </div>
+
+            <!-- Option 3: Choose from Curated Presets -->
+            <div class="space-y-1.5">
+                <label class="block text-xs font-bold text-slate-700">Tareeqa 3: Standard Stock Photo Chunein (1-Click)</label>
+                <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 text-center text-[10px]">
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/hdpe_pipe.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-lines-leaning text-blue-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">HDPE Pipe</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/submersible_motor.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-water-ladder text-emerald-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Motor</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/starter_panel.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-bolt text-amber-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Starter</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/brass_gate_valve.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-faucet-drip text-rose-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Gate Valve</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/upvc_ball_valve.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-circle-dot text-indigo-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Ball Valve</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/sintex_water_tank.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-oil-well text-cyan-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Sintex Tank</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/cable.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-plug text-purple-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Cable Wire</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/fittings.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-wrench text-slate-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Fittings</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/teflon_tape.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-tape text-rose-500 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Teflon Tape</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/hardware_consumables.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-flask text-amber-700 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Solvent</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/water_tap.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-faucet text-sky-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Nal (Tap)</span>
+                    </button>
+                    <button type="button" onclick="setPresetPhoto('/uploads/materials/tools.jpg')" class="p-1.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-hammer text-orange-600 text-base block mb-0.5"></i>
+                        <span class="font-medium text-slate-700">Breaker</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Option 4: Local File Upload -->
+            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                <label class="block text-xs font-bold text-slate-700">Tareeqa 4: Apne Mobile / Computer Se Photo Upload Karein</label>
+                <input type="file" id="modalFileInput" accept="image/*" onchange="onFileSelected(this)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <button type="button" onclick="resetStorePhoto()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> Default Wapas Layein
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closePhotoModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Radd Karein</button>
+                    <button type="button" id="savePhotoBtn" onclick="saveMaterialPhoto()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check"></i> Photo Save Karein
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Shopping Cart State
+    let cart = {}; // { materialId: { id, name, rate, unit, img, qty } }
+    let activeCategory = 'ALL';
+    let currentPhotoMat = null;
+
+    // --- CART FUNCTIONS ---
+    function addToCart(id, name, rate, unit, img) {
+        if (!cart[id]) {
+            cart[id] = { id, name, rate, unit, img, qty: 1 };
+        } else {
+            cart[id].qty += 1;
+        }
+        updateCardStepper(id);
+        updateCartUI();
+    }
+
+    function decreaseCart(id) {
+        if (cart[id]) {
+            cart[id].qty -= 1;
+            if (cart[id].qty <= 0) {
+                delete cart[id];
+            }
+        }
+        updateCardStepper(id);
+        updateCartUI();
+    }
+
+    function setCartQty(id, newQty) {
+        newQty = parseFloat(newQty) || 0;
+        if (newQty <= 0) {
+            delete cart[id];
+        } else {
+            if (cart[id]) cart[id].qty = newQty;
+        }
+        updateCardStepper(id);
+        updateCartUI();
+    }
+
+    function updateCardStepper(id) {
+        const container = document.getElementById(`action-container-${id}`);
+        if (!container) return;
+
+        if (cart[id] && cart[id].qty > 0) {
+            const item = cart[id];
+            container.innerHTML = `
+                <div class="flex items-center rounded-xl border-2 border-blue-600 bg-white shadow-sm overflow-hidden text-xs">
+                    <button onclick="decreaseCart(${id})" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition">-</button>
+                    <input type="number" step="any" min="0" value="${item.qty}" onchange="setCartQty(${id}, this.value)" class="w-12 text-center font-bold text-slate-800 text-xs py-1 focus:outline-none">
+                    <button onclick="addToCart(${id}, '${item.name.replace(/'/g, "\\'")}', ${item.rate}, '${item.unit}', '${item.img}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition">+</button>
+                </div>
+            `;
+        } else {
+            const card = document.querySelector(`.product-card[data-id="${id}"]`);
+            if (card) {
+                const name = card.dataset.name;
+                const rate = parseFloat(card.dataset.rate) || 0;
+                const unit = card.dataset.unit || 'NOS';
+                const img = card.dataset.img || '';
+                container.innerHTML = `
+                    <button onclick="addToCart(${id}, '${name.replace(/'/g, "\\'")}', ${rate}, '${unit}', '${img}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-plus text-[10px]"></i> ADD
+                    </button>
+                `;
+            }
+        }
+    }
+
+    function updateCartUI() {
+        const items = Object.values(cart);
+        let totalCount = 0;
+        let grandTotal = 0;
+
+        items.forEach(it => {
+            totalCount += 1;
+            grandTotal += (it.qty * it.rate);
+        });
+
+        // Update Header Badge
+        document.getElementById('headerCartCount').textContent = `${totalCount} Items`;
+        document.getElementById('headerCartTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+        // Update Floating Bar
+        const bar = document.getElementById('floatingCartBar');
+        if (totalCount > 0) {
+            bar.classList.remove('hidden');
+            document.getElementById('barCartCount').textContent = `${totalCount} Items`;
+            document.getElementById('barCartTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        } else {
+            bar.classList.add('hidden');
+        }
+
+        // Render Cart Drawer Table
+        renderCartDrawer(items, grandTotal);
+    }
+
+    function renderCartDrawer(items, grandTotal) {
+        document.getElementById('cartItemsCount').textContent = items.length;
+        document.getElementById('checkoutItemsCountText').textContent = `${items.length} alag-alag materials`;
+        document.getElementById('checkoutGrandTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+        const tbody = document.getElementById('cartTableBody');
+        if (items.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-8 text-center text-slate-400">
+                        <i class="fa-solid fa-cart-shopping text-2xl mb-1 block"></i>
+                        Cart khali hai. Store se '+ ADD' karein!
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = items.map(item => {
+            const lineTotal = item.qty * item.rate;
+            return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.img || '/uploads/materials/fittings.jpg'}" referrerpolicy="no-referrer" onerror="this.src='/uploads/materials/fittings.jpg'" class="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-slate-200">
+                            <div>
+                                <span class="font-bold text-slate-800 block text-xs leading-snug">${item.name}</span>
+                                <span class="text-[10px] text-slate-400 font-mono">Unit: ${item.unit}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3 text-right font-mono text-slate-600 font-semibold">₹${item.rate.toFixed(2)}</td>
+                    <td class="p-3 text-center">
+                        <div class="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden text-xs">
+                            <button onclick="decreaseCart(${item.id})" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">-</button>
+                            <input type="number" step="any" min="0" value="${item.qty}" onchange="setCartQty(${item.id}, this.value)" class="w-14 text-center font-bold text-slate-800 py-0.5 focus:outline-none">
+                            <button onclick="addToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.rate}, '${item.unit}', '${item.img}')" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">+</button>
+                        </div>
+                    </td>
+                    <td class="p-3 text-right font-mono font-bold text-emerald-600">₹${lineTotal.toFixed(2)}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="setCartQty(${item.id}, 0)" class="text-rose-500 hover:text-rose-700 p-1">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openCartDrawer() {
+        document.getElementById('cartModal').classList.remove('hidden');
+    }
+
+    function closeCartDrawer() {
+        document.getElementById('cartModal').classList.add('hidden');
+    }
+
+    function clearCart() {
+        const ids = Object.keys(cart);
+        cart = {};
+        ids.forEach(id => updateCardStepper(id));
+        updateCartUI();
+    }
+
+    function onSiteSelect() {
+        const select = document.getElementById('checkoutSite');
+        const opt = select.options[select.selectedIndex];
+        const sup = opt ? opt.dataset.supervisor : '';
+        document.getElementById('checkoutSupervisor').value = sup || '';
+    }
+
+    // Submit Cart Requisition to Backend
+    async function submitRequisition() {
+        const siteId = document.getElementById('checkoutSite').value;
+        const usageDate = document.getElementById('checkoutDate').value;
+        const purpose = document.getElementById('checkoutPurpose').value.trim();
+        const enteredBy = document.getElementById('checkoutEnteredBy').value.trim();
+        const items = Object.values(cart);
+
+        if (!siteId) {
+            alert("Kripya koun se site par saman lag raha hai, pehle Site chunein!");
+            document.getElementById('checkoutSite').focus();
+            return;
+        }
+
+        if (!usageDate) {
+            alert("Kripya tareekh (Date) select karein!");
+            return;
+        }
+
+        if (items.length === 0) {
+            alert("Cart me koi material nahi hai. Kripya pehle '+ ADD' karein!");
+            return;
+        }
+
+        const payload = {
+            site_id: parseInt(siteId),
+            usage_date: usageDate,
+            purpose: purpose,
+            entered_by: enteredBy,
+            items: items.map(it => ({
+                material_id: it.id,
+                quantity: it.qty,
+                rate: it.rate,
+                remarks: ""
+            }))
+        };
+
+        const btn = document.getElementById('submitIssueBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+        if (!navigator.onLine) {
+            const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
+            queue.push(payload);
+            localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
+            alert('🕒 OFFLINE SAVED: Network nahi hai, par materials issue slip aapke phone me surakshit save ho gayi hai! Internet aate hi yeh server par chadh jayegi.');
+            clearCart();
+            closeIssueModal();
+            window.location.href = `/reports/sites?site_id=${siteId}`;
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/entries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert(`✅ Safalta-purvak save ho gaya!\n${data.count} materials chuni hui site par record ho gaye hain.`);
+                clearCart();
+                closeCartDrawer();
+                // Redirect to Site Report to view the added issue
+                window.location.href = `/reports/sites?site_id=${siteId}&from_date=${usageDate}&to_date=${usageDate}`;
+            } else {
+                alert("Error: " + data.message);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Site Par Material Issue Karein`;
+            }
+        } catch (err) {
+            alert("Network error: " + err);
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Site Par Material Issue Karein`;
+        }
+    }
+
+    // --- SEARCH & CATEGORY FILTER ---
+    function selectCategory(cat) {
+        activeCategory = cat;
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            if (pill.dataset.category === cat) {
+                pill.classList.remove('bg-slate-100', 'text-slate-700');
+                pill.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
+            } else {
+                pill.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
+                pill.classList.add('bg-slate-100', 'text-slate-700');
+            }
+        });
+        filterProducts();
+    }
+
+    function filterProducts() {
+        const query = document.getElementById('storeSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.product-card');
+        let count = 0;
+
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const category = card.dataset.category;
+            const matchesCat = (activeCategory === 'ALL' || category === activeCategory);
+            const matchesQuery = (!query || name.includes(query) || category.toLowerCase().includes(query));
+
+            if (matchesCat && matchesQuery) {
+                card.style.display = '';
+                count++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('visibleProductsCount').textContent = count;
+        const noResults = document.getElementById('noStoreResults');
+        if (count === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    function clearSearch() {
+        document.getElementById('storeSearchInput').value = '';
+        selectCategory('ALL');
+    }
+
+    // --- PHOTO MODAL FUNCTIONS ---
+    function extractClientImgUrl(url) {
+        if (!url) return '';
+        url = url.trim();
+        if (url.includes('google.') && (url.includes('imgres') || url.includes('imgurl='))) {
+            try {
+                const u = new URL(url);
+                const imgurl = u.searchParams.get('imgurl');
+                if (imgurl) return decodeURIComponent(imgurl);
+            } catch(e) {}
+        }
+        return url;
+    }
+
+    function openPhotoModal(material) {
+        currentPhotoMat = material;
+        document.getElementById('photoModalMaterialName').textContent = material.name;
+        document.getElementById('photoModalCategory').textContent = `Category: ${material.category} | Rate: ₹${material.rate}/${material.unit}`;
+        
+        const curImg = material.image_url || '/uploads/materials/fittings.jpg';
+        document.getElementById('modalPreviewImg').src = curImg;
+        document.getElementById('modalImageUrlInput').value = material.image_url || '';
+        document.getElementById('modalFileInput').value = '';
+
+        // Update Google Search Button URL
+        const googleUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(material.name + ' plumbing construction water supply')}`;
+        document.getElementById('googleSearchBtn').href = googleUrl;
+
+        document.getElementById('photoModal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+        document.getElementById('photoModal').classList.add('hidden');
+        currentPhotoMat = null;
+    }
+
+    function onUrlInput(url) {
+        const clean = extractClientImgUrl(url);
+        if (clean && (clean.startsWith('http') || clean.startsWith('/uploads/'))) {
+            document.getElementById('modalPreviewImg').src = clean;
+        }
+    }
+
+    function applyUrlPreview() {
+        let url = document.getElementById('modalImageUrlInput').value.trim();
+        const clean = extractClientImgUrl(url);
+        if (clean && clean !== url) {
+            document.getElementById('modalImageUrlInput').value = clean;
+        }
+        if (clean) {
+            document.getElementById('modalPreviewImg').src = clean;
+        }
+    }
+
+    function setPresetPhoto(url) {
+        document.getElementById('modalImageUrlInput').value = url;
+        document.getElementById('modalPreviewImg').src = url;
+    }
+
+    function onFileSelected(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('modalPreviewImg').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function saveMaterialPhoto() {
+        if (!currentPhotoMat) return;
+
+        const fileInput = document.getElementById('modalFileInput');
+        const urlInput = document.getElementById('modalImageUrlInput');
+        const saveBtn = document.getElementById('savePhotoBtn');
+
+        const formData = new FormData();
+
+        if (fileInput.files && fileInput.files[0]) {
+            formData.append('photo', fileInput.files[0]);
+        } else if (urlInput.value.trim()) {
+            formData.append('image_url', urlInput.value.trim());
+        } else {
+            alert("Kripya photo link paste karein ya file select karein!");
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+        try {
+            const res = await fetch(`/api/materials/${currentPhotoMat.id}/photo`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const newImg = data.image_url;
+                const timestampedUrl = newImg.startsWith('/uploads/') ? `${newImg}?t=${Date.now()}` : newImg;
+                
+                // Update card image in grid
+                const cardImg = document.getElementById(`img-${currentPhotoMat.id}`);
+                if (cardImg) cardImg.src = timestampedUrl;
+                
+                // Update dataset
+                const card = document.querySelector(`.product-card[data-id="${currentPhotoMat.id}"]`);
+                if (card) card.dataset.img = newImg;
+
+                currentPhotoMat.image_url = newImg;
+
+                // Update in cart if present
+                if (cart[currentPhotoMat.id]) {
+                    cart[currentPhotoMat.id].img = newImg;
+                    updateCartUI();
+                }
+
+                alert("✅ Photo safalta se update ho gayi!");
+                closePhotoModal();
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            alert("Save error: " + err);
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i class="fa-solid fa-check"></i> Photo Save Karein`;
+        }
+    }
+
+    async function resetStorePhoto() {
+        if (!currentPhotoMat) return;
+        try {
+            const res = await fetch(`/api/materials/${currentPhotoMat.id}/photo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_url: '/uploads/materials/submersible_motor.jpg' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const cardImg = document.getElementById(`img-${currentPhotoMat.id}`);
+                if (cardImg) cardImg.src = data.image_url + `?t=${Date.now()}`;
+                alert("✅ Default photo reset ho gayi!");
+                closePhotoModal();
+            }
+        } catch (e) {
+            alert("Reset error: " + e);
+        }
+    }
+</script>
+{% endblock %}

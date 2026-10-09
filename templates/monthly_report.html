@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Mahina-war Expense Report - {{ month }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Month Filter & Actions Bar -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+        <div>
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-calendar-days"></i> Mahina-war Hisab (Monthly Expense Summary)
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">19 Sites Monthly Material Report</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Pore mahine me koun se site par kitna paisa laga aur kul hisab</p>
+        </div>
+
+        <form method="GET" action="{{ url_for('monthly_report') }}" class="flex flex-wrap items-center gap-2.5">
+            <div class="flex items-center gap-1.5">
+                <label class="text-xs font-bold text-slate-700 whitespace-nowrap">Mahina Chunein:</label>
+                <input type="month" name="month" value="{{ month }}" onchange="this.form.submit()" class="rounded-xl border-slate-300 py-2 px-3 text-xs font-bold text-slate-800 border focus:border-blue-500 focus:ring-blue-500 shadow-sm bg-white">
+            </div>
+
+            <a href="{{ url_for('export_monthly_excel', month=month) }}" class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-excel text-emerald-600"></i> Excel Download
+            </a>
+
+            <button type="button" onclick="shareMonthlyWhatsApp()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="WhatsApp par mahine ka hisab bhejein">
+                <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Share
+            </button>
+
+            <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-print"></i> Print
+            </button>
+        </form>
+    </div>
+
+    <!-- Monthly High-Level Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Report Ka Mahina</span>
+            <p class="text-2xl font-black text-blue-800 mt-1 font-mono">{{ month }}</p>
+            <span class="text-[11px] text-slate-400 block mt-0.5">Monthly Consolidated</span>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kul Mahine Ka Kharch</span>
+            <p class="text-2xl font-black text-emerald-700 mt-1">₹{{ "{:,.2f}".format(total_month_cost) }}</p>
+            <span class="text-[11px] text-emerald-600 font-bold block mt-0.5">19 Sites Grand Total</span>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Sites This Month</span>
+            <p class="text-2xl font-black text-indigo-700 mt-1">{{ active_sites_count }} / 19 Sites</p>
+            <span class="text-[11px] text-indigo-600 block mt-0.5">Jahan maal consume hua</span>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Issue Records</span>
+            <p class="text-2xl font-black text-amber-700 mt-1">{{ total_items_count }} Entries</p>
+            <span class="text-[11px] text-slate-400 block mt-0.5">Usage log transactions</span>
+        </div>
+    </div>
+
+    <!-- Section 1: 19 Sites Monthly Breakdown Table -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-building-flag text-blue-600"></i>
+                    19 Sites Monthly Expense Breakdown (Kis Site Par Kitna Laga)
+                </h2>
+                <p class="text-xs text-slate-500">Mahina: {{ month }} me sabhi 19 sites ka kharcha aur hisab</p>
+            </div>
+            <span class="text-xs font-mono text-slate-400">19 Sites</span>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+                    <tr>
+                        <th class="py-3 px-3 w-10 text-center">#</th>
+                        <th class="py-3 px-3 w-24">Site Code</th>
+                        <th class="py-3 px-3">Site Name</th>
+                        <th class="py-3 px-3">Supervisor & Contact</th>
+                        <th class="py-3 px-3 text-right">Items Used</th>
+                        <th class="py-3 px-3 text-right">Total Monthly Amount (₹)</th>
+                        <th class="py-3 px-3 w-40">% of Month Expense</th>
+                        <th class="py-3 px-3 text-center no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for s in site_summaries %}
+                    {% set pct = ((s.site_total_cost / total_month_cost * 100) if total_month_cost > 0 else 0) %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-3 text-center text-slate-400 font-mono">{{ loop.index }}</td>
+                        <td class="py-3 px-3 font-mono font-bold text-blue-700">
+                            <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[11px]">{{ s.code }}</span>
+                        </td>
+                        <td class="py-3 px-3 font-bold text-slate-800">
+                            {{ s.name }}
+                            {% if s.location %}<div class="text-[10px] text-slate-400 font-normal"><i class="fa-solid fa-map-pin text-rose-500 mr-0.5"></i>{{ s.location }}</div>{% endif %}
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="font-medium text-slate-700">{{ s.supervisor or 'N/A' }}</div>
+                            {% if s.contact %}<div class="text-[11px] font-mono text-slate-400">{{ s.contact }}</div>{% endif %}
+                        </td>
+                        <td class="py-3 px-3 text-right font-mono font-bold text-blue-600">{{ s.items_count }} items</td>
+                        <td class="py-3 px-3 text-right font-mono font-black text-emerald-700 text-sm">
+                            ₹{{ "{:,.2f}".format(s.site_total_cost or 0) }}
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ pct }}%"></div>
+                                </div>
+                                <span class="font-mono text-[10px] font-bold text-slate-600 whitespace-nowrap">{{ "%.1f"|format(pct) }}%</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-3 text-center no-print">
+                            <a href="{{ url_for('site_report', site_id=s.id) }}" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] transition inline-flex items-center gap-1">
+                                <span>Report</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-slate-100 font-bold border-t-2 border-slate-300">
+                    <tr>
+                        <td colspan="5" class="py-3 px-3 text-right uppercase text-xs text-slate-800">Month Grand Total:</td>
+                        <td class="py-3 px-3 text-right font-mono text-emerald-800 text-base">₹{{ "{:,.2f}".format(total_month_cost) }}</td>
+                        <td colspan="2" class="py-3 px-3 text-slate-500 font-mono text-xs">100.0%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 2: Top Materials Consumed This Month -->
+    {% if top_materials %}
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked text-amber-600"></i>
+                Is Mahine Sabse Zyada Lagne Wale Materials (Top 10 Consumed)
+            </h2>
+            <span class="text-xs text-slate-400">Ranked by Total Cost</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {% for m in top_materials %}
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-black text-xs flex items-center justify-center">#{{ loop.index }}</span>
+                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600">{{ m.material_unit }}</span>
+                </div>
+                <h3 class="text-xs font-bold text-slate-800 line-clamp-2 h-8" title="{{ m.material_name }}">{{ m.material_name }}</h3>
+                <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
+                    <div>
+                        <span class="text-[9px] text-slate-400 block">Total Qty</span>
+                        <span class="font-mono font-bold text-blue-700">{{ m.total_quantity }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] text-slate-400 block">Total Bill</span>
+                        <span class="font-mono font-black text-emerald-700">₹{{ "{:,.0f}".format(m.total_cost) }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section 3: Daily Expense Trend (Din-war Kharch) -->
+    {% if daily_trend %}
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-emerald-600"></i>
+                Tarikh-war Daily Expense Breakdown (Kis Din Kitna Laga)
+            </h2>
+            <span class="text-xs text-slate-400">{{ daily_trend|length }} Active Days</span>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
+                    <tr>
+                        <th class="py-2.5 px-3">Date (Tareekh)</th>
+                        <th class="py-2.5 px-3 text-center">Active Sites</th>
+                        <th class="py-2.5 px-3 text-right">Items Issued</th>
+                        <th class="py-2.5 px-3 text-right">Day Total Amount (₹)</th>
+                        <th class="py-2.5 px-3 text-center no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for d in daily_trend %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-3 font-mono font-bold text-slate-800">{{ d.usage_date }}</td>
+                        <td class="py-2.5 px-3 text-center font-bold text-indigo-700">{{ d.active_sites }} sites</td>
+                        <td class="py-2.5 px-3 text-right font-mono text-blue-600">{{ d.items_count }} items</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-700">₹{{ "{:,.2f}".format(d.day_total) }}</td>
+                        <td class="py-2.5 px-3 text-center no-print">
+                            <a href="{{ url_for('daily_report', date=d.usage_date) }}" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition">
+                                Roj Ka Hisab &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section 4: Detailed Monthly Transactions Log -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-600"></i>
+                    Is Mahine Ka Pura Transaction Log (All Monthly Entries)
+                </h2>
+                <p class="text-xs text-slate-500">Mahina {{ month }} me darj hui sabhi entries</p>
+            </div>
+            <span class="text-xs font-mono text-slate-400">{{ entries|length }} total records</span>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px]">
+                    <tr>
+                        <th class="py-3 px-3 w-10 text-center">#</th>
+                        <th class="py-3 px-3 whitespace-nowrap">Date</th>
+                        <th class="py-3 px-3">Site</th>
+                        <th class="py-3 px-3">Material Description</th>
+                        <th class="py-3 px-3 text-right">Qty</th>
+                        <th class="py-3 px-3 text-center">Unit</th>
+                        <th class="py-3 px-3 text-right">Rate (₹)</th>
+                        <th class="py-3 px-3 text-right">Amount (₹)</th>
+                        <th class="py-3 px-3">Purpose / Supervisor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for entry in entries %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-3 text-center text-slate-400 font-mono">{{ loop.index }}</td>
+                        <td class="py-2.5 px-3 font-mono font-medium text-slate-700 whitespace-nowrap">{{ entry.usage_date }}</td>
+                        <td class="py-2.5 px-3 font-semibold text-blue-700 whitespace-nowrap">
+                            <span class="font-mono text-[10px] text-slate-400 mr-1">{{ entry.site_code }}</span>{{ entry.site_name }}
+                        </td>
+                        <td class="py-2.5 px-3 font-semibold text-slate-800">{{ entry.material_name }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">{{ entry.quantity }}</td>
+                        <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-100 font-mono text-[10px]">{{ entry.material_unit }}</span></td>
+                        <td class="py-2.5 px-3 text-right font-mono text-slate-500">₹{{ entry.rate }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
+                        <td class="py-2.5 px-3 text-slate-600">
+                            {{ entry.purpose or '-' }}
+                            {% if entry.entered_by %}<span class="text-[10px] text-slate-400 ml-1">({{ entry.entered_by }})</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="py-12 text-center text-slate-400">Is mahine ({{ month }}) me koi material log darj nahi hai.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function shareMonthlyWhatsApp() {
+        const month = "{{ month }}";
+        const total = "₹{{ '{:,.2f}'.format(total_month_cost) }}";
+        const activeSites = "{{ active_sites_count }}";
+        const entriesCount = "{{ total_items_count }}";
+
+        let text = `*M/S SANDIP KUMAR - MONTHLY MATERIAL REPORT*\n` +
+            `📅 *Mahina:* ${month}\n` +
+            `💰 *Kul Mahine Ka Kharch:* ${total}\n` +
+            `🏗️ *Active Sites:* ${activeSites} / 19 Sites\n` +
+            `📦 *Total Records:* ${entriesCount} Entries\n\n` +
+            `*Top 5 Sites Kharch:*\n`;
+
+        {% for s in site_summaries[:5] %}
+        {% if s.site_total_cost and s.site_total_cost > 0 %}
+        text += `• {{ s.code }} ({{ s.name }}): ₹{{ "{:,.0f}".format(s.site_total_cost) }}\n`;
+        {% endif %}
+        {% endfor %}
+
+        text += `\n_Generated via M/S Sandip Kumar Material Management System_`;
+
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+        window.open(waUrl, '_blank');
+    }
+</script>
+{% endblock %}
