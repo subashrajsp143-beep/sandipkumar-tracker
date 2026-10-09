@@ -83,6 +83,12 @@ def save_entries():
                 )
                 added_count += 1
 
+        try:
+            import generate_standalone_package
+            generate_standalone_package.build_standalone_package()
+        except Exception as gen_err:
+            print("Auto-generate desktop package error:", gen_err)
+
         return jsonify({"success": True, "message": f"{added_count} material entries safalta-purvak save ho gayi hain!", "count": added_count})
     except Exception as e:
         return jsonify({"success": False, "message": f"Error saving entries: {str(e)}"}), 500
@@ -95,7 +101,9 @@ def delete_entry(entry_id):
         # Security: Require Owner PIN (Default: 1234) to delete financial logs
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        if not pin or str(pin).strip() != "1234":
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        if not is_owner_auth:
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक (PIN: 7808) ही एंट्री डिलीट कर सकते हैं।"}), 403
             return jsonify({"success": False, "message": "Ghalat ya missing Malik PIN! Record delete karne ke liye valid Malik PIN (1234) anivarya hai."}), 403
 
         database.delete_consumption_entry(entry_id)
@@ -856,6 +864,16 @@ def sync_batch_entries():
     except Exception as ex:
         return jsonify({"success": False, "error": str(ex)}), 500
 
+@app.route("/api/live-entries", methods=["GET", "OPTIONS"])
+def get_live_entries_api():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        entries, _ = database.get_site_report()
+        return jsonify({"success": True, "entries": entries})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route("/api/live-status", methods=["GET"])
 def live_status():
     try:
@@ -868,6 +886,30 @@ def live_status():
         })
     except Exception as ex:
         return jsonify({"status": "online", "error": str(ex)})
+
+
+# ==========================================
+# OWNER PIN (7808) AUTHENTICATION
+# ==========================================
+@app.route("/api/owner/login", methods=["POST", "OPTIONS"])
+def owner_login_api():
+    if request.method == "OPTIONS":
+        return "", 200
+    data = request.get_json(silent=True) or {}
+    pin = str(data.get("pin", "")).strip()
+    if pin == "7808":
+        session["is_owner"] = True
+        return jsonify({"success": True, "is_owner": True, "message": "👑 मालिक मोड सक्रिय (Owner Mode Active)!"})
+    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पिन! केवल मालिक (PIN: 7808) ही लॉगिन कर सकते हैं।"}), 401
+
+@app.route("/api/owner/logout", methods=["POST", "GET"])
+def owner_logout_api():
+    session["is_owner"] = False
+    return jsonify({"success": True, "is_owner": False, "message": "वर्कर मोड में वापस आ गए।"})
+
+@app.route("/api/owner/status", methods=["GET"])
+def owner_status_api():
+    return jsonify({"is_owner": session.get("is_owner", False)})
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)

@@ -92,7 +92,7 @@
                     <a href="{{ url_for('daily_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
                         <i class="fa-solid fa-calendar-day text-xs"></i> Daily Report
                     </a>
-                    <a href="{{ url_for('monthly_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
+                    <a href="{{ url_for('monthly_report') }}" class="owner-only hidden px-3 py-2 rounded-md text-sm font-medium text-amber-200 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
                         <i class="fa-solid fa-calendar-days text-xs"></i> Mahina-war
                     </a>
                     <a href="{{ url_for('material_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
@@ -117,6 +117,21 @@
                     <a href="/api/backup" download title="Pura System Backup Download Karein" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-300 bg-amber-900/40 hover:bg-amber-800/60 transition flex items-center gap-1.5 border border-amber-600/50">
                         <i class="fa-solid fa-cloud-arrow-down"></i> Backup
                     </a>
+                </div>
+
+                <!-- Owner Mode Button / Crown in Navbar -->
+                <div class="flex items-center gap-2">
+                    <button type="button" id="navOwnerLoginBtn" onclick="openOwnerPinModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">मालिक लॉगिन</span><span class="sm:hidden">मालिक</span>
+                    </button>
+                    <div id="navOwnerActiveBadge" class="hidden flex items-center gap-1.5">
+                        <span class="px-2.5 py-1 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline">👑 मालिक</span>
+                        </span>
+                        <button type="button" onclick="logoutOwner()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="वर्कर मोड में बदलें">
+                            <i class="fa-solid fa-power-off text-rose-400"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -340,6 +355,112 @@
     setInterval(checkLiveUpdates, 25000);
     checkLiveUpdates();
     </script>
+
+    <!-- OWNER PIN MODAL (PIN: 7808) -->
+    <div id="ownerPinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4 animate-scaleIn">
+            <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                <i class="fa-solid fa-crown text-amber-500"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-800">मालिक लॉगिन (Owner Mode)</h3>
+                <p class="text-xs text-slate-500 mt-1">मास्टर कंट्रोल, कुल खर्चे और डिलीट पावर के लिए 4 अंकों का पिन डालें:</p>
+            </div>
+            <div>
+                <input type="password" id="ownerPinInput" maxlength="6" placeholder="••••" class="w-full text-center text-2xl tracking-[0.5em] font-black py-3 rounded-2xl border-2 border-slate-300 focus:border-amber-500 focus:outline-none bg-slate-50 text-slate-900">
+                <div id="ownerPinError" class="hidden text-xs text-rose-600 font-bold mt-2"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="closeOwnerPinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                    रद्द करें (Cancel)
+                </button>
+                <button type="button" onclick="submitOwnerPin()" class="py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-lg transition">
+                    लॉगिन करें (Unlock)
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-400 pt-1">वर्कर को इस पिन की जानकारी नहीं होनी चाहिए।</p>
+        </div>
+    </div>
+
+    <script>
+    // --- OWNER ROLE (PIN: 7808) CLIENT LOGIC ---
+    function isOwnerLoggedIn() {
+        return localStorage.getItem('sandip_is_owner') === 'true';
+    }
+
+    function openOwnerPinModal() {
+        const modal = document.getElementById('ownerPinModal');
+        const input = document.getElementById('ownerPinInput');
+        const err = document.getElementById('ownerPinError');
+        if (modal) {
+            modal.classList.remove('hidden');
+            if (input) { input.value = ''; input.focus(); }
+            if (err) err.classList.add('hidden');
+        }
+    }
+
+    function closeOwnerPinModal() {
+        const modal = document.getElementById('ownerPinModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitOwnerPin() {
+        const input = document.getElementById('ownerPinInput');
+        const err = document.getElementById('ownerPinError');
+        const pin = (input ? input.value : '').trim();
+
+        if (pin === '7808') {
+            try {
+                await fetch('/api/owner/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pin: pin })
+                });
+            } catch(e) {}
+
+            localStorage.setItem('sandip_is_owner', 'true');
+            closeOwnerPinModal();
+            alert('👑 स्वागत है मालिक साहब! मास्टर कंट्रोल सक्रिय हो गया है।');
+            window.location.reload();
+        } else {
+            if (err) {
+                err.textContent = '❌ गलत पिन! केवल मालिक ही लॉगिन कर सकते हैं।';
+                err.classList.remove('hidden');
+            }
+            if (input) input.value = '';
+        }
+    }
+
+    async function logoutOwner() {
+        if (!confirm('क्या आप मालिक मोड से बाहर निकलकर वर्कर मोड में जाना चाहते हैं?')) return;
+        localStorage.removeItem('sandip_is_owner');
+        try {
+            await fetch('/api/owner/logout', { method: 'POST' });
+        } catch(e) {}
+        alert('वर्कर मोड सक्रिय हो गया है।');
+        window.location.reload();
+    }
+
+    // Apply role-based visibility across the page
+    document.addEventListener('DOMContentLoaded', () => {
+        const isOwner = isOwnerLoggedIn();
+        const ownerBtn = document.getElementById('navOwnerLoginBtn');
+        const ownerActiveBadge = document.getElementById('navOwnerActiveBadge');
+
+        if (isOwner) {
+            if (ownerBtn) ownerBtn.classList.add('hidden');
+            if (ownerActiveBadge) ownerActiveBadge.classList.remove('hidden');
+            document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
+        } else {
+            if (ownerBtn) ownerBtn.classList.remove('hidden');
+            if (ownerActiveBadge) ownerActiveBadge.classList.add('hidden');
+            document.querySelectorAll('.owner-only').forEach(el => el.classList.add('hidden'));
+            // Hide delete buttons in tables for workers
+            document.querySelectorAll('.owner-delete-btn').forEach(el => el.classList.add('hidden'));
+        }
+    });
+    </script>
+    
 </body>
 
 </html>

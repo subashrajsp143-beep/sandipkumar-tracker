@@ -3120,6 +3120,12 @@ def build_standalone_package():
             const entry = appEntries.find(e => e.id == entryId);
             if (!entry) return;
 
+            const pin = prompt("🚨 SURAKSHA CHECK (मालिक केवल):\n\nएंट्री केवल मालिक ही हटा सकते हैं।\nकृपया मालिक PIN (7808) डालें:");
+            if (!pin || pin.trim() !== '7808') {{
+                alert("❌ गलत पिन! केवल मालिक ही एंट्री डिलीट कर सकते हैं।");
+                return;
+            }}
+
             const confirmMsg = `Kya aap sach me is entry ko DELETE karna chahte hain?\\n\\n` +
                 `• Tareekh: ${{entry.usage_date}}\\n` +
                 `• Material: ${{entry.material_name}}\\n` +
@@ -3187,6 +3193,19 @@ def build_standalone_package():
         window.addEventListener('DOMContentLoaded', () => {{
             initStore();
             initNewEntryTab();
+            // Auto-fetch latest live entries from local server
+            try {{
+                fetch('http://127.0.0.1:5000/api/live-entries')
+                    .then(r => r.json())
+                    .then(data => {{
+                        if (data && data.success && data.entries && data.entries.length > 0) {{
+                            appEntries = data.entries;
+                            localStorage.setItem('sandip_entries', JSON.stringify(appEntries));
+                            renderRecentEntriesList();
+                            renderSiteReport();
+                        }}
+                    }}).catch(() => {{}});
+            }} catch(e) {{}}
         }});
     </script>
 </body>
