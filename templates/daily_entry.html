@@ -768,6 +768,25 @@ Entry आपके फोन में सुरक्षित सेव हो
         }
     });
 
+    
+    function checkWebSupervisorCrossSite() {
+        const siteSelect = document.getElementById('siteSelect');
+        const selectedOpt = siteSelect ? siteSelect.options[siteSelect.selectedIndex] : null;
+        const officialSup = selectedOpt ? selectedOpt.getAttribute('data-supervisor') || '' : '';
+        const entered = (document.getElementById('enteredByInput')?.value || '').trim();
+        const alertBox = document.getElementById('webCrossSiteWarning');
+        const supSpan = document.getElementById('webOfficialSupName');
+
+        if (alertBox && supSpan) {
+            if (entered && officialSup && entered.toLowerCase() !== officialSup.toLowerCase() && !officialSup.toLowerCase().includes(entered.toLowerCase()) && !entered.toLowerCase().includes(officialSup.toLowerCase())) {
+                supSpan.textContent = officialSup;
+                alertBox.classList.remove('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+    }
+    
     // Make functions globally available as fallback
     window.openSlipScanner = openSlipScanner;
     window.closeSlipScanner = closeSlipScanner;

@@ -92,6 +92,12 @@ def delete_entry(entry_id):
     if request.method == "OPTIONS":
         return "", 200
     try:
+        # Security: Require Owner PIN (Default: 1234) to delete financial logs
+        data = request.get_json(silent=True) or {}
+        pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
+        if not pin or str(pin).strip() != "1234":
+            return jsonify({"success": False, "message": "Ghalat ya missing Malik PIN! Record delete karne ke liye valid Malik PIN (1234) anivarya hai."}), 403
+
         database.delete_consumption_entry(entry_id)
         try:
             import generate_standalone_package
