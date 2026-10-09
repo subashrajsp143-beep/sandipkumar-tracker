@@ -3120,7 +3120,7 @@ def build_standalone_package():
             const entry = appEntries.find(e => e.id == entryId);
             if (!entry) return;
 
-            const pin = prompt("🚨 SURAKSHA CHECK (मालिक केवल):\n\nएंट्री केवल मालिक ही हटा सकते हैं।\nकृपया मालिक PIN (7808) डालें:");
+            const pin = prompt("🚨 SURAKSHA CHECK (मालिक केवल):\n\nएंट्री केवल मालिक ही हटा सकते हैं।\nकृपया मालिक PIN डालें:");
             if (!pin || pin.trim() !== '7808') {{
                 alert("❌ गलत पिन! केवल मालिक ही एंट्री डिलीट कर सकते हैं।");
                 return;

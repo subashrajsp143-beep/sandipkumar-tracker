@@ -103,7 +103,7 @@ def delete_entry(entry_id):
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
         if not is_owner_auth:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक (PIN: 7808) ही एंट्री डिलीट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही एंट्री डिलीट कर सकते हैं।"}), 403
             return jsonify({"success": False, "message": "Ghalat ya missing Malik PIN! Record delete karne ke liye valid Malik PIN (1234) anivarya hai."}), 403
 
         database.delete_consumption_entry(entry_id)
@@ -900,7 +900,7 @@ def owner_login_api():
     if pin == "7808":
         session["is_owner"] = True
         return jsonify({"success": True, "is_owner": True, "message": "👑 मालिक मोड सक्रिय (Owner Mode Active)!"})
-    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पिन! केवल मालिक (PIN: 7808) ही लॉगिन कर सकते हैं।"}), 401
+    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही लॉगिन कर सकते हैं।"}), 401
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
 def owner_logout_api():
