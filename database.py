@@ -1002,3 +1002,33 @@ def get_all_sites_stock_overview():
         "site_cards": site_cards
     }
 
+def backup_database():
+    """
+    Creates a timestamped snapshot copy of material_tracker.db in backups directory.
+    """
+    import shutil, datetime
+    backup_dir = os.path.join(os.path.dirname(DB_PATH), "backups")
+    os.makedirs(backup_dir, exist_ok=True)
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_file = os.path.join(backup_dir, f"material_tracker_backup_{ts}.db")
+    shutil.copy2(DB_PATH, backup_file)
+    return backup_file
+
+def reset_stock_to_zero(site_id=None):
+    """
+    Resets all item inward quantities and daily consumption logs to 0.
+    Does NOT delete materials master or sites list.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    if site_id:
+        cursor.execute("DELETE FROM material_inward WHERE site_id = ?", (site_id,))
+        cursor.execute("DELETE FROM daily_consumption WHERE site_id = ?", (site_id,))
+    else:
+        cursor.execute("DELETE FROM material_inward")
+        cursor.execute("DELETE FROM daily_consumption")
+    conn.commit()
+    conn.close()
+    return True
+
+

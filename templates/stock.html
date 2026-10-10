@@ -27,6 +27,10 @@
                     <i class="fa-solid fa-plus-circle text-base"></i>
                     <span>साइट पर माल भेजें</span>
                 </button>
+                <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5" title="स्टॉक व खर्च को 0 (रीसेट) करें">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>स्टॉक 0 करें</span>
+                </button>
                 <a href="{{ url_for('export_stock_excel', site_id=selected_site_id) }}" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-file-excel text-base"></i>
                     <span>Excel डाउनलोड</span>
@@ -438,6 +442,18 @@
                 </div>
             </div>
 
+            <!-- Owner PIN Verification -->
+            <div id="stockPinContainer" class="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-black text-amber-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock text-amber-600"></i> मालिक का गुप्त पिन (Owner PIN) <span class="text-rose-500">*</span>
+                    </label>
+                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">सुरक्षा हेतु अनिवार्य</span>
+                </div>
+                <input type="password" id="inwardOwnerPin" placeholder="मालिक का 4 अंकों का पिन डालें..." required class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                <p class="text-[11px] text-amber-800">बिना सही पिन के नया माल साइट पर नहीं जुड़ेगा।</p>
+            </div>
+
             <!-- Submit Button -->
             <div class="pt-2">
                 <button type="submit" id="submitSendStockBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-xl shadow-teal-900/20 transition flex items-center justify-center gap-2">
@@ -448,6 +464,48 @@
         </form>
     </div>
 </div>
+
+<!-- ============================================================= -->
+<!-- MODAL 3: RESET TO ZERO (स्टॉक 0 करें) -->
+<!-- ============================================================= -->
+<div id="resetZeroModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 animate-fade-in">
+        <div class="bg-gradient-to-r from-rose-800 to-slate-900 text-white p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-300">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-lg text-white">स्टॉक 0 (शून्य) करें</h3>
+                    <p class="text-xs text-rose-200">सामग्री मात्रा व दैनिक खर्च रीसेट करें</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeResetZeroModal()" class="text-white/80 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <form id="resetZeroForm" onsubmit="submitResetZero(event)" class="p-5 sm:p-6 space-y-4">
+            <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-900 leading-relaxed font-medium">
+                ⚠️ <strong>चेतावनी:</strong> यह क्रिया सभी भेजी गई सामग्री की मात्रा और दैनिक खर्च को 0 (शून्य) कर देगी ताकि नया वास्तविक स्टॉक दर्ज कर सकें। (271 सामग्री व 21 साइट्स की लिस्ट सुरक्षित रहेगी)।
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-800 mb-1">
+                    मालिक का गुप्त पिन दर्ज करें (Owner PIN) <span class="text-rose-500">*</span>
+                </label>
+                <input type="password" id="resetOwnerPin" placeholder="4 अंकों का पिन डालें..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+            </div>
+            <div class="pt-2 flex gap-2">
+                <button type="button" onclick="closeResetZeroModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                    रद्द करें
+                </button>
+                <button type="submit" id="submitResetBtn" class="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <!-- ============================================================= -->
 <!-- MODAL 2: ITEM LEDGER & DAILY TIMELINE (तारीख-वार लेजर व हिस्ट्री) -->
@@ -575,11 +633,68 @@ function openSendStockModal(preselectSiteId) {
     if (preselectSiteId) {
         document.getElementById('inwardSiteId').value = preselectSiteId;
     }
+    const savedPin = sessionStorage.getItem('owner_pin');
+    if (savedPin) {
+        const pinInput = document.getElementById('inwardOwnerPin');
+        if (pinInput) pinInput.value = savedPin;
+    }
     document.getElementById('sendStockModal').classList.remove('hidden');
 }
 
 function closeSendStockModal() {
     document.getElementById('sendStockModal').classList.add('hidden');
+}
+
+// Reset Zero Modal Controls
+function openResetZeroModal() {
+    const savedPin = sessionStorage.getItem('owner_pin');
+    if (savedPin) {
+        const pinInput = document.getElementById('resetOwnerPin');
+        if (pinInput) pinInput.value = savedPin;
+    }
+    document.getElementById('resetZeroModal').classList.remove('hidden');
+}
+
+function closeResetZeroModal() {
+    document.getElementById('resetZeroModal').classList.add('hidden');
+}
+
+async function submitResetZero(e) {
+    e.preventDefault();
+    const pin = document.getElementById('resetOwnerPin').value;
+    if (!pin) {
+        alert('मालिक का पिन दर्ज करना अनिवार्य है।');
+        return;
+    }
+
+    if (!confirm('क्या आप वाकई सभी साइट्स का भेजा गया माल और खर्च 0 (रीसेट) करना चाहते हैं?\n\n(यह क्रिया मास्टर सामग्री सूची और साइट्स को नहीं हटाएगी)')) {
+        return;
+    }
+
+    const btn = document.getElementById('submitResetBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>0 हो रहा है...</span>';
+
+    try {
+        const res = await fetch('/api/stock/reset-zero', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin: pin })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert(data.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>';
+        }
+    } catch (err) {
+        alert('❌ नेटवर्क एरर: ' + err);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>';
+    }
 }
 
 // Submit Send Stock Form
@@ -589,12 +704,15 @@ async function submitSendStock(e) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>सेव हो रहा है...</span>';
 
+    const ownerPin = document.getElementById('inwardOwnerPin').value || sessionStorage.getItem('owner_pin') || '';
+
     const payload = {
         site_id: parseInt(document.getElementById('inwardSiteId').value),
         inward_date: document.getElementById('inwardDate').value,
         challan_no: document.getElementById('inwardChallan').value,
         supplier: document.getElementById('inwardSupplier').value,
         remarks: document.getElementById('inwardRemarks').value,
+        pin: ownerPin,
         items: [{
             material_id: parseInt(document.getElementById('inwardMaterialId').value),
             quantity: parseFloat(document.getElementById('inwardQuantity').value)
@@ -612,7 +730,7 @@ async function submitSendStock(e) {
             alert('✅ ' + data.message);
             window.location.reload();
         } else {
-            alert('❌ त्रुटि: ' + data.message);
+            alert(data.message);
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check-circle text-lg"></i> <span>स्टॉक सेव करें (Send Stock)</span>';
         }

@@ -919,14 +919,7 @@ def owner_status_api():
 def attendance_view():
     selected_date = request.args.get("date")
     if not selected_date:
-        today_str = datetime.date.today().strftime("%Y-%m-%d")
-        # Check if today has entries, else default to 2026-10-08 (seeded photo date) or today
-        rows_today, totals_today = database.get_daily_manpower(today_str)
-        if totals_today["total"] > 0:
-            selected_date = today_str
-        else:
-            rows_sample, totals_sample = database.get_daily_manpower("2026-10-08")
-            selected_date = "2026-10-08" if totals_sample["total"] > 0 else today_str
+        selected_date = datetime.date.today().strftime("%Y-%m-%d")
 
     rows, totals = database.get_daily_manpower(selected_date)
 
@@ -1017,6 +1010,12 @@ def save_stock_inward():
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
+        # Require Owner PIN
+        pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        if not is_owner_auth:
+            return jsonify({"success": False, "message": "❌ गलत पिन! स्टॉक एंट्री (माल भेजना) केवल अधिकृत मालिक ही कर सकते हैं।"}), 403
+
         site_id = data.get("site_id")
         inward_date = data.get("inward_date") or datetime.date.today().strftime("%Y-%m-%d")
         challan_no = data.get("challan_no", "")
@@ -1056,6 +1055,35 @@ def save_stock_inward():
         })
     except Exception as ex:
         return jsonify({"success": False, "message": f"Error: {str(ex)}"}), 500
+
+@app.route("/api/stock/reset-zero", methods=["POST", "OPTIONS"])
+def reset_stock_zero_api():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        if not is_owner_auth:
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही स्टॉक को 0 (रीसेट) कर सकते हैं।"}), 403
+
+        site_id = data.get("site_id")
+        if site_id:
+            site_id = int(site_id)
+
+        database.backup_database()
+        database.reset_stock_to_zero(site_id=site_id)
+
+        try:
+            import generate_standalone_package
+            generate_standalone_package.build_standalone_package()
+        except Exception:
+            pass
+
+        msg = "सभी साइट्स की सामग्री मात्रा और स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।" if not site_id else "साइट का स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।"
+        return jsonify({"success": True, "message": msg})
+    except Exception as ex:
+        return jsonify({"success": False, "message": str(ex)}), 500
 
 @app.route("/api/stock/ledger/<int:site_id>/<int:material_id>")
 def get_stock_ledger_api(site_id, material_id):
