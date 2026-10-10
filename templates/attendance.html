@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Manpower Attendance - M/S Sandip Kumar{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Action Bar -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase">Manpower Register</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites Sheet</span>
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
+                <i class="fa-solid fa-users-gear text-indigo-600"></i>
+                Daily Manpower Attendance (दैनिक साइट हाजिरी)
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">हर साइट पर रोज कितने मिस्त्री, प्लंबर, हेल्पर और स्टाफ आए</p>
+        </div>
+
+        <!-- Controls: Date Picker & Export Buttons -->
+        <div class="flex flex-wrap items-center gap-2.5 no-print">
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
+                <i class="fa-solid fa-calendar-days text-slate-400 text-xs"></i>
+                <label for="attDateInput" class="text-xs font-bold text-slate-700">तारीख:</label>
+                <input type="date" id="attDateInput" value="{{ selected_date }}" onchange="changeAttendanceDate(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
+            </div>
+
+            <button type="button" onclick="saveAllManpower()" id="saveAllBtn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
+                <i class="fa-solid fa-floppy-disk"></i> <span>हाजिरी सेव करें</span>
+            </button>
+
+            <a href="{{ url_for('export_manpower_excel', date=selected_date) }}" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i> <span>Excel डाउनलोड</span>
+            </a>
+
+            <button type="button" onclick="shareAttendanceWhatsApp()" class="px-3.5 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                <i class="fa-brands fa-whatsapp text-sm"></i> <span>WhatsApp Share</span>
+            </button>
+
+            <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-print"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल मैनपावर</span>
+                <p id="cardTotalManpower" class="text-2xl font-black text-slate-800 mt-1">{{ totals.total }} लोग</p>
+                <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">21 साइट्स मिलाकर</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-people-group"></i>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">मिस्त्री व प्लंबर</span>
+                <p id="cardMistriPlumber" class="text-2xl font-black text-blue-700 mt-1">{{ totals.gi_mistri + totals.plumber }} कारीगर</p>
+                <span class="text-[11px] text-blue-600 font-semibold block mt-0.5">GI Mistri + Plumber</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-wrench"></i>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल हेल्पर्स</span>
+                <p id="cardHelpers" class="text-2xl font-black text-amber-600 mt-1">{{ totals.helper }} हेल्पर्स</p>
+                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">सहायक मजदूर</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-hand-holding-hand"></i>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">स्टाफ / सुपरवाइजर</span>
+                <p id="cardStaff" class="text-2xl font-black text-emerald-700 mt-1">{{ totals.site_incharge + totals.supervisor }} लोग</p>
+                <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">Incharge + Supervisor</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Table Container -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        <!-- Big Red Date Header matching photo -->
+        <div class="py-3 px-6 bg-slate-50 border-b border-slate-200 text-center">
+            <h2 class="text-xl sm:text-2xl font-black text-rose-600 tracking-wider">
+                DATE {{ formatted_date }}
+            </h2>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse" id="manpowerTable">
+                <thead class="bg-slate-100 text-slate-800 font-black border-b border-slate-300 uppercase text-[11px] tracking-wider text-center">
+                    <tr>
+                        <th class="py-3 px-2 w-10 border-r border-slate-200">SL.NO</th>
+                        <th class="py-3 px-3 text-left w-36 border-r border-slate-200">SITE NAME</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">SITE INCHARGE</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">SUPERVISOR</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">ELECTRICIAN</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">GI MISTRI</th>
+                        <th class="py-3 px-2 w-16 border-r border-slate-200">D E O</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">PLUMBER</th>
+                        <th class="py-3 px-2 w-20 border-r border-slate-200">HELPER</th>
+                        <th class="py-3 px-2 w-16 border-r border-slate-200">OTHER</th>
+                        <th class="py-3 px-2 w-20 bg-slate-200 font-extrabold border-r border-slate-300">TOTAL</th>
+                        <th class="py-3 px-3 text-left w-64">REMARKS</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-slate-800">
+                    {% for row in rows %}
+                    <tr class="hover:bg-slate-50/80 transition site-row" data-site-id="{{ row.site_id }}">
+                        <!-- SL.NO -->
+                        <td class="py-2 px-2 text-center text-slate-400 font-mono font-bold border-r border-slate-100">
+                            {{ loop.index }}
+                        </td>
+
+                        <!-- SITE NAME -->
+                        <td class="py-2 px-3 font-bold text-slate-900 border-r border-slate-100 whitespace-nowrap">
+                            {{ row.site_name|upper }}
+                        </td>
+
+                        <!-- SITE INCHARGE -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.site_incharge if row.site_incharge > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="site_incharge" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- SUPERVISOR -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.supervisor if row.supervisor > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="supervisor" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- ELECTRICIAN -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.electrician if row.electrician > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="electrician" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- GI MISTRI -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.gi_mistri if row.gi_mistri > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="gi_mistri" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- D E O -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.deo if row.deo > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="deo" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- PLUMBER -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.plumber if row.plumber > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="plumber" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- HELPER -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.helper if row.helper > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="helper" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- OTHER -->
+                        <td class="p-1 border-r border-slate-100">
+                            <input type="number" min="0" max="99" value="{{ row.other if row.other > 0 else '' }}" 
+                                   class="inp-count w-full text-center py-1.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 font-bold text-xs bg-slate-50/50 focus:bg-white" 
+                                   data-role="other" oninput="recalcRow(this)">
+                        </td>
+
+                        <!-- ROW TOTAL -->
+                        <td class="py-2 px-2 text-center font-black text-slate-900 bg-slate-100/70 border-r border-slate-200 row-total">
+                            {{ row.total if row.total > 0 else '' }}
+                        </td>
+
+                        <!-- REMARKS -->
+                        <td class="p-1">
+                            <div class="flex items-center gap-1">
+                                <input type="text" value="{{ row.remarks }}" placeholder="e.g. RAINING, CLOSED" 
+                                       class="inp-remarks w-full py-1.5 px-2.5 rounded-lg border border-transparent hover:border-slate-300 focus:border-indigo-500 text-xs font-semibold uppercase text-slate-800 bg-slate-50/50 focus:bg-white">
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+                <!-- Bottom Grand Totals Row -->
+                <tfoot class="bg-slate-100 border-t-2 border-slate-300 font-black text-slate-900 text-center">
+                    <tr>
+                        <td class="py-3 px-2 border-r border-slate-200"></td>
+                        <td class="py-3 px-3 text-center border-r border-slate-200">TOTAL</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_site_incharge">{{ totals.site_incharge if totals.site_incharge > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_supervisor">{{ totals.supervisor if totals.supervisor > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_electrician">{{ totals.electrician if totals.electrician > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_gi_mistri">{{ totals.gi_mistri if totals.gi_mistri > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_deo">{{ totals.deo if totals.deo > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_plumber">{{ totals.plumber if totals.plumber > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_helper">{{ totals.helper if totals.helper > 0 else '' }}</td>
+                        <td class="py-3 px-1 border-r border-slate-200" id="total_other">{{ totals.other if totals.other > 0 else '' }}</td>
+                        <td class="py-3 px-2 bg-slate-200 text-indigo-700 text-sm border-r border-slate-300 font-extrabold" id="total_all">{{ totals.total if totals.total > 0 else '' }}</td>
+                        <td class="py-3 px-3 text-left text-slate-400 text-[11px]">Auto-Calculated Totals</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Quick Remarks Legend & Save Bar -->
+        <div class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                <span class="font-bold text-slate-700">Quick Remarks:</span>
+                <button type="button" onclick="setQuickRemark('RAINING')" class="px-2 py-0.5 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 text-[11px] font-semibold transition">RAINING</button>
+                <button type="button" onclick="setQuickRemark('NOT REACHABLE')" class="px-2 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-800 text-[11px] font-semibold transition">NOT REACHABLE</button>
+                <button type="button" onclick="setQuickRemark('SITE CLOSED')" class="px-2 py-0.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-800 text-[11px] font-semibold transition">SITE CLOSED</button>
+                <button type="button" onclick="setQuickRemark('SITE CLOSED DUE TO MANPOWER')" class="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 text-[11px] font-semibold transition">CLOSED DUE TO MANPOWER</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="saveAllManpower()" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-check-double"></i> Save Karein
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Client-side Scripts -->
+<script>
+function changeAttendanceDate(newDate) {
+    if (!newDate) return;
+    window.location.href = `/attendance?date=${newDate}`;
+}
+
+// Live calculation of row total and column totals as user types
+function recalcRow(inputEl) {
+    const row = inputEl.closest('tr');
+    if (!row) return;
+
+    let rowSum = 0;
+    row.querySelectorAll('.inp-count').forEach(inp => {
+        const val = parseInt(inp.value) || 0;
+        rowSum += val;
+    });
+
+    const rowTotalCell = row.querySelector('.row-total');
+    if (rowTotalCell) {
+        rowTotalCell.textContent = rowSum > 0 ? rowSum : '';
+    }
+
+    recalcAllColumnTotals();
+}
+
+function recalcAllColumnTotals() {
+    const roles = ["site_incharge", "supervisor", "electrician", "gi_mistri", "deo", "plumber", "helper", "other"];
+    let grandSum = 0;
+
+    const roleTotals = {};
+    roles.forEach(r => roleTotals[r] = 0);
+
+    document.querySelectorAll('.site-row').forEach(row => {
+        roles.forEach(r => {
+            const inp = row.querySelector(`[data-role="${r}"]`);
+            if (inp) {
+                const val = parseInt(inp.value) || 0;
+                roleTotals[r] += val;
+                grandSum += val;
+            }
+        });
+    });
+
+    // Update bottom footer totals
+    roles.forEach(r => {
+        const cell = document.getElementById(`total_${r}`);
+        if (cell) cell.textContent = roleTotals[r] > 0 ? roleTotals[r] : '';
+    });
+
+    const allCell = document.getElementById('total_all');
+    if (allCell) allCell.textContent = grandSum > 0 ? grandSum : '';
+
+    // Update Top Summary Cards
+    const cardTotal = document.getElementById('cardTotalManpower');
+    if (cardTotal) cardTotal.textContent = grandSum + " लोग";
+
+    const cardMistri = document.getElementById('cardMistriPlumber');
+    if (cardMistri) cardMistri.textContent = (roleTotals["gi_mistri"] + roleTotals["plumber"]) + " कारीगर";
+
+    const cardHelp = document.getElementById('cardHelpers');
+    if (cardHelp) cardHelp.textContent = roleTotals["helper"] + " हेल्पर्स";
+
+    const cardStaff = document.getElementById('cardStaff');
+    if (cardStaff) cardStaff.textContent = (roleTotals["site_incharge"] + roleTotals["supervisor"]) + " लोग";
+}
+
+// Quick remarks injection
+let lastFocusedRemarkInput = null;
+document.addEventListener('focusin', (e) => {
+    if (e.target && e.target.classList.contains('inp-remarks')) {
+        lastFocusedRemarkInput = e.target;
+    }
+});
+
+function setQuickRemark(text) {
+    if (lastFocusedRemarkInput) {
+        lastFocusedRemarkInput.value = text;
+        lastFocusedRemarkInput.focus();
+    } else {
+        alert("पहले जिस साइट पर रिमार्क लगाना है, उसके Remarks वाले डिब्बे पर क्लिक करें!");
+    }
+}
+
+// Save all rows to server
+async function saveAllManpower() {
+    const saveBtn = document.getElementById('saveAllBtn');
+    const attDate = document.getElementById('attDateInput').value;
+
+    if (!attDate) {
+        alert("कृपया तारीख चुनें!");
+        return;
+    }
+
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+    }
+
+    const rowsData = [];
+    document.querySelectorAll('.site-row').forEach(row => {
+        const siteId = row.getAttribute('data-site-id');
+        const getVal = (role) => parseInt(row.querySelector(`[data-role="${role}"]`)?.value) || 0;
+        const remarks = row.querySelector('.inp-remarks')?.value.trim() || '';
+
+        rowsData.push({
+            site_id: siteId,
+            site_incharge: getVal('site_incharge'),
+            supervisor: getVal('supervisor'),
+            electrician: getVal('electrician'),
+            gi_mistri: getVal('gi_mistri'),
+            deo: getVal('deo'),
+            plumber: getVal('plumber'),
+            helper: getVal('helper'),
+            other: getVal('other'),
+            remarks: remarks
+        });
+    });
+
+    try {
+        const res = await fetch('/api/attendance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: attDate,
+                rows: rowsData
+            })
+        });
+        const result = await res.json();
+        if (result.success) {
+            alert("✅ शानदार! " + (result.message || "हाजिरी सफलतापूर्वक सेव हो गई!"));
+        } else {
+            alert("❌ Error: " + result.message);
+        }
+    } catch(err) {
+        alert("Network Error: " + err);
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>हाजिरी सेव करें</span>`;
+        }
+    }
+}
+
+function shareAttendanceWhatsApp() {
+    const attDate = document.getElementById('attDateInput').value;
+    const totalAll = document.getElementById('total_all')?.textContent || '0';
+    const totalMistri = (parseInt(document.getElementById('total_gi_mistri')?.textContent) || 0) + (parseInt(document.getElementById('total_plumber')?.textContent) || 0);
+    const totalHelper = document.getElementById('total_helper')?.textContent || '0';
+    const totalStaff = (parseInt(document.getElementById('total_site_incharge')?.textContent) || 0) + (parseInt(document.getElementById('total_supervisor')?.textContent) || 0);
+
+    const text = `📋 *M/S SANDIP KUMAR - DAILY MANPOWER REPORT*\\n` +
+                 `📅 *DATE:* ${attDate}\\n` +
+                 `👥 *TOTAL MANPOWER:* ${totalAll} लोग\\n` +
+                 `👔 *Staff (Incharge + Supervisor):* ${totalStaff}\\n` +
+                 `🔧 *Mistri + Plumber:* ${totalMistri}\\n` +
+                 `👷 *Helpers:* ${totalHelper}\\n\\n` +
+                 `🔗 *Puri 21 Sites Sheet Dekhein:*\\n${window.location.href}`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+}
+</script>
+{% endblock %}
