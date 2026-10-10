@@ -266,14 +266,32 @@
 
     <!-- PWA Service Worker & Real-Time Sync Script -->
     <script>
-    // 1. Register Service Worker
+    // 1. Register Service Worker & Auto-Update Handler
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js')
-                .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+                .then(reg => {
+                    console.log('[PWA] Service Worker registered:', reg.scope);
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[PWA] Naya version mila! Auto-updating page...');
+                                window.location.reload();
+                            }
+                        });
+                    });
+                })
                 .catch(err => console.log('[PWA] Service Worker registration failed:', err));
         });
     }
+
+    // Auto-check on app resume/focus
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            if (typeof checkLiveUpdates === 'function') checkLiveUpdates();
+        }
+    });
 
     // 2. Handle Mobile Install Prompt
     let deferredPrompt = null;
