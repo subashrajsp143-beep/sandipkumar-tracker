@@ -979,5 +979,137 @@ def export_manpower_excel():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+# 9. Site Stock & Inventory Register
+@app.route("/stock")
+def site_stock():
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    
+    sites = database.get_all_sites()
+    materials = database.get_all_materials()
+    stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
+    overview = database.get_all_sites_stock_overview()
+    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+
+    total_inward_sum = sum(r["total_inward"] for r in stock_rows)
+    total_consumed_sum = sum(r["total_consumed"] for r in stock_rows)
+    balance_sum = sum(r["balance_stock"] for r in stock_rows)
+    low_stock_count = sum(1 for r in stock_rows if r["status"] in ["low_stock", "out_of_stock"])
+
+    return render_template(
+        "stock.html",
+        sites=sites,
+        materials=materials,
+        stock_rows=stock_rows,
+        overview=overview,
+        selected_site=selected_site,
+        selected_site_id=selected_site_id,
+        total_inward_sum=total_inward_sum,
+        total_consumed_sum=total_consumed_sum,
+        balance_sum=balance_sum,
+        low_stock_count=low_stock_count,
+        today=datetime.date.today().strftime("%Y-%m-%d")
+    )
+
+@app.route("/api/stock/inward", methods=["POST", "OPTIONS"])
+def save_stock_inward():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        site_id = data.get("site_id")
+        inward_date = data.get("inward_date") or datetime.date.today().strftime("%Y-%m-%d")
+        challan_no = data.get("challan_no", "")
+        supplier = data.get("supplier", "मालिक / हेड ऑफिस")
+        remarks = data.get("remarks", "")
+        items = data.get("items", [])
+
+        if not site_id or not items:
+            return jsonify({"success": False, "message": "साइट और सामान चुनना अनिवार्य है।"}), 400
+
+        added_count = 0
+        for it in items:
+            mat_id = int(it.get("material_id"))
+            qty = float(it.get("quantity") or 0)
+            if qty > 0:
+                database.add_inward_entry(
+                    site_id=int(site_id),
+                    material_id=mat_id,
+                    inward_date=inward_date,
+                    quantity=qty,
+                    challan_no=challan_no,
+                    supplier=supplier,
+                    remarks=remarks
+                )
+                added_count += 1
+
+        try:
+            import generate_standalone_package
+            generate_standalone_package.build_standalone_package()
+        except Exception:
+            pass
+
+        return jsonify({
+            "success": True,
+            "message": f"{added_count} सामान की इनवर्ड एंट्री (भेजा गया माल) सफलतापूर्वक दर्ज हो गई!",
+            "count": added_count
+        })
+    except Exception as ex:
+        return jsonify({"success": False, "message": f"Error: {str(ex)}"}), 500
+
+@app.route("/api/stock/ledger/<int:site_id>/<int:material_id>")
+def get_stock_ledger_api(site_id, material_id):
+    try:
+        ledger = database.get_material_stock_ledger(site_id, material_id)
+        return jsonify({"success": True, "ledger": ledger})
+    except Exception as ex:
+        return jsonify({"success": False, "message": str(ex)}), 500
+
+@app.route("/api/stock/inward/<int:entry_id>", methods=["DELETE", "OPTIONS"])
+def delete_stock_inward_api(entry_id):
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        if not is_owner_auth:
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही इनवर्ड एंट्री हटा सकते हैं।"}), 403
+
+        database.delete_inward_entry(entry_id)
+        try:
+            import generate_standalone_package
+            generate_standalone_package.build_standalone_package()
+        except Exception:
+            pass
+        return jsonify({"success": True, "message": "इनवर्ड एंट्री हटा दी गई।"})
+    except Exception as ex:
+        return jsonify({"success": False, "message": str(ex)}), 500
+
+@app.route("/export/stock-excel")
+def export_stock_excel():
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    
+    site_name = None
+    if selected_site_id:
+        s = database.get_site_by_id(selected_site_id)
+        if s:
+            site_name = s["name"]
+
+    stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
+    excel_file = exporter.generate_site_stock_excel(stock_rows, site_name=site_name)
+
+    safe_name = (site_name or "ALL_SITES").replace(" ", "_")
+    filename = f"SITE_STOCK_REGISTER_{safe_name}_{datetime.date.today().strftime('%Y%m%d')}.xlsx"
+
+    return send_file(
+        excel_file,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
+

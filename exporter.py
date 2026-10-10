@@ -491,3 +491,75 @@ def generate_manpower_excel(att_date, rows, totals):
     wb.save(output)
     output.seek(0)
     return output
+
+def generate_site_stock_excel(stock_rows, site_name=None):
+    """
+    Generates a clean Excel spreadsheet of the Site Stock & Balance Register.
+    """
+    import datetime
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Site Stock Register"
+
+    title_text = "M/S SANDIP KUMAR — SITE STOCK & INVENTORY REGISTER"
+    subtitle_text = f"Site: {site_name or 'ALL 21 SITES OVERVIEW'} | Date: {datetime.date.today().strftime('%d/%m/%Y')}"
+    
+    ws.append([title_text])
+    ws.cell(1, 1).font = TITLE_FONT
+    ws.append([subtitle_text])
+    ws.cell(2, 1).font = SUBTITLE_FONT
+    ws.append([])
+
+    headers = ["S.No.", "Site Name", "Material Name", "Category", "Unit", "Total Sent (Inward)", "Total Used (Consumed)", "Balance Stock", "Status"]
+    ws.append(headers)
+    style_header_row(ws, 4)
+
+    total_inw = 0
+    total_cons = 0
+    total_bal = 0
+
+    for i, r in enumerate(stock_rows, start=1):
+        inw = float(r.get("total_inward", 0))
+        cons = float(r.get("total_consumed", 0))
+        bal = float(r.get("balance_stock", 0))
+        total_inw += inw
+        total_cons += cons
+        total_bal += bal
+        row_num = 4 + i
+        ws.append([
+            i,
+            r.get("site_name", ""),
+            r.get("material_name", ""),
+            r.get("material_category", "") or "-",
+            r.get("material_unit", ""),
+            inw,
+            cons,
+            bal,
+            r.get("status_label", "")
+        ])
+        for c in range(1, 10):
+            cell = ws.cell(row=row_num, column=c)
+            cell.font = REGULAR_FONT
+            cell.border = THIN_BORDER
+            if c in [1, 5, 9]:
+                cell.alignment = Alignment(horizontal="center")
+            elif c in [6, 7, 8]:
+                cell.alignment = Alignment(horizontal="right")
+
+    tot_row = 4 + len(stock_rows) + 1
+    ws.append(["", "GRAND TOTAL", "", "", "", round(total_inw, 2), round(total_cons, 2), round(total_bal, 2), ""])
+    for c in range(1, 10):
+        cell = ws.cell(row=tot_row, column=c)
+        cell.font = BOLD_FONT
+        cell.fill = TOTAL_FILL
+        cell.border = THIN_BORDER
+        if c in [6, 7, 8]:
+            cell.alignment = Alignment(horizontal="right")
+
+    auto_fit_columns(ws)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+

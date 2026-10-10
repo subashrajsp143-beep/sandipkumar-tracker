@@ -1,0 +1,720 @@
+{% extends "base.html" %}
+
+{% block title %}साइट स्टॉक और बैलेंस रजिस्टर — M/S Sandip Kumar{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Top Breadcrumb & Header -->
+    <div class="bg-gradient-to-r from-teal-900 via-slate-900 to-blue-950 text-white rounded-2xl shadow-xl p-5 sm:p-6 border border-teal-700/40 relative overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-teal-300 text-xs font-bold uppercase tracking-wider mb-1">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Site Inventory & Stock Balance Register</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+                    📦 साइट स्टॉक और बैलेंस रजिस्टर
+                </h1>
+                <p class="text-teal-100/90 text-sm mt-1">
+                    किस साइट पर कितना माल भेजा गया, रोज़ कितना खर्च हुआ और आज कितना बचा है (Live Balance)
+                </p>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openSendStockModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-sm shadow-lg shadow-emerald-900/40 transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-base"></i>
+                    <span>साइट पर माल भेजें</span>
+                </button>
+                <a href="{{ url_for('export_stock_excel', site_id=selected_site_id) }}" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-base"></i>
+                    <span>Excel डाउनलोड</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Site Selector & Filter Bar -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Site Dropdown -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+            <label for="siteSelector" class="text-xs font-black uppercase text-slate-500 tracking-wider flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-map-pin text-teal-600"></i> साइट चुनें:
+            </label>
+            <select id="siteSelector" onchange="onSiteChange(this.value)" class="w-full sm:w-72 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 font-bold text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <option value="" {% if not selected_site_id %}selected{% endif %}>🌐 सभी 21 साइट्स (All Sites Overview)</option>
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
+                    📍 {{ s.name }} ({{ s.code }}) — {{ s.supervisor or 'सुपरवाइजर' }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Search Bar & Filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:w-auto">
+            <div class="relative w-full sm:w-64">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" id="materialSearchInput" onkeyup="filterStockTable()" placeholder="सामान खोजें (उदा. Solvent, Pipe)..." class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500">
+            </div>
+
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                <button type="button" onclick="setStockStatusFilter('all')" id="btnFilterAll" class="stock-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-teal-600 text-white shadow-sm">सभी</button>
+                <button type="button" onclick="setStockStatusFilter('healthy')" id="btnFilterHealthy" class="stock-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700">🟢 पर्याप्त</button>
+                <button type="button" onclick="setStockStatusFilter('low')" id="btnFilterLow" class="stock-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-700">🟡 कम स्टॉक</button>
+                <button type="button" onclick="setStockStatusFilter('out')" id="btnFilterOut" class="stock-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700">🔴 खत्म</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between text-blue-700 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">कुल भेजा गया (Inward)</span>
+                <i class="fa-solid fa-truck-ramp-box text-blue-500 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-blue-950 mt-1">
+                {{ "%.0f"|format(total_inward_sum) }} <span class="text-xs font-semibold text-blue-700">यूनिट्स</span>
+            </div>
+            <p class="text-[11px] text-blue-600 mt-1">मालिक / ऑफिस से साइट पर भेजा माल</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-200/80 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between text-rose-700 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">कुल खर्च हुआ (Used)</span>
+                <i class="fa-solid fa-screwdriver-wrench text-rose-500 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-rose-950 mt-1">
+                {{ "%.0f"|format(total_consumed_sum) }} <span class="text-xs font-semibold text-rose-700">यूनिट्स</span>
+            </div>
+            <p class="text-[11px] text-rose-600 mt-1">सुपरवाइजर्स द्वारा दैनिक उपयोग</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between text-emerald-700 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">साइट पर शेष स्टॉक (Balance)</span>
+                <i class="fa-solid fa-cubes-stacked text-emerald-500 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-950 mt-1">
+                {{ "%.0f"|format(balance_sum) }} <span class="text-xs font-semibold text-emerald-700">यूनिट्स</span>
+            </div>
+            <p class="text-[11px] text-emerald-600 mt-1">वर्तमान में साइट पर उपलब्ध माल</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200/80 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between text-amber-700 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">कम / खत्म स्टॉक अलर्ट</span>
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-amber-950 mt-1">
+                {{ low_stock_count }} <span class="text-xs font-semibold text-amber-700">सामग्री</span>
+            </div>
+            <p class="text-[11px] text-amber-600 mt-1">जिन्हें नया भेजने की ज़रूरत है</p>
+        </div>
+    </div>
+
+    <!-- Active Site Banner (if site selected) -->
+    {% if selected_site %}
+    <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-black text-base shadow-sm">
+                {{ selected_site.name[:2]|upper }}
+            </div>
+            <div>
+                <h2 class="font-black text-slate-900 text-base flex items-center gap-2">
+                    {{ selected_site.name }} <span class="text-xs font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-md">{{ selected_site.code }}</span>
+                </h2>
+                <p class="text-xs text-slate-600">
+                    सुपरवाइजर: <strong class="text-slate-800">{{ selected_site.supervisor or 'N/A' }}</strong> (📞 {{ selected_site.contact or 'N/A' }}) | स्थान: {{ selected_site.location or 'बिहार' }}
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="openSendStockModal({{ selected_site.id }})" class="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> <span>इस साइट पर नया माल भेजें</span>
+            </button>
+            <a href="{{ url_for('site_stock') }}" class="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition">
+                सारे साइट्स देखें
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Stock Table Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="font-black text-slate-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-teal-600"></i>
+                    {% if selected_site %}
+                    {{ selected_site.name }} साइट का स्टॉक रजिस्टर
+                    {% else %}
+                    सभी 21 साइट्स का सक्रिय स्टॉक रजिस्टर
+                    {% endif %}
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    किसी भी सामान की तारीख-वार पूरी डिटेल देखने के लिए <strong>"तारीख-वार लेजर देखें"</strong> पर क्लिक करें
+                </p>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 self-start sm:self-auto">
+                कुल {{ stock_rows|length }} सामग्री दर्ज
+            </span>
+        </div>
+
+        {% if stock_rows %}
+        <!-- Desktop Table (Hidden on small mobile) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700" id="stockTable">
+                <thead class="bg-slate-50 text-[11px] font-black uppercase text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="py-3 px-4 text-center w-12">क्र.</th>
+                        {% if not selected_site %}
+                        <th class="py-3 px-4">साइट का नाम</th>
+                        {% endif %}
+                        <th class="py-3 px-4">सामान का नाम व श्रेणी</th>
+                        <th class="py-3 px-3 text-center">इकाई</th>
+                        <th class="py-3 px-4 text-right">कुल भेजा गया (Inward)</th>
+                        <th class="py-3 px-4 text-right">कुल खर्च (Used)</th>
+                        <th class="py-3 px-4 text-right">साइट पर शेष (Balance)</th>
+                        <th class="py-3 px-4 text-center">उपलब्ध %</th>
+                        <th class="py-3 px-4 text-center">स्थिति</th>
+                        <th class="py-3 px-4 text-center">एक्शन</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for r in stock_rows %}
+                    <tr class="stock-row hover:bg-slate-50/80 transition" data-name="{{ r.material_name|lower }}" data-status="{{ r.status }}" data-site="{{ r.site_name|lower }}">
+                        <td class="py-3.5 px-4 text-center text-xs font-bold text-slate-400">{{ loop.index }}</td>
+                        {% if not selected_site %}
+                        <td class="py-3.5 px-4 font-bold text-slate-900">
+                            <a href="{{ url_for('site_stock', site_id=r.site_id) }}" class="text-teal-700 hover:text-teal-900 hover:underline flex items-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-xs text-teal-500"></i>
+                                <span>{{ r.site_name }}</span>
+                            </a>
+                        </td>
+                        {% endif %}
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-500 flex-shrink-0 overflow-hidden">
+                                    {% if r.material_image %}
+                                    <img src="{{ r.material_image }}" alt="{{ r.material_name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <i class="fa-solid fa-cube text-slate-400"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <span class="font-black text-slate-900 text-sm block leading-snug">{{ r.material_name }}</span>
+                                    <span class="text-[11px] font-medium text-slate-400">{{ r.material_category or 'General' }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-3 text-center">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">{{ r.material_unit }}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-bold text-blue-700 text-sm">
+                            +{{ "%.1f"|format(r.total_inward) }}
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-bold text-rose-600 text-sm">
+                            -{{ "%.1f"|format(r.total_consumed) }}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <span class="text-base font-black {% if r.balance_stock <= 0 %}text-rose-600{% elif r.balance_stock <= 10 %}text-amber-600{% else %}text-emerald-700{% endif %}">
+                                {{ "%.1f"|format(r.balance_stock) }}
+                            </span>
+                            <span class="text-[10px] text-slate-400 block">{{ r.material_unit }}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center w-28">
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div class="h-2 rounded-full {% if r.percent_remaining > 50 %}bg-emerald-500{% elif r.percent_remaining > 20 %}bg-amber-500{% else %}bg-rose-500{% endif %}" style="width: {{ r.percent_remaining }}%"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500 mt-0.5 block">{{ r.percent_remaining }}%</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            {% if r.status == 'healthy' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> पर्याप्त
+                            </span>
+                            {% elif r.status == 'low_stock' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span> कम स्टॉक
+                            </span>
+                            {% elif r.status == 'out_of_stock' %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> खत्म
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">
+                                खर्च दर्ज
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <button type="button" onclick="openLedgerModal({{ r.site_id }}, {{ r.material_id }}, '{{ r.site_name }}', '{{ r.material_name }}', '{{ r.material_unit }}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-600 hover:text-white text-teal-800 text-xs font-black shadow-sm transition flex items-center gap-1.5 mx-auto">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>तारीख-वार लेजर</span>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards View (Visible on small screens) -->
+        <div class="md:hidden divide-y divide-slate-100" id="stockMobileCards">
+            {% for r in stock_rows %}
+            <div class="p-4 stock-card space-y-3" data-name="{{ r.material_name|lower }}" data-status="{{ r.status }}" data-site="{{ r.site_name|lower }}">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-500 overflow-hidden flex-shrink-0">
+                            {% if r.material_image %}
+                            <img src="{{ r.material_image }}" alt="{{ r.material_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <i class="fa-solid fa-cube text-slate-400"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="font-black text-slate-900 text-sm leading-tight">{{ r.material_name }}</h4>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">{{ r.site_name }}</span>
+                                <span class="text-xs text-slate-400">इकाई: {{ r.material_unit }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        {% if r.status == 'healthy' %}
+                        <span class="px-2 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">पर्याप्त</span>
+                        {% elif r.status == 'low_stock' %}
+                        <span class="px-2 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">कम</span>
+                        {% elif r.status == 'out_of_stock' %}
+                        <span class="px-2 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">खत्म</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">दर्ज</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 3 Numbers Box -->
+                <div class="grid grid-cols-3 gap-2 bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400 block">भेजा गया</span>
+                        <span class="text-sm font-black text-blue-700">+{{ "%.1f"|format(r.total_inward) }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400 block">खर्च हुआ</span>
+                        <span class="text-sm font-black text-rose-600">-{{ "%.1f"|format(r.total_consumed) }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400 block">बचा स्टॉक</span>
+                        <span class="text-sm font-black {% if r.balance_stock <= 0 %}text-rose-600{% elif r.balance_stock <= 10 %}text-amber-600{% else %}text-emerald-700{% endif %}">
+                            {{ "%.1f"|format(r.balance_stock) }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                        <span>उपलब्ध स्टॉक</span>
+                        <span class="font-bold">{{ r.percent_remaining }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div class="h-2 rounded-full {% if r.percent_remaining > 50 %}bg-emerald-500{% elif r.percent_remaining > 20 %}bg-amber-500{% else %}bg-rose-500{% endif %}" style="width: {{ r.percent_remaining }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Button to Open Ledger -->
+                <button type="button" onclick="openLedgerModal({{ r.site_id }}, {{ r.material_id }}, '{{ r.site_name }}', '{{ r.material_name }}', '{{ r.material_unit }}')" class="w-full py-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-black text-xs transition border border-teal-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>तारीख-वार लेजर व पूरा हिसाब देखें</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-teal-50 text-teal-500 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <h4 class="font-black text-slate-800 text-lg">इस साइट पर अभी कोई स्टॉक दर्ज नहीं है</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                मालिक या ऑफिस से पहली बार माल भेजने के लिए नीचे दिए गए बटन पर क्लिक करें।
+            </p>
+            <button type="button" onclick="openSendStockModal({{ selected_site_id or '' }})" class="mt-4 px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm shadow-md transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>साइट पर पहला माल भेजें</span>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ============================================================= -->
+<!-- MODAL 1: SEND STOCK TO SITE (साइट पर नया माल भेजें) -->
+<!-- ============================================================= -->
+<div id="sendStockModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 animate-fade-in">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-teal-800 to-slate-900 text-white p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
+                    <i class="fa-solid fa-truck-ramp-box text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-lg text-white">साइट पर माल भेजें (Stock Inward)</h3>
+                    <p class="text-xs text-teal-200">हेड ऑफिस या गोदाम से साइट पर डिलीवरी दर्ज करें</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeSendStockModal()" class="text-white/80 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body Form -->
+        <form id="sendStockForm" onsubmit="submitSendStock(event)" class="p-5 sm:p-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Date -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">भेजने की तारीख <span class="text-rose-500">*</span></label>
+                    <input type="date" id="inwardDate" name="inward_date" value="{{ today }}" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <!-- Site Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">किस साइट पर भेजा? <span class="text-rose-500">*</span></label>
+                    <select id="inwardSiteId" name="site_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">साइट चुनें...</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
+                            {{ s.name }} ({{ s.code }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Material Selector -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">कौन सा सामान भेजा? <span class="text-rose-500">*</span></label>
+                <select id="inwardMaterialId" name="material_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <option value="">सामान चुनें (उदा. SOLVENT, Pipe, Valve)...</option>
+                    {% for m in materials %}
+                    <option value="{{ m.id }}" data-unit="{{ m.unit }}">
+                        {{ m.name }} [{{ m.unit }}] — ₹{{ m.rate or 0 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Quantity & Challan -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">कितनी मात्रा भेजी? <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="number" step="0.01" min="0.01" id="inwardQuantity" name="quantity" placeholder="उदा. 100" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-base font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <span id="selectedUnitBadge" class="absolute right-3 top-2.5 text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">यूनिट</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">चालान / रसीद / गाड़ी नं.</label>
+                    <input type="text" id="inwardChallan" name="challan_no" placeholder="उदा. CH-101 / BR-01" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+
+            <!-- Supplier / Sent By & Remarks -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">भेजने वाला (Sender / Supplier)</label>
+                    <input type="text" id="inwardSupplier" name="supplier" value="मालिक / हेड ऑफिस" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">रिमार्क / नोट (वैकल्पिक)</label>
+                    <input type="text" id="inwardRemarks" name="remarks" placeholder="उदा. पाइपलाइन कार्य हेतु" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-2">
+                <button type="submit" id="submitSendStockBtn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-xl shadow-teal-900/20 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle text-lg"></i>
+                    <span>स्टॉक सेव करें (Send Stock)</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- MODAL 2: ITEM LEDGER & DAILY TIMELINE (तारीख-वार लेजर व हिस्ट्री) -->
+<!-- ============================================================= -->
+<div id="ledgerModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-6 animate-fade-in flex flex-col max-h-[90vh]">
+        <!-- Ledger Header -->
+        <div class="bg-gradient-to-r from-teal-900 to-slate-900 text-white p-5 flex items-center justify-between flex-shrink-0">
+            <div>
+                <span class="text-teal-300 text-xs font-black uppercase tracking-wider block">तारीख-वार लेजर व हिसाब</span>
+                <h3 id="ledgerModalTitle" class="font-black text-xl text-white mt-0.5">सामग्री का नाम</h3>
+                <p id="ledgerModalSubtitle" class="text-xs text-teal-100/90 mt-0.5">साइट: सीवान</p>
+            </div>
+            <button type="button" onclick="closeLedgerModal()" class="text-white/80 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Ledger Top Stats Summary -->
+        <div class="grid grid-cols-3 gap-2 p-4 bg-slate-50 border-b border-slate-200 text-center flex-shrink-0">
+            <div class="bg-blue-50/80 rounded-xl p-2.5 border border-blue-200">
+                <span class="text-[10px] font-black uppercase text-blue-700 block">कुल भेजा गया (Inward)</span>
+                <span id="ledgerTotalInward" class="text-base sm:text-lg font-black text-blue-900">0</span>
+            </div>
+            <div class="bg-rose-50/80 rounded-xl p-2.5 border border-rose-200">
+                <span class="text-[10px] font-black uppercase text-rose-700 block">कुल खर्च (Used)</span>
+                <span id="ledgerTotalConsumed" class="text-base sm:text-lg font-black text-rose-900">0</span>
+            </div>
+            <div class="bg-emerald-50/80 rounded-xl p-2.5 border border-emerald-200">
+                <span class="text-[10px] font-black uppercase text-emerald-700 block">बचा हुआ स्टॉक</span>
+                <span id="ledgerBalance" class="text-base sm:text-lg font-black text-emerald-900">0</span>
+            </div>
+        </div>
+
+        <!-- Ledger Events Timeline Table -->
+        <div class="overflow-y-auto p-4 sm:p-5 space-y-3 flex-1" id="ledgerEventsContainer">
+            <div class="text-center py-8 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-teal-600 mb-2"></i>
+                <p class="text-xs font-bold">लेजर लोड हो रहा है...</p>
+            </div>
+        </div>
+
+        <!-- Ledger Footer -->
+        <div class="p-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 flex-shrink-0">
+            <span>🟢 इनवर्ड = प्राप्त माल | 🔴 आउटवर्ड = दैनिक खर्च</span>
+            <button type="button" onclick="closeLedgerModal()" class="px-4 py-1.5 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700">
+                बंद करें
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter Stock by Status
+let currentStatusFilter = 'all';
+
+function setStockStatusFilter(status) {
+    currentStatusFilter = status;
+    document.querySelectorAll('.stock-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-600', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+    });
+    
+    if (status === 'all') document.getElementById('btnFilterAll').classList.replace('bg-slate-100', 'bg-teal-600'), document.getElementById('btnFilterAll').classList.replace('text-slate-700', 'text-white');
+    if (status === 'healthy') document.getElementById('btnFilterHealthy').classList.replace('bg-slate-100', 'bg-teal-600'), document.getElementById('btnFilterHealthy').classList.replace('text-slate-700', 'text-white');
+    if (status === 'low') document.getElementById('btnFilterLow').classList.replace('bg-slate-100', 'bg-teal-600'), document.getElementById('btnFilterLow').classList.replace('text-slate-700', 'text-white');
+    if (status === 'out') document.getElementById('btnFilterOut').classList.replace('bg-slate-100', 'bg-teal-600'), document.getElementById('btnFilterOut').classList.replace('text-slate-700', 'text-white');
+
+    filterStockTable();
+}
+
+function filterStockTable() {
+    const query = (document.getElementById('materialSearchInput').value || '').toLowerCase().trim();
+    
+    // Filter Desktop rows
+    const rows = document.querySelectorAll('.stock-row');
+    rows.forEach(r => {
+        const name = r.getAttribute('data-name') || '';
+        const site = r.getAttribute('data-site') || '';
+        const status = r.getAttribute('data-status') || '';
+        
+        let matchQuery = !query || name.includes(query) || site.includes(query);
+        let matchStatus = (currentStatusFilter === 'all') ||
+                          (currentStatusFilter === 'healthy' && status === 'healthy') ||
+                          (currentStatusFilter === 'low' && status === 'low_stock') ||
+                          (currentStatusFilter === 'out' && (status === 'out_of_stock' || status === 'untracked_inward'));
+
+        r.style.display = (matchQuery && matchStatus) ? '' : 'none';
+    });
+
+    // Filter Mobile cards
+    const cards = document.querySelectorAll('.stock-card');
+    cards.forEach(c => {
+        const name = c.getAttribute('data-name') || '';
+        const site = c.getAttribute('data-site') || '';
+        const status = c.getAttribute('data-status') || '';
+        
+        let matchQuery = !query || name.includes(query) || site.includes(query);
+        let matchStatus = (currentStatusFilter === 'all') ||
+                          (currentStatusFilter === 'healthy' && status === 'healthy') ||
+                          (currentStatusFilter === 'low' && status === 'low_stock') ||
+                          (currentStatusFilter === 'out' && (status === 'out_of_stock' || status === 'untracked_inward'));
+
+        c.style.display = (matchQuery && matchStatus) ? '' : 'none';
+    });
+}
+
+function onSiteChange(siteId) {
+    if (siteId) {
+        window.location.href = '/stock?site_id=' + siteId;
+    } else {
+        window.location.href = '/stock';
+    }
+}
+
+// Update unit badge when material changes in form
+document.getElementById('inwardMaterialId')?.addEventListener('change', function() {
+    const selected = this.options[this.selectedIndex];
+    const unit = selected?.getAttribute('data-unit') || 'यूनिट';
+    document.getElementById('selectedUnitBadge').textContent = unit;
+});
+
+// Modal Controls
+function openSendStockModal(preselectSiteId) {
+    if (preselectSiteId) {
+        document.getElementById('inwardSiteId').value = preselectSiteId;
+    }
+    document.getElementById('sendStockModal').classList.remove('hidden');
+}
+
+function closeSendStockModal() {
+    document.getElementById('sendStockModal').classList.add('hidden');
+}
+
+// Submit Send Stock Form
+async function submitSendStock(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitSendStockBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>सेव हो रहा है...</span>';
+
+    const payload = {
+        site_id: parseInt(document.getElementById('inwardSiteId').value),
+        inward_date: document.getElementById('inwardDate').value,
+        challan_no: document.getElementById('inwardChallan').value,
+        supplier: document.getElementById('inwardSupplier').value,
+        remarks: document.getElementById('inwardRemarks').value,
+        items: [{
+            material_id: parseInt(document.getElementById('inwardMaterialId').value),
+            quantity: parseFloat(document.getElementById('inwardQuantity').value)
+        }]
+    };
+
+    try {
+        const res = await fetch('/api/stock/inward', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ त्रुटि: ' + data.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-circle text-lg"></i> <span>स्टॉक सेव करें (Send Stock)</span>';
+        }
+    } catch (err) {
+        alert('❌ नेटवर्क एरर: ' + err);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check-circle text-lg"></i> <span>स्टॉक सेव करें (Send Stock)</span>';
+    }
+}
+
+// Open Ledger Modal
+async function openLedgerModal(siteId, materialId, siteName, materialName, unit) {
+    const modal = document.getElementById('ledgerModal');
+    modal.classList.remove('hidden');
+    document.getElementById('ledgerModalTitle').textContent = `${materialName} (${unit})`;
+    document.getElementById('ledgerModalSubtitle').textContent = `साइट: ${siteName}`;
+
+    const container = document.getElementById('ledgerEventsContainer');
+    container.innerHTML = `
+        <div class="text-center py-8 text-slate-400">
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-teal-600 mb-2"></i>
+            <p class="text-xs font-bold">लेजर लोड हो रहा है...</p>
+        </div>
+    `;
+
+    try {
+        const res = await fetch(`/api/stock/ledger/${siteId}/${materialId}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        const ledger = data.ledger;
+        document.getElementById('ledgerTotalInward').textContent = `+${ledger.total_inward} ${unit}`;
+        document.getElementById('ledgerTotalConsumed').textContent = `-${ledger.total_consumed} ${unit}`;
+        document.getElementById('ledgerBalance').textContent = `${ledger.balance_stock} ${unit}`;
+
+        if (!ledger.events || ledger.events.length === 0) {
+            container.innerHTML = `
+                <div class="p-6 text-center text-slate-500">
+                    <p class="font-bold text-sm">इस सामग्री का कोई लेनदेन नहीं मिला।</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-slate-100 text-[11px] font-black uppercase text-slate-500 border-b border-slate-200">
+                        <tr>
+                            <th class="py-2.5 px-3">तारीख</th>
+                            <th class="py-2.5 px-3">प्रकार</th>
+                            <th class="py-2.5 px-3 text-right">मात्रा</th>
+                            <th class="py-2.5 px-3">संदर्भ / दर्जकर्ता</th>
+                            <th class="py-2.5 px-3">कार्य / विवरण</th>
+                            <th class="py-2.5 px-3 text-right">शेष बैलेंस</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+        `;
+
+        ledger.events.forEach((ev, idx) => {
+            const isInward = ev.type === 'INWARD';
+            const badgeClass = isInward ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+            const qtyClass = isInward ? 'text-emerald-700 font-black' : 'text-rose-600 font-bold';
+            const qtySign = isInward ? `+${ev.qty}` : `-${ev.qty}`;
+
+            html += `
+                <tr class="hover:bg-slate-50/80">
+                    <td class="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">${ev.date}</td>
+                    <td class="py-2.5 px-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">
+                            ${isInward ? '🟢 भेजा गया' : '🔴 खर्च'}
+                        </span>
+                    </td>
+                    <td class="py-2.5 px-3 text-right ${qtyClass}">${qtySign}</td>
+                    <td class="py-2.5 px-3 text-slate-600 font-medium">${ev.ref} <span class="text-slate-400">(${ev.person})</span></td>
+                    <td class="py-2.5 px-3 text-slate-500">${ev.remarks || '-'}</td>
+                    <td class="py-2.5 px-3 text-right font-black text-slate-900 bg-slate-50">${ev.running_balance}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+    } catch (err) {
+        container.innerHTML = `
+            <div class="p-6 text-center text-rose-500">
+                <i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
+                <p class="font-bold text-sm">लेजर लोड करने में समस्या: ${err.message}</p>
+            </div>
+        `;
+    }
+}
+
+function closeLedgerModal() {
+    document.getElementById('ledgerModal').classList.add('hidden');
+}
+</script>
+{% endblock %}

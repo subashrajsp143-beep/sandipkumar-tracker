@@ -742,3 +742,263 @@ def save_daily_manpower(att_date, rows_data, updated_by=""):
     conn.commit()
     conn.close()
     return True
+
+# ==========================================
+# SITE STOCK & INVENTORY FUNCTIONS
+# ==========================================
+
+def add_inward_entry(site_id, material_id, inward_date, quantity, challan_no="", supplier="", remarks=""):
+    """
+    Records material dispatch / inward entry received at a specific site.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO material_inward (site_id, material_id, inward_date, quantity, challan_no, supplier, remarks)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (int(site_id), int(material_id), inward_date, float(quantity), str(challan_no).strip(), str(supplier).strip(), str(remarks).strip()))
+    new_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return new_id
+
+def delete_inward_entry(entry_id):
+    """
+    Deletes an inward stock entry.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM material_inward WHERE id = ?", (entry_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+def get_site_stock_inventory(site_id=None):
+    """
+    Returns inventory list showing total sent (inward), total used (consumed),
+    and current balance stock for materials at the given site (or all sites).
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    where_site_clause = "AND s.id = ?" if site_id else ""
+    params = [site_id] if site_id else []
+
+    query = f"""
+    SELECT 
+        s.id as site_id, s.name as site_name, s.code as site_code, s.supervisor as site_supervisor,
+        m.id as material_id, m.name as material_name, m.unit as material_unit, m.rate as material_rate,
+        m.category as material_category, m.image_url as material_image,
+        COALESCE(i.total_inward, 0) as total_inward,
+        COALESCE(c.total_consumed, 0) as total_consumed,
+        (COALESCE(i.total_inward, 0) - COALESCE(c.total_consumed, 0)) as balance_stock,
+        i.last_inward_date,
+        c.last_usage_date,
+        COALESCE(i.inward_count, 0) as inward_count,
+        COALESCE(c.usage_count, 0) as usage_count
+    FROM sites s
+    CROSS JOIN materials m
+    LEFT JOIN (
+        SELECT site_id, material_id, SUM(quantity) as total_inward, MAX(inward_date) as last_inward_date, COUNT(id) as inward_count
+        FROM material_inward
+        GROUP BY site_id, material_id
+    ) i ON s.id = i.site_id AND m.id = i.material_id
+    LEFT JOIN (
+        SELECT site_id, material_id, SUM(quantity) as total_consumed, MAX(usage_date) as last_usage_date, COUNT(id) as usage_count
+        FROM daily_consumption
+        GROUP BY site_id, material_id
+    ) c ON s.id = c.site_id AND m.id = c.material_id
+    WHERE (COALESCE(i.total_inward, 0) > 0 OR COALESCE(c.total_consumed, 0) > 0)
+    {where_site_clause}
+    ORDER BY s.id ASC, (COALESCE(i.total_inward, 0) - COALESCE(c.total_consumed, 0)) ASC, m.name ASC
+    """
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+
+    for r in rows:
+        bal = r["balance_stock"]
+        inw = r["total_inward"]
+        cons = r["total_consumed"]
+        if inw > 0 and bal <= 0:
+            r["status"] = "out_of_stock"
+            r["status_label"] = "खत्म (Out of Stock)"
+            r["status_color"] = "red"
+        elif inw == 0 and cons > 0:
+            r["status"] = "untracked_inward"
+            r["status_label"] = "बिना इनवर्ड दर्ज खर्च"
+            r["status_color"] = "yellow"
+        elif inw > 0 and bal <= max(5, inw * 0.15):
+            r["status"] = "low_stock"
+            r["status_label"] = "कम स्टॉक (Low Stock)"
+            r["status_color"] = "amber"
+        else:
+            r["status"] = "healthy"
+            r["status_label"] = "पर्याप्त स्टॉक (In Stock)"
+            r["status_color"] = "green"
+
+        if inw > 0:
+            r["percent_remaining"] = max(0, min(100, round((bal / inw) * 100, 1)))
+        else:
+            r["percent_remaining"] = 0
+
+    conn.close()
+    return rows
+
+def get_material_stock_ledger(site_id, material_id):
+    """
+    Returns full chronological ledger of all inward deliveries and daily consumption
+    for a single material on a specific site, with running balance at every transaction.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, inward_date as event_date, quantity, challan_no as ref_no, 
+               supplier as source_person, remarks, 'INWARD' as event_type, created_at
+        FROM material_inward
+        WHERE site_id = ? AND material_id = ?
+    """, (site_id, material_id))
+    inwards = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("""
+        SELECT id, usage_date as event_date, quantity, purpose as ref_no, 
+               entered_by as source_person, remarks, 'OUTWARD' as event_type, created_at
+        FROM daily_consumption
+        WHERE site_id = ? AND material_id = ?
+    """, (site_id, material_id))
+    consumptions = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("SELECT id, name, code, supervisor, incharge FROM sites WHERE id = ?", (site_id,))
+    site_row = cursor.fetchone()
+    site_info = dict(site_row) if site_row else {}
+
+    cursor.execute("SELECT id, name, unit, rate, category, image_url FROM materials WHERE id = ?", (material_id,))
+    mat_row = cursor.fetchone()
+    mat_info = dict(mat_row) if mat_row else {}
+
+    conn.close()
+
+    all_events = []
+    for item in inwards:
+        all_events.append({
+            "id": item["id"],
+            "date": item["event_date"],
+            "type": "INWARD",
+            "type_label": "🟢 भेजा गया (Inward)",
+            "qty": item["quantity"],
+            "signed_qty": item["quantity"],
+            "ref": item["ref_no"] or "चालान / ऑफिस प्रेषण",
+            "person": item["source_person"] or "मालिक / हेड ऑफिस",
+            "remarks": item["remarks"] or "",
+            "created_at": item["created_at"]
+        })
+
+    for item in consumptions:
+        all_events.append({
+            "id": item["id"],
+            "date": item["event_date"],
+            "type": "OUTWARD",
+            "type_label": "🔴 खर्च हुआ (Daily Use)",
+            "qty": item["quantity"],
+            "signed_qty": -item["quantity"],
+            "ref": item["ref_no"] or "दैनिक उपयोग",
+            "person": item["source_person"] or site_info.get("supervisor", "सुपरवाइजर"),
+            "remarks": item["remarks"] or "",
+            "created_at": item["created_at"]
+        })
+
+    # Sort chronologically by date ASC, INWARD first on same date, then id ASC
+    all_events.sort(key=lambda x: (x["date"], 0 if x["type"] == "INWARD" else 1, x["id"]))
+
+    running_bal = 0.0
+    for ev in all_events:
+        running_bal += ev["signed_qty"]
+        ev["running_balance"] = round(running_bal, 2)
+
+    total_inward = sum(e["qty"] for e in all_events if e["type"] == "INWARD")
+    total_consumed = sum(e["qty"] for e in all_events if e["type"] == "OUTWARD")
+    balance_stock = round(total_inward - total_consumed, 2)
+
+    return {
+        "site": site_info,
+        "material": mat_info,
+        "total_inward": total_inward,
+        "total_consumed": total_consumed,
+        "balance_stock": balance_stock,
+        "events": all_events
+    }
+
+def get_all_sites_stock_overview():
+    """
+    Returns high-level summary cards and site-wise aggregates.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            COALESCE(SUM(i.quantity), 0) as grand_inward_units,
+            COALESCE(COUNT(DISTINCT i.site_id), 0) as sites_with_inward
+        FROM material_inward i
+    """)
+    inw_stat = dict(cursor.fetchone())
+
+    cursor.execute("""
+        SELECT 
+            COALESCE(SUM(c.quantity), 0) as grand_consumed_units,
+            COALESCE(COUNT(DISTINCT c.site_id), 0) as sites_with_consumption
+        FROM daily_consumption c
+    """)
+    cons_stat = dict(cursor.fetchone())
+
+    sites = get_all_sites()
+    
+    # Per site aggregates
+    cursor.execute("""
+        SELECT 
+            s.id as site_id,
+            COALESCE(i.site_inward_units, 0) as inward_units,
+            COALESCE(c.site_consumed_units, 0) as consumed_units,
+            (COALESCE(i.site_inward_units, 0) - COALESCE(c.site_consumed_units, 0)) as balance_units,
+            COALESCE(i.inward_items_count, 0) as inward_items_count,
+            COALESCE(c.consumed_items_count, 0) as consumed_items_count
+        FROM sites s
+        LEFT JOIN (
+            SELECT site_id, SUM(quantity) as site_inward_units, COUNT(DISTINCT material_id) as inward_items_count
+            FROM material_inward
+            GROUP BY site_id
+        ) i ON s.id = i.site_id
+        LEFT JOIN (
+            SELECT site_id, SUM(quantity) as site_consumed_units, COUNT(DISTINCT material_id) as consumed_items_count
+            FROM daily_consumption
+            GROUP BY site_id
+        ) c ON s.id = c.site_id
+        ORDER BY s.id ASC
+    """)
+    site_stats_map = {r["site_id"]: dict(r) for r in cursor.fetchall()}
+    conn.close()
+
+    site_cards = []
+    for s in sites:
+        st = site_stats_map.get(s["id"], {
+            "inward_units": 0, "consumed_units": 0, "balance_units": 0,
+            "inward_items_count": 0, "consumed_items_count": 0
+        })
+        site_cards.append({
+            "id": s["id"],
+            "code": s["code"],
+            "name": s["name"],
+            "location": s.get("location", ""),
+            "supervisor": s.get("supervisor", ""),
+            "contact": s.get("contact", ""),
+            **st
+        })
+
+    return {
+        "grand_inward_units": round(inw_stat.get("grand_inward_units", 0), 2),
+        "grand_consumed_units": round(cons_stat.get("grand_consumed_units", 0), 2),
+        "grand_balance_units": round(inw_stat.get("grand_inward_units", 0) - cons_stat.get("grand_consumed_units", 0), 2),
+        "sites_with_stock": inw_stat.get("sites_with_inward", 0),
+        "site_cards": site_cards
+    }
+

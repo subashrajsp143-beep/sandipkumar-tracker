@@ -62,9 +62,12 @@
                         </div>
                         <div>
                             <span class="font-bold text-lg tracking-wide text-white block leading-tight">M/S SANDIP KUMAR</span>
-                            <div class="flex items-center gap-2">
-                    <!-- Quick Mobile Attendance Shortcut -->
-                    <a href="{{ url_for('attendance_view') }}" class="md:hidden px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition flex items-center gap-1">
+                            <div class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- Quick Mobile Attendance & Stock Shortcuts -->
+                    <a href="{{ url_for('site_stock') }}" class="md:hidden px-2 py-1 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1">
+                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>स्टॉक</span>
+                    </a>
+                    <a href="{{ url_for('attendance_view') }}" class="md:hidden px-2 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1">
                         <i class="fa-solid fa-users-gear text-xs"></i> <span>हाजिरी</span>
                     </a>
                                 <span class="text-xs text-blue-200 block font-medium">19 Sites Material Tracker</span>
@@ -81,6 +84,9 @@
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
                     <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-xs"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('site_stock') }}" class="px-3 py-2 rounded-md text-sm font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>📦 साइट स्टॉक (Stock)</span>
                     </a>
                     <a href="{{ url_for('material_store') }}" class="px-3 py-2 rounded-md text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition flex items-center gap-1.5">
                         <i class="fa-solid fa-cart-shopping text-xs"></i> <span>Material Store</span>
@@ -153,6 +159,9 @@
         <!-- Mobile Menu Dropdown -->
         <div id="mobileMenu" class="hidden md:hidden bg-brand-950 px-4 pt-2 pb-4 space-y-2 border-t border-blue-900">
             <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Dashboard</a>
+            <a href="{{ url_for('site_stock') }}" class="block px-3 py-2.5 rounded-xl text-base font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-md flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked"></i> <span>📦 साइट स्टॉक व बैलेंस (Site Stock)</span>
+            </a>
             <a href="{{ url_for('material_store') }}" class="block px-3 py-2 rounded-md text-base font-bold bg-amber-400 text-slate-900">🛒 Material Store (Add Item)</a>
             <a href="{{ url_for('daily_entry') }}" class="block px-3 py-2 rounded-md text-base font-medium bg-emerald-600 text-white">Roj Ka Entry (Daily Log)</a>
             <a href="{{ url_for('attendance_view') }}" class="block px-3 py-2.5 rounded-xl text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md flex items-center gap-2">

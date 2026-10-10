@@ -34,24 +34,48 @@
         </div>
     </div>
 
-    <!-- Quick Action Banner for Manpower Attendance -->
-    <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-2xl border border-indigo-400/30 flex-shrink-0">
-                <i class="fa-solid fa-users-gear"></i>
-            </div>
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="text-base font-bold text-white">Daily Manpower Attendance (दैनिक हाजिरी)</span>
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">21 Sites Sheet</span>
+    <!-- Quick Action Banners for Site Stock & Manpower Attendance -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Site Stock & Balance Banner -->
+        <div class="bg-gradient-to-r from-teal-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-teal-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-2xl border border-teal-400/30 flex-shrink-0">
+                    <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <p class="text-xs text-indigo-200 mt-0.5">मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट भरें व Excel निकालें</p>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-bold text-white">साइट स्टॉक व बैलेंस (Site Stock)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">Live Balance</span>
+                    </div>
+                    <p class="text-xs text-teal-200 mt-0.5">भेजा गया माल, रोज़ का खर्च और बचा स्टॉक (तारीख-वार लेजर)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
+                    <span>स्टॉक रजिस्टर खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ url_for('attendance_view') }}" class="px-4 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
-                <span>हाजिरी शीट खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
-            </a>
+
+        <!-- Daily Manpower Attendance Banner -->
+        <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-2xl border border-indigo-400/30 flex-shrink-0">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-bold text-white">Daily Manpower Attendance (हाजिरी)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">21 Sites Sheet</span>
+                    </div>
+                    <p class="text-xs text-indigo-200 mt-0.5">मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('attendance_view') }}" class="px-4 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
+                    <span>हाजिरी शीट खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
         </div>
     </div>
 
