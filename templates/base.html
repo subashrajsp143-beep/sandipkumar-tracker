@@ -54,28 +54,88 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 
-                <!-- Logo & Brand -->
-                <div class="flex items-center space-x-3">
-                    <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-3 group">
-                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-400/30 text-blue-300 group-hover:bg-blue-500/30 transition">
-                            <i class="fa-solid fa-faucet-drip text-xl"></i>
-                        </div>
-                        <div>
-                            <span class="font-bold text-lg tracking-wide text-white block leading-tight">M/S SANDIP KUMAR</span>
-                            <div class="flex items-center gap-1.5 sm:gap-2">
-                    <!-- Quick Mobile Attendance & Stock Shortcuts -->
-                    <a href="{{ url_for('site_stock') }}" class="md:hidden px-2 py-1 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1">
-                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>स्टॉक</span>
-                    </a>
-                    <a href="{{ url_for('attendance_view') }}" class="md:hidden px-2 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1">
-                        <i class="fa-solid fa-users-gear text-xs"></i> <span>हाजिरी</span>
-                    </a>
-                                <span class="text-xs text-blue-200 block font-medium">19 Sites Material Tracker</span>
-                                <span id="networkBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
-                                    <span id="networkText">Online (Live Sync)</span>
-                                </span>
+                <!-- Logo & Brand with TAP ICON Language Selector in UP LEFT -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Tap Icon Language Selector (UP LEFT) -->
+                    <div class="relative" id="tapLangContainer">
+                        <button type="button" 
+                                id="tapLangBtn" 
+                                onclick="toggleLanguageDropdown(event)" 
+                                title="भाषा बदलें / Change Language (हिंदी / English)"
+                                class="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-blue-950/90 hover:bg-blue-800 border-2 border-amber-400 text-white shadow-lg transition-all transform active:scale-95 group focus:outline-none focus:ring-2 focus:ring-amber-300">
+                            <!-- Water Tap Icon (NAL ICON) -->
+                            <div class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/40 group-hover:bg-amber-400/30 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-faucet-drip text-base sm:text-lg animate-pulse"></i>
                             </div>
+                            <!-- Language Badge -->
+                            <div class="flex flex-col text-left leading-none pr-0.5">
+                                <span class="text-[9px] text-amber-300 font-bold uppercase tracking-wider flex items-center gap-0.5">
+                                    <i class="fa-solid fa-globe text-[8px]"></i> <span id="tapLangCode">HI</span>
+                                </span>
+                                <span id="tapLangName" class="text-[11px] sm:text-xs font-black text-white whitespace-nowrap">🇮🇳 हिंदी</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-amber-300 transition-transform duration-200" id="tapLangChevron"></i>
+                        </button>
+
+                        <!-- Language Dropdown Popup Menu -->
+                        <div id="tapLangDropdown" 
+                             class="hidden absolute left-0 top-full mt-2 w-56 sm:w-64 bg-slate-900/98 backdrop-blur-md border-2 border-amber-400 rounded-2xl shadow-2xl p-2 z-50 text-white animate-scaleIn">
+                            <div class="px-3 py-2 border-b border-slate-700/80 flex items-center justify-between">
+                                <div class="flex items-center gap-2 text-xs font-black text-amber-300">
+                                    <i class="fa-solid fa-language text-sm"></i>
+                                    <span data-i18n="lang_selector_title">भाषा चुनें / Select Language</span>
+                                </div>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-900 text-blue-200">1-Tap</span>
+                            </div>
+
+                            <div class="p-1 space-y-1.5 mt-1">
+                                <!-- Hindi Option -->
+                                <button type="button" 
+                                        onclick="setAppLanguage('hi', event)" 
+                                        id="langOptHi"
+                                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white hover:bg-blue-800">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xl">🇮🇳</span>
+                                        <div>
+                                            <div class="text-white font-extrabold text-sm" data-i18n="lang_hi_title">हिंदी (Hindi)</div>
+                                            <div class="text-[10px] text-amber-200 font-normal" data-i18n="lang_hi_sub">पूरा सिस्टम हिंदी में</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-circle-check text-emerald-400 text-base" id="langCheckHi"></i>
+                                </button>
+
+                                <!-- English Option -->
+                                <button type="button" 
+                                        onclick="setAppLanguage('en', event)" 
+                                        id="langOptEn"
+                                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xl">🇬🇧</span>
+                                        <div>
+                                            <div class="text-white font-extrabold text-sm" data-i18n="lang_en_title">English</div>
+                                            <div class="text-[10px] text-slate-400 font-normal" data-i18n="lang_en_sub">Complete system in English</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-regular fa-circle text-slate-500 text-base" id="langCheckEn"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-2 pt-2 border-t border-slate-800 px-2 py-1 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-faucet-drip text-amber-400 text-[10px]"></i>
+                                <span>नल आइकन (Tap) पर दबाकर कभी भी बदलें</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand / Company Name (links to Dashboard) -->
+                    <a href="{{ url_for('dashboard') }}" class="flex flex-col group py-1">
+                        <span class="font-extrabold text-sm sm:text-lg tracking-wide text-white group-hover:text-amber-300 transition leading-tight" data-i18n="app_title">M/S SANDIP KUMAR</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] sm:text-xs text-blue-200 font-medium" data-i18n="app_subtitle">19 Sites Material Tracker</span>
+                            <span id="networkBadge" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
+                                <span id="networkText" data-i18n="online_status">Online (Live Sync)</span>
+                            </span>
                         </div>
                     </a>
                 </div>
@@ -83,63 +143,71 @@
                 <!-- Desktop Menu -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
                     <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-xs"></i> Dashboard
+                        <i class="fa-solid fa-chart-pie text-xs"></i> <span data-i18n="nav_dashboard">Dashboard</span>
                     </a>
                     <a href="{{ url_for('site_stock') }}" class="px-3 py-2 rounded-md text-sm font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>📦 साइट स्टॉक (Stock)</span>
+                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span data-i18n="nav_stock">📦 साइट स्टॉक (Stock)</span>
                     </a>
                     <a href="{{ url_for('material_store') }}" class="px-3 py-2 rounded-md text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-cart-shopping text-xs"></i> <span>Material Store</span>
+                        <i class="fa-solid fa-cart-shopping text-xs"></i> <span data-i18n="nav_store">Material Store</span>
                     </a>
                     <a href="{{ url_for('daily_entry') }}" class="px-3 py-2 rounded-md text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle text-xs"></i> Roj Ka Entry
+                        <i class="fa-solid fa-plus-circle text-xs"></i> <span data-i18n="nav_daily_entry">Roj Ka Entry</span>
                     </a>
                     <a href="{{ url_for('attendance_view') }}" class="px-3 py-2 rounded-md text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-users-gear text-xs"></i> <span>हाजिरी (Manpower)</span>
+                        <i class="fa-solid fa-users-gear text-xs"></i> <span data-i18n="nav_attendance">हाजिरी (Manpower)</span>
                     </a>
                     
                     <!-- Reports Dropdown or Links -->
                     <a href="{{ url_for('site_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-map-location-dot text-xs"></i> Site Report
+                        <i class="fa-solid fa-map-location-dot text-xs"></i> <span data-i18n="nav_site_report">Site Report</span>
                     </a>
                     <a href="{{ url_for('daily_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-day text-xs"></i> Daily Report
+                        <i class="fa-solid fa-calendar-day text-xs"></i> <span data-i18n="nav_daily_report">Daily Report</span>
                     </a>
                     <a href="{{ url_for('monthly_report') }}" class="owner-only hidden px-3 py-2 rounded-md text-sm font-medium text-amber-200 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-days text-xs"></i> Mahina-war
+                        <i class="fa-solid fa-calendar-days text-xs"></i> <span data-i18n="nav_monthly_report">Mahina-war</span>
                     </a>
                     <a href="{{ url_for('material_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-stacked text-xs"></i> Material Wise
+                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span data-i18n="nav_material_report">Material Wise</span>
                     </a>
                     <a href="{{ url_for('item_history') }}" class="px-3 py-2 rounded-md text-sm font-bold text-amber-300 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-check text-xs"></i> Kab Use Hua? (Tareekh)
+                        <i class="fa-solid fa-calendar-check text-xs"></i> <span data-i18n="nav_item_history">Kab Use Hua? (Tareekh)</span>
                     </a>
                     <a href="{{ url_for('matrix_report') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-table-cells text-xs"></i> Sites Matrix
+                        <i class="fa-solid fa-table-cells text-xs"></i> <span data-i18n="nav_matrix_report">Sites Matrix</span>
                     </a>
                 </nav>
 
                 <!-- Right Admin Links -->
                 <div class="hidden md:flex items-center space-x-2 border-l border-blue-800/80 pl-4">
                     <a href="{{ url_for('sites_list') }}" title="Sites Directory & Incharge" class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-200 hover:bg-brand-800 hover:text-white transition flex items-center gap-1.5 border border-blue-700/50">
-                        <i class="fa-solid fa-building-circle-check"></i> Sites
+                        <i class="fa-solid fa-building-circle-check"></i> <span data-i18n="nav_sites">Sites</span>
                     </a>
                     <a href="{{ url_for('materials_list') }}" title="Material Master Catalog" class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-blue-200 hover:bg-brand-800 hover:text-white transition flex items-center gap-1.5 border border-blue-700/50">
-                        <i class="fa-solid fa-list-check"></i> Materials
+                        <i class="fa-solid fa-list-check"></i> <span data-i18n="nav_materials">Materials</span>
                     </a>
                     <a href="/api/backup" download title="Pura System Backup Download Karein" class="px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-300 bg-amber-900/40 hover:bg-amber-800/60 transition flex items-center gap-1.5 border border-amber-600/50">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> Backup
+                        <i class="fa-solid fa-cloud-arrow-down"></i> <span data-i18n="nav_backup">Backup</span>
                     </a>
                 </div>
 
-                <!-- Owner Mode Button / Crown in Navbar -->
-                <div class="flex items-center gap-2">
-                    <button type="button" id="navOwnerLoginBtn" onclick="openOwnerPinModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">मालिक लॉगिन</span><span class="sm:hidden">मालिक</span>
+                <!-- Owner Mode Button / Crown in Navbar & Mobile Quick Shortcuts -->
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- Quick Mobile Shortcuts -->
+                    <a href="{{ url_for('site_stock') }}" class="md:hidden px-2 py-1 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1" title="साइट स्टॉक">
+                        <i class="fa-solid fa-boxes-stacked text-[10px]"></i> <span data-i18n="nav_stock_short">स्टॉक</span>
+                    </a>
+                    <a href="{{ url_for('attendance_view') }}" class="md:hidden px-2 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1" title="हाजिरी">
+                        <i class="fa-solid fa-users-gear text-[10px]"></i> <span data-i18n="nav_attendance_short">हाजिरी</span>
+                    </a>
+
+                    <button type="button" id="navOwnerLoginBtn" onclick="openOwnerPinModal()" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline" data-i18n="owner_login">मालिक लॉगिन</span><span class="sm:hidden" data-i18n="owner_login">मालिक</span>
                     </button>
                     <div id="navOwnerActiveBadge" class="hidden flex items-center gap-1.5">
                         <span class="px-2.5 py-1 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 animate-pulse">
-                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline">👑 मालिक</span>
+                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline" data-i18n="owner_active">👑 मालिक</span>
                         </span>
                         <button type="button" onclick="logoutOwner()" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="वर्कर मोड में बदलें">
                             <i class="fa-solid fa-power-off text-rose-400"></i>
@@ -149,7 +217,7 @@
 
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center">
-                    <button id="mobileMenuBtn" class="text-blue-200 hover:text-white focus:outline-none p-2">
+                    <button id="mobileMenuBtn" class="text-blue-200 hover:text-white focus:outline-none p-2" title="Menu">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
@@ -158,23 +226,23 @@
 
         <!-- Mobile Menu Dropdown -->
         <div id="mobileMenu" class="hidden md:hidden bg-brand-950 px-4 pt-2 pb-4 space-y-2 border-t border-blue-900">
-            <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Dashboard</a>
+            <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_dashboard">Dashboard</a>
             <a href="{{ url_for('site_stock') }}" class="block px-3 py-2.5 rounded-xl text-base font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-md flex items-center gap-2">
-                <i class="fa-solid fa-boxes-stacked"></i> <span>📦 साइट स्टॉक व बैलेंस (Site Stock)</span>
+                <i class="fa-solid fa-boxes-stacked"></i> <span data-i18n="nav_stock">📦 साइट स्टॉक व बैलेंस (Site Stock)</span>
             </a>
-            <a href="{{ url_for('material_store') }}" class="block px-3 py-2 rounded-md text-base font-bold bg-amber-400 text-slate-900">🛒 Material Store (Add Item)</a>
-            <a href="{{ url_for('daily_entry') }}" class="block px-3 py-2 rounded-md text-base font-medium bg-emerald-600 text-white">Roj Ka Entry (Daily Log)</a>
+            <a href="{{ url_for('material_store') }}" class="block px-3 py-2 rounded-md text-base font-bold bg-amber-400 text-slate-900" data-i18n="nav_store">🛒 Material Store (Add Item)</a>
+            <a href="{{ url_for('daily_entry') }}" class="block px-3 py-2 rounded-md text-base font-medium bg-emerald-600 text-white" data-i18n="nav_daily_entry">Roj Ka Entry (Daily Log)</a>
             <a href="{{ url_for('attendance_view') }}" class="block px-3 py-2.5 rounded-xl text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md flex items-center gap-2">
-                <i class="fa-solid fa-users-gear"></i> <span>हाजिरी (Daily Manpower Register)</span>
+                <i class="fa-solid fa-users-gear"></i> <span data-i18n="nav_attendance">हाजिरी (Daily Manpower Register)</span>
             </a>
-            <a href="{{ url_for('site_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Site-Wise Report</a>
-            <a href="{{ url_for('daily_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Date-Wise Report</a>
-            <a href="{{ url_for('item_history') }}" class="block px-3 py-2 rounded-md text-base font-bold text-amber-300 hover:bg-brand-900">Kab Use Hua? (Tareekh Tracker)</a>
-            <a href="{{ url_for('material_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Material-Wise Usage</a>
-            <a href="{{ url_for('matrix_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900">Sites Matrix</a>
+            <a href="{{ url_for('site_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_site_report">Site-Wise Report</a>
+            <a href="{{ url_for('daily_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_daily_report">Date-Wise Report</a>
+            <a href="{{ url_for('item_history') }}" class="block px-3 py-2 rounded-md text-base font-bold text-amber-300 hover:bg-brand-900" data-i18n="nav_item_history">Kab Use Hua? (Tareekh Tracker)</a>
+            <a href="{{ url_for('material_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_material_report">Material-Wise Usage</a>
+            <a href="{{ url_for('matrix_report') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_matrix_report">Sites Matrix</a>
             <div class="border-t border-blue-800 pt-2 flex gap-2">
-                <a href="{{ url_for('sites_list') }}" class="flex-1 text-center py-2 rounded bg-blue-900/60 text-xs text-blue-200">Sites Directory</a>
-                <a href="{{ url_for('materials_list') }}" class="flex-1 text-center py-2 rounded bg-blue-900/60 text-xs text-blue-200">Material Master</a>
+                <a href="{{ url_for('sites_list') }}" class="flex-1 text-center py-2 rounded bg-blue-900/60 text-xs text-blue-200" data-i18n="nav_sites">Sites Directory</a>
+                <a href="{{ url_for('materials_list') }}" class="flex-1 text-center py-2 rounded bg-blue-900/60 text-xs text-blue-200" data-i18n="nav_materials">Material Master</a>
             </div>
         </div>
     </header>
@@ -498,6 +566,8 @@
     });
     </script>
     
+    <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
+    <script src="/static/translations.js"></script>
 </body>
 
 </html>

@@ -12,23 +12,23 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 M/S SANDIP KUMAR &bull; 19 Sites Live Project Tracker
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Material Consumption & Site Tracking</h1>
-            <p class="text-blue-100 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" data-i18n="dash_banner_title">Material Consumption & Site Tracking</h1>
+            <p class="text-blue-100 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed" data-i18n="dash_banner_desc">
                 Mairwa, Siwan, Chhapra, Madhubani, Darbhanga sahit sabhi 19 sites par roj hone wale material istemal (Pipes, Motors, Cables, Fittings) ka hisab-kitab aur daily reports.
             </p>
             
             <div class="mt-6 flex flex-wrap gap-3">
                 <a href="{{ url_for('material_store') }}" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm shadow-md hover:shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-cart-shopping"></i> 🛒 Material Store (+ ADD Items)
+                    <i class="fa-solid fa-cart-shopping"></i> <span data-i18n="dash_btn_store">🛒 Material Store (+ ADD Items)</span>
                 </a>
                 <a href="{{ url_for('daily_entry') }}" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-md hover:shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus"></i> Nayi Daily Entry Karein
+                    <i class="fa-solid fa-circle-plus"></i> <span data-i18n="dash_btn_entry">Nayi Daily Entry Karein</span>
                 </a>
                 <a href="{{ url_for('site_report') }}" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> Site-Wise Hisab Dekhein
+                    <i class="fa-solid fa-file-invoice"></i> <span data-i18n="dash_btn_site_report">Site-Wise Hisab Dekhein</span>
                 </a>
                 <a href="{{ url_for('matrix_report') }}" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells"></i> Sites Matrix
+                    <i class="fa-solid fa-table-cells"></i> <span data-i18n="dash_btn_matrix">Sites Matrix</span>
                 </a>
             </div>
         </div>
@@ -44,15 +44,15 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-base font-bold text-white">साइट स्टॉक व बैलेंस (Site Stock)</span>
+                        <span class="text-base font-bold text-white" data-i18n="dash_stock_card_title">साइट स्टॉक व बैलेंस (Site Stock)</span>
                         <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">Live Balance</span>
                     </div>
-                    <p class="text-xs text-teal-200 mt-0.5">भेजा गया माल, रोज़ का खर्च और बचा स्टॉक (तारीख-वार लेजर)</p>
+                    <p class="text-xs text-teal-200 mt-0.5" data-i18n="dash_stock_card_sub">भेजा गया माल, रोज़ का खर्च और बचा स्टॉक (तारीख-वार लेजर)</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
-                    <span>स्टॉक रजिस्टर खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <span data-i18n="dash_stock_open">स्टॉक रजिस्टर खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
                 </a>
             </div>
         </div>
@@ -65,15 +65,15 @@
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-base font-bold text-white">Daily Manpower Attendance (हाजिरी)</span>
+                        <span class="text-base font-bold text-white" data-i18n="dash_att_card_title">Daily Manpower Attendance (हाजिरी)</span>
                         <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">21 Sites Sheet</span>
                     </div>
-                    <p class="text-xs text-indigo-200 mt-0.5">मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट</p>
+                    <p class="text-xs text-indigo-200 mt-0.5" data-i18n="dash_att_card_sub">मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ url_for('attendance_view') }}" class="px-4 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
-                    <span>हाजिरी शीट खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <span data-i18n="dash_att_open">हाजिरी शीट खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
                 </a>
             </div>
         </div>
