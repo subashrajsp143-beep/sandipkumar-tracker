@@ -1,5 +1,8 @@
-cloudflared.exe
 __pycache__/
 *.pyc
-.system_generated/
-temp_preprocessed.png
+*.pyo
+.venv/
+venv/
+*.log
+cloudflared.exe
+backups/
