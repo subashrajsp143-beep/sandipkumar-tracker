@@ -32,9 +32,16 @@ database.init_db()
 @app.context_processor
 def inject_common():
     return {
-        "current_date": datetime.date.today().strftime("%Y-%m-%d"),
-        "now_year": datetime.date.today().year
+        "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
+        "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year
     }
+
+@app.before_request
+def ensure_canonical_domain():
+    host = request.host.lower()
+    if "ms-sandipkumar-tracker.onrender.com" in host:
+        url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker.onrender.com")
+        return redirect(url, code=301)
 
 # 1. Dashboard
 @app.route("/")
@@ -157,6 +164,10 @@ def export_database_backup():
         materials = [dict(r) for r in cursor.fetchall()]
         cursor.execute("SELECT * FROM daily_consumption ORDER BY id ASC")
         entries = [dict(r) for r in cursor.fetchall()]
+        cursor.execute("SELECT * FROM daily_manpower ORDER BY id ASC")
+        manpower = [dict(r) for r in cursor.fetchall()]
+        cursor.execute("SELECT * FROM material_inward ORDER BY id ASC")
+        inward = [dict(r) for r in cursor.fetchall()]
         conn.close()
 
         backup_data = {
@@ -166,9 +177,13 @@ def export_database_backup():
             "total_sites": len(sites),
             "total_materials": len(materials),
             "total_entries": len(entries),
+            "total_manpower": len(manpower),
+            "total_inward": len(inward),
             "sites": sites,
             "materials": materials,
-            "entries": entries
+            "entries": entries,
+            "daily_manpower": manpower,
+            "material_inward": inward
         }
         resp = jsonify(backup_data)
         resp.headers["Content-Disposition"] = f"attachment; filename=SANDIP_KUMAR_BACKUP_{datetime.date.today().strftime('%Y%m%d')}.json"
@@ -923,7 +938,8 @@ def owner_status_api():
 def attendance_view():
     selected_date = request.args.get("date")
     if not selected_date:
-        selected_date = datetime.date.today().strftime("%Y-%m-%d")
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        selected_date = ist_now.strftime("%Y-%m-%d")
 
     rows, totals = database.get_daily_manpower(selected_date)
 
@@ -942,10 +958,17 @@ def attendance_view():
         totals=totals
     )
 
-@app.route("/api/attendance", methods=["POST", "OPTIONS"])
+@app.route("/api/attendance", methods=["GET", "POST", "OPTIONS"])
 def save_attendance_api():
     if request.method == "OPTIONS":
         return "", 200
+    if request.method == "GET":
+        att_date = request.args.get("date")
+        if not att_date:
+            ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+            att_date = ist_now.strftime("%Y-%m-%d")
+        rows, totals = database.get_daily_manpower(att_date)
+        return jsonify({"success": True, "date": att_date, "rows": rows, "totals": totals})
     try:
         data = request.get_json(silent=True) or {}
         att_date = data.get("date")
@@ -960,7 +983,8 @@ def save_attendance_api():
 
 @app.route("/export/manpower-excel")
 def export_manpower_excel():
-    att_date = request.args.get("date") or datetime.date.today().strftime("%Y-%m-%d")
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     rows, totals = database.get_daily_manpower(att_date)
 
     excel_file = exporter.generate_manpower_excel(att_date, rows, totals)
@@ -974,6 +998,25 @@ def export_manpower_excel():
         as_attachment=True,
         download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+@app.route("/export/manpower-pdf")
+def export_manpower_pdf():
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    rows, totals = database.get_daily_manpower(att_date)
+
+    pdf_file = exporter.generate_manpower_pdf(att_date, rows, totals)
+    
+    # Format filename: MANPOWER_ATTENDANCE_08_10_2026.pdf
+    clean_date = att_date.replace("-", "_")
+    filename = f"MANPOWER_ATTENDANCE_{clean_date}.pdf"
+
+    return send_file(
+        pdf_file,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/pdf"
     )
 
 # 9. Site Stock & Inventory Register

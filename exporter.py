@@ -492,6 +492,122 @@ def generate_manpower_excel(att_date, rows, totals):
     output.seek(0)
     return output
 
+def generate_manpower_pdf(att_date, rows, totals):
+    """
+    Generates a crisp, professional 1-page A4 Landscape PDF for Daily Manpower Attendance.
+    Guaranteed to fit on exactly 1 single page.
+    """
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=landscape(A4),
+        leftMargin=18,
+        rightMargin=18,
+        topMargin=14,
+        bottomMargin=14
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('Title', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=13, leading=15, textColor=colors.HexColor('#0F172A'), alignment=1)
+    sub_style = ParagraphStyle('Sub', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=10, leading=12, textColor=colors.HexColor('#DC2626'), alignment=1)
+    stat_style = ParagraphStyle('Stat', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10, textColor=colors.HexColor('#334155'), alignment=1)
+
+    # Format date DD/MM/YYYY
+    clean_date = att_date
+    try:
+        parts = att_date.split('-')
+        if len(parts) == 3:
+            clean_date = f"{parts[2]}/{parts[1]}/{parts[0]}"
+    except:
+        pass
+
+    tot_val = totals.get("total", 0)
+    staff_val = totals.get("site_incharge", 0) + totals.get("supervisor", 0)
+    mistri_val = totals.get("gi_mistri", 0) + totals.get("plumber", 0)
+    helper_val = totals.get("helper", 0)
+
+    elements = [
+        Paragraph('M/S SANDIP KUMAR &mdash; 21 SITES DAILY MANPOWER ATTENDANCE', title_style),
+        Spacer(1, 2),
+        Paragraph(f'DATE: {clean_date}', sub_style),
+        Spacer(1, 2),
+        Paragraph(f'<b>TOTAL MANPOWER:</b> {tot_val} Persons &nbsp;|&nbsp; <b>Staff (Incharge+Supervisor):</b> {staff_val} &nbsp;|&nbsp; <b>Mistri+Plumber:</b> {mistri_val} &nbsp;|&nbsp; <b>Helpers:</b> {helper_val}', stat_style),
+        Spacer(1, 5)
+    ]
+
+    col_widths = [26, 95, 55, 55, 52, 48, 40, 48, 48, 40, 48, 250]
+    table_data = [['SL', 'SITE NAME', 'INCHARGE', 'SUPERVISOR', 'ELECTRICIAN', 'GI MISTRI', 'DEO', 'PLUMBER', 'HELPER', 'OTHER', 'TOTAL', 'REMARKS']]
+
+    for idx, r in enumerate(rows, 1):
+        table_data.append([
+            str(idx),
+            r['site_name'].upper(),
+            str(r['site_incharge']) if r['site_incharge'] > 0 else '-',
+            str(r['supervisor']) if r['supervisor'] > 0 else '-',
+            str(r['electrician']) if r['electrician'] > 0 else '-',
+            str(r['gi_mistri']) if r['gi_mistri'] > 0 else '-',
+            str(r['deo']) if r['deo'] > 0 else '-',
+            str(r['plumber']) if r['plumber'] > 0 else '-',
+            str(r['helper']) if r['helper'] > 0 else '-',
+            str(r['other']) if r['other'] > 0 else '-',
+            str(r['total']) if r['total'] > 0 else '0',
+            r.get('remarks') or ''
+        ])
+
+    table_data.append([
+        '', 'TOTAL',
+        str(totals.get('site_incharge', 0)),
+        str(totals.get('supervisor', 0)),
+        str(totals.get('electrician', 0)),
+        str(totals.get('gi_mistri', 0)),
+        str(totals.get('deo', 0)),
+        str(totals.get('plumber', 0)),
+        str(totals.get('helper', 0)),
+        str(totals.get('other', 0)),
+        str(totals.get('total', 0)),
+        ''
+    ])
+
+    num_rows = len(rows)
+    row_heights = [17] + [16.5] * num_rows + [18]
+    t = Table(table_data, colWidths=col_widths, rowHeights=row_heights)
+    
+    t_style = [
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0F172A')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 7.5),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('ALIGN', (1,1), (1,-1), 'LEFT'),
+        ('ALIGN', (-1,1), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
+        ('FONTNAME', (0,1), (-1,-2), 'Helvetica'),
+        ('FONTSIZE', (0,1), (-1,-2), 7),
+        ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor('#F1F5F9')),
+        ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,-1), (-1,-1), 8),
+        ('TEXTCOLOR', (10,-1), (10,-1), colors.HexColor('#DC2626')),
+        ('TOPPADDING', (0,0), (-1,-1), 1),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+    ]
+
+    for i in range(1, num_rows + 1):
+        if i % 2 == 0:
+            t_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F8FAFC')))
+
+    t.setStyle(TableStyle(t_style))
+    elements.append(t)
+
+    doc.build(elements)
+    buf.seek(0)
+    return buf
+
 def generate_site_stock_excel(stock_rows, site_name=None):
     """
     Generates a clean Excel spreadsheet of the Site Stock & Balance Register.
