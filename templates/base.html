@@ -461,6 +461,45 @@
     checkLiveUpdates();
     </script>
 
+    <!-- GLOBAL RESET ZERO MODAL (उपलब्ध हर पेज पर) -->
+    <div id="resetZeroModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all my-8 animate-fade-in">
+            <div class="bg-gradient-to-r from-rose-800 to-slate-900 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-300">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-lg text-white">स्टॉक 0 (शून्य) करें</h3>
+                        <p class="text-xs text-rose-200">सामग्री मात्रा व दैनिक खर्च रीसेट करें</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeResetZeroModal()" class="text-white/80 hover:text-white p-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form id="resetZeroForm" onsubmit="submitResetZero(event)" class="p-5 sm:p-6 space-y-4">
+                <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-900 leading-relaxed font-medium">
+                    ⚠️ <strong>चेतावनी:</strong> यह क्रिया सभी भेजी गई सामग्री की मात्रा और दैनिक खर्च को 0 (शून्य) कर देगी ताकि नया वास्तविक स्टॉक दर्ज कर सकें। (271 सामग्री व 21 साइट्स की लिस्ट सुरक्षित रहेगी)।
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-800 mb-1">
+                        मालिक का गुप्त पिन दर्ज करें (Owner PIN) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="password" id="resetOwnerPin" placeholder="4 अंकों का पिन डालें..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeResetZeroModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                        रद्द करें
+                    </button>
+                    <button type="submit" id="submitResetBtn" class="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- OWNER PIN MODAL  -->
     <div id="ownerPinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4 animate-scaleIn">
@@ -544,6 +583,66 @@
         } catch(e) {}
         alert('वर्कर मोड सक्रिय हो गया है।');
         window.location.reload();
+    }
+
+    // Global Reset Zero Modal Handlers
+    function openResetZeroModal() {
+        const modal = document.getElementById('resetZeroModal');
+        const pinInput = document.getElementById('resetOwnerPin');
+        if (modal) {
+            modal.classList.remove('hidden');
+            if (pinInput) { pinInput.value = ''; pinInput.focus(); }
+        }
+    }
+
+    function closeResetZeroModal() {
+        const modal = document.getElementById('resetZeroModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitResetZero(e) {
+        if (e) e.preventDefault();
+        const pinInput = document.getElementById('resetOwnerPin');
+        const pin = (pinInput ? pinInput.value : '').trim();
+        if (!pin) {
+            alert('मालिक का पिन दर्ज करना अनिवार्य है।');
+            return;
+        }
+
+        if (!confirm('क्या आप वाकई सभी साइट्स का भेजा गया माल और खर्च 0 (रीसेट) करना चाहते हैं?\n\n(यह क्रिया मास्टर सामग्री सूची और साइट्स को सुरक्षित रखेगी)')) {
+            return;
+        }
+
+        const btn = document.getElementById('submitResetBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>0 हो रहा है...</span>';
+        }
+
+        try {
+            const res = await fetch('/api/stock/reset-zero', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: pin })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ ' + data.message);
+                window.location.reload();
+            } else {
+                alert(data.message || 'गलत पिन!');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>';
+                }
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>हां, 0 करें</span>';
+            }
+        }
     }
 
     // Apply role-based visibility across the page

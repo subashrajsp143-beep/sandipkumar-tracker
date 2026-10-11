@@ -51,9 +51,12 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
+                <a href="{{ url_for('site_stock') }}" class="px-3.5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
                     <span data-i18n="dash_stock_open">स्टॉक रजिस्टर खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
                 </a>
+                <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 whitespace-nowrap" title="स्टॉक व खर्च को 0 (रीसेट) करें">
+                    <i class="fa-solid fa-rotate-left"></i> <span data-i18n="stock_btn_reset">⚠️ स्टॉक 0 करें</span>
+                </button>
             </div>
         </div>
 
