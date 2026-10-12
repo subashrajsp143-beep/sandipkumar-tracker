@@ -111,6 +111,7 @@ exit
 
 # 2. Daily Material Usage Entry
 @app.route("/entry")
+@app.route("/daily-entry")
 def daily_entry():
     sites = database.get_all_sites()
     materials = database.get_all_materials()
@@ -516,109 +517,124 @@ def update_material_photo(material_id):
     except Exception as e:
         return jsonify({"success": False, "message": f"Error updating photo: {str(e)}"}), 500
 
-# 3. Site-wise Report
-@app.route("/reports/sites")
-def site_report():
+# 3. Unified Reports Hub (All-in-One: Daily, Monthly, Site, Material, Matrix)
+@app.route("/reports")
+def reports_hub():
+    tab = request.args.get("tab", "daily")
     sites = database.get_all_sites()
     materials = database.get_all_materials()
-    
+
+    report_date = request.args.get("date", datetime.date.today().strftime("%Y-%m-%d"))
+    month_arg = request.args.get("month", datetime.date.today().strftime("%Y-%m"))
+
+    # Daily Data
+    daily_entries, site_summaries = [], []
+    total_day_cost = 0.0
+    if tab == "daily":
+        daily_entries, site_summaries = database.get_daily_report(report_date)
+        total_day_cost = sum(s["site_total_cost"] or 0 for s in site_summaries)
+
+    # Monthly Data
+    monthly_data = {
+        "entries": [], "site_summaries": [], "top_materials": [],
+        "daily_trend": [], "total_month_cost": 0.0,
+        "total_items_count": 0, "active_sites_count": 0, "available_months": []
+    }
+    if tab == "monthly":
+        monthly_data = database.get_monthly_report(month_arg)
+
+    # Site Wise Data
     site_id_arg = request.args.get("site_id", type=int)
     from_date = request.args.get("from_date", "")
     to_date = request.args.get("to_date", "")
-    mat_id_arg = request.args.get("material_id", type=int)
-
-    # Default to first site if none specified
     selected_site_id = site_id_arg if site_id_arg else (sites[0]["id"] if sites else None)
-    
-    entries, material_summary = [], []
+    site_entries, site_material_summary = [], []
     selected_site = None
     grand_total = 0.0
-
-    if selected_site_id:
+    if tab == "site" and selected_site_id:
         selected_site = database.get_site_by_id(selected_site_id)
-        entries, material_summary = database.get_site_report(
+        site_entries, site_material_summary = database.get_site_report(
             site_id=selected_site_id,
             from_date=from_date if from_date else None,
-            to_date=to_date if to_date else None,
-            material_id=mat_id_arg if mat_id_arg else None
+            to_date=to_date if to_date else None
         )
-        grand_total = sum(item["total_amount"] or 0 for item in material_summary)
+        grand_total = sum(item["total_amount"] or 0 for item in site_material_summary)
 
-    return render_template(
-        "site_report.html",
-        sites=sites,
-        materials=materials,
-        selected_site=selected_site,
-        selected_site_id=selected_site_id,
-        from_date=from_date,
-        to_date=to_date,
-        selected_mat_id=mat_id_arg,
-        entries=entries,
-        material_summary=material_summary,
-        grand_total=grand_total
-    )
-
-# 4. Daily / Date-wise Report
-@app.route("/reports/daily")
-def daily_report():
-    report_date = request.args.get("date", datetime.date.today().strftime("%Y-%m-%d"))
-    entries, site_summaries = database.get_daily_report(report_date)
-    total_day_cost = sum(s["site_total_cost"] or 0 for s in site_summaries)
-    
-    return render_template(
-        "daily_report.html",
-        report_date=report_date,
-        entries=entries,
-        site_summaries=site_summaries,
-        total_day_cost=total_day_cost
-    )
-
-# 4.5 Monthly / Mahina-war Report across 19 sites
-@app.route("/reports/monthly")
-def monthly_report():
-    month_arg = request.args.get("month", datetime.date.today().strftime("%Y-%m"))
-    report_data = database.get_monthly_report(month_arg)
-    return render_template(
-        "monthly_report.html",
-        month=month_arg,
-        entries=report_data["entries"],
-        site_summaries=report_data["site_summaries"],
-        top_materials=report_data["top_materials"],
-        daily_trend=report_data["daily_trend"],
-        total_month_cost=report_data["total_month_cost"],
-        total_items_count=report_data["total_items_count"],
-        active_sites_count=report_data["active_sites_count"],
-        available_months=report_data["available_months"]
-    )
-
-# 5. Material-wise Report across 19 sites
-@app.route("/reports/materials")
-def material_report():
-    materials = database.get_all_materials()
+    # Material Wise Data
     mat_id_arg = request.args.get("material_id", type=int)
     selected_mat_id = mat_id_arg if mat_id_arg else (materials[0]["id"] if materials else None)
-    
     selected_material = None
-    sites_usage, logs = [], []
+    sites_usage, mat_logs = [], []
     total_qty_all_sites = 0
     total_cost_all_sites = 0
-
-    if selected_mat_id:
+    if tab == "material" and selected_mat_id:
         selected_material = database.get_material_by_id(selected_mat_id)
-        sites_usage, logs = database.get_material_distribution(selected_mat_id)
+        sites_usage, mat_logs = database.get_material_distribution(selected_mat_id)
         total_qty_all_sites = sum(u["total_quantity"] or 0 for u in sites_usage)
         total_cost_all_sites = sum(u["total_cost"] or 0 for u in sites_usage)
 
+    # Matrix Data
+    matrix_sites, top_mats, matrix = [], [], {}
+    if tab == "matrix":
+        matrix_sites, top_mats, matrix = database.get_matrix_data()
+
     return render_template(
-        "material_report.html",
+        "reports.html",
+        active_tab=tab,
+        sites=sites,
         materials=materials,
+        # Daily
+        report_date=report_date,
+        entries=daily_entries if tab == "daily" else site_entries,
+        site_summaries=site_summaries if tab == "daily" else monthly_data["site_summaries"],
+        total_day_cost=total_day_cost,
+        # Monthly
+        month=month_arg,
+        total_month_cost=monthly_data["total_month_cost"],
+        active_sites_count=monthly_data["active_sites_count"],
+        total_items_count=monthly_data["total_items_count"],
+        top_materials=monthly_data["top_materials"],
+        daily_trend=monthly_data["daily_trend"],
+        available_months=monthly_data["available_months"],
+        # Site Wise
+        selected_site_id=selected_site_id,
+        selected_site=selected_site,
+        from_date=from_date,
+        to_date=to_date,
+        material_summary=site_material_summary,
+        grand_total=grand_total,
+        # Material Wise
         selected_mat_id=selected_mat_id,
         selected_material=selected_material,
         sites_usage=sites_usage,
-        logs=logs,
         total_qty=total_qty_all_sites,
-        total_cost=total_cost_all_sites
+        total_cost=total_cost_all_sites,
+        # Matrix
+        matrix_sites=matrix_sites,
+        top_mats=top_mats,
+        matrix=matrix
     )
+
+# Backwards-compatible report endpoints redirecting to unified reports_hub
+@app.route("/reports/sites")
+def site_report():
+    return redirect(url_for("reports_hub", tab="site", **request.args))
+
+@app.route("/reports/daily")
+def daily_report():
+    return redirect(url_for("reports_hub", tab="daily", **request.args))
+
+@app.route("/reports/monthly")
+def monthly_report():
+    return redirect(url_for("reports_hub", tab="monthly", **request.args))
+
+@app.route("/reports/materials")
+def material_report():
+    return redirect(url_for("reports_hub", tab="material", **request.args))
+
+@app.route("/reports/matrix")
+def matrix_report():
+    return redirect(url_for("reports_hub", tab="matrix", **request.args))
 
 # 5.1 Dedicated Item Date Timeline (Kab Kab Use Hua)
 @app.route("/item-history")
@@ -644,12 +660,6 @@ def item_history():
         selected_site=selected_site,
         history=history_data
     )
-
-# 6. Master Matrix (19 Sites vs Top Materials)
-@app.route("/reports/matrix")
-def matrix_report():
-    sites, top_mats, matrix = database.get_matrix_data()
-    return render_template("matrix_report.html", sites=sites, top_mats=top_mats, matrix=matrix)
 
 # 7. Excel Exports
 @app.route("/export/site-excel")

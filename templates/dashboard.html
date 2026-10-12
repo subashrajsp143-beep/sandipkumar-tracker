@@ -1,97 +1,119 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - 19 Sites Material Management{% endblock %}
+{% block title %}डैशबोर्ड - 21 Sites Project Tracker - M/S SANDIP KUMAR{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Top Banner & Greeting -->
-    <div class="bg-gradient-to-r from-brand-900 via-blue-800 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+    <!-- Top Banner & Quick Actions -->
+    <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold uppercase tracking-wider mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold uppercase tracking-wider mb-3">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                M/S SANDIP KUMAR &bull; 19 Sites Live Project Tracker
+                M/S SANDIP KUMAR &bull; 21 Sites Live Project Tracker
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" data-i18n="dash_banner_title">Material Consumption & Site Tracking</h1>
-            <p class="text-blue-100 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed" data-i18n="dash_banner_desc">
-                Mairwa, Siwan, Chhapra, Madhubani, Darbhanga sahit sabhi 19 sites par roj hone wale material istemal (Pipes, Motors, Cables, Fittings) ka hisab-kitab aur daily reports.
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight" data-i18n="dash_banner_title">सामग्री खपत एवं साइट ट्रैकिंग</h1>
+            <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
+                सीवान, मैरवा, छपरा, मधुबनी, दरभंगा सहित सभी 21 साइट्स पर रोज़ाना माल की खपत, साइट बैलेंस, हाजिरी और दैनिक व मासिक रिपोर्ट।
             </p>
             
-            <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ url_for('material_store') }}" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm shadow-md hover:shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-cart-shopping"></i> <span data-i18n="dash_btn_store">🛒 Material Store (+ ADD Items)</span>
+            <div class="mt-6 flex flex-wrap gap-2.5">
+                <a href="{{ url_for('daily_entry') }}" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus"></i> <span>नई दैनिक एंट्री करें</span>
                 </a>
-                <a href="{{ url_for('daily_entry') }}" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-md hover:shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus"></i> <span data-i18n="dash_btn_entry">Nayi Daily Entry Karein</span>
+                <a href="{{ url_for('attendance_view') }}" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear"></i> <span>दैनिक हाजिरी (67-72)</span>
                 </a>
-                <a href="{{ url_for('site_report') }}" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> <span data-i18n="dash_btn_site_report">Site-Wise Hisab Dekhein</span>
+                <a href="{{ url_for('reports_hub') }}" class="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-blue-500/50">
+                    <i class="fa-solid fa-chart-pie text-amber-300"></i> <span>रिपोर्ट्स केंद्र (Daily & Monthly)</span>
                 </a>
-                <a href="{{ url_for('matrix_report') }}" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells"></i> <span data-i18n="dash_btn_matrix">Sites Matrix</span>
+                <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-stacked text-teal-300"></i> <span>साइट स्टॉक</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Quick Action Banners for Site Stock & Manpower Attendance -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Site Stock & Balance Banner -->
-        <div class="bg-gradient-to-r from-teal-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-teal-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-2xl border border-teal-400/30 flex-shrink-0">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-base font-bold text-white" data-i18n="dash_stock_card_title">साइट स्टॉक व बैलेंस (Site Stock)</span>
-                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">Live Balance</span>
+    <!-- 3 Essential Operational Cards (Side-by-Side) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Card 1: Site Stock & Store -->
+        <div class="bg-gradient-to-br from-teal-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-teal-700/40 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-xl border border-teal-400/30">
+                        <i class="fa-solid fa-boxes-stacked"></i>
                     </div>
-                    <p class="text-xs text-teal-200 mt-0.5" data-i18n="dash_stock_card_sub">भेजा गया माल, रोज़ का खर्च और बचा स्टॉक (तारीख-वार लेजर)</p>
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">Live Balance</span>
                 </div>
+                <h3 class="text-base font-bold text-white">📦 साइट स्टॉक व स्टोर</h3>
+                <p class="text-xs text-teal-200 mt-1 leading-relaxed">भेजा गया माल, दैनिक खपत और बचा हुआ बैलेंस</p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ url_for('site_stock') }}" class="px-3.5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
-                    <span data-i18n="dash_stock_open">स्टॉक रजिस्टर खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+            <div class="mt-4 pt-3 border-t border-teal-800/60 flex items-center gap-2">
+                <a href="{{ url_for('site_stock') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow transition">
+                    स्टॉक खोलें &rarr;
                 </a>
-                <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5 whitespace-nowrap" title="स्टॉक व खर्च को 0 (रीसेट) करें">
-                    <i class="fa-solid fa-rotate-left"></i> <span data-i18n="stock_btn_reset">⚠️ स्टॉक 0 करें</span>
-                </button>
+                <a href="{{ url_for('material_store') }}" class="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow transition" title="मटेरियल स्टोर (+ ऐड)">
+                    <i class="fa-solid fa-cart-shopping"></i> स्टोर
+                </a>
             </div>
         </div>
 
-        <!-- Daily Manpower Attendance Banner -->
-        <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-indigo-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-2xl border border-indigo-400/30 flex-shrink-0">
-                    <i class="fa-solid fa-users-gear"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-base font-bold text-white" data-i18n="dash_att_card_title">Daily Manpower Attendance (हाजिरी)</span>
-                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">21 Sites Sheet</span>
+        <!-- Card 2: Daily Manpower Attendance -->
+        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-indigo-700/40 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl border border-indigo-400/30">
+                        <i class="fa-solid fa-users-gear"></i>
                     </div>
-                    <p class="text-xs text-indigo-200 mt-0.5" data-i18n="dash_att_card_sub">मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट</p>
+                    <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-400/30">21 Sites Sheet</span>
                 </div>
+                <h3 class="text-base font-bold text-white">👥 दैनिक हाजिरी (Manpower)</h3>
+                <p class="text-xs text-indigo-200 mt-1 leading-relaxed">मिस्त्री, प्लंबर, हेल्पर व स्टाफ का 1-पेज हाजिरी रजिस्टर</p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ url_for('attendance_view') }}" class="px-4 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow-md transition flex items-center gap-2 whitespace-nowrap">
-                    <span data-i18n="dash_att_open">हाजिरी शीट खोलें</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+            <div class="mt-4 pt-3 border-t border-indigo-800/60 flex items-center gap-2">
+                <a href="{{ url_for('attendance_view') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow transition">
+                    हाजिरी शीट &rarr;
+                </a>
+                <a href="{{ url_for('export_manpower_pdf') }}" class="py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow transition flex items-center gap-1" title="1-Page PDF Download">
+                    <i class="fa-solid fa-file-pdf"></i> PDF
                 </a>
             </div>
         </div>
+
+        <!-- Card 3: Unified Reports Hub -->
+        <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-blue-700/40 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-amber-300 flex items-center justify-center text-xl border border-blue-400/30">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-400/30">All-in-One</span>
+                </div>
+                <h3 class="text-base font-bold text-white">📊 दैनिक व मासिक रिपोर्ट्स</h3>
+                <p class="text-xs text-blue-200 mt-1 leading-relaxed">आज का खर्च, पूरे महीने का कुल योग व साइट-वार हिसाब</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-blue-800/60 flex items-center gap-2">
+                <a href="{{ url_for('reports_hub', tab='daily') }}" class="flex-1 py-2 px-2.5 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition">
+                    📅 आज की रिपोर्ट
+                </a>
+                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="flex-1 py-2 px-2.5 text-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+                    📆 माहवार खर्च
+                </a>
+            </div>
+        </div>
+
     </div>
 
     <!-- Quick Stat Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Sites -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kul Sites</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल साइट्स</span>
                 <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_sites }} Sites</p>
                 <span class="text-xs text-blue-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-circle-check text-xs"></i> Active Project Sites
+                    <i class="fa-solid fa-circle-check text-xs"></i> 21 Active Projects
                 </span>
             </div>
             <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
@@ -102,10 +124,10 @@
         <!-- Master Materials -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Material Catalog</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">सामग्री कैटलॉग</span>
                 <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_materials }} Items</p>
                 <span class="text-xs text-indigo-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-tags text-xs"></i> Pre-loaded Rate List
+                    <i class="fa-solid fa-tags text-xs"></i> Fixed Rate List
                 </span>
             </div>
             <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
@@ -116,7 +138,7 @@
         <!-- Total Usage Entries -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Daily Entries</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल दैनिक प्रविष्टियाँ</span>
                 <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_logs }} Logs</p>
                 <span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
                     <i class="fa-solid fa-clock-rotate-left text-xs"></i> Saved Records
@@ -130,7 +152,7 @@
         <!-- Total Cost -->
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Consumed Value</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल खर्च मूल्य</span>
                 <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</p>
                 <span class="text-xs text-amber-600 font-medium flex items-center gap-1 mt-1">
                     <i class="fa-solid fa-indian-rupee-sign text-xs"></i> Estimated Usage
@@ -142,38 +164,38 @@
         </div>
     </div>
 
-    <!-- 19 Sites Quick Grid Navigation -->
+    <!-- 21 Sites Quick Grid Navigation -->
     <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-network-wired text-blue-600"></i>
-                    19 Construction Sites Overview
+                    21 Construction Sites Overview
                 </h2>
-                <p class="text-xs text-slate-500">Kisi bhi site par click karke uska pura material hisab dekhein:</p>
+                <p class="text-xs text-slate-500">किसी भी साइट पर क्लिक करके उसका पूरा सामग्री लेजर देखें:</p>
             </div>
             <a href="{{ url_for('sites_list') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                Edit Sites <i class="fa-solid fa-arrow-right"></i>
+                सभी साइट्स <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {% for site in sites %}
-            <a href="{{ url_for('site_report', site_id=site.id) }}" class="group p-3 rounded-xl border border-slate-100 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/50 transition duration-150 flex flex-col justify-between">
+            <a href="{{ url_for('reports_hub', tab='site', site_id=site.id) }}" class="group p-3 rounded-xl border border-slate-100 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/50 transition duration-150 flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-mono font-bold text-slate-400 group-hover:text-blue-600">{{ site.code }}</span>
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                 </div>
                 <div class="mt-2">
                     <p class="text-sm font-semibold text-slate-800 group-hover:text-blue-700 truncate">{{ site.name }}</p>
-                    <p class="text-[11px] text-slate-400 truncate">{{ site.location or 'Active' }}</p>
+                    <p class="text-[11px] text-slate-400 truncate">{{ site.supervisor or site.location or 'Active' }}</p>
                 </div>
             </a>
             {% endfor %}
         </div>
     </div>
 
-    <!-- Section with 2 Columns: Top Materials Consumed & Recent Entries -->
+    <!-- 2 Columns: Top Materials Consumed & Recent Entries -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Top Materials Consumed (1 Col) -->
@@ -184,10 +206,10 @@
                         <i class="fa-solid fa-chart-column text-indigo-600"></i>
                         Top Consumed Materials
                     </h2>
-                    <a href="{{ url_for('material_report') }}" class="text-xs text-blue-600 hover:underline">All Materials</a>
+                    <a href="{{ url_for('reports_hub', tab='material') }}" class="text-xs text-blue-600 hover:underline">All Materials</a>
                 </div>
                 
-                <div class="space-y-4">
+                <div class="space-y-3">
                     {% for mat in stats.top_materials %}
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-indigo-50/30 transition">
                         <div class="flex items-center justify-between text-sm">
@@ -199,7 +221,7 @@
                         </div>
                     </div>
                     {% else %}
-                    <p class="text-xs text-slate-400 py-4 text-center">Abhi tak koi material use log nahi hua hai.</p>
+                    <p class="text-xs text-slate-400 py-4 text-center">अभी तक कोई मटेरियल इस्तेमाल दर्ज नहीं हुआ है।</p>
                     {% endfor %}
                 </div>
             </div>
@@ -217,26 +239,26 @@
                 <div>
                     <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
-                        Haal Hi Ki Entries (Recent Usage Logs)
+                        हाल ही की प्रविष्टियाँ (Recent Usage Logs)
                     </h2>
-                    <p class="text-xs text-slate-500">Last 10 recorded material usage entries across 19 sites</p>
+                    <p class="text-xs text-slate-500">21 साइट्स पर दर्ज हुई अंतिम सामग्री प्रविष्टियाँ</p>
                 </div>
-                <a href="{{ url_for('daily_report') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
-                    View Daily Report <i class="fa-solid fa-arrow-right"></i>
+                <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
+                    दैनिक रिपोर्ट देखें <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                            <th class="py-2.5 px-3">Date</th>
-                            <th class="py-2.5 px-3">Site</th>
-                            <th class="py-2.5 px-3">Material</th>
-                            <th class="py-2.5 px-3 text-right">Quantity</th>
-                            <th class="py-2.5 px-3 text-right">Rate</th>
-                            <th class="py-2.5 px-3 text-right">Total (₹)</th>
-                            <th class="py-2.5 px-3">Work / Purpose</th>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                            <th class="py-2.5 px-3">तारीख</th>
+                            <th class="py-2.5 px-3">साइट</th>
+                            <th class="py-2.5 px-3">सामग्री</th>
+                            <th class="py-2.5 px-3 text-right">मात्रा</th>
+                            <th class="py-2.5 px-3 text-right">दर</th>
+                            <th class="py-2.5 px-3 text-right">कुल (₹)</th>
+                            <th class="py-2.5 px-3">कार्य विवरण</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -244,7 +266,7 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-2.5 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">{{ entry.usage_date }}</td>
                             <td class="py-2.5 px-3 font-semibold text-blue-700 whitespace-nowrap">
-                                <a href="{{ url_for('site_report', site_id=entry.site_id) }}" class="hover:underline">
+                                <a href="{{ url_for('reports_hub', tab='site', site_id=entry.site_id) }}" class="hover:underline">
                                     {{ entry.site_name }}
                                 </a>
                             </td>
@@ -258,7 +280,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-400">Koi entry nahi mili. Nayi entry add karein.</td>
+                            <td colspan="7" class="py-8 text-center text-slate-400">कोई प्रविष्टि नहीं मिली। नई प्रविष्टि दर्ज करें।</td>
                         </tr>
                         {% endfor %}
                     </tbody>

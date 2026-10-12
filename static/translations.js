@@ -13,8 +13,9 @@ const AppTranslations = {
         hi: {
             // Header & Navigation
             app_title: "M/S SANDIP KUMAR",
-            app_subtitle: "19 Sites Material Tracker",
+            app_subtitle: "21 Sites Project Tracker",
             nav_dashboard: "डैशबोर्ड",
+            nav_reports: "📊 रिपोर्ट्स केंद्र",
             nav_stock: "📦 साइट स्टॉक (रजिस्टर)",
             nav_stock_short: "स्टॉक",
             nav_store: "🛒 सामग्री स्टोर",
@@ -125,8 +126,9 @@ const AppTranslations = {
         en: {
             // Header & Navigation
             app_title: "M/S SANDIP KUMAR",
-            app_subtitle: "19 Sites Material Tracker",
+            app_subtitle: "21 Sites Project Tracker",
             nav_dashboard: "Dashboard",
+            nav_reports: "📊 Reports Center",
             nav_stock: "📦 Site Stock Register",
             nav_stock_short: "Stock",
             nav_store: "🛒 Material Store",

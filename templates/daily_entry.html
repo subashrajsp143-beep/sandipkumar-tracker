@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Daily Material Usage Entry - 19 Sites Tracker{% endblock %}
+{% block title %}Daily Material Usage Entry - 21 Sites Tracker{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto space-y-6">
@@ -56,13 +56,13 @@
         <!-- Top Metadata Row: Site, Date, Supervisor, Purpose -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-5 rounded-xl bg-slate-50 border border-slate-100">
             
-            <!-- Site Selection (1 of 19) -->
+            <!-- Site Selection (1 of 21) -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Site Select Karein <span class="text-rose-500">*</span>
                 </label>
                 <select id="siteSelect" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
-                    <option value="">-- 19 Sites Me Se Chunein --</option>
+                    <option value="">-- 21 Sites Me Se Chunein --</option>
                     {% for site in sites %}
                     <option value="{{ site.id }}" data-supervisor="{{ site.supervisor or '' }}">
                         {{ site.code }} - {{ site.name }} {% if site.location %}({{ site.location }}){% endif %}
