@@ -142,6 +142,9 @@
 
                 <!-- Desktop Menu -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    <a href="{{ url_for('company_website') }}" class="px-2.5 py-1.5 rounded-lg text-xs font-black bg-blue-950/80 hover:bg-blue-800 text-cyan-300 border border-cyan-400/40 shadow-sm transition flex items-center gap-1.5" title="कंपनी की ऑफिशियल वेबसाइट देखें">
+                        <i class="fa-solid fa-globe text-xs"></i> <span>वेबसाइट</span>
+                    </a>
                     <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-xs"></i> <span data-i18n="nav_dashboard">Dashboard</span>
                     </a>
@@ -226,6 +229,7 @@
 
         <!-- Mobile Menu Dropdown -->
         <div id="mobileMenu" class="hidden md:hidden bg-brand-950 px-4 pt-2 pb-4 space-y-2 border-t border-blue-900">
+            <a href="{{ url_for('company_website') }}" class="block px-3 py-2 rounded-md text-base font-black text-cyan-300 bg-blue-950/80 border border-cyan-400/40">🌐 कंपनी वेबसाइट (Official Website)</a>
             <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-brand-900" data-i18n="nav_dashboard">Dashboard</a>
             <a href="{{ url_for('site_stock') }}" class="block px-3 py-2.5 rounded-xl text-base font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-md flex items-center gap-2">
                 <i class="fa-solid fa-boxes-stacked"></i> <span data-i18n="nav_stock">📦 साइट स्टॉक व बैलेंस (Site Stock)</span>

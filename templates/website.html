@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M/S SANDIP KUMAR — Official Company Website | Bihar Infrastructure & Water Pipeline Projects</title>
+    <meta name="description" content="M/S Sandip Kumar — Government Registered Infrastructure & Water Supply Contractor executing 21 pipeline projects across Bihar under Jal Jeevan Mission.">
+    <meta name="theme-color" content="#0a0f1d">
+
+    <!-- PWA & Mobile Web App Meta -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sandip Kumar">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+
+    <!-- Google Fonts & Tailwind & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans Devanagari"', 'sans-serif'],
+                        hindi: ['"Noto Sans Devanagari"', 'sans-serif']
+                    },
+                    colors: {
+                        navy: {
+                            950: '#070a12',
+                            900: '#0a0f1d',
+                            800: '#11182c',
+                            700: '#1a233d',
+                            600: '#233052'
+                        },
+                        cyan: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2'
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Animations & Glows */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-glow { animation: pulseGlow 5s ease-in-out infinite; }
+
+        .glass-nav {
+            background: rgba(10, 15, 29, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(17, 24, 44, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(6, 182, 212, 0.2);
+        }
+
+        .gradient-text-cyan {
+            background: linear-gradient(135deg, #a5f3fc 0%, #22d3ee 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-text-gold {
+            background: linear-gradient(135deg, #fef08a 0%, #facc15 50%, #eab308 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="bg-navy-950 text-slate-100 font-sans antialiased selection:bg-cyan-500 selection:text-navy-950">
+
+    <!-- 1. TOP ANNOUNCEMENT & HELPLINE BAR -->
+    <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-center sm:text-left">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>LIVE</span>
+                </span>
+                <span class="font-medium text-slate-300">
+                    🇮🇳 <strong class="text-white">बिहार सरकार पंजीकृत ठेकेदार</strong> • 21 साइट्स पर हर घर नल का जल एवं पाइपलाइन अवसंरचना
+                </span>
+            </div>
+
+            <!-- Language Toggle & Direct Portal Link -->
+            <div class="flex items-center gap-3">
+                <!-- Water Tap Icon Language Selector (UP LEFT/RIGHT) -->
+                <div class="relative" id="tapLangContainer">
+                    <button type="button" 
+                            id="tapLangBtn" 
+                            onclick="toggleLanguageDropdown(event)" 
+                            title="भाषा बदलें / Change Language"
+                            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-white text-xs transition">
+                        <i class="fa-solid fa-faucet-drip text-cyan-400"></i>
+                        <span id="tapLangName" class="font-bold text-[11px]">🇮🇳 हिंदी</span>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="tapLangDropdown" class="hidden absolute right-0 top-full mt-1.5 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 z-50 text-white">
+                        <button type="button" onclick="setAppLanguage('hi', event)" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-xs font-bold hover:bg-slate-800">
+                            <span>🇮🇳 हिंदी (Hindi)</span>
+                            <i class="fa-solid fa-circle-check text-cyan-400" id="langCheckHi"></i>
+                        </button>
+                        <button type="button" onclick="setAppLanguage('en', event)" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-xs font-bold hover:bg-slate-800 text-slate-400 hover:text-white">
+                            <span>🇬🇧 English</span>
+                            <i class="fa-solid fa-circle-check text-cyan-400 hidden" id="langCheckEn"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('dashboard') }}" class="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-bold text-xs transition">
+                    <span>कर्मचारी पोर्टल</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. STICKY GLASS HEADER -->
+    <header class="glass-nav sticky top-0 z-40 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Company Brand & Logo -->
+                <a href="#home" class="flex items-center gap-3.5 group">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
+                        <div class="w-full h-full bg-navy-900 rounded-[14px] flex items-center justify-center">
+                            <i class="fa-solid fa-faucet-drip text-2xl text-cyan-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-cyan-400 transition">
+                                M/S SANDIP KUMAR
+                            </h1>
+                        </div>
+                        <p class="text-[11px] sm:text-xs text-slate-400 font-medium">
+                            Infrastructure & Water Pipeline Projects • Bihar
+                        </p>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center space-x-7 text-sm font-semibold text-slate-300">
+                    <a href="#home" class="hover:text-cyan-400 transition">होम (Home)</a>
+                    <a href="#projects" class="hover:text-cyan-400 transition">21 प्रोजेक्ट्स</a>
+                    <a href="#services" class="hover:text-cyan-400 transition">सेवाएं (Services)</a>
+                    <a href="{{ url_for('material_store') }}" class="hover:text-cyan-400 transition flex items-center gap-1">
+                        <i class="fa-solid fa-cart-shopping text-xs text-amber-400"></i> सामग्री स्टोर
+                    </a>
+                    <a href="#app-download" class="hover:text-cyan-400 transition">ऐप डाउनलोड</a>
+                    <a href="#about" class="hover:text-cyan-400 transition">कंपनी परिचय</a>
+                    <a href="#contact" class="hover:text-cyan-400 transition">संपर्क</a>
+                </nav>
+
+                <!-- Header Actions: App Install & Portal CTA -->
+                <div class="hidden sm:flex items-center gap-3">
+                    <button type="button" 
+                            id="webInstallBtn" 
+                            onclick="triggerPwaInstall()" 
+                            class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-download text-cyan-400"></i> <span>ऐप इंस्टॉल</span>
+                    </button>
+
+                    <a href="{{ url_for('dashboard') }}" 
+                       class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
+                        <span>पोर्टल लॉगिन ➔</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center gap-2 sm:hidden">
+                    <a href="{{ url_for('dashboard') }}" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-black text-xs">
+                        पोर्टल
+                    </a>
+                    <button type="button" onclick="toggleMobileMenu()" class="p-2 text-slate-400 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl" id="menuIcon"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobileMenu" class="hidden sm:hidden border-t border-slate-800 bg-navy-900/98 px-4 pt-3 pb-6 space-y-3">
+            <a href="#home" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-white hover:text-cyan-400">होम (Home)</a>
+            <a href="#projects" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-300 hover:text-cyan-400">बिहार के 21 प्रोजेक्ट्स</a>
+            <a href="#services" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-300 hover:text-cyan-400">सेवाएं व कार्यक्षेत्र</a>
+            <a href="{{ url_for('material_store') }}" class="block py-2 text-sm font-bold text-amber-300 hover:text-amber-200">🛒 271 सामग्री स्टोर</a>
+            <a href="#app-download" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-300 hover:text-cyan-400">📱 ऐप डाउनलोड करें</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-300 hover:text-cyan-400">कंपनी परिचय (About)</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block py-2 text-sm font-bold text-slate-300 hover:text-cyan-400">संपर्क व ऑफिस</a>
+            
+            <div class="pt-3 border-t border-slate-800 flex gap-2">
+                <button type="button" onclick="triggerPwaInstall()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-cyan-400 font-bold text-xs border border-slate-700 text-center">
+                    <i class="fa-solid fa-download mr-1"></i> ऐप इंस्टॉल
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="flex-1 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs text-center">
+                    🚀 ट्रैकर पोर्टल
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. HERO SECTION (HIGH IMPACT) -->
+    <section id="home" class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden">
+        <!-- Ambient Glowing Background Orbs -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none animate-glow"></div>
+        <div class="absolute top-1/3 -left-32 w-[450px] h-[450px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-10 -right-32 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                
+                <!-- Bihar Govt Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-cyan-500/30 text-cyan-300 text-xs font-bold shadow-inner">
+                    <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+                    <span>बिहार सरकार नल-जल योजना एवं बुनियादी ढांचा परियोजनाएं • 21 Sites</span>
+                </div>
+
+                <!-- Main Headline -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
+                    जल ही जीवन है <br>
+                    <span class="gradient-text-cyan">M/S SANDIP KUMAR</span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-lg sm:text-xl text-slate-300 font-medium leading-relaxed max-w-2xl mx-auto">
+                    बिहार के 21 स्थलों पर अत्याधुनिक एचडीपीई/यूपीवीसी जल आपूर्ति पाइपलाइन नेटवर्क, सबमर्सिबल पंपिंग और 100% पारदर्शी डिजिटल ट्रैकिंग।
+                </p>
+
+                <!-- Primary Action Cards Row (3 Glowing Quick Action Buttons) -->
+                <div class="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+                    
+                    <!-- Card 1: Open Tracker Portal -->
+                    <a href="{{ url_for('dashboard') }}" 
+                       class="glass-card p-5 rounded-2xl group transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 relative overflow-hidden block">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-11 h-11 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                            <span class="text-cyan-400 text-xs font-black uppercase tracking-wider flex items-center gap-1">
+                                खोलें <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-base font-extrabold text-white group-hover:text-cyan-300 transition">साइट ट्रैकर पोर्टल</h2>
+                        <p class="text-xs text-slate-400 mt-1">स्टॉक आवक, रोज़ का खर्च, लेजर और सामग्री इन्वेंट्री</p>
+                    </a>
+
+                    <!-- Card 2: Attendance Sheet -->
+                    <a href="{{ url_for('attendance_view') }}" 
+                       class="glass-card p-5 rounded-2xl group transition-all duration-300 hover:-translate-y-1 hover:border-indigo-400 relative overflow-hidden block">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-11 h-11 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-users-gear"></i>
+                            </div>
+                            <span class="text-indigo-400 text-xs font-black uppercase tracking-wider flex items-center gap-1">
+                                1-पेज PDF <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-base font-extrabold text-white group-hover:text-indigo-300 transition">दैनिक हाजिरी रजिस्टर</h2>
+                        <p class="text-xs text-slate-400 mt-1">21 साइट्स मैनपावर, मिस्त्री, हेल्पर व 1-पेज PDF</p>
+                    </a>
+
+                    <!-- Card 3: Mobile & Desktop App -->
+                    <button type="button" 
+                            onclick="triggerPwaInstall()" 
+                            class="glass-card p-5 rounded-2xl group transition-all duration-300 hover:-translate-y-1 hover:border-amber-400 text-left block w-full">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                            </div>
+                            <span class="text-amber-400 text-xs font-black uppercase tracking-wider flex items-center gap-1">
+                                1-क्लिक <i class="fa-solid fa-download text-[10px]"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-base font-extrabold text-white group-hover:text-amber-300 transition">मोबाइल ऐप डाउनलोड</h2>
+                        <p class="text-xs text-slate-400 mt-1">फोन व लैपटॉप पर ऑफलाइन सपोर्ट वाली ऐप लगाएं</p>
+                    </button>
+
+                </div>
+
+                <!-- Trust Badges Bar -->
+                <div class="pt-8 flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-400">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-400"></i> 21 सक्रिय साइट्स</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-400"></i> 271+ सामग्रियां</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-400"></i> 100% डिजिटल मॉनिटरिंग</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-cyan-400"></i> 24×7 क्लाउड उपलब्धता</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. LIVE NUMBERS & COUNTERS BAR -->
+    <section class="py-12 bg-navy-900 border-y border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                
+                <div class="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+                    <div class="text-3xl sm:text-5xl font-black text-cyan-400">21</div>
+                    <div class="text-sm font-bold text-white mt-2">सक्रिय प्रोजेक्ट साइट्स</div>
+                    <p class="text-xs text-slate-400 mt-1">बिहार के विभिन्न जिलों में कार्य प्रगति पर</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+                    <div class="text-3xl sm:text-5xl font-black text-amber-400">271+</div>
+                    <div class="text-sm font-bold text-white mt-2">सामग्री इन्वेंट्री प्रबंधन</div>
+                    <p class="text-xs text-slate-400 mt-1">पाइप्स, वॉल्व्स, मोटर्स, फिटिंग्स आदि</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+                    <div class="text-3xl sm:text-5xl font-black text-emerald-400">70+</div>
+                    <div class="text-sm font-bold text-white mt-2">दैनिक तकनीकी मैनपावर</div>
+                    <p class="text-xs text-slate-400 mt-1">मिस्त्री, प्लंबर, हेल्पर्स व सुपरवाइजर्स</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
+                    <div class="text-3xl sm:text-5xl font-black text-indigo-400">24×7</div>
+                    <div class="text-sm font-bold text-white mt-2">क्लाउड रीयल-टाइम डेटा</div>
+                    <p class="text-xs text-slate-400 mt-1">हर सेकंड लाइव अपडेट्स व बैकअप</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. INTERACTIVE 21 SITES DIRECTORY SECTION -->
+    <section id="projects" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+                <div>
+                    <span class="text-cyan-400 text-xs font-black uppercase tracking-widest">Ongoing Projects</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">
+                        बिहार के 21 सक्रिय पाइपलाइन प्रोजेक्ट्स
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 max-w-xl">
+                        M/S Sandip Kumar द्वारा संचालित सभी 21 साइट्स की लोकेशन, सुपरवाइजर और लाइव स्थिति की जानकारी।
+                    </p>
+                </div>
+
+                <!-- Site Search Bar -->
+                <div class="w-full md:w-72">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" 
+                               id="siteSearchInput" 
+                               onkeyup="filterSitesDirectory(this.value)" 
+                               placeholder="साइट या सुपरवाइजर खोजें..." 
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-navy-900 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 21 Sites Cards Grid -->
+            <div id="sitesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for s in sites %}
+                <div class="site-card glass-card p-5 rounded-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
+                     data-site-name="{{ s.name|lower }}" 
+                     data-supervisor="{{ (s.supervisor or '')|lower }}">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-xs font-mono font-bold">
+                                {{ s.code or ('SITE-' ~ loop.index) }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> सक्रिय (Active)
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-location-dot text-cyan-400 text-sm"></i>
+                            {{ s.name|upper }}
+                        </h3>
+                        <div class="mt-2 text-xs text-slate-300 space-y-1">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-tie text-slate-400 text-[11px]"></i>
+                                <span>सुपरवाइजर: <strong class="text-white">{{ s.supervisor or 'साइट इंचार्ज' }}</strong></span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-map text-slate-400 text-[11px]"></i>
+                                <span>क्षेत्र: <span class="text-slate-300">बिहार (Jal Jeevan Mission)</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                        <a href="{{ url_for('site_report', site_id=s.id) }}" class="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1">
+                            खर्च रिपोर्ट ➔
+                        </a>
+                        <a href="{{ url_for('attendance_view') }}" class="text-slate-400 hover:text-white font-medium">
+                            हाजिरी देखें
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 6. CORE SERVICES & ENGINEERING CAPABILITIES -->
+    <section id="services" class="py-20 bg-navy-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-cyan-400 text-xs font-black uppercase tracking-widest">Our Expertise</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">हमारी मुख्य सेवाएं व विशेषज्ञता</h2>
+                <p class="text-sm text-slate-400 mt-2">उच्च गुणवत्ता मानकों और सरकारी नियमों के अनुरूप पाइपलाइन और निर्माण कार्य।</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-2xl border border-cyan-500/20">
+                        <i class="fa-solid fa-lines-leaning"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white">पाइपलाइन नेटवर्क व जॉइंटिंग</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        HDPE, UPVC और GI पाइपलाइन की भूमिगत खुदाई, लेइंग, फ्यूजन वेल्डिंग और डिस्ट्रीब्यूशन नेटवर्क।
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl border border-blue-500/20">
+                        <i class="fa-solid fa-gears"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white">सबमर्सिबल पंप व स्टार्टर</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        गहरे बोरवेल सबमर्सिबल मोटर्स, कंट्रोल स्टार्टर पैनल्स, केबल वायरिंग और अनवरत ऑटोमेशन।
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl border border-indigo-500/20">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white">ओवरहेड वाटर स्टोरेज (OHT)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        मजबूत सिंटेक्स वाटर टैंक, स्ट्रक्चरल बेस, ओवरफ्लो व इनलेट-आउटलेट वॉल्व नेटवर्क की पूर्ण स्थापना।
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl border border-amber-500/20">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-white">100% डिजिटल मॉनिटरिंग</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        हर पाइप, वॉल्व, सीमेंट और दैनिक खर्च का सटीक डिजिटल लेजर, मैनपावर हाजिरी व एक्सल/पीडीएफ रिपोर्टिंग।
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. MATERIAL STORE SHOWCASE -->
+    <section class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+                <div>
+                    <span class="text-amber-400 text-xs font-black uppercase tracking-widest">Inventory Management</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">271 सामग्री भंडार (Material Store)</h2>
+                    <p class="text-sm text-slate-400 mt-2">प्रमाणित आईएसआई-मार्क पाइप्स, वॉल्व्स, फिटिंग्स और मशीनरी का लाइव स्टॉक।</p>
+                </div>
+
+                <a href="{{ url_for('material_store') }}" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition flex items-center gap-2 whitespace-nowrap w-fit">
+                    <i class="fa-solid fa-cart-shopping"></i> <span>पूरा सामग्री भंडार खोलें ➔</span>
+                </a>
+            </div>
+
+            <!-- Material Categories Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-cyan-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-lines-leaning"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">HDPE Pipes</div>
+                    <div class="text-[10px] text-slate-400">63mm, 75mm, 90mm</div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-circle-dot"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">Gate & Ball Valves</div>
+                    <div class="text-[10px] text-slate-400">Brass & UPVC Valves</div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-blue-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-plug"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">Submersible Pumps</div>
+                    <div class="text-[10px] text-slate-400">1HP, 2HP, 3HP Motors</div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-indigo-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">Starter Panels</div>
+                    <div class="text-[10px] text-slate-400">Auto & Digital Panels</div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-cubes-stacked"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">Storage Tanks</div>
+                    <div class="text-[10px] text-slate-400">500L, 1000L Sintex</div>
+                </div>
+
+                <div class="glass-card p-4 rounded-2xl text-center space-y-2">
+                    <div class="w-12 h-12 rounded-xl bg-slate-800 text-rose-400 flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                    <div class="font-bold text-xs text-white">Fittings & Hardware</div>
+                    <div class="text-[10px] text-slate-400">Tee, Elbow, Coupler</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. APP DOWNLOAD CENTER (1-CLICK PWA & DESKTOP) -->
+    <section id="app-download" class="py-20 bg-gradient-to-b from-navy-900 to-navy-950 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card p-8 sm:p-12 rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-navy-800/90 to-slate-900/90 relative overflow-hidden">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                            <i class="fa-solid fa-mobile-screen"></i> <span>Mobile App & Desktop Software</span>
+                        </span>
+                        <h2 class="text-3xl sm:text-4xl font-black text-white">
+                            अपने फोन और कंप्यूटर में M/S Sandip Kumar ऐप लगाएं
+                        </h2>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            इंटरनेट धीमा होने या न होने पर भी काम करें! एक क्लिक में ऐप इंस्टॉल करें और होम स्क्रीन पर रखें।
+                        </p>
+
+                        <div class="pt-4 flex flex-wrap gap-3">
+                            <!-- 1-Click Mobile PWA Install -->
+                            <button type="button" 
+                                    onclick="triggerPwaInstall()" 
+                                    class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+                                <span>फोन में ऐप लगाएं (Install PWA)</span>
+                            </button>
+
+                            <!-- Windows Desktop Launcher Download -->
+                            <a href="{{ url_for('download_desktop_launcher') }}" 
+                               class="px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 transition flex items-center gap-2">
+                                <i class="fa-brands fa-windows text-lg text-cyan-400"></i>
+                                <span>कंप्यूटर लॉन्चर डाउनलोड</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Steps Guide Cards -->
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-2xl bg-navy-950/70 border border-slate-800 flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-black text-sm shrink-0">1</div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Android फोन में:</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">ऊपर "फोन में ऐप लगाएं" बटन दबाएं या Chrome के 3 डॉट्स दबाकर <strong>"Add to Home screen" / "Install app"</strong> चुनें।</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-navy-950/70 border border-slate-800 flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-sm shrink-0">2</div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">iPhone (Apple) में:</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Safari ब्राउज़र में नीचे शेयर बटन <strong>(Square with Arrow)</strong> दबाएं और <strong>"Add to Home Screen"</strong> पर टैप करें।</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-navy-950/70 border border-slate-800 flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-sm shrink-0">3</div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">Windows कंप्यूटर / लैपटॉप में:</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">"कंप्यूटर लॉन्चर डाउनलोड" करें या डेस्कटॉप पर मौजूद 1-क्लिक शॉर्टकट से सीधे खोलें।</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. ABOUT THE FIRM & LEADERSHIP -->
+    <section id="about" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <div class="space-y-6">
+                    <span class="text-cyan-400 text-xs font-black uppercase tracking-widest">About Firm</span>
+                    <h2 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+                        विश्वास, गुणवत्ता और समयबद्ध क्रियान्वयन
+                    </h2>
+                    <p class="text-base text-slate-300 leading-relaxed">
+                        <strong>M/S Sandip Kumar</strong> बिहार सरकार द्वारा पंजीकृत एक प्रतिष्ठित निर्माण एवं जल आपूर्ति अवसंरचना फर्म है। हमारा मुख्य लक्ष्य राज्य के विभिन्न जिलों में हर गांव और वार्ड तक सुरक्षित, स्वच्छ और सतत पेयजल पहुंचाना है।
+                    </p>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        हम 21 साइट्स पर पूरी पारदर्शिता और कड़े गुणवत्ता नियंत्रण के साथ काम करते हैं। हमारा हर कार्यस्थल डिजिटल मटेरियल ट्रैकर से जुड़ा है, जिससे सामग्री की गुणवत्ता और वास्तविक प्रगति हर समय ऑनलाइन जांची जा सकती है।
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="p-4 rounded-xl bg-navy-900 border border-slate-800">
+                            <div class="text-lg font-black text-white">संदीप कुमार</div>
+                            <div class="text-xs text-cyan-400 font-bold">मालिक / मुख्य ठेकेदार</div>
+                            <p class="text-[11px] text-slate-400 mt-1">परियोजनाओं का कुशल नेतृत्व व दिशा-निर्देश</p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-navy-900 border border-slate-800">
+                            <div class="text-lg font-black text-white">21 सुपरवाइजर्स</div>
+                            <div class="text-xs text-emerald-400 font-bold">फील्ड तकनीकी टीम</div>
+                            <p class="text-[11px] text-slate-400 mt-1">प्रत्येक साइट पर गुणवत्ता और हाजिरी मॉनिटरिंग</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brand Seal Card -->
+                <div class="glass-card p-8 sm:p-10 rounded-3xl border border-cyan-500/20 relative">
+                    <div class="space-y-6 text-center">
+                        <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-4xl text-white mx-auto shadow-2xl shadow-cyan-500/30">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-black text-white">M/S SANDIP KUMAR</h3>
+                            <p class="text-xs text-cyan-400 font-bold uppercase tracking-widest mt-1">Government Registered Contractor • Bihar</p>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed italic">
+                            "शुद्ध पेयजल हर नागरिक का अधिकार है — हम इसे तकनीकी श्रेष्ठता और निष्ठा के साथ हर घर तक पहुंचाने के लिए प्रतिबद्ध हैं।"
+                        </p>
+                        <div class="pt-4 border-t border-slate-800 flex items-center justify-center gap-6 text-xs text-slate-400 font-bold">
+                            <span><i class="fa-solid fa-certificate text-cyan-400 mr-1"></i> ISO Standards</span>
+                            <span><i class="fa-solid fa-water text-cyan-400 mr-1"></i> JJM Compliant</span>
+                            <span><i class="fa-solid fa-check-double text-cyan-400 mr-1"></i> 100% Tested</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. OFFICIAL CONTACT & HELPDESK -->
+    <section id="contact" class="py-20 bg-navy-900 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                <div class="space-y-6">
+                    <span class="text-cyan-400 text-xs font-black uppercase tracking-widest">Connect With Us</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-white">
+                        कार्यालय व संपर्क जानकारी
+                    </h2>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        परियोजनाओं, साइट सामग्री आपूर्ति या आधिकारिक संपर्क के लिए हमारे हेल्पलाइन या व्हाट्सएप पर तुरंत संपर्क करें।
+                    </p>
+
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-navy-950 border border-slate-800">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-400 uppercase">पंजीकृत कार्यालय</h4>
+                                <p class="text-sm font-bold text-white mt-0.5">M/S Sandip Kumar, बिहार, भारत</p>
+                                <span class="text-xs text-slate-400">कार्यक्षेत्र: सीवान, छपरा, मधुबनी, दरभंगा, शिवहर, गोपालगंज, पटना आदि</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-navy-950 border border-slate-800">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-black text-slate-400 uppercase">व्हाट्सएप सपोर्ट</h4>
+                                <p class="text-sm font-bold text-white mt-0.5">24×7 त्वरित संदेश व इंक्वायरी</p>
+                                <a href="https://api.whatsapp.com/send?text=नमस्ते,%20M/S%20Sandip%20Kumar%20वेबसाइट%20से%20संपर्क%20कर%20रहा%20हूं।" 
+                                   target="_blank" 
+                                   class="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-bold mt-1">
+                                    <span>व्हाट्सएप पर चैट करें</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-navy-950 border border-slate-800">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-400 uppercase">वेबसाइट व पोर्टल</h4>
+                                <p class="text-sm font-bold text-white mt-0.5">sandipkumar-tracker.onrender.com</p>
+                                <span class="text-xs text-slate-400">24 घंटे ऑनलाइन सक्रिय</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Message / Inquiry Card -->
+                <div class="glass-card p-8 rounded-3xl border border-slate-700">
+                    <h3 class="text-xl font-black text-white mb-2">त्वरित संदेश भेजें (Quick Inquiry)</h3>
+                    <p class="text-xs text-slate-400 mb-6">अपना नाम और संदेश लिखें, हमारी टीम शीघ्र संपर्क करेगी।</p>
+
+                    <form onsubmit="handleInquirySubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">आपका नाम (Full Name) *</label>
+                            <input type="text" id="inqName" required placeholder="अपना नाम दर्ज करें..." class="w-full px-4 py-2.5 rounded-xl bg-navy-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">मोबाइल नंबर (Phone Number) *</label>
+                            <input type="tel" id="inqPhone" required placeholder="10 अंकों का मोबाइल नंबर..." class="w-full px-4 py-2.5 rounded-xl bg-navy-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">संदेश / साइट विवरण (Message) *</label>
+                            <textarea id="inqMsg" rows="3" required placeholder="अपना संदेश या प्रश्न लिखें..." class="w-full px-4 py-2.5 rounded-xl bg-navy-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-400"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm shadow-lg shadow-cyan-500/20 transition">
+                            <i class="fa-solid fa-paper-plane mr-1.5"></i> संदेश भेजें (Send Message)
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 11. FOOTER -->
+    <footer class="bg-navy-950 border-t border-slate-800/80 py-12 text-slate-400 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-faucet-drip"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-black text-white">M/S SANDIP KUMAR</div>
+                        <p class="text-[11px] text-slate-500">Government Registered Infrastructure Contractor • Bihar</p>
+                    </div>
+                </div>
+
+                <!-- Footer Quick Links -->
+                <div class="flex flex-wrap items-center justify-center gap-6 font-semibold">
+                    <a href="#home" class="hover:text-cyan-400 transition">होम</a>
+                    <a href="#projects" class="hover:text-cyan-400 transition">21 साइट्स</a>
+                    <a href="{{ url_for('dashboard') }}" class="hover:text-cyan-400 transition text-cyan-400 font-bold">🚀 पोर्टल लॉगिन</a>
+                    <a href="{{ url_for('attendance_view') }}" class="hover:text-cyan-400 transition">हाजिरी रजिस्टर</a>
+                    <a href="{{ url_for('site_stock') }}" class="hover:text-cyan-400 transition">स्टॉक रजिस्टर</a>
+                    <a href="{{ url_for('material_store') }}" class="hover:text-cyan-400 transition">सामग्री भंडार</a>
+                    <a href="#contact" class="hover:text-cyan-400 transition">संपर्क</a>
+                </div>
+
+                <div class="text-slate-500 text-center md:text-right">
+                    © 2026 M/S SANDIP KUMAR. All rights reserved.<br>
+                    <span class="text-[10px]">Jal Jeevan Mission • Har Ghar Nal Ka Jal Bihar</span>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- CLIENT JAVASCRIPT -->
+    <script>
+        // 1. Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const icon = document.getElementById('menuIcon');
+            if (menu) {
+                menu.classList.toggle('hidden');
+                if (icon) {
+                    if (menu.classList.contains('hidden')) {
+                        icon.className = "fa-solid fa-bars text-xl";
+                    } else {
+                        icon.className = "fa-solid fa-xmark text-xl";
+                    }
+                }
+            }
+        }
+
+        // 2. Interactive Site Directory Filter
+        function filterSitesDirectory(query) {
+            const q = (query || '').toLowerCase().trim();
+            document.querySelectorAll('.site-card').forEach(card => {
+                const sName = card.getAttribute('data-site-name') || '';
+                const sup = card.getAttribute('data-supervisor') || '';
+                if (!q || sName.includes(q) || sup.includes(q)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 3. PWA 1-Click Install Handler
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('webInstallBtn');
+            if (btn) btn.classList.add('animate-pulse');
+        });
+
+        async function triggerPwaInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            } else {
+                alert("📱 ऐप इंस्टॉल करने के लिए:\n\n1. Android: ब्राउज़र के 3 डॉट्स दबाकर 'Add to Home screen' या 'Install app' चुनें।\n2. iPhone: नीचे शेयर बटन दबाकर 'Add to Home Screen' चुनें।\n3. PC: एड्रेस बार में दाईं ओर Install (⬇️) आइकन दबाएं।");
+            }
+        }
+
+        // 4. Quick Inquiry Form Handler
+        function handleInquirySubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('inqName').value;
+            const phone = document.getElementById('inqPhone').value;
+            const msg = document.getElementById('inqMsg').value;
+
+            const text = `नमस्ते M/S Sandip Kumar Office,\n\nमेरा नाम: ${name}\nमोबाइल: ${phone}\nसंदेश: ${msg}`;
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        // 5. Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registered'))
+                    .catch(err => console.log('[PWA] Service worker error:', err));
+            });
+        }
+    </script>
+
+    <!-- Bilingual Translation Script -->
+    <script src="/static/translations.js"></script>
+</body>
+
+</html>

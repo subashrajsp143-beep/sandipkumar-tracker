@@ -12,6 +12,7 @@ import urllib.request
 import urllib.parse
 import base64
 import re
+import io
 import database
 import exporter
 import ocr_extractor
@@ -76,12 +77,37 @@ def _start_keep_alive_daemon():
 
 _start_keep_alive_daemon()
 
-# 1. Dashboard
+# 0. Official Company Website (Public Home Page)
 @app.route("/")
+def company_website():
+    stats = database.get_dashboard_stats()
+    sites = database.get_all_sites()
+    materials = database.get_all_materials()
+    return render_template("website.html", stats=stats, sites=sites, materials=materials)
+
+# 1. Internal Contractor Portal & Tracker Dashboard
+@app.route("/dashboard")
+@app.route("/portal")
 def dashboard():
     stats = database.get_dashboard_stats()
     sites = database.get_all_sites()
     return render_template("dashboard.html", stats=stats, sites=sites)
+
+# 1.1 Download Windows Desktop Launcher BAT
+@app.route("/download/desktop-launcher")
+def download_desktop_launcher():
+    bat_content = """@echo off
+title M/S SANDIP KUMAR 24x7 TRACKER
+echo Opening M/S Sandip Kumar 24x7 Cloud Tracker...
+start https://sandipkumar-tracker.onrender.com/
+exit
+"""
+    return send_file(
+        io.BytesIO(bat_content.encode("utf-8")),
+        mimetype="application/x-bat",
+        as_attachment=True,
+        download_name="OPEN_SANDIP_KUMAR_APP.bat"
+    )
 
 # 2. Daily Material Usage Entry
 @app.route("/entry")
