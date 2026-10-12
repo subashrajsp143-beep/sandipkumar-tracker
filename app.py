@@ -43,6 +43,39 @@ def ensure_canonical_domain():
         url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker.onrender.com")
         return redirect(url, code=301)
 
+# 24/7 Keep-Alive Background Worker (Prevents Render Free Tier Cold-Start Sleep)
+def _start_keep_alive_daemon():
+    def ping_worker():
+        import time
+        import urllib.request
+        # Wait 60 seconds after boot to let server warm up
+        time.sleep(60)
+        target_urls = [
+            "https://sandipkumar-tracker.onrender.com/api/live-status",
+            "https://ms-sandipkumar-tracker.onrender.com/api/live-status"
+        ]
+        while True:
+            for url in target_urls:
+                try:
+                    req = urllib.request.Request(
+                        url,
+                        headers={"User-Agent": "SandipTracker-KeepAlive/2.0"}
+                    )
+                    urllib.request.urlopen(req, timeout=12)
+                except Exception:
+                    pass
+            # Sleep 8 minutes (480 seconds) - keeps Render from sleeping after 15 min idle
+            time.sleep(480)
+
+    try:
+        import threading
+        t = threading.Thread(target=ping_worker, daemon=True)
+        t.start()
+    except Exception as e:
+        print(f"Keep-alive thread notice: {e}")
+
+_start_keep_alive_daemon()
+
 # 1. Dashboard
 @app.route("/")
 def dashboard():
@@ -90,12 +123,6 @@ def save_entries():
                 )
                 added_count += 1
 
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception as gen_err:
-            print("Auto-generate desktop package error:", gen_err)
-
         return jsonify({"success": True, "message": f"{added_count} material entries safalta-purvak save ho gayi hain!", "count": added_count})
     except Exception as e:
         return jsonify({"success": False, "message": f"Error saving entries: {str(e)}"}), 500
@@ -111,14 +138,8 @@ def delete_entry(entry_id):
         is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही एंट्री डिलीट कर सकते हैं।"}), 403
-            return jsonify({"success": False, "message": "Ghalat ya missing Malik PIN! Record delete karne ke liye valid Malik PIN (1234) anivarya hai."}), 403
 
         database.delete_consumption_entry(entry_id)
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception:
-            pass
         return jsonify({"success": True, "message": "Entry delete ho gayi."})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -141,11 +162,6 @@ def update_entry(entry_id):
             remarks=data.get("remarks")
         )
         if success:
-            try:
-                import generate_standalone_package
-                generate_standalone_package.build_standalone_package()
-            except Exception:
-                pass
             return jsonify({"success": True, "message": "Entry safalta-purvak update ho gayi!"})
         else:
             return jsonify({"success": False, "message": "Entry nahi mili."}), 404
@@ -224,12 +240,6 @@ def restore_database_backup():
                 """, (e.get("id"), e.get("site_id"), e.get("material_id"), e.get("usage_date"), e.get("quantity"), e.get("rate"), e.get("total_amount"), e.get("purpose"), e.get("entered_by"), e.get("remarks")))
         conn.commit()
         conn.close()
-
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception:
-            pass
 
         return jsonify({"success": True, "message": f"{len(entries)} entries safalta se restore ho gayi!"})
     except Exception as e:
@@ -475,13 +485,6 @@ def update_material_photo(material_id):
         # Smartly process, extract Google image links and save locally
         final_image_url = process_and_save_photo(image_url, material_id)
         database.update_material_photo(material_id, final_image_url)
-
-        # Auto-sync Desktop standalone files with newly updated photo
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception as sync_err:
-            print(f"Notice: desktop auto-sync: {sync_err}")
 
         return jsonify({"success": True, "message": "Material photo safalta se update ho gayi!", "image_url": final_image_url})
     except Exception as e:
@@ -1089,12 +1092,6 @@ def save_stock_inward():
                 )
                 added_count += 1
 
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception:
-            pass
-
         return jsonify({
             "success": True,
             "message": f"{added_count} सामान की इनवर्ड एंट्री (भेजा गया माल) सफलतापूर्वक दर्ज हो गई!",
@@ -1121,12 +1118,6 @@ def reset_stock_zero_api():
         database.backup_database()
         database.reset_stock_to_zero(site_id=site_id)
 
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception:
-            pass
-
         msg = "सभी साइट्स की सामग्री मात्रा और स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।" if not site_id else "साइट का स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।"
         return jsonify({"success": True, "message": msg})
     except Exception as ex:
@@ -1152,11 +1143,6 @@ def delete_stock_inward_api(entry_id):
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही इनवर्ड एंट्री हटा सकते हैं।"}), 403
 
         database.delete_inward_entry(entry_id)
-        try:
-            import generate_standalone_package
-            generate_standalone_package.build_standalone_package()
-        except Exception:
-            pass
         return jsonify({"success": True, "message": "इनवर्ड एंट्री हटा दी गई।"})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
