@@ -128,7 +128,7 @@
                     </select>
                     {% else %}
                     <span class="text-xs font-black text-amber-300 bg-indigo-950/90 px-3 py-1 rounded-xl border border-indigo-700/80">
-                        साइट: {{ sites[0].name if sites else 'Mairwa' }}
+                        साइट: {{ sites[0].name if sites else 'कार्य स्थल' }}
                     </span>
                     {% endif %}
                 </div>
@@ -166,7 +166,7 @@
             </div>
             <h3 class="text-base font-bold text-slate-800">अभी तक कोई वर्कर नहीं जोड़ा गया है</h3>
             <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                सीवान (Siwan) या किसी भी साइट के वर्कर (प्लंबर, सुपरवाइज़र, हेल्पर) को जोड़ने के लिए ऊपर <strong>"+ नया वर्कर जोड़ें"</strong> बटन दबाएं।
+                साइट के वर्कर (प्लंबर, सुपरवाइज़र, हेल्पर) को जोड़ने के लिए ऊपर <strong>"+ नया वर्कर"</strong> बटन दबाएं।
             </p>
             <button onclick="openAddWorkerModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
                 + पहला वर्कर जोड़ें
@@ -478,9 +478,9 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">दायरा (Radius in Meters)</label>
-                <input type="number" id="gpsRadius" value="500" required min="50" max="5000"
+                <input type="number" id="gpsRadius" value="1000" required min="50" max="5000"
                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500">
-                <span class="text-[11px] text-slate-500">डिफ़ॉल्ट: 500 मीटर (हाजिरी का दायरा)</span>
+                <span class="text-[11px] text-slate-500">डिफ़ॉल्ट: 1000 मीटर (1 KM दायरा)</span>
             </div>
 
             <div class="pt-2 flex items-center justify-end gap-2">
@@ -517,7 +517,7 @@
             <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें (Select Site) *</label>
             <select id="multiGpsSiteSelect" onchange="loadSiteGeoPoints(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                 {% for s in sites %}
-                <option value="{{ s.id }}" {% if s.name == 'Siwan' or s.id == 4 %}selected{% endif %}>
+                <option value="{{ s.id }}" {% if (session.get('site_id') and s.id == session.get('site_id')) or loop.first %}selected{% endif %}>
                     {{ s.name }} ({{ s.code }})
                 </option>
                 {% endfor %}
