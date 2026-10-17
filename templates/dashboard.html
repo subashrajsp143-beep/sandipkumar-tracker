@@ -30,6 +30,9 @@
                 <a href="/geo-attendance" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-violet-400/40">
                     <i class="fa-solid fa-satellite-dish text-amber-300"></i> <span>GPS हाजिरी (500M ऑटो)</span>
                 </a>
+                <button onclick="openGlobalSiteGpsModal()" class="px-4 py-2.5 rounded-xl bg-violet-800/80 hover:bg-violet-700 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-violet-400/40">
+                    <i class="fa-solid fa-map-location-dot text-amber-300"></i> <span>📍 लोकेशन सेट करें</span>
+                </button>
                 <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-boxes-stacked text-teal-300"></i> <span>साइट स्टॉक</span>
                 </a>

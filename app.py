@@ -39,7 +39,8 @@ def inject_common():
         "user_role": session.get("role", "guest"),
         "user_name": session.get("worker_name", ""),
         "user_site_id": session.get("site_id", None),
-        "user_site_name": session.get("site_name", "")
+        "user_site_name": session.get("site_name", ""),
+        "all_sites_list": database.get_all_sites()
     }
 
 @app.before_request
