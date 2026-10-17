@@ -78,12 +78,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Swipe down to refresh
+        // Swipe down to refresh (Strictly guarded so scrolling content never triggers reload)
         swipeRefresh.setOnRefreshListener(() -> webView.reload());
         swipeRefresh.setColorSchemeColors(
                 ContextCompat.getColor(this, R.color.accent),
                 ContextCompat.getColor(this, R.color.primary)
         );
+        // Only allow pull-to-refresh when webView is at the absolute top (cannot scroll up)
+        swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
+            return webView != null && (webView.canScrollVertically(-1) || webView.getScrollY() > 0);
+        });
+        // Require a deliberate 450px pull instead of accidental micro-swipes
+        swipeRefresh.setDistanceToTriggerSync(450);
 
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
@@ -140,10 +146,17 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
-        settings.setSupportZoom(true);
-        settings.setBuiltInZoomControls(true);
+        
+        // Accurate Screen Fit & Anti-Zoom Fixes:
+        settings.setTextZoom(100); // Forces exact 100% scale regardless of Android system font blowout
+        settings.setSupportZoom(false); // Disables accidental pinch-to-zoom that makes the page oversized
+        settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
+
+        webView.setInitialScale(0); // 0 = standard viewport meta scale
+        webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER); // Prevents overscroll bouncing
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
