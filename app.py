@@ -64,8 +64,13 @@ def ensure_canonical_and_auth():
     is_owner = session.get("is_owner", False) or role == "owner"
 
     # If worker is logged in, restrict to worker portal only (privacy protection)
+    # BUT if worker role is Data Entry / DEO, allow them to also access daily entry!
     if role == "worker":
-        if path not in ["/my-attendance", "/logout", "/api/worker/ping"]:
+        allowed_worker_paths = ["/my-attendance", "/logout", "/api/worker/ping"]
+        worker_role = session.get("worker_role", "")
+        if worker_role in ["Data Entry", "DEO", "डाटा एंट्री"]:
+            allowed_worker_paths.extend(["/entry", "/daily-entry", "/api/entries", "/api/scan-slip", "/api/parse-text"])
+        if path not in allowed_worker_paths:
             return redirect(url_for("my_attendance_portal"))
 
     # If not logged in at all, direct them to login
