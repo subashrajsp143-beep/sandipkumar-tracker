@@ -35,13 +35,29 @@
         <div>
             <div class="flex items-center gap-2">
                 <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase">Manpower Register</span>
+                {% if is_supervisor_view %}
+                <span class="px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-900 text-[11px] font-black border border-teal-300 flex items-center gap-1">
+                    <i class="fa-solid fa-lock text-teal-600"></i> {{ locked_site.name }} ({{ locked_site.code }}) — आपकी अधिकृत साइट
+                </span>
+                {% else %}
                 <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites Sheet</span>
+                {% endif %}
             </div>
             <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
                 <i class="fa-solid fa-users-gear text-indigo-600"></i>
-                Daily Manpower Attendance (दैनिक साइट हाजिरी)
+                {% if is_supervisor_view %}
+                <span>दैनिक हाजिरी — {{ locked_site.name }} साइट</span>
+                {% else %}
+                <span>Daily Manpower Attendance (दैनिक साइट हाजिरी)</span>
+                {% endif %}
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">हर साइट पर रोज कितने मिस्त्री, प्लंबर, हेल्पर और स्टाफ आए</p>
+            <p class="text-xs text-slate-500 mt-0.5">
+                {% if is_supervisor_view %}
+                आपकी साइट पर आज कितने मिस्त्री, प्लंबर, हेल्पर व स्टाफ आए (केवल आपकी साइट का डेटा)
+                {% else %}
+                हर साइट पर रोज कितने मिस्त्री, प्लंबर, हेल्पर और स्टाफ आए
+                {% endif %}
+            </p>
         </div>
 
         <!-- Controls: Date Picker & Export Buttons -->

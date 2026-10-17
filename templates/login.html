@@ -205,7 +205,7 @@
             }
         }
 
-        // 2. Supervisor Login Submit
+        // 2. Supervisor Login Submit with GPS Attendance Check-in
         async function handleSupervisorLogin(e) {
             e.preventDefault();
             const siteId = document.getElementById('supSiteId').value;
@@ -215,17 +215,46 @@
 
             const btn = document.getElementById('supLoginBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> लॉगिन हो रहा है...';
+            btn.innerHTML = '<i class="fa-solid fa-location-crosshairs animate-pulse"></i> GPS लोकेशन जांच हो रही है...';
+
+            let lat = null, lng = null;
+            if ("geolocation" in navigator) {
+                try {
+                    const pos = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 3000,
+                            maximumAge: 0
+                        });
+                    });
+                    lat = pos.coords.latitude;
+                    lng = pos.coords.longitude;
+                } catch(ge) {
+                    // Geolocation denied or timed out
+                }
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> लॉगिन व हाजिरी दर्ज हो रही है...';
 
             try {
                 const res = await fetch('/api/auth/supervisor-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ site_id: siteId, role: role, name: name, phone: phone })
+                    body: JSON.stringify({ 
+                        site_id: siteId, 
+                        role: role, 
+                        name: name, 
+                        phone: phone,
+                        latitude: lat,
+                        longitude: lng
+                    })
                 });
                 const data = await res.json();
                 if (data.success) {
                     localStorage.setItem('sandip_user_role', 'supervisor');
+                    if (data.worker && data.worker.worker_token) {
+                        localStorage.setItem('sandip_worker_token', data.worker.worker_token);
+                    }
                     window.location.href = '/stock?site_id=' + siteId;
                 } else {
                     alert('❌ ' + data.message);

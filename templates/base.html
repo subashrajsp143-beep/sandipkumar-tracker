@@ -228,10 +228,11 @@
                             <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline">👑 मालिक</span>
                         </span>
                     </div>
-                    {% elif user_role == 'supervisor' %}
+                    {% elif session.get('role') == 'supervisor' or user_role == 'supervisor' %}
                     <div class="flex items-center gap-1.5">
-                        <span class="px-2.5 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-tie"></i> <span class="hidden sm:inline">सुपरवाइज़र</span>
+                        <span class="px-2.5 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md flex items-center gap-1.5" title="आपकी अधिकृत साइट">
+                            <i class="fa-solid fa-map-pin text-amber-300"></i>
+                            <span class="max-w-[110px] sm:max-w-none truncate">{{ session.get('site_name') or 'सुपरवाइज़र' }}</span>
                         </span>
                     </div>
                     {% endif %}
@@ -871,6 +872,29 @@
     
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
     <script src="/static/translations.js"></script>
+
+    {% if session.get('worker_token') and not session.get('is_owner') %}
+    <!-- Auto-Ping GPS Attendance for Supervisors, DEOs & Staff on Site -->
+    <script>
+    (function() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(async function(pos) {
+                try {
+                    await fetch('/api/worker/ping', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: "{{ session.get('worker_token') }}",
+                            lat: pos.coords.latitude,
+                            lng: pos.coords.longitude
+                        })
+                    });
+                } catch(e) {}
+            }, function(err) {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+        }
+    })();
+    </script>
+    {% endif %}
 </body>
 
 </html>

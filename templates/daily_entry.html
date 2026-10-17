@@ -59,8 +59,15 @@
             <!-- Site Selection (1 of 21) -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Site Select Karein <span class="text-rose-500">*</span>
+                    Site <span class="text-rose-500">*</span>
                 </label>
+                {% if locked_site_id %}
+                <div class="w-full rounded-xl border border-teal-300 bg-teal-50 py-2.5 px-3 text-sm font-bold text-teal-900 shadow-sm flex items-center justify-between">
+                    <span>{{ locked_site.code }} - {{ locked_site.name }}</span>
+                    <span class="text-[10px] text-teal-700 font-black">🔒 आपकी अधिकृत साइट</span>
+                </div>
+                <input type="hidden" id="siteSelect" value="{{ locked_site_id }}" data-supervisor="{{ locked_site.supervisor or '' }}">
+                {% else %}
                 <select id="siteSelect" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
                     <option value="">-- 21 Sites Me Se Chunein --</option>
                     {% for site in sites %}
@@ -69,6 +76,7 @@
                     </option>
                     {% endfor %}
                 </select>
+                {% endif %}
             </div>
 
             <!-- Date Picker -->

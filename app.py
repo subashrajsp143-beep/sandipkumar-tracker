@@ -213,6 +213,7 @@ def api_supervisor_login():
         worker = database.get_or_create_worker(site_id, name, role, phone)
         session.permanent = True
         session["role"] = "supervisor"
+        session["is_owner"] = False
         session["worker_id"] = worker["id"]
         session["worker_token"] = worker["worker_token"]
         session["worker_name"] = worker["name"]
@@ -221,7 +222,33 @@ def api_supervisor_login():
         session["site_id"] = worker["site_id"]
         session["site_name"] = worker["site_name"]
 
-        return jsonify({"success": True, "worker": worker})
+        # Capture & Process Live GPS Location during Login
+        lat = data.get("latitude")
+        lng = data.get("longitude")
+        location_status = "pending"
+        distance_m = None
+        if lat and lng and worker.get("site_lat") and worker.get("site_lng"):
+            try:
+                ping_res = database.process_location_ping(
+                    worker_id=worker["id"],
+                    site_id=worker["site_id"],
+                    lat=float(lat),
+                    lng=float(lng),
+                    site_lat=float(worker["site_lat"]),
+                    site_lng=float(worker["site_lng"]),
+                    radius=worker.get("site_radius") or 500
+                )
+                location_status = "on_site" if ping_res.get("is_on_site") else "off_site"
+                distance_m = ping_res.get("distance_m")
+            except Exception as pe:
+                pass
+
+        return jsonify({
+            "success": True, 
+            "worker": worker,
+            "location_status": location_status,
+            "distance_m": distance_m
+        })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -281,10 +308,25 @@ exit
 @app.route("/entry")
 @app.route("/daily-entry")
 def daily_entry():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
     sites = database.get_all_sites()
+    locked_site = None
+    if not is_owner and user_site_id:
+        user_site_id = int(user_site_id)
+        locked_site = database.get_site_by_id(user_site_id)
+        sites = [s for s in sites if s["id"] == user_site_id]
+
     materials = database.get_all_materials()
     today_str = datetime.date.today().strftime("%Y-%m-%d")
-    return render_template("daily_entry.html", sites=sites, materials=materials, today=today_str)
+    return render_template(
+        "daily_entry.html", 
+        sites=sites, 
+        materials=materials, 
+        today=today_str,
+        locked_site_id=user_site_id if not is_owner else None,
+        locked_site=locked_site
+    )
 
 @app.route("/api/entries", methods=["POST"])
 def save_entries():
@@ -298,6 +340,13 @@ def save_entries():
 
         if not site_id or not items:
             return jsonify({"success": False, "message": "Site aur materials select karna anivarya hai."}), 400
+
+        # Security check: If not owner, prevent posting to other sites
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id:
+            if site_id != int(user_site_id):
+                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की खपत दर्ज कर सकते हैं।"}), 403
 
         added_count = 0
         for item in items:
@@ -1153,6 +1202,35 @@ def attendance_view():
 
     rows, totals = database.get_daily_manpower(selected_date)
 
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    is_supervisor_view = False
+    locked_site = None
+
+    if not is_owner and user_site_id:
+        is_supervisor_view = True
+        user_site_id = int(user_site_id)
+        locked_site = database.get_site_by_id(user_site_id)
+        rows = [r for r in rows if r["site_id"] == user_site_id]
+        if rows:
+            r0 = rows[0]
+            totals = {
+                "site_incharge": r0.get("site_incharge", 0),
+                "supervisor": r0.get("supervisor", 0),
+                "electrician": r0.get("electrician", 0),
+                "gi_mistri": r0.get("gi_mistri", 0),
+                "deo": r0.get("deo", 0),
+                "plumber": r0.get("plumber", 0),
+                "helper": r0.get("helper", 0),
+                "other": r0.get("other", 0),
+                "total": r0.get("total", 0)
+            }
+        else:
+            totals = {
+                "site_incharge": 0, "supervisor": 0, "electrician": 0,
+                "gi_mistri": 0, "deo": 0, "plumber": 0, "helper": 0, "other": 0, "total": 0
+            }
+
     # Format date for red title: DD/MM/YYYY
     try:
         parts = selected_date.split("-")
@@ -1165,7 +1243,9 @@ def attendance_view():
         selected_date=selected_date,
         formatted_date=formatted_date,
         rows=rows,
-        totals=totals
+        totals=totals,
+        is_supervisor_view=is_supervisor_view,
+        locked_site=locked_site
     )
 
 @app.route("/api/attendance", methods=["GET", "POST", "OPTIONS"])
@@ -1178,6 +1258,10 @@ def save_attendance_api():
             ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
             att_date = ist_now.strftime("%Y-%m-%d")
         rows, totals = database.get_daily_manpower(att_date)
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id:
+            rows = [r for r in rows if r["site_id"] == int(user_site_id)]
         return jsonify({"success": True, "date": att_date, "rows": rows, "totals": totals})
     try:
         data = request.get_json(silent=True) or {}
@@ -1186,7 +1270,13 @@ def save_attendance_api():
         if not att_date:
             return jsonify({"success": False, "message": "तारीख चुनना अनिवार्य है।"}), 400
 
-        database.save_daily_manpower(att_date, rows, updated_by="Web User")
+        # Security check: If not owner, only allow saving attendance for supervisor's site
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id:
+            rows = [r for r in rows if int(r.get("site_id", 0)) == int(user_site_id)]
+
+        database.save_daily_manpower(att_date, rows, updated_by=session.get("worker_name", "Web User"))
         return jsonify({"success": True, "message": f"{att_date} की हाजिरी सफलतापूर्वक सेव हो गई!"})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
@@ -1200,6 +1290,10 @@ def auto_fetch_attendance_from_gps():
         att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
         res = database.auto_sync_gps_to_manpower(att_date)
         rows, totals = database.get_daily_manpower(att_date)
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id:
+            rows = [r for r in rows if r["site_id"] == int(user_site_id)]
         return jsonify({
             "success": True,
             "date": att_date,
@@ -1218,10 +1312,13 @@ def export_manpower_excel():
     ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
     att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     rows, totals = database.get_daily_manpower(att_date)
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        rows = [r for r in rows if r["site_id"] == int(user_site_id)]
 
     excel_file = exporter.generate_manpower_excel(att_date, rows, totals)
     
-    # Format filename: MANPOWER_ATTENDANCE_08_10_2026.xlsx
     clean_date = att_date.replace("-", "_")
     filename = f"MANPOWER_ATTENDANCE_{clean_date}.xlsx"
 
@@ -1238,9 +1335,27 @@ def export_manpower_pdf():
     att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     rows, totals = database.get_daily_manpower(att_date)
 
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        user_site_id = int(user_site_id)
+        rows = [r for r in rows if r["site_id"] == user_site_id]
+        if rows:
+            r0 = rows[0]
+            totals = {
+                "site_incharge": r0.get("site_incharge", 0),
+                "supervisor": r0.get("supervisor", 0),
+                "electrician": r0.get("electrician", 0),
+                "gi_mistri": r0.get("gi_mistri", 0),
+                "deo": r0.get("deo", 0),
+                "plumber": r0.get("plumber", 0),
+                "helper": r0.get("helper", 0),
+                "other": r0.get("other", 0),
+                "total": r0.get("total", 0)
+            }
+
     pdf_file = exporter.generate_manpower_pdf(att_date, rows, totals)
     
-    # Format filename: MANPOWER_ATTENDANCE_08_10_2026.pdf
     clean_date = att_date.replace("-", "_")
     filename = f"MANPOWER_ATTENDANCE_{clean_date}.pdf"
 
@@ -1471,13 +1586,26 @@ def site_photos_print_album():
 # 9. Site Stock & Inventory Register
 @app.route("/stock")
 def site_stock():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
     
+    # SECURITY LOCK: If not owner, lock strictly to supervisor's site!
+    if not is_owner and user_site_id:
+        selected_site_id = int(user_site_id)
+
     sites = database.get_all_sites()
+    if not is_owner and user_site_id:
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
+
     materials = database.get_all_materials()
     stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
     overview = database.get_all_sites_stock_overview()
+    if not is_owner and user_site_id:
+        overview = [o for o in overview if o["id"] == int(user_site_id)]
+
     selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
 
     total_inward_sum = sum(r["total_inward"] for r in stock_rows)
@@ -1493,6 +1621,7 @@ def site_stock():
         overview=overview,
         selected_site=selected_site,
         selected_site_id=selected_site_id,
+        locked_site_id=int(user_site_id) if (not is_owner and user_site_id) else None,
         total_inward_sum=total_inward_sum,
         total_consumed_sum=total_consumed_sum,
         balance_sum=balance_sum,
@@ -1515,6 +1644,13 @@ def save_stock_inward():
             return jsonify({"success": False, "message": "❌ स्टॉक एंट्री (माल भेजना) केवल अधिकृत सुपरवाइज़र, साइट इनचार्ज या मालिक ही कर सकते हैं।"}), 403
 
         site_id = data.get("site_id")
+        # SECURITY RESTRICTION: Non-owners can only add stock to their own assigned site
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id:
+            if int(site_id) != int(user_site_id):
+                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट का ही माल दर्ज कर सकते हैं।"}), 403
+
         inward_date = data.get("inward_date") or datetime.date.today().strftime("%Y-%m-%d")
         challan_no = data.get("challan_no", "")
         supplier = data.get("supplier", "मालिक / हेड ऑफिस")
@@ -1626,12 +1762,20 @@ def export_stock_excel():
 
 @app.route("/geo-attendance")
 def geo_attendance_admin():
-    """Admin view — live GPS attendance dashboard for all sites/workers."""
+    """Live GPS attendance dashboard."""
     ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
     date_str = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     rows, date_used = database.get_geo_attendance_today(date_str)
     sites = database.get_all_sites()
     workers = database.get_all_workers()
+
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        user_site_id = int(user_site_id)
+        rows = [r for r in rows if r["site_id"] == user_site_id]
+        sites = [s for s in sites if s["id"] == user_site_id]
+        workers = [w for w in workers if w["site_id"] == user_site_id]
 
     # Group rows by site for display
     by_site = {}
@@ -1667,6 +1811,10 @@ def geo_attendance_today_api():
     ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
     date_str = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     rows, _ = database.get_geo_attendance_today(date_str)
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        rows = [r for r in rows if r["site_id"] == int(user_site_id)]
     return jsonify({"success": True, "date": date_str, "workers": rows})
 
 
