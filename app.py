@@ -56,7 +56,7 @@ def ensure_canonical_and_auth():
     if (path.startswith("/static") or 
         path.startswith("/uploads") or 
         path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
-                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website"] or
+                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website", "/download-apk"] or
         path.startswith("/worker/") or 
         path == "/api/worker/ping"):
         return None
@@ -1180,6 +1180,12 @@ def pwa_sw():
     response.headers["Service-Worker-Allowed"] = "/"
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
+
+@app.route("/download-apk")
+def download_apk():
+    """Redirects to the latest released Android APK on GitHub."""
+    return redirect("https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk")
+
 
 @app.route("/api/sync/batch", methods=["POST", "OPTIONS"])
 def sync_batch_entries():
