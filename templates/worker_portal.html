@@ -255,13 +255,36 @@
                 });
                 const data = await res.json();
                 if (data.success) {
+                    localStorage.removeItem('offline_worker_ping');
                     updateUI(data);
                 }
-            } catch(e) {}
+            } catch(e) {
+                // Offline fallback: Save in localStorage with timestamp
+                const offlineData = {
+                    token: WORKER_TOKEN,
+                    lat: currentLat,
+                    lng: currentLng,
+                    saved_at: new Date().toLocaleTimeString()
+                };
+                localStorage.setItem('offline_worker_ping', JSON.stringify(offlineData));
+                const text = document.getElementById('statusText');
+                const sub = document.getElementById('statusSub');
+                if (text && sub) {
+                    text.textContent = '📍 GPS दर्ज (ऑफलाइन मोड)';
+                    sub.textContent = 'सैटेलाइट से लोकेशन सुरक्षित हो गई है। इंटरनेट मिलते ही स्वतः सर्वर पर दर्ज हो जाएगी।';
+                }
+            }
             finally {
                 isPinging = false;
             }
         }
+
+        // Auto sync when network is restored
+        window.addEventListener('online', () => {
+            if (currentLat && currentLng) {
+                sendLocationPing();
+            }
+        });
 
         function updateUI(data) {
             const dist = data.distance_m;
