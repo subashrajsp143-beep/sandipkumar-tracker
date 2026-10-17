@@ -40,8 +40,8 @@
         </div>
     </div>
 
-    <!-- 3 Essential Operational Cards (Side-by-Side) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- 4 Essential Operational Cards (Side-by-Side) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- Card 1: Site Stock & Store -->
         <div class="bg-gradient-to-br from-teal-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-teal-700/40 flex flex-col justify-between">
@@ -87,7 +87,29 @@
             </div>
         </div>
 
-        <!-- Card 3: Unified Reports Hub -->
+        <!-- Card 3: Site Photos & A4 4-Photo Album -->
+        <div class="bg-gradient-to-br from-amber-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-amber-700/40 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl border border-amber-400/30">
+                        <i class="fa-solid fa-camera-retro"></i>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-400/30">4 Photos / Sheet</span>
+                </div>
+                <h3 class="text-base font-bold text-white">📸 साइट फोटो व A4 एल्बम</h3>
+                <p class="text-xs text-amber-200 mt-1 leading-relaxed">काम की फोटो व सरकारी MB हेतु 4-फोटो प्रति पेज A4 PDF</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-amber-800/60 flex items-center gap-2">
+                <a href="/site-photos" class="flex-1 py-2 px-3 text-center rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow transition">
+                    गैलरी खोलें &rarr;
+                </a>
+                <a href="/site-photos/upload" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition flex items-center gap-1" title="फोटो अपलोड">
+                    <i class="fa-solid fa-camera"></i> +अपलोड
+                </a>
+            </div>
+        </div>
+
+        <!-- Card 4: Unified Reports Hub -->
         <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-blue-700/40 flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-2">
@@ -100,11 +122,11 @@
                 <p class="text-xs text-blue-200 mt-1 leading-relaxed">आज का खर्च, पूरे महीने का कुल योग व साइट-वार हिसाब</p>
             </div>
             <div class="mt-4 pt-3 border-t border-blue-800/60 flex items-center gap-2">
-                <a href="{{ url_for('reports_hub', tab='daily') }}" class="flex-1 py-2 px-2.5 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition">
-                    📅 आज की रिपोर्ट
+                <a href="{{ url_for('reports_hub', tab='daily') }}" class="flex-1 py-2 px-2 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition">
+                    📅 आज की
                 </a>
-                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="flex-1 py-2 px-2.5 text-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-                    📆 माहवार खर्च
+                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="flex-1 py-2 px-2 text-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
+                    📆 माहवार
                 </a>
             </div>
         </div>

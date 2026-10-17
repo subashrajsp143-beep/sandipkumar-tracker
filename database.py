@@ -142,6 +142,7 @@ def init_db():
 
     # Initialize GPS attendance tables (added in v3.0 update)
     init_gps_tables()
+    init_photo_tables()
 
 # Helper query functions
 def get_all_sites():
@@ -1516,5 +1517,156 @@ def reset_stock_to_zero(site_id=None):
     conn.commit()
     conn.close()
     return True
+
+
+# ==========================================
+# SITE WORK PHOTOS & A4 4-PHOTO ALBUM DATABASE LAYER
+# ==========================================
+
+def init_photo_tables():
+    """
+    Initializes site_work_photos table for Jal Jeevan Mission photo documentation & A4 4-photo albums.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS site_work_photos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        photo_date TEXT NOT NULL,
+        uploaded_at TEXT NOT NULL,
+        uploaded_by TEXT DEFAULT '',
+        uploader_phone TEXT DEFAULT '',
+        category TEXT NOT NULL DEFAULT 'सामान्य कार्य',
+        description TEXT DEFAULT '',
+        latitude REAL,
+        longitude REAL,
+        accuracy REAL DEFAULT 0,
+        photo_url TEXT NOT NULL,
+        file_size_kb INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
+    );
+    """)
+    conn.commit()
+    conn.close()
+
+
+def add_site_work_photo(site_id, photo_date, uploaded_at, uploaded_by, uploader_phone, category, description, latitude, longitude, accuracy, photo_url, file_size_kb):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO site_work_photos 
+        (site_id, photo_date, uploaded_at, uploaded_by, uploader_phone, category, description, latitude, longitude, accuracy, photo_url, file_size_kb)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (site_id, photo_date, uploaded_at, uploaded_by, uploader_phone, category, description, latitude, longitude, accuracy, photo_url, file_size_kb))
+    photo_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return photo_id
+
+
+def get_site_work_photos(site_id=None, month_str=None, date_str=None, category=None, limit=1000):
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+        SELECT p.*, s.name as site_name, s.code as site_code, s.supervisor as site_supervisor
+        FROM site_work_photos p
+        JOIN sites s ON p.site_id = s.id
+        WHERE 1=1
+    """
+    params = []
+    if site_id:
+        query += " AND p.site_id = ?"
+        params.append(site_id)
+    if date_str:
+        query += " AND p.photo_date = ?"
+        params.append(date_str)
+    elif month_str:
+        query += " AND p.photo_date LIKE ?"
+        params.append(month_str + "%")
+    if category and category != "all" and category != "":
+        query += " AND p.category = ?"
+        params.append(category)
+    
+    query += " ORDER BY p.photo_date ASC, p.uploaded_at ASC, p.id ASC LIMIT ?"
+    params.append(limit)
+
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_site_work_photo_by_id(photo_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.*, s.name as site_name, s.code as site_code, s.supervisor as site_supervisor
+        FROM site_work_photos p
+        JOIN sites s ON p.site_id = s.id
+        WHERE p.id = ?
+    """, (photo_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def delete_site_work_photo(photo_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT photo_url FROM site_work_photos WHERE id = ?", (photo_id,))
+    row = cursor.fetchone()
+    url = row[0] if row else None
+    cursor.execute("DELETE FROM site_work_photos WHERE id = ?", (photo_id,))
+    conn.commit()
+    conn.close()
+    return url
+
+
+def get_available_photo_months(site_id=None):
+    conn = get_db()
+    cursor = conn.cursor()
+    if site_id:
+        cursor.execute("""
+            SELECT DISTINCT substr(photo_date, 1, 7) as ym, COUNT(*) as cnt
+            FROM site_work_photos
+            WHERE site_id = ?
+            GROUP BY ym
+            ORDER BY ym DESC
+        """, (site_id,))
+    else:
+        cursor.execute("""
+            SELECT DISTINCT substr(photo_date, 1, 7) as ym, COUNT(*) as cnt
+            FROM site_work_photos
+            GROUP BY ym
+            ORDER BY ym DESC
+        """)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_photo_category_counts(site_id=None, month_str=None):
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+        SELECT category, COUNT(*) as cnt
+        FROM site_work_photos
+        WHERE 1=1
+    """
+    params = []
+    if site_id:
+        query += " AND site_id = ?"
+        params.append(site_id)
+    if month_str:
+        query += " AND photo_date LIKE ?"
+        params.append(month_str + "%")
+    query += " GROUP BY category ORDER BY cnt DESC"
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
 
 

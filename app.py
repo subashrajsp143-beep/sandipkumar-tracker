@@ -16,6 +16,7 @@ import io
 import database
 import exporter
 import ocr_extractor
+import photo_service
 
 app = Flask(__name__)
 app.secret_key = "construction-material-secret-key-19-sites"
@@ -1249,6 +1250,223 @@ def export_manpower_pdf():
         download_name=filename,
         mimetype="application/pdf"
     )
+
+# ==========================================
+# 8.1 SITE WORK PHOTOS & A4 4-PHOTO ALBUM ROUTES
+# ==========================================
+
+@app.route("/site-photos")
+def site_photos_view():
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+
+    # If supervisor logged in, default to supervisor's site
+    if not selected_site_id and session.get("supervisor_site_id"):
+        selected_site_id = int(session.get("supervisor_site_id"))
+
+    selected_month = request.args.get("month", "").strip()
+    selected_date = request.args.get("date", "").strip()
+    selected_category = request.args.get("category", "").strip()
+
+    sites = database.get_all_sites()
+    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+    available_months = database.get_available_photo_months(site_id=selected_site_id)
+
+    # If no month chosen and we have available months, pick the latest month
+    if not selected_month and not selected_date and available_months:
+        selected_month = available_months[0]["ym"]
+    elif not selected_month and not selected_date:
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        selected_month = ist_now.strftime("%Y-%m")
+
+    photos = database.get_site_work_photos(
+        site_id=selected_site_id,
+        month_str=selected_month if not selected_date else None,
+        date_str=selected_date if selected_date else None,
+        category=selected_category,
+        limit=1000
+    )
+
+    total_photos = len(photos)
+    total_pages = (total_photos + 3) // 4 if total_photos > 0 else 0
+    categories = photo_service.PHOTO_CATEGORIES
+    category_counts = database.get_photo_category_counts(site_id=selected_site_id, month_str=selected_month)
+
+    return render_template(
+        "site_photos.html",
+        sites=sites,
+        selected_site=selected_site,
+        selected_site_id=selected_site_id,
+        months=available_months,
+        selected_month=selected_month,
+        selected_date=selected_date,
+        selected_category=selected_category,
+        categories=categories,
+        photos=photos,
+        total_photos=total_photos,
+        total_pages=total_pages,
+        category_counts=category_counts
+    )
+
+
+@app.route("/site-photos/upload", methods=["GET", "POST"])
+def site_photo_upload():
+    if request.method == "POST":
+        try:
+            site_id_raw = request.form.get("site_id")
+            if not site_id_raw:
+                return jsonify({"success": False, "message": "कृपया साइट चुनें"}), 400
+            
+            site = database.get_site_by_id(int(site_id_raw))
+            if not site:
+                return jsonify({"success": False, "message": "अमान्य साइट"}), 400
+
+            file = request.files.get("photo")
+            if not file or file.filename == "":
+                return jsonify({"success": False, "message": "कृपया काम की फोटो चुनें"}), 400
+
+            category = request.form.get("category") or "सामान्य कार्य"
+            description = request.form.get("description", "").strip()
+            photo_date = request.form.get("photo_date")
+            uploaded_by = request.form.get("uploaded_by") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
+            uploader_phone = session.get("worker_phone") or request.form.get("uploader_phone", "")
+
+            lat = request.form.get("latitude")
+            lng = request.form.get("longitude")
+            accuracy = request.form.get("accuracy", 0)
+
+            res = photo_service.process_and_save_photo(
+                file_storage=file,
+                site=site,
+                category=category,
+                description=description,
+                lat=lat,
+                lng=lng,
+                accuracy=accuracy,
+                photo_date=photo_date,
+                uploaded_by=uploaded_by,
+                uploader_phone=uploader_phone
+            )
+
+            return jsonify({
+                "success": True,
+                "message": f"✅ {site['name']} की फोटो सफलतापूर्वक सेव हो गई!",
+                "photo": res
+            })
+        except Exception as e:
+            return jsonify({"success": False, "message": str(e)}), 500
+
+    # GET: Render Mobile Upload Page
+    sites = database.get_all_sites()
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else session.get("supervisor_site_id")
+    if selected_site_id:
+        selected_site_id = int(selected_site_id)
+
+    uploader_name = session.get("worker_name") or session.get("supervisor_name") or ""
+    categories = photo_service.PHOTO_CATEGORIES
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    return render_template(
+        "photo_upload.html",
+        sites=sites,
+        selected_site_id=selected_site_id,
+        uploader_name=uploader_name,
+        categories=categories,
+        today=today
+    )
+
+
+@app.route("/api/site-photos/delete/<int:photo_id>", methods=["POST", "DELETE"])
+def delete_site_photo_api(photo_id):
+    try:
+        url = database.delete_site_work_photo(photo_id)
+        if url and url.startswith("/static/"):
+            disk_path = url.lstrip("/")
+            if os.path.exists(disk_path):
+                try:
+                    os.remove(disk_path)
+                except Exception:
+                    pass
+        return jsonify({"success": True, "message": "फोटो सफलतापूर्वक हटा दी गई"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/export/site-photos-pdf")
+def export_site_photos_pdf():
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    selected_month = request.args.get("month", "").strip()
+    selected_date = request.args.get("date", "").strip()
+    selected_category = request.args.get("category", "").strip()
+
+    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+
+    if not selected_month and not selected_date:
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        selected_month = ist_now.strftime("%Y-%m")
+
+    photos = database.get_site_work_photos(
+        site_id=selected_site_id,
+        month_str=selected_month if not selected_date else None,
+        date_str=selected_date if selected_date else None,
+        category=selected_category,
+        limit=2000
+    )
+
+    pdf_buffer = exporter.generate_photo_album_pdf(
+        site=selected_site,
+        month_str=selected_date if selected_date else selected_month,
+        photos=photos
+    )
+
+    site_slug = selected_site["code"].replace(" ", "_") if selected_site else "ALL_SITES"
+    period_slug = (selected_date or selected_month).replace("-", "_")
+    filename = f"A4_PHOTO_ALBUM_{site_slug}_{period_slug}.pdf"
+
+    return send_file(
+        pdf_buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/pdf"
+    )
+
+
+@app.route("/site-photos/print-album")
+def site_photos_print_album():
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    selected_month = request.args.get("month", "").strip()
+    selected_date = request.args.get("date", "").strip()
+    selected_category = request.args.get("category", "").strip()
+
+    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+
+    if not selected_month and not selected_date:
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        selected_month = ist_now.strftime("%Y-%m")
+
+    photos = database.get_site_work_photos(
+        site_id=selected_site_id,
+        month_str=selected_month if not selected_date else None,
+        date_str=selected_date if selected_date else None,
+        category=selected_category,
+        limit=2000
+    )
+
+    # Chunk photos into pages of exactly 4 photos each
+    pages = [photos[i:i+4] for i in range(0, len(photos), 4)] if photos else []
+
+    return render_template(
+        "site_photos_print.html",
+        pages=pages,
+        selected_site=selected_site,
+        selected_site_id=selected_site_id,
+        selected_month=selected_date if selected_date else selected_month
+    )
+
 
 # 9. Site Stock & Inventory Register
 @app.route("/stock")

@@ -679,3 +679,178 @@ def generate_site_stock_excel(stock_rows, site_name=None):
     output.seek(0)
     return output
 
+
+# ==========================================
+# 4 PHOTOS PER A4 SHEET - GOVERNMENT ALBUM PDF GENERATOR
+# ==========================================
+
+def generate_photo_album_pdf(site, month_str, photos, from_date=None, to_date=None):
+    """
+    Generates a government-ready A4 Portrait PDF Photo Album.
+    Formatted strictly with exactly 4 PHOTOS PER A4 SHEET (2 columns x 2 rows).
+    Includes Site Info, GPS Coordinates, Timestamp, Category, Description, and Page X of Y.
+    """
+    import os
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image as RLImage
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.pdfgen import canvas
+
+    class NumberedCanvas(canvas.Canvas):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._saved_page_states = []
+
+        def showPage(self):
+            self._saved_page_states.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            num_pages = len(self._saved_page_states)
+            for state in self._saved_page_states:
+                self.__dict__.update(state)
+                self.draw_page_number(num_pages)
+                canvas.Canvas.showPage(self)
+            canvas.Canvas.save(self)
+
+        def draw_page_number(self, page_count):
+            self.saveState()
+            self.setFont('Helvetica', 7.5)
+            self.setFillColor(colors.HexColor('#64748B'))
+            self.setStrokeColor(colors.HexColor('#CBD5E1'))
+            self.setLineWidth(0.5)
+            self.line(18, 20, 577, 20)
+            footer_text = 'M/S SANDIP KUMAR  |  JAL JEEVAN MISSION (BIHAR)  |  OFFICIAL SITE WORK PROGRESS ALBUM'
+            self.drawString(18, 10, footer_text)
+            page_str = f'Page {self._pageNumber} of {page_count}'
+            self.drawRightString(577, 10, page_str)
+            self.restoreState()
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=18,
+        rightMargin=18,
+        topMargin=16,
+        bottomMargin=26
+    )
+
+    styles = getSampleStyleSheet()
+    site_name = (site.get('name') if site else 'All Sites') or 'Site'
+    site_code = (site.get('code') if site else 'ALL') or 'ALL'
+    supervisor = (site.get('supervisor') if site else 'Staff') or 'Staff'
+
+    elements = []
+    
+    # Chunk photos into groups of 4 (2x2 grid per page)
+    chunks = [photos[i:i+4] for i in range(0, len(photos), 4)] if photos else []
+
+    if not chunks:
+        empty_title = Paragraph('<b>M/S SANDIP KUMAR &mdash; JAL JEEVAN MISSION (BIHAR)</b>', styles['Title'])
+        empty_msg = Paragraph(f'<br/><br/><br/><center><font size=12 color="#64748B">इस साइट ({site_name}) या चुने गए महीने ({month_str}) में कोई फोटो उपलब्ध नहीं है।</font></center>', styles['Normal'])
+        elements.extend([empty_title, empty_msg])
+    else:
+        for page_idx, chunk in enumerate(chunks):
+            # Page Header Table (559 pt width)
+            h_left = Paragraph(
+                '<b><font size=10 color="#0F172A">M/S SANDIP KUMAR</font></b><br/>'
+                '<font size=7 color="#475569">JAL JEEVAN MISSION (BIHAR) &bull; WORK PROGRESS ALBUM</font>',
+                styles['Normal']
+            )
+            h_center = Paragraph(
+                f'<b><font size=9 color="#1E3A8A">SITE: {site_name.upper()} ({site_code})</font></b><br/>'
+                f'<font size=7 color="#475569">SUPERVISOR: {supervisor.upper()} &bull; PERIOD: {month_str}</font>',
+                styles['Normal']
+            )
+            h_right = Paragraph(
+                '<font size=8 color="#B91C1C"><b>4 PHOTOS / SHEET</b></font><br/>'
+                f'<font size=7 color="#64748B">Total: {len(photos)} Photos</font>',
+                styles['Normal']
+            )
+            
+            header_table = Table([[h_left, h_center, h_right]], colWidths=[200, 259, 100])
+            header_table.setStyle(TableStyle([
+                ('BOX', (0,0), (-1,-1), 0.75, colors.HexColor('#94A3B8')),
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#F8FAFC')),
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('TOPPADDING', (0,0), (-1,-1), 4),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+                ('LEFTPADDING', (0,0), (-1,-1), 6),
+                ('RIGHTPADDING', (0,0), (-1,-1), 6),
+            ]))
+            elements.append(header_table)
+            elements.append(Spacer(1, 5))
+
+            # 4 Photos in 2x2 grid
+            cells = []
+            for j in range(4):
+                if j < len(chunk):
+                    p = chunk[j]
+                    global_num = page_idx * 4 + j + 1
+                    
+                    # Resolve disk path
+                    raw_url = p.get('photo_url', '')
+                    clean_path = raw_url.lstrip('/')
+                    
+                    if os.path.exists(clean_path):
+                        img_flowable = RLImage(clean_path, width=260, height=180)
+                    else:
+                        img_flowable = Paragraph('<br/><br/><center><font size=9 color="#DC2626"><b>[PHOTO FILE NOT FOUND]</b></font></center><br/>', styles['Normal'])
+
+                    # Caption block
+                    p_date = p.get('photo_date', '')
+                    p_time = ''
+                    uploaded_at = p.get('uploaded_at', '')
+                    if uploaded_at and len(uploaded_at) >= 16:
+                        p_time = uploaded_at[11:16]
+
+                    lat_val = float(p.get('latitude') or 0.0)
+                    lng_val = float(p.get('longitude') or 0.0)
+                    gps_text = f"{lat_val:.5f}&deg; N, {lng_val:.5f}&deg; E" if (lat_val and lng_val) else "GPS Verified"
+
+                    cat_text = p.get('category', 'कार्य')
+                    desc_text = p.get('description', '') or 'Site work execution'
+                    by_text = p.get('uploaded_by', '') or p.get('site_supervisor', 'Supervisor')
+
+                    caption_html = (
+                        f'<b><font size=8.5 color="#312E81">#{global_num} &bull; {cat_text}</font></b><br/>'
+                        f'<font size=7 color="#334155">📅 <b>Date:</b> {p_date} {p_time} &nbsp;|&nbsp; 🌐 <b>GPS:</b> {gps_text}</font><br/>'
+                        f'<font size=7 color="#0F172A">📝 <b>Work:</b> {desc_text}</font><br/>'
+                        f'<font size=6.5 color="#64748B">👷 <b>Staff:</b> {by_text}</font>'
+                    )
+                    caption_flowable = Paragraph(caption_html, styles['Normal'])
+
+                    cell_table = Table([[img_flowable], [caption_flowable]], colWidths=[266])
+                    cell_table.setStyle(TableStyle([
+                        ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
+                        ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#F8FAFC')),
+                        ('TOPPADDING', (0,0), (-1,-1), 2),
+                        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+                        ('LEFTPADDING', (0,0), (-1,-1), 3),
+                        ('RIGHTPADDING', (0,0), (-1,-1), 3),
+                    ]))
+                    cells.append(cell_table)
+                else:
+                    empty_box = Paragraph('', styles['Normal'])
+                    cells.append(empty_box)
+
+            # Build 2x2 grid
+            grid_table = Table([[cells[0], cells[1]], [cells[2], cells[3]]], colWidths=[276, 276])
+            grid_table.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ]))
+            elements.append(grid_table)
+
+            # Page break if more pages follow
+            if page_idx < len(chunks) - 1:
+                elements.append(PageBreak())
+
+    doc.build(elements, canvasmaker=NumberedCanvas)
+    buf.seek(0)
+    return buf
+
+

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4 Photo Album - M/S Sandip Kumar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm;
+            }
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-after: always;
+                break-after: page;
+            }
+        }
+        .a4-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 8mm;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased">
+
+    <!-- Top Floating Print Controls (Hidden on Print) -->
+    <div class="no-print sticky top-0 z-50 bg-slate-900 text-white p-3 shadow-lg border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="font-black text-amber-300 text-sm">M/S SANDIP KUMAR</span>
+            <span class="text-xs text-slate-400">&bull; सरकारी 4-फोटो A4 एल्बम व्यू</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-black text-xs shadow flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-print"></i> <span>प्रिंट करें या PDF सेव करें (Print / Save PDF)</span>
+            </button>
+            <a href="/site-photos{% if selected_site_id %}?site_id={{ selected_site_id }}{% endif %}" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold transition">
+                वापस जाएं
+            </a>
+        </div>
+    </div>
+
+    <!-- Album Pages Container -->
+    <div class="py-6 space-y-6">
+        {% if pages %}
+            {% for page_photos in pages %}
+            <div class="a4-sheet shadow-lg border border-slate-300 rounded-lg flex flex-col justify-between page-break">
+                
+                <!-- Page Header Table -->
+                <div>
+                    <div class="border-2 border-slate-800 rounded-lg p-2.5 bg-slate-50 flex items-center justify-between mb-3 text-xs">
+                        <div>
+                            <h2 class="font-black text-slate-900 text-sm tracking-wide">M/S SANDIP KUMAR</h2>
+                            <p class="text-[10px] text-slate-600 font-medium">JAL JEEVAN MISSION (BIHAR) &bull; WORK PROGRESS PHOTO ALBUM</p>
+                        </div>
+                        <div class="text-center">
+                            <span class="font-black text-indigo-900 text-xs block">
+                                SITE: {{ selected_site.name if selected_site else 'ALL 21 SITES' }} ({{ selected_site.code if selected_site else 'ALL' }})
+                            </span>
+                            <span class="text-[10px] text-slate-600 font-semibold block">
+                                SUPERVISOR: {{ selected_site.supervisor if selected_site else 'Staff' }} &bull; MONTH: {{ selected_month or 'All Months' }}
+                            </span>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-black text-[10px] uppercase border border-rose-300 block">
+                                4 PHOTOS / SHEET
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-medium mt-0.5 block">
+                                Page {{ loop.index }} of {{ pages|length }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 Photos Grid (Exactly 4 per page) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        {% for p in page_photos %}
+                        <div class="border border-slate-400 rounded-lg overflow-hidden bg-white flex flex-col justify-between">
+                            <!-- Photo Image -->
+                            <div class="aspect-[4/3] bg-black overflow-hidden flex items-center justify-center">
+                                <img src="{{ p.photo_url }}" alt="{{ p.category }}" class="w-full h-full object-cover">
+                            </div>
+                            
+                            <!-- Metadata Caption Box -->
+                            <div class="p-2 bg-slate-50 border-t border-slate-300 text-[10px] space-y-0.5 leading-tight">
+                                <div class="flex items-center justify-between font-black text-indigo-900 text-[11px]">
+                                    <span>#{{ (loop.parent.loop.index0 * 4) + loop.index }} &bull; {{ p.category }}</span>
+                                    <span class="text-slate-500 font-mono text-[9px]">{{ p.site_code }}</span>
+                                </div>
+                                <div class="text-slate-600 font-semibold">
+                                    📅 तारीख: {{ p.photo_date }} {% if p.uploaded_at and p.uploaded_at|length >= 16 %}&bull; ⏰ {{ p.uploaded_at[11:16] }}{% endif %}
+                                </div>
+                                <div class="text-slate-700 font-mono text-[9px]">
+                                    🌐 GPS: {% if p.latitude and p.longitude %}{{ "%.5f"|format(p.latitude) }}° N, {{ "%.5f"|format(p.longitude) }}° E{% else %}Verified{% endif %}
+                                </div>
+                                {% if p.description %}
+                                <div class="text-slate-900 font-medium truncate">
+                                    📝 विवरण: {{ p.description }}
+                                </div>
+                                {% endif %}
+                                <div class="text-slate-500 text-[9px]">
+                                    👷 अपलोडर: {{ p.uploaded_by or p.site_supervisor or 'Supervisor' }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Fill empty slots if last page has fewer than 4 -->
+                        {% for i in range(4 - page_photos|length) %}
+                        <div class="border border-dashed border-slate-300 rounded-lg bg-slate-50/50 flex items-center justify-center text-slate-300 text-xs aspect-[4/3]">
+                            [खाली स्थान]
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Page Footer -->
+                <div class="border-t border-slate-300 pt-2 mt-3 flex items-center justify-between text-[9px] text-slate-500 font-medium">
+                    <span>M/S SANDIP KUMAR &bull; JAL JEEVAN MISSION BIHAR</span>
+                    <span>OFFICIAL MEASUREMENT & VERIFICATION RECORD</span>
+                    <span>PAGE {{ loop.index }} OF {{ pages|length }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="max-w-md mx-auto text-center py-12 bg-white rounded-2xl shadow p-6">
+                <i class="fa-solid fa-camera text-4xl text-slate-400 mb-2"></i>
+                <h3 class="text-base font-bold text-slate-800">कोई फोटो उपलब्ध नहीं है</h3>
+                <p class="text-xs text-slate-500 mt-1">चुने गए साइट या महीने में कोई फोटो नहीं मिली।</p>
+                <a href="/site-photos" class="mt-4 inline-block px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">
+                    वापस जाएं
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
