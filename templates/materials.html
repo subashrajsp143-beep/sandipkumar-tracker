@@ -49,7 +49,9 @@
                         <th class="py-3 px-3">Material Description</th>
                         <th class="py-3 px-3">Category</th>
                         <th class="py-3 px-3 text-center">Unit</th>
+                        {% if is_owner %}
                         <th class="py-3 px-3 text-right">Standard Rate (₹)</th>
+                        {% endif %}
                         <th class="py-3 px-3 text-center">Actions</th>
                     </tr>
                 </thead>
@@ -75,7 +77,9 @@
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium text-[10px]">{{ m.category }}</span>
                         </td>
                         <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-600">{{ m.unit }}</td>
+                        {% if is_owner %}
                         <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(m.rate) }}</td>
+                        {% endif %}
                         <td class="py-2.5 px-3 text-center">
                             <div class="inline-flex items-center gap-1.5">
                                 <button onclick='openPhotoModal({{ m|tojson }})' class="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium text-[11px] transition flex items-center gap-1" title="Photo Badlein">

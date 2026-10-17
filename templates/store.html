@@ -39,7 +39,9 @@
                 <div>
                     <span class="text-blue-200 uppercase font-semibold text-[10px] tracking-wider block">Selected Items</span>
                     <span class="text-lg font-black text-white font-mono" id="headerCartCount">0 Items</span>
+                    {% if is_owner %}
                     <span class="text-amber-300 font-bold font-mono block text-xs" id="headerCartTotal">₹0.00</span>
+                    {% endif %}
                 </div>
                 <button onclick="openCartDrawer()" class="ml-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow transition">
                     Cart Dekhein &rarr;
@@ -135,16 +137,23 @@
                 <!-- Price & Add Section -->
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div>
+                        {% if is_owner %}
                         <span class="text-[10px] text-slate-400 block font-medium">Standard Rate</span>
                         <div class="flex items-baseline gap-1">
                             <span class="text-base sm:text-lg font-black text-emerald-600 font-mono">₹{{ "%.2f"|format(m.rate) }}</span>
                             <span class="text-[10px] text-slate-500 font-medium">/ {{ m.unit }}</span>
                         </div>
+                        {% else %}
+                        <span class="text-[10px] text-slate-400 block font-medium">इकाई (Unit)</span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-sm font-bold text-slate-700 font-mono">{{ m.unit }}</span>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <!-- Action Button: + ADD or Stepper -->
                     <div id="action-container-{{ m.id }}">
-                        <button onclick="addToCart({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', {{ m.rate }}, '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
+                        <button onclick="addToCart({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', {% if is_owner %}{{ m.rate }}{% else %}0{% endif %}, '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
                             <i class="fa-solid fa-plus text-[10px]"></i> ADD
                         </button>
                     </div>
@@ -179,10 +188,12 @@
                     <span class="text-xs text-slate-300">Selected Materials:</span>
                     <span id="barCartCount" class="px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-300 font-mono text-xs font-bold">0 Items</span>
                 </div>
+                {% if is_owner %}
                 <div class="flex items-baseline gap-1 mt-0.5">
                     <span class="text-xs text-slate-400">Total Bill:</span>
                     <span id="barCartTotal" class="text-base sm:text-lg font-black text-amber-300 font-mono">₹0.00</span>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -283,9 +294,13 @@
                         <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
                             <tr>
                                 <th class="p-3">Material</th>
+                                {% if is_owner %}
                                 <th class="p-3 text-right">Rate</th>
+                                {% endif %}
                                 <th class="p-3 text-center w-36">Quantity</th>
+                                {% if is_owner %}
                                 <th class="p-3 text-right">Total Amount</th>
+                                {% endif %}
                                 <th class="p-3 text-center w-12">Hatao</th>
                             </tr>
                         </thead>
@@ -299,12 +314,14 @@
             <!-- Bill Summary Box -->
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between">
                 <div>
-                    <span class="text-xs text-slate-400 block font-medium">Kul Lagat (Total Bill Value)</span>
+                    <span class="text-xs text-slate-400 block font-medium">मांग सारांश (Requisition Items)</span>
                     <span class="text-xs text-slate-600 font-semibold" id="checkoutItemsCountText">0 materials</span>
                 </div>
+                {% if is_owner %}
                 <div class="text-right">
                     <span class="text-2xl font-black text-emerald-600 font-mono" id="checkoutGrandTotal">₹0.00</span>
                 </div>
+                {% endif %}
             </div>
 
         </div>
@@ -538,15 +555,19 @@
         });
 
         // Update Header Badge
-        document.getElementById('headerCartCount').textContent = `${totalCount} Items`;
-        document.getElementById('headerCartTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        const headerCountEl = document.getElementById('headerCartCount');
+        if (headerCountEl) headerCountEl.textContent = `${totalCount} Items`;
+        const headerTotalEl = document.getElementById('headerCartTotal');
+        if (headerTotalEl) headerTotalEl.textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
         // Update Floating Bar
         const bar = document.getElementById('floatingCartBar');
         if (totalCount > 0) {
             bar.classList.remove('hidden');
-            document.getElementById('barCartCount').textContent = `${totalCount} Items`;
-            document.getElementById('barCartTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            const barCountEl = document.getElementById('barCartCount');
+            if (barCountEl) barCountEl.textContent = `${totalCount} Items`;
+            const barTotalEl = document.getElementById('barCartTotal');
+            if (barTotalEl) barTotalEl.textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         } else {
             bar.classList.add('hidden');
         }
@@ -555,16 +576,22 @@
         renderCartDrawer(items, grandTotal);
     }
 
+    const isOwner = {{ 'true' if is_owner else 'false' }};
+
     function renderCartDrawer(items, grandTotal) {
         document.getElementById('cartItemsCount').textContent = items.length;
         document.getElementById('checkoutItemsCountText').textContent = `${items.length} alag-alag materials`;
-        document.getElementById('checkoutGrandTotal').textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        const grandTotalEl = document.getElementById('checkoutGrandTotal');
+        if (grandTotalEl) {
+            grandTotalEl.textContent = `₹${grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
 
         const tbody = document.getElementById('cartTableBody');
+        const colspan = isOwner ? 5 : 3;
         if (items.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="py-8 text-center text-slate-400">
+                    <td colspan="${colspan}" class="py-8 text-center text-slate-400">
                         <i class="fa-solid fa-cart-shopping text-2xl mb-1 block"></i>
                         Cart khali hai. Store se '+ ADD' karein!
                     </td>
@@ -586,7 +613,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="p-3 text-right font-mono text-slate-600 font-semibold">₹${item.rate.toFixed(2)}</td>
+                    ${isOwner ? `<td class="p-3 text-right font-mono text-slate-600 font-semibold">₹${item.rate.toFixed(2)}</td>` : ''}
                     <td class="p-3 text-center">
                         <div class="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden text-xs">
                             <button onclick="decreaseCart(${item.id})" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">-</button>
@@ -594,7 +621,7 @@
                             <button onclick="addToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.rate}, '${item.unit}', '${item.img}')" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">+</button>
                         </div>
                     </td>
-                    <td class="p-3 text-right font-mono font-bold text-emerald-600">₹${lineTotal.toFixed(2)}</td>
+                    ${isOwner ? `<td class="p-3 text-right font-mono font-bold text-emerald-600">₹${lineTotal.toFixed(2)}</td>` : ''}
                     <td class="p-3 text-center">
                         <button onclick="setCartQty(${item.id}, 0)" class="text-rose-500 hover:text-rose-700 p-1">
                             <i class="fa-solid fa-trash-can"></i>
@@ -782,7 +809,8 @@
     function openPhotoModal(material) {
         currentPhotoMat = material;
         document.getElementById('photoModalMaterialName').textContent = material.name;
-        document.getElementById('photoModalCategory').textContent = `Category: ${material.category} | Rate: ₹${material.rate}/${material.unit}`;
+        const rateText = isOwner ? ` | Rate: ₹${material.rate}/${material.unit}` : ` | Unit: ${material.unit}`;
+        document.getElementById('photoModalCategory').textContent = `Category: ${material.category}${rateText}`;
         
         const curImg = material.image_url || '/uploads/materials/fittings.jpg';
         document.getElementById('modalPreviewImg').src = curImg;

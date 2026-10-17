@@ -191,6 +191,12 @@
                         <span class="text-xs font-bold text-slate-600 mr-1">
                             {{ site_data.workers|length }} वर्कर
                         </span>
+                        <button onclick="openGroupPhotoModal({{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
+                                class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow-xs transition flex items-center gap-1 active:scale-95"
+                                title="साइट पर उपस्थित सभी वर्करों की सामूहिक फोटो लें">
+                            <i class="fa-solid fa-camera text-[10px]"></i>
+                            <span>📸 सामूहिक फोटो</span>
+                        </button>
                         <button onclick="openMultiGpsModalForSite({{ site_id }}, '{{ site_data.site_name }}')" 
                                 class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[11px] shadow-xs transition flex items-center gap-1">
                             <i class="fa-solid fa-draw-polygon text-[10px]"></i>
@@ -205,18 +211,19 @@
                         <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                             <tr>
                                 <th class="py-3 px-4">वर्कर का नाम व पद</th>
+                                <th class="py-3 px-3 text-center">📸 फोटो हाजिरी</th>
                                 <th class="py-3 px-3">स्थिति (Status)</th>
                                 <th class="py-3 px-3">चेक-इन (आए)</th>
                                 <th class="py-3 px-3">चेक-आउट (गए)</th>
                                 <th class="py-3 px-3 text-center">कार्य समय</th>
                                 <th class="py-3 px-3">वर्कर GPS लोकेशन (Lat, Lng)</th>
                                 <th class="py-3 px-3">दूरी व नजदीकी पॉइंट</th>
-                                <th class="py-3 px-4 text-right">वर्कर लिंक (Share)</th>
+                                <th class="py-3 px-4 text-right">वर्कर लिंक व एक्शन</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             {% for w in site_data.workers %}
-                            <tr class="hover:bg-slate-50/80 transition">
+                            <tr class="hover:bg-slate-50/80 transition" id="worker-row-{{ w.worker_id }}">
                                 <!-- Name & Role -->
                                 <td class="py-3 px-4">
                                     <div class="font-extrabold text-slate-900">{{ w.worker_name }}</div>
@@ -226,6 +233,31 @@
                                         <span><i class="fa-solid fa-phone text-[9px] text-slate-400"></i> {{ w.phone }}</span>
                                         {% endif %}
                                     </div>
+                                </td>
+
+                                <!-- Photo Attendance -->
+                                <td class="py-3 px-3 text-center">
+                                    {% if w.photo_url %}
+                                    <div class="inline-flex items-center gap-1.5">
+                                        <div class="relative group cursor-pointer inline-block" onclick="viewPhotoLightbox('{{ w.photo_url }}', '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', '{{ site_data.site_name|replace("'", "\\'") }}', '{{ w.check_in_time or '' }}', '{{ w.last_lat or '' }}', '{{ w.last_lng or '' }}')">
+                                            <img src="{{ w.photo_url }}" class="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-xs group-hover:scale-105 transition" title="बड़ी फोटो देखें">
+                                            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] border border-white">
+                                                <i class="fa-solid fa-check"></i>
+                                            </span>
+                                        </div>
+                                        <button onclick="openIndividualPhotoModal({{ w.worker_id }}, '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', {{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
+                                                class="p-1 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition text-xs" title="नई फोटो खींचें / बदलें">
+                                            <i class="fa-solid fa-camera-rotate"></i>
+                                        </button>
+                                    </div>
+                                    {% else %}
+                                    <button onclick="openIndividualPhotoModal({{ w.worker_id }}, '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', {{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
+                                            class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 mx-auto active:scale-95"
+                                            title="इस वर्कर की फोटो लेकर उपस्थिति दर्ज करें">
+                                        <i class="fa-solid fa-camera"></i>
+                                        <span>फोटो लें</span>
+                                    </button>
+                                    {% endif %}
                                 </td>
 
                                 <!-- Status Badge -->
@@ -606,7 +638,522 @@
     </div>
 </div>
 
+<!-- 4. Individual Photo Attendance Modal -->
+<div id="individualPhotoModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <!-- Header -->
+        <div class="px-5 py-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black leading-tight">📸 फोटो उपस्थिति (Photo Attendance)</h3>
+                    <p class="text-[11px] text-emerald-100 font-medium">वर्कर की लाइव फोटो लेकर हाजिरी लगाएं</p>
+                </div>
+            </div>
+            <button onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none">&times;</button>
+        </div>
+
+        <!-- Worker Info Bar -->
+        <div class="bg-slate-50 px-5 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs">
+            <div>
+                <span class="text-slate-400 block text-[10px]">वर्कर:</span>
+                <strong class="text-slate-800 text-sm" id="indivWorkerName">—</strong>
+                <span class="text-[10px] text-indigo-700 bg-indigo-50 font-bold px-1.5 py-0.5 rounded ml-1" id="indivWorkerRole">—</span>
+            </div>
+            <div class="text-right">
+                <span class="text-slate-400 block text-[10px]">साइट:</span>
+                <strong class="text-teal-700 font-bold" id="indivSiteName">—</strong>
+            </div>
+        </div>
+
+        <form onsubmit="submitIndividualPhoto(event)" class="p-5 space-y-4">
+            <input type="hidden" id="indivWorkerId">
+            <input type="hidden" id="indivSiteId">
+            <input type="hidden" id="indivPhotoBase64">
+            <input type="hidden" id="indivLat">
+            <input type="hidden" id="indivLng">
+            <input type="hidden" id="indivAccuracy">
+
+            <!-- Check-in / Check-out Toggle -->
+            <div class="grid grid-cols-2 gap-2">
+                <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
+                    <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
+                    <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
+                    <span>आए (Check-In)</span>
+                </label>
+                <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
+                    <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
+                    <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
+                    <span>गए (Check-Out)</span>
+                </label>
+            </div>
+
+            <!-- Viewfinder / Preview Box -->
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-800">
+                <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
+                <div id="indivPlaceholder" class="text-center p-6 text-slate-400">
+                    <i class="fa-solid fa-camera text-4xl mb-2 text-slate-500 block"></i>
+                    <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">GPS वॉटरमार्क व समय स्वतः दर्ज होगा</p>
+                </div>
+                <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/75 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+                    </div>
+                    <span class="text-emerald-300 font-bold ml-1">On-Site</span>
+                </div>
+            </div>
+
+            <!-- Native Camera Button -->
+            <div class="flex items-center gap-2">
+                <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
+                <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="flex-1 py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition flex items-center justify-center gap-2 border border-slate-700 shadow-sm active:scale-95">
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span>फोन कैमरे से फोटो खींचें</span>
+                </button>
+            </div>
+
+            <!-- Location Status Row -->
+            <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
+                <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
+                <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeIndividualPhotoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    रद्द करें
+                </button>
+                <button type="submit" id="indivSubmitBtn" disabled class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>उपस्थिति दर्ज करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 5. Group Photo Attendance Modal -->
+<div id="groupPhotoModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+        <div class="px-5 py-4 bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 text-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-users-viewfinder"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black leading-tight">📸 सामूहिक फोटो हाजिरी (Group Attendance)</h3>
+                    <p class="text-[11px] text-emerald-100 font-medium" id="groupModalSiteName">साइट पर उपस्थित टीम की फोटो लें</p>
+                </div>
+            </div>
+            <button onclick="closeGroupPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none">&times;</button>
+        </div>
+
+        <form onsubmit="submitGroupPhoto(event)" class="p-5 overflow-y-auto space-y-4">
+            <input type="hidden" id="groupSiteId">
+            <input type="hidden" id="groupPhotoBase64">
+            <input type="hidden" id="groupLat">
+            <input type="hidden" id="groupLng">
+            <input type="hidden" id="groupAccuracy">
+
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-16/10 flex items-center justify-center border border-slate-800">
+                <img id="groupPreviewImg" src="" class="w-full h-full object-cover hidden">
+                <div id="groupPlaceholder" class="text-center p-6 text-slate-400">
+                    <i class="fa-solid fa-users text-4xl mb-2 text-slate-500 block"></i>
+                    <p class="text-xs font-bold text-slate-300">साइट पर पूरी टीम को खड़ा करके फोटो खींचें</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">सभी चुने गए वर्करों की 1-क्लिक में हाजिरी लग जाएगी</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="file" id="groupNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleGroupNativePhotoFile(event)">
+                <button type="button" onclick="document.getElementById('groupNativeFileInput').click()" class="w-full py-3 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-md active:scale-95">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>📸 फोन कैमरे से सामूहिक फोटो खींचें</span>
+                </button>
+            </div>
+
+            <div id="groupLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
+                <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
+                <span id="groupLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-xs font-black text-slate-800">कौन-कौन से वर्कर इस फोटो में मौजूद हैं? *</label>
+                    <button type="button" onclick="toggleAllGroupWorkers()" class="text-[11px] text-emerald-700 font-bold hover:underline">सभी चुनें / हटाएं</button>
+                </div>
+                <div class="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 max-h-48 overflow-y-auto space-y-1.5" id="groupWorkersChecklist">
+                </div>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-200">
+                <button type="button" onclick="closeGroupPhotoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    रद्द करें
+                </button>
+                <button type="submit" id="groupSubmitBtn" disabled class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span>सामूहिक हाजिरी दर्ज करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 6. Photo Lightbox Modal -->
+<div id="photoLightboxModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5" onclick="if(event.target===this) closePhotoLightbox()">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+        <div class="p-3 bg-slate-950 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-slate-200" id="lightboxWorkerTitle">—</span>
+            </div>
+            <button onclick="closePhotoLightbox()" class="text-slate-400 hover:text-white text-2xl font-bold px-2 leading-none">&times;</button>
+        </div>
+
+        <div class="relative bg-black flex items-center justify-center max-h-[60vh] overflow-hidden">
+            <img id="lightboxImg" src="" class="max-h-[60vh] w-auto object-contain mx-auto">
+        </div>
+
+        <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-slate-300">
+                <span>साइट: <strong class="text-white" id="lightboxSiteName">—</strong></span>
+                <span>समय: <strong class="text-emerald-400" id="lightboxCheckinTime">—</strong></span>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span class="font-mono text-slate-400" id="lightboxGpsCoords">GPS: —</span>
+                <a id="lightboxMapLink" href="#" target="_blank" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition flex items-center gap-1">
+                    <i class="fa-solid fa-map-location-dot"></i> Google Map ↗
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // All Workers data grouped by site
+    const bySiteMap = {{ by_site|tojson }};
+
+    // Helper: Resize File to base64 WebP/JPEG using Canvas
+    function fileToBase64Resized(file, maxDim = 1280, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Helper: Acquire high-accuracy GPS
+    function getLiveGpsCoords() {
+        return new Promise((resolve, reject) => {
+            if (!("geolocation" in navigator)) {
+                return reject(new Error("फोन में Geolocation समर्थित नहीं है"));
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy || 0
+                }),
+                (err) => reject(err),
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+            );
+        });
+    }
+
+    // Individual Photo Modal Handlers
+    async function openIndividualPhotoModal(workerId, workerName, workerRole, siteId, siteName) {
+        document.getElementById('indivWorkerId').value = workerId;
+        document.getElementById('indivSiteId').value = siteId;
+        document.getElementById('indivWorkerName').textContent = workerName;
+        document.getElementById('indivWorkerRole').textContent = workerRole;
+        document.getElementById('indivSiteName').textContent = siteName;
+        document.getElementById('indivPhotoBase64').value = '';
+        document.getElementById('indivLat').value = '';
+        document.getElementById('indivLng').value = '';
+        document.getElementById('indivAccuracy').value = '';
+
+        document.getElementById('indivPreviewImg').classList.add('hidden');
+        document.getElementById('indivPlaceholder').classList.remove('hidden');
+        document.getElementById('indivGpsBadge').classList.add('hidden');
+        document.getElementById('indivSubmitBtn').disabled = true;
+
+        document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2";
+        document.getElementById('indivLocText').textContent = "फोन की GPS लोकेशन खोजी जा रही है...";
+
+        document.getElementById('individualPhotoModal').classList.remove('hidden');
+
+        try {
+            const gps = await getLiveGpsCoords();
+            document.getElementById('indivLat').value = gps.latitude.toFixed(6);
+            document.getElementById('indivLng').value = gps.longitude.toFixed(6);
+            document.getElementById('indivAccuracy').value = Math.round(gps.accuracy);
+            document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
+            document.getElementById('indivLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+            document.getElementById('indivGpsCoordsText').textContent = `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`;
+            document.getElementById('indivGpsBadge').classList.remove('hidden');
+        } catch (e) {
+            document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
+            document.getElementById('indivLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+        }
+    }
+
+    function closeIndividualPhotoModal() {
+        document.getElementById('individualPhotoModal').classList.add('hidden');
+    }
+
+    function toggleCheckType(type) {
+        const lblIn = document.getElementById('lblCheckIn');
+        const lblOut = document.getElementById('lblCheckOut');
+        if (type === 'check_in') {
+            lblIn.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer";
+            lblOut.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer";
+        } else {
+            lblOut.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-900 font-black text-xs cursor-pointer";
+            lblIn.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer";
+        }
+    }
+
+    async function handleNativePhotoFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const b64 = await fileToBase64Resized(file, 1280, 0.85);
+        document.getElementById('indivPhotoBase64').value = b64;
+        const img = document.getElementById('indivPreviewImg');
+        img.src = b64;
+        img.classList.remove('hidden');
+        document.getElementById('indivPlaceholder').classList.add('hidden');
+        document.getElementById('indivSubmitBtn').disabled = false;
+    }
+
+    async function submitIndividualPhoto(e) {
+        e.preventDefault();
+        const workerId = document.getElementById('indivWorkerId').value;
+        const siteId = document.getElementById('indivSiteId').value;
+        const b64 = document.getElementById('indivPhotoBase64').value;
+        const lat = document.getElementById('indivLat').value;
+        const lng = document.getElementById('indivLng').value;
+        const acc = document.getElementById('indivAccuracy').value;
+        const checkType = document.querySelector('input[name="indivCheckType"]:checked').value;
+
+        if (!b64) {
+            alert("कृपया पहले कैमरे से फोटो खींचें!");
+            return;
+        }
+
+        const btn = document.getElementById('indivSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> दर्ज हो रही है...';
+
+        try {
+            const res = await fetch('/api/geo-attendance/photo-checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    worker_id: workerId,
+                    site_id: siteId,
+                    photo: b64,
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: acc,
+                    check_type: checkType,
+                    date: '{{ date_str }}'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                closeIndividualPhotoModal();
+                window.location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>उपस्थिति दर्ज करें</span>';
+        }
+    }
+
+    // Group Photo Modal Handlers
+    async function openGroupPhotoModal(siteId, siteName) {
+        document.getElementById('groupSiteId').value = siteId;
+        document.getElementById('groupModalSiteName').textContent = `${siteName} — सामूहिक फोटो`;
+        document.getElementById('groupPhotoBase64').value = '';
+        document.getElementById('groupLat').value = '';
+        document.getElementById('groupLng').value = '';
+        document.getElementById('groupAccuracy').value = '';
+
+        document.getElementById('groupPreviewImg').classList.add('hidden');
+        document.getElementById('groupPlaceholder').classList.remove('hidden');
+        document.getElementById('groupSubmitBtn').disabled = true;
+
+        const checklist = document.getElementById('groupWorkersChecklist');
+        checklist.innerHTML = '';
+        const siteData = bySiteMap[siteId];
+        if (siteData && siteData.workers && siteData.workers.length > 0) {
+            siteData.workers.forEach(w => {
+                const item = document.createElement('label');
+                item.className = "flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-emerald-50/50 transition";
+                item.innerHTML = `
+                    <input type="checkbox" name="groupWorkerCheck" value="${w.worker_id}" checked class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                    <div class="flex-1 text-xs">
+                        <strong class="text-slate-800">${w.worker_name}</strong>
+                        <span class="text-[10px] text-slate-500 ml-1">(${w.role})</span>
+                    </div>
+                `;
+                checklist.appendChild(item);
+            });
+        } else {
+            checklist.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">इस साइट पर कोई वर्कर नहीं मिला।</div>';
+        }
+
+        document.getElementById('groupPhotoModal').classList.remove('hidden');
+
+        try {
+            const gps = await getLiveGpsCoords();
+            document.getElementById('groupLat').value = gps.latitude.toFixed(6);
+            document.getElementById('groupLng').value = gps.longitude.toFixed(6);
+            document.getElementById('groupAccuracy').value = Math.round(gps.accuracy);
+            document.getElementById('groupLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
+            document.getElementById('groupLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+        } catch (e) {
+            document.getElementById('groupLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
+            document.getElementById('groupLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+        }
+    }
+
+    function closeGroupPhotoModal() {
+        document.getElementById('groupPhotoModal').classList.add('hidden');
+    }
+
+    function toggleAllGroupWorkers() {
+        const boxes = document.querySelectorAll('input[name="groupWorkerCheck"]');
+        const anyUnchecked = Array.from(boxes).some(b => !b.checked);
+        boxes.forEach(b => b.checked = anyUnchecked);
+    }
+
+    async function handleGroupNativePhotoFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const b64 = await fileToBase64Resized(file, 1280, 0.85);
+        document.getElementById('groupPhotoBase64').value = b64;
+        const img = document.getElementById('groupPreviewImg');
+        img.src = b64;
+        img.classList.remove('hidden');
+        document.getElementById('groupPlaceholder').classList.add('hidden');
+        document.getElementById('groupSubmitBtn').disabled = false;
+    }
+
+    async function submitGroupPhoto(e) {
+        e.preventDefault();
+        const siteId = document.getElementById('groupSiteId').value;
+        const b64 = document.getElementById('groupPhotoBase64').value;
+        const lat = document.getElementById('groupLat').value;
+        const lng = document.getElementById('groupLng').value;
+        const acc = document.getElementById('groupAccuracy').value;
+
+        const checkedBoxes = document.querySelectorAll('input[name="groupWorkerCheck"]:checked');
+        const workerIds = Array.from(checkedBoxes).map(b => parseInt(b.value));
+
+        if (!b64) {
+            alert("कृपया पहले कैमरे से सामूहिक फोटो खींचें!");
+            return;
+        }
+
+        if (workerIds.length === 0) {
+            alert("कम से कम 1 वर्कर चुनना आवश्यक है!");
+            return;
+        }
+
+        const btn = document.getElementById('groupSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> दर्ज हो रही है...';
+
+        try {
+            const res = await fetch('/api/geo-attendance/photo-checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    worker_ids: workerIds,
+                    site_id: siteId,
+                    photo: b64,
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: acc,
+                    check_type: 'check_in',
+                    date: '{{ date_str }}'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                closeGroupPhotoModal();
+                window.location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>सामूहिक हाजिरी दर्ज करें</span>';
+        }
+    }
+
+    // Photo Lightbox Viewer
+    function viewPhotoLightbox(photoUrl, workerName, role, siteName, checkinTime, lat, lng) {
+        document.getElementById('lightboxImg').src = photoUrl;
+        document.getElementById('lightboxWorkerTitle').textContent = `${workerName} (${role})`;
+        document.getElementById('lightboxSiteName').textContent = siteName;
+        document.getElementById('lightboxCheckinTime').textContent = checkinTime || '—';
+
+        if (lat && lng) {
+            document.getElementById('lightboxGpsCoords').textContent = `GPS: ${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}`;
+            document.getElementById('lightboxMapLink').href = `https://www.google.com/maps?q=${lat},${lng}`;
+            document.getElementById('lightboxMapLink').classList.remove('hidden');
+        } else {
+            document.getElementById('lightboxGpsCoords').textContent = 'GPS: लोकेशन रिकॉर्ड नहीं';
+            document.getElementById('lightboxMapLink').classList.add('hidden');
+        }
+
+        document.getElementById('photoLightboxModal').classList.remove('hidden');
+    }
+
+    function closePhotoLightbox() {
+        document.getElementById('photoLightboxModal').classList.add('hidden');
+    }
+
     // Refresh data periodically
     let autoRefreshTimer = setInterval(() => {
         const icon = document.getElementById('refreshIcon');

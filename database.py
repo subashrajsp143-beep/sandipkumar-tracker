@@ -1181,6 +1181,12 @@ def init_gps_tables():
     if "nearest_point_name" not in ping_cols:
         cursor.execute("ALTER TABLE worker_location_pings ADD COLUMN nearest_point_name TEXT")
 
+    # Migration for geo_attendance: photo_url if missing
+    cursor.execute("PRAGMA table_info(geo_attendance)")
+    geo_cols = [r[1] for r in cursor.fetchall()]
+    if "photo_url" not in geo_cols:
+        cursor.execute("ALTER TABLE geo_attendance ADD COLUMN photo_url TEXT")
+
     # 5. Multi-location sub-points per site (e.g. Siwan 4-5 points: Pump House, Tank, Ward 4 Pipeline, etc.)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS site_geo_points (
@@ -1260,6 +1266,22 @@ def get_worker_by_token(token):
         JOIN sites s ON w.site_id = s.id
         WHERE w.worker_token = ? AND w.is_active = 1
     """, (token,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_worker_by_id(worker_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.*, s.name as site_name, s.code as site_code,
+               s.latitude as site_lat, s.longitude as site_lng,
+               s.geo_radius as site_radius
+        FROM site_workers w
+        JOIN sites s ON w.site_id = s.id
+        WHERE w.id = ?
+    """, (worker_id,))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
@@ -1837,6 +1859,7 @@ def get_geo_attendance_today(date_str=None):
                s.id as site_id, s.name as site_name, s.code as site_code,
                a.check_in_time, a.check_out_time, a.total_minutes,
                a.status as att_status,
+               a.photo_url,
                p.latitude as last_lat, p.longitude as last_lng,
                p.distance_meters as last_dist, p.ping_time as last_ping,
                p.is_on_site as last_on_site,
@@ -1853,6 +1876,95 @@ def get_geo_attendance_today(date_str=None):
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return rows, date_str
+
+
+def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_date=None, check_type='check_in'):
+    """
+    Saves an attendance photo entry for a worker:
+    - Records GPS coordinates into worker_location_pings
+    - Updates or inserts geo_attendance with photo_url and check_in_time/check_out_time
+    """
+    import datetime as dt
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    if not att_date:
+        att_date = ist_now.strftime("%Y-%m-%d")
+    now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM sites WHERE id = ?", (site_id,))
+    site = cursor.fetchone()
+    site_lat = site["latitude"] if site and "latitude" in site.keys() else None
+    site_lng = site["longitude"] if site and "longitude" in site.keys() else None
+    radius = site["geo_radius"] if site and "geo_radius" in site.keys() and site["geo_radius"] else 1000
+
+    distance = 0.0
+    is_on_site = True
+    nearest_point = "फोटो हाजिरी"
+
+    if lat and lng:
+        try:
+            distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+                site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=att_date
+            )
+        except Exception:
+            distance = 0.0
+            is_on_site = True
+            nearest_point = "फोटो हाजिरी"
+
+        cursor.execute("""
+            INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, nearest_point_name, ping_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (worker_id, float(lat), float(lng), round(distance, 1), 1 if is_on_site else 0, f"📸 फोटो हाजिरी ({nearest_point})", now_str))
+
+    cursor.execute("""
+        SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
+    """, (worker_id, att_date))
+    att = cursor.fetchone()
+
+    action = "checked_in"
+    if not att:
+        cursor.execute("""
+            INSERT INTO geo_attendance (worker_id, site_id, att_date, check_in_time, status, photo_url)
+            VALUES (?, ?, ?, ?, 'present', ?)
+        """, (worker_id, site_id, att_date, now_str, photo_url))
+        action = "checked_in"
+    else:
+        att = dict(att)
+        if check_type == 'check_out':
+            try:
+                cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S") if att.get("check_in_time") else ist_now
+                minutes = int((ist_now - cin).total_seconds() / 60)
+            except Exception:
+                minutes = 0
+            cursor.execute("""
+                UPDATE geo_attendance
+                SET check_out_time = ?, total_minutes = ?, status = 'left', photo_url = COALESCE(?, photo_url)
+                WHERE worker_id = ? AND att_date = ?
+            """, (now_str, max(0, minutes), photo_url, worker_id, att_date))
+            action = "checked_out"
+        else:
+            new_cin = att["check_in_time"] if att.get("check_in_time") else now_str
+            cursor.execute("""
+                UPDATE geo_attendance
+                SET check_in_time = ?, status = 'present', photo_url = ?
+                WHERE worker_id = ? AND att_date = ?
+            """, (new_cin, photo_url, worker_id, att_date))
+            action = "photo_saved"
+
+    cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "action": action,
+        "photo_url": photo_url,
+        "is_on_site": is_on_site,
+        "distance_m": round(distance, 1),
+        "timestamp": now_str
+    }
 
 
 def get_geo_attendance_monthly(site_id, month_str):

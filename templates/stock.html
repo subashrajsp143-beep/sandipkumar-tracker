@@ -437,7 +437,7 @@
                     <option value="">सामान चुनें (उदा. SOLVENT, Pipe, Valve)...</option>
                     {% for m in materials %}
                     <option value="{{ m.id }}" data-unit="{{ m.unit }}">
-                        {{ m.name }} [{{ m.unit }}] — ₹{{ m.rate or 0 }}
+                        {{ m.name }} [{{ m.unit }}]{% if is_owner %} — ₹{{ m.rate or 0 }}{% endif %}
                     </option>
                     {% endfor %}
                 </select>

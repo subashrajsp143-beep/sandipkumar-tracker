@@ -39,11 +39,13 @@
                 <span>📅 दैनिक रिपोर्ट (Daily)</span>
             </a>
 
+            {% if is_owner %}
             <!-- 2. Monthly Tab -->
             <a href="{{ url_for('reports_hub', tab='monthly') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'monthly' %}bg-white text-indigo-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
                 <i class="fa-solid fa-calendar-days {% if active_tab == 'monthly' %}text-indigo-600{% else %}text-indigo-300{% endif %}"></i>
                 <span>📆 मासिक रिपोर्ट (Monthly)</span>
             </a>
+            {% endif %}
 
             <!-- 3. Site Wise Tab -->
             <a href="{{ url_for('reports_hub', tab='site') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'site' %}bg-white text-teal-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
@@ -110,11 +112,13 @@
                 <p class="text-2xl font-black text-indigo-700 mt-1">{{ site_summaries|length }} / {{ sites|length }} साइट्स</p>
                 <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">जहाँ माल लगा</span>
             </div>
+            {% if is_owner %}
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">आज का कुल खर्च</span>
                 <p class="text-2xl font-black text-emerald-700 mt-1">₹{{ "{:,.2f}".format(total_day_cost) }}</p>
                 <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">Estimated Day Cost</span>
             </div>
+            {% endif %}
         </div>
 
         <!-- Sites Active Today -->
@@ -132,9 +136,11 @@
                         <span class="font-bold text-slate-800 text-xs block truncate">{{ s.site_name }}</span>
                         <span class="text-[11px] text-slate-500">{{ s.items_count }} आइटम लगे</span>
                     </div>
+                    {% if is_owner %}
                     <div class="text-right">
                         <span class="font-mono font-bold text-emerald-700 text-xs">₹{{ "{:,.0f}".format(s.site_total_cost) }}</span>
                     </div>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </div>
@@ -163,8 +169,10 @@
                             <th class="py-3 px-3">सामग्री (Material Description)</th>
                             <th class="py-3 px-3 text-right">मात्रा (Qty)</th>
                             <th class="py-3 px-3 text-center">इकाई</th>
+                            {% if is_owner %}
                             <th class="py-3 px-3 text-right">दर (₹)</th>
                             <th class="py-3 px-3 text-right">कुल राशि (₹)</th>
+                            {% endif %}
                             <th class="py-3 px-3">काम / उद्देश्य (Purpose)</th>
                             <th class="py-3 px-3">सुपरवाइजर</th>
                             <th class="py-3 px-2 text-center no-print owner-only hidden">हटाएं</th>
@@ -182,8 +190,10 @@
                             <td class="py-2.5 px-3 font-semibold text-slate-800">{{ entry.material_name }}</td>
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">{{ entry.quantity }}</td>
                             <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-100 font-mono text-[10px]">{{ entry.material_unit }}</span></td>
+                            {% if is_owner %}
                             <td class="py-2.5 px-3 text-right font-mono text-slate-500">₹{{ entry.rate }}</td>
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
+                            {% endif %}
                             <td class="py-2.5 px-3 text-slate-600">{{ entry.purpose or '-' }}</td>
                             <td class="py-2.5 px-3 text-slate-500">{{ entry.entered_by or '-' }}</td>
                             <td class="py-2.5 px-2 text-center no-print owner-only hidden">
@@ -440,10 +450,12 @@
                 <h3 class="text-xl font-black mt-1">{{ selected_site.name }}</h3>
                 <p class="text-xs text-teal-200 mt-0.5">सुपरवाइजर: {{ selected_site.supervisor or '-' }} | लोकेशन: {{ selected_site.location or '-' }}</p>
             </div>
+            {% if is_owner %}
             <div class="text-left sm:text-right">
                 <span class="text-xs text-teal-300 block">कुल सामग्री खपत मूल्य</span>
                 <span class="text-2xl sm:text-3xl font-black text-emerald-300 font-mono">₹{{ "{:,.2f}".format(grand_total) }}</span>
             </div>
+            {% endif %}
         </div>
 
         <!-- Material-wise Summary for this site -->
@@ -455,7 +467,9 @@
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                     <div class="font-bold text-slate-800 text-xs truncate">{{ m.material_name }}</div>
                     <div class="text-xs font-mono font-bold text-teal-700 mt-1">{{ m.total_qty }} {{ m.unit }}</div>
+                    {% if is_owner %}
                     <div class="text-[11px] text-slate-500 font-mono mt-0.5">₹{{ "{:,.0f}".format(m.total_amount) }}</div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -477,8 +491,10 @@
                             <th class="py-2.5 px-3">सामग्री</th>
                             <th class="py-2.5 px-3 text-right">मात्रा</th>
                             <th class="py-2.5 px-3 text-center">इकाई</th>
+                            {% if is_owner %}
                             <th class="py-2.5 px-3 text-right">दर (₹)</th>
                             <th class="py-2.5 px-3 text-right">कुल (₹)</th>
+                            {% endif %}
                             <th class="py-2.5 px-3">काम / विवरण</th>
                         </tr>
                     </thead>
@@ -489,8 +505,10 @@
                             <td class="py-2.5 px-3 font-semibold text-slate-800">{{ entry.material_name }}</td>
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">{{ entry.quantity }}</td>
                             <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded bg-slate-100 font-mono text-[10px]">{{ entry.material_unit }}</span></td>
+                            {% if is_owner %}
                             <td class="py-2.5 px-3 text-right font-mono text-slate-500">₹{{ entry.rate }}</td>
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
+                            {% endif %}
                             <td class="py-2.5 px-3 text-slate-600">{{ entry.purpose or '-' }}</td>
                         </tr>
                         {% else %}
@@ -528,7 +546,7 @@
                 <select name="material_id" onchange="this.form.submit()" class="w-72 px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 font-bold text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
                     {% for m in materials %}
                     <option value="{{ m.id }}" {% if selected_mat_id == m.id %}selected{% endif %}>
-                        {{ m.name }} (₹{{ m.unit_rate }}/{{ m.unit }})
+                        {{ m.name }} {% if is_owner %}(₹{{ m.unit_rate }}/{{ m.unit }}){% else %}({{ m.unit }}){% endif %}
                     </option>
                     {% endfor %}
                 </select>
@@ -540,12 +558,16 @@
             <div>
                 <span class="px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-200 text-xs font-mono font-bold">{{ selected_material.category or 'Material' }}</span>
                 <h3 class="text-xl font-black mt-1">{{ selected_material.name }}</h3>
+                {% if is_owner %}
                 <p class="text-xs text-amber-200 mt-0.5">दर: ₹{{ selected_material.unit_rate }} प्रति {{ selected_material.unit }}</p>
+                {% endif %}
             </div>
             <div class="text-left sm:text-right">
                 <span class="text-xs text-amber-300 block">सभी साइट्स पर कुल खपत</span>
                 <span class="text-2xl sm:text-3xl font-black text-amber-300 font-mono">{{ total_qty }} {{ selected_material.unit }}</span>
+                {% if is_owner %}
                 <div class="text-xs text-amber-200 mt-0.5">कुल मूल्य: ₹{{ "{:,.2f}".format(total_cost) }}</div>
+                {% endif %}
             </div>
         </div>
 
@@ -559,7 +581,9 @@
                             <th class="py-2.5 px-3">साइट कोड</th>
                             <th class="py-2.5 px-3">साइट का नाम</th>
                             <th class="py-2.5 px-3 text-right">खपत मात्रा</th>
+                            {% if is_owner %}
                             <th class="py-2.5 px-3 text-right">कुल खर्च (₹)</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -568,7 +592,9 @@
                             <td class="py-2.5 px-3 font-mono font-bold text-blue-700">{{ su.site_code }}</td>
                             <td class="py-2.5 px-3 font-semibold text-slate-800">{{ su.site_name }}</td>
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">{{ su.total_quantity }} {{ selected_material.unit }}</td>
+                            {% if is_owner %}
                             <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700">₹{{ "{:,.2f}".format(su.total_cost) }}</td>
+                            {% endif %}
                         </tr>
                         {% else %}
                         <tr>

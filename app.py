@@ -41,7 +41,8 @@ def inject_common():
         "user_name": session.get("worker_name", ""),
         "user_site_id": session.get("site_id", None),
         "user_site_name": session.get("site_name", ""),
-        "all_sites_list": database.get_all_sites()
+        "all_sites_list": database.get_all_sites(),
+        "is_owner": session.get("is_owner", False) or session.get("role") == "owner"
     }
 
 @app.before_request
@@ -313,7 +314,7 @@ exit
 @app.route("/entry")
 @app.route("/daily-entry")
 def daily_entry():
-    is_owner = session.get("is_owner", False)
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
     sites = database.get_all_sites()
     locked_site = None
@@ -323,6 +324,15 @@ def daily_entry():
         sites = [s for s in sites if s["id"] == user_site_id]
 
     materials = database.get_all_materials()
+    if not is_owner:
+        # Strict Price Shield: Zero out rates so they never leak to supervisors/DEO via JSON or DOM
+        sanitized_materials = []
+        for m in materials:
+            mc = dict(m)
+            mc["rate"] = 0
+            sanitized_materials.append(mc)
+        materials = sanitized_materials
+
     today_str = datetime.date.today().strftime("%Y-%m-%d")
     return render_template(
         "daily_entry.html", 
@@ -330,7 +340,8 @@ def daily_entry():
         materials=materials, 
         today=today_str,
         locked_site_id=user_site_id if not is_owner else None,
-        locked_site=locked_site
+        locked_site=locked_site,
+        is_owner=is_owner
     )
 
 @app.route("/api/entries", methods=["POST"])
@@ -347,7 +358,7 @@ def save_entries():
             return jsonify({"success": False, "message": "Site aur materials select karna anivarya hai."}), 400
 
         # Security check: If not owner, prevent posting to other sites
-        is_owner = session.get("is_owner", False)
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
         if not is_owner and user_site_id:
             if site_id != int(user_site_id):
@@ -359,6 +370,13 @@ def save_entries():
             qty = float(item["quantity"])
             rate = float(item.get("rate", 0))
             item_remarks = item.get("remarks", "")
+
+            # Auto-fill standard rate from DB for supervisors / non-owners to maintain accurate financial ledgers
+            if not is_owner or rate <= 0:
+                mat_info = database.get_material_by_id(mat_id)
+                if mat_info and mat_info.get("rate"):
+                    rate = float(mat_info["rate"])
+
             if qty > 0:
                 database.add_consumption_entry(
                     site_id=site_id,
@@ -581,7 +599,7 @@ def parse_text():
 # 2.3 Material Store & Requisition
 @app.route("/store")
 def material_store():
-    is_owner = session.get("is_owner", False)
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
 
     sites = database.get_all_sites()
@@ -592,6 +610,14 @@ def material_store():
         sites = [s for s in sites if s["id"] == user_site_id]
 
     materials = database.get_all_materials()
+    if not is_owner:
+        sanitized_materials = []
+        for m in materials:
+            mc = dict(m)
+            mc["rate"] = 0
+            sanitized_materials.append(mc)
+        materials = sanitized_materials
+
     today_str = datetime.date.today().strftime("%Y-%m-%d")
     categories = sorted(list(set(m["category"] for m in materials if m.get("category"))))
     return render_template(
@@ -601,7 +627,8 @@ def material_store():
         categories=categories, 
         today=today_str,
         locked_site_id=user_site_id if not is_owner else None,
-        locked_site=locked_site
+        locked_site=locked_site,
+        is_owner=is_owner
     )
 
 def process_and_save_photo(url_or_path, material_id):
@@ -1128,9 +1155,9 @@ def delete_site(site_id):
 # 9. Materials Master Management
 @app.route("/materials")
 def materials_list():
-    is_owner = session.get("is_owner", False)
-    user_site_id = session.get("site_id")
-    if not is_owner and user_site_id:
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
+    if not is_owner:
+        flash("❌ सामग्री व मूल्य सूची (Rate Master) केवल मालिक (Owner) के लिए अधिकृत है।", "error")
         return redirect(url_for("site_stock"))
 
     materials = database.get_all_materials()
@@ -1756,6 +1783,14 @@ def site_stock():
         sites = [s for s in sites if s["id"] == int(user_site_id)]
 
     materials = database.get_all_materials()
+    if not is_owner:
+        sanitized_materials = []
+        for m in materials:
+            mc = dict(m)
+            mc["rate"] = 0
+            sanitized_materials.append(mc)
+        materials = sanitized_materials
+
     stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
     overview = database.get_all_sites_stock_overview()
 
@@ -2026,6 +2061,116 @@ def worker_location_ping():
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/geo-attendance/photo-checkin", methods=["POST", "OPTIONS"])
+def geo_attendance_photo_checkin():
+    """
+    Supervisor / Worker photo attendance endpoint with GPS stamping.
+    Accepts individual or group photo check-in.
+    """
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        is_json = request.is_json
+        if is_json:
+            data = request.get_json() or {}
+            photo_data = data.get("photo")
+            worker_id_raw = data.get("worker_id")
+            worker_ids = data.get("worker_ids")
+            site_id = int(data.get("site_id", 0))
+            lat = data.get("latitude")
+            lng = data.get("longitude")
+            accuracy = data.get("accuracy", 0)
+            check_type = data.get("check_type", "check_in")
+            att_date = data.get("date")
+        else:
+            photo_file = request.files.get("photo")
+            photo_data = photo_file or request.form.get("photo_base64")
+            worker_id_raw = request.form.get("worker_id")
+            worker_ids_str = request.form.get("worker_ids")
+            worker_ids = [int(x.strip()) for x in worker_ids_str.split(",") if x.strip().isdigit()] if worker_ids_str else None
+            site_id = int(request.form.get("site_id", 0))
+            lat = request.form.get("latitude")
+            lng = request.form.get("longitude")
+            accuracy = request.form.get("accuracy", 0)
+            check_type = request.form.get("check_type", "check_in")
+            att_date = request.form.get("date")
+
+        if not photo_data:
+            return jsonify({"success": False, "message": "कृपया उपस्थिति फोटो लें।"}), 400
+
+        target_wids = []
+        if worker_ids and isinstance(worker_ids, list):
+            target_wids = [int(w) for w in worker_ids if w]
+        elif worker_id_raw:
+            if str(worker_id_raw).isdigit():
+                target_wids = [int(worker_id_raw)]
+            elif "," in str(worker_id_raw):
+                target_wids = [int(x.strip()) for x in str(worker_id_raw).split(",") if x.strip().isdigit()]
+
+        if not target_wids:
+            return jsonify({"success": False, "message": "कम से कम 1 वर्कर चुनना आवश्यक है।"}), 400
+
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner"
+        user_site_id = session.get("site_id")
+
+        primary_worker = database.get_worker_by_id(target_wids[0]) if target_wids else None
+        if not site_id and primary_worker:
+            site_id = primary_worker["site_id"]
+
+        if not is_owner and user_site_id and site_id and int(user_site_id) != site_id:
+            return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अपनी साइट की हाजिरी दर्ज कर सकते हैं।"}), 403
+
+        site = database.get_site_by_id(site_id) if site_id else None
+        site_name = site["name"] if site else (primary_worker["site_name"] if primary_worker else "Site")
+        site_code = site["code"] if site else (primary_worker["site_code"] if primary_worker else f"SITE-{site_id}")
+
+        w_name = primary_worker["name"] if primary_worker else "Worker"
+        w_role = primary_worker["role"] if primary_worker else "Staff"
+        if len(target_wids) > 1:
+            w_name = f"{w_name} + {len(target_wids)-1} अन्य वर्कर (Group Photo)"
+            w_role = "Team / Group"
+
+        # Process photo with GPS watermark
+        photo_url = photo_service.process_and_save_attendance_photo(
+            file_storage=photo_data,
+            worker_name=w_name,
+            worker_role=w_role,
+            site_name=site_name,
+            site_code=site_code,
+            lat=lat,
+            lng=lng,
+            accuracy=accuracy,
+            att_date=att_date,
+            check_type=check_type
+        )
+
+        results = []
+        for wid in target_wids:
+            res = database.save_worker_photo_attendance(
+                worker_id=wid,
+                site_id=site_id,
+                lat=lat,
+                lng=lng,
+                photo_url=photo_url,
+                att_date=att_date,
+                check_type=check_type
+            )
+            results.append({"worker_id": wid, **res})
+
+        action_hindi = "चेक-इन (आए)" if check_type == 'check_in' else "चेक-आउट (गए)"
+        msg = f"✅ {len(target_wids)} वर्कर की फोटो उपस्थिति ({action_hindi}) GPS के साथ दर्ज हो गई!"
+
+        return jsonify({
+            "success": True,
+            "message": msg,
+            "photo_url": photo_url,
+            "updated_count": len(target_wids),
+            "workers": results
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": f"फोटो हाजिरी दर्ज करने में त्रुटि: {str(e)}"}), 500
 
 
 @app.route("/worker/<token>")

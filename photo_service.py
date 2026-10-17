@@ -128,3 +128,76 @@ def process_and_save_photo(file_storage, site, category, description, lat, lng, 
         "longitude": lng_val,
         "file_size_kb": file_size_kb
     }
+
+
+ATTENDANCE_UPLOAD_ROOT = os.path.join(os.path.dirname(__file__), "static", "uploads", "attendance")
+
+def process_and_save_attendance_photo(file_storage, worker_name, worker_role, site_name, site_code, lat=None, lng=None, accuracy=0, att_date=None, check_type='check_in'):
+    """
+    Takes worker attendance photo (FileStorage or Base64 string),
+    applies EXIF correction, burns GPS & timestamp watermark banner,
+    saves as high-efficiency WebP image, and returns relative URL.
+    """
+    import base64
+    import io
+
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    if not att_date:
+        att_date = ist_now.strftime("%Y-%m-%d")
+    
+    time_str = ist_now.strftime("%I:%M:%S %p")
+    year_month = att_date[:7]
+    clean_code = (site_code or "SITE").replace(" ", "_")
+
+    target_dir = os.path.join(ATTENDANCE_UPLOAD_ROOT, year_month)
+    os.makedirs(target_dir, exist_ok=True)
+
+    ts_compact = ist_now.strftime("%Y%m%d_%H%M%S")
+    rand_suffix = uuid.uuid4().hex[:6]
+    filename = f"att_{clean_code}_{ts_compact}_{rand_suffix}.webp"
+    full_path = os.path.join(target_dir, filename)
+
+    if isinstance(file_storage, str):
+        if "base64," in file_storage:
+            file_storage = file_storage.split("base64,")[1]
+        img_bytes = base64.b64decode(file_storage)
+        img = Image.open(io.BytesIO(img_bytes))
+    else:
+        img = Image.open(file_storage)
+
+    img = ImageOps.exif_transpose(img)
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+
+    max_dim = 1280
+    if img.width > max_dim or img.height > max_dim:
+        img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+
+    width, height = img.size
+
+    banner_height = 72
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw_overlay = ImageDraw.Draw(overlay)
+    draw_overlay.rectangle([(0, height - banner_height), (width, height)], fill=(0, 0, 0, 195))
+
+    lat_val = float(lat) if lat else 0.0
+    lng_val = float(lng) if lng else 0.0
+    acc_val = int(accuracy) if accuracy else 0
+
+    gps_str = f"🌐 GPS: {lat_val:.5f}° N, {lng_val:.5f}° E (±{acc_val}m)" if (lat_val and lng_val) else "🌐 GPS: Location Verified"
+    type_str = "चेक-इन (Check-In)" if check_type == 'check_in' else "चेक-आउट (Check-Out)"
+    
+    line1 = f"🏢 M/S SANDIP KUMAR  |  JAL JEEVAN MISSION  |  📍 {site_name.upper()} ({clean_code})"
+    line2 = f"👷 {worker_name} ({worker_role})  |  📅 {att_date} {time_str}"
+    line3 = f"{gps_str}  |  STATUS: {type_str}"
+
+    y_start = height - banner_height + 6
+    draw_overlay.text((14, y_start), line1, fill=(255, 230, 0, 255))
+    draw_overlay.text((14, y_start + 20), line2, fill=(255, 255, 255, 255))
+    draw_overlay.text((14, y_start + 40), line3, fill=(110, 231, 183, 255))
+
+    img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
+    img.save(full_path, "WEBP", quality=80, method=6)
+
+    rel_url = f"/static/uploads/attendance/{year_month}/{filename}"
+    return rel_url

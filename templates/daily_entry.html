@@ -186,8 +186,10 @@
                             <th class="py-3 px-3 min-w-[260px]">Material Name (Chunein ya Type karein)</th>
                             <th class="py-3 px-3 w-24 text-center">Unit</th>
                             <th class="py-3 px-3 w-28 text-right">Quantity</th>
+                            {% if is_owner %}
                             <th class="py-3 px-3 w-28 text-right">Rate (₹)</th>
                             <th class="py-3 px-3 w-32 text-right">Total Amount (₹)</th>
+                            {% endif %}
                             <th class="py-3 px-3 min-w-[140px]">Specific Remarks</th>
                             <th class="py-3 px-2 w-12 text-center">Action</th>
                         </tr>
@@ -206,10 +208,12 @@
                     <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Kul Items Count</span>
                     <span id="totalItemsCount" class="text-lg font-bold text-blue-900">0</span>
                 </div>
+                {% if is_owner %}
                 <div class="border-l border-blue-200 pl-6">
                     <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Grand Total Value</span>
                     <span id="grandTotalDisplay" class="text-xl font-extrabold text-blue-900">₹0.00</span>
                 </div>
+                {% endif %}
             </div>
 
             <div class="flex items-center gap-3">
@@ -320,14 +324,15 @@
 <!-- Datalist for fast material autocomplete -->
 <datalist id="materialsDataList">
     {% for mat in materials %}
-    <option value="{{ mat.name }}" data-id="{{ mat.id }}" data-unit="{{ mat.unit }}" data-rate="{{ mat.rate }}" data-category="{{ mat.category }}">
-        {{ mat.name }} (₹{{ mat.rate }} / {{ mat.unit }})
+    <option value="{{ mat.name }}" data-id="{{ mat.id }}" data-unit="{{ mat.unit }}" data-rate="{% if is_owner %}{{ mat.rate }}{% else %}0{% endif %}" data-category="{{ mat.category }}">
+        {{ mat.name }} {% if is_owner %}(₹{{ mat.rate }} / {{ mat.unit }}){% else %}({{ mat.unit }}){% endif %}
     </option>
     {% endfor %}
 </datalist>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const isOwner = {{ 'true' if is_owner else 'false' }};
     const materialsData = {{ materials|tojson }};
     const matLookupByName = {};
     const matLookupById = {};
@@ -530,13 +535,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="number" step="any" min="0.001" required value="${item.quantity}" 
                         class="w-full text-right rounded-lg border-emerald-300 py-1.5 px-2 text-xs font-bold text-slate-800 border focus:border-blue-500 qty-input">
                 </td>
+                ${isOwner ? `
                 <td class="py-2.5 px-3 text-right">
-                    <input type="number" step="any" min="0" value="${item.rate}" 
+                    <input type="number" step="any" min="0" value="${item.rate || 0}" 
                         class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-mono text-slate-700 border focus:border-blue-500 rate-input">
                 </td>
                 <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700 row-amount">
-                    ₹${(item.quantity * item.rate).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    ₹${((item.quantity || 0) * (item.rate || 0)).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </td>
+                ` : `
+                <input type="hidden" class="rate-input" value="0">
+                `}
                 <td class="py-2.5 px-3">
                     <input type="text" placeholder="Remarks" value="Auto-scanned from parchi"
                         class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
@@ -558,12 +567,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function updateRowTotal() {
                 const q = parseFloat(qtyInput.value) || 0;
-                const r = parseFloat(rateInput.value) || 0;
-                rowAmount.textContent = "₹" + (q * r).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const r = rateInput ? (parseFloat(rateInput.value) || 0) : 0;
+                if (rowAmount) {
+                    rowAmount.textContent = "₹" + (q * r).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
                 recalcGrandTotal();
             }
             qtyInput.addEventListener('input', updateRowTotal);
-            rateInput.addEventListener('input', updateRowTotal);
+            if (rateInput) rateInput.addEventListener('input', updateRowTotal);
             delBtn.addEventListener('click', function() {
                 tr.remove();
                 recalcRowNumbers();
@@ -638,6 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" step="any" min="0.001" required placeholder="Qty" 
                     class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-bold text-slate-800 border focus:border-blue-500 focus:ring-blue-500 qty-input">
             </td>
+            ${isOwner ? `
             <td class="py-2.5 px-3 text-right">
                 <input type="number" step="any" min="0" placeholder="0.00" 
                     class="w-full text-right rounded-lg border-slate-300 py-1.5 px-2 text-xs font-mono text-slate-700 border focus:border-blue-500 focus:ring-blue-500 rate-input">
@@ -645,6 +657,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700 row-amount">
                 ₹0.00
             </td>
+            ` : `
+            <input type="hidden" class="rate-input" value="0">
+            `}
             <td class="py-2.5 px-3">
                 <input type="text" placeholder="Remarks" 
                     class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
@@ -674,11 +689,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (matched) {
                 matIdInput.value = matched.id;
                 unitBadge.textContent = matched.unit;
-                rateInput.value = matched.rate || 0;
+                if (rateInput) rateInput.value = isOwner ? (matched.rate || 0) : 0;
                 if (rowMatImg) rowMatImg.src = matched.image_url || '/uploads/materials/fittings.jpg';
             } else {
                 matIdInput.value = "";
                 unitBadge.textContent = "-";
+                if (rateInput) rateInput.value = 0;
                 if (rowMatImg) rowMatImg.src = '/uploads/materials/fittings.jpg';
             }
             updateRowTotal();
@@ -686,14 +702,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function updateRowTotal() {
             const q = parseFloat(qtyInput.value) || 0;
-            const r = parseFloat(rateInput.value) || 0;
+            const r = rateInput ? (parseFloat(rateInput.value) || 0) : 0;
             const total = q * r;
-            rowAmount.textContent = "₹" + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (rowAmount) {
+                rowAmount.textContent = "₹" + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
             recalcGrandTotal();
         }
 
         qtyInput.addEventListener('input', updateRowTotal);
-        rateInput.addEventListener('input', updateRowTotal);
+        if (rateInput) rateInput.addEventListener('input', updateRowTotal);
 
         delBtn.addEventListener('click', function() {
             tr.remove();
@@ -711,11 +729,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function recalcGrandTotal() {
+        if (!grandTotalDisplay) return;
         let total = 0;
         const rows = itemsTableBody.querySelectorAll('.item-row');
         rows.forEach(row => {
             const q = parseFloat(row.querySelector('.qty-input').value) || 0;
-            const r = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const rEl = row.querySelector('.rate-input');
+            const r = rEl ? (parseFloat(rEl.value) || 0) : 0;
             total += (q * r);
         });
         grandTotalDisplay.textContent = "₹" + total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -749,7 +769,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const matName = row.querySelector('.mat-input').value.trim();
             const matId = row.querySelector('.mat-id-input').value;
             const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const rEl = row.querySelector('.rate-input');
+            const rate = rEl ? (parseFloat(rEl.value) || 0) : 0;
             const remarks = row.querySelector('.remarks-input').value.trim();
 
             if (!matName || qty <= 0) continue;
