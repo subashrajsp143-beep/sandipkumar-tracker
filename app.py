@@ -80,7 +80,7 @@ def ensure_canonical_and_auth():
             return redirect(url_for("login_page"))
 
 
-# 24/7 Keep-Alive Background Worker (Prevents Render Free Tier Cold-Start Sleep)
+# 24/7 Keep-Alive & 10:30 AM GPS Attendance Auto-Analyzer Daemon
 def _start_keep_alive_daemon():
     def ping_worker():
         import time
@@ -91,7 +91,9 @@ def _start_keep_alive_daemon():
             "https://sandipkumar-tracker.onrender.com/api/live-status",
             "https://ms-sandipkumar-tracker.onrender.com/api/live-status"
         ]
+        last_synced_date = None
         while True:
+            # 1. 24/7 Render Keep-Alive Ping
             for url in target_urls:
                 try:
                     req = urllib.request.Request(
@@ -101,8 +103,21 @@ def _start_keep_alive_daemon():
                     urllib.request.urlopen(req, timeout=12)
                 except Exception:
                     pass
-            # Sleep 8 minutes (480 seconds) - keeps Render from sleeping after 15 min idle
-            time.sleep(480)
+
+            # 2. Check IST time for 10:30 AM Auto-Sync
+            try:
+                ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+                today_str = ist_now.strftime("%Y-%m-%d")
+                # Trigger once daily at 10:30 AM IST
+                if ist_now.hour == 10 and ist_now.minute >= 30 and last_synced_date != today_str:
+                    database.auto_sync_gps_to_manpower(today_str)
+                    last_synced_date = today_str
+                    print(f"[{ist_now.strftime('%H:%M:%S')}] 10:30 AM GPS Auto-Attendance Sync Completed for {today_str}")
+            except Exception as e:
+                print(f"Auto-sync worker notice: {e}")
+
+            # Sleep 60 seconds (1 minute interval)
+            time.sleep(60)
 
     try:
         import threading
@@ -112,6 +127,7 @@ def _start_keep_alive_daemon():
         print(f"Keep-alive thread notice: {e}")
 
 _start_keep_alive_daemon()
+
 
 # 0. App Root Landing - Role-Based Smart Router
 @app.route("/")
@@ -1173,6 +1189,28 @@ def save_attendance_api():
         return jsonify({"success": True, "message": f"{att_date} की हाजिरी सफलतापूर्वक सेव हो गई!"})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
+
+@app.route("/api/attendance/auto-fetch", methods=["POST", "GET", "OPTIONS"])
+def auto_fetch_attendance_from_gps():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        att_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+        res = database.auto_sync_gps_to_manpower(att_date)
+        rows, totals = database.get_daily_manpower(att_date)
+        return jsonify({
+            "success": True,
+            "date": att_date,
+            "updated_sites": res["updated_sites"],
+            "total_workers": res["total_workers"],
+            "site_counts": res["site_counts"],
+            "rows": rows,
+            "totals": totals,
+            "message": f"✅ GPS से {res['total_workers']} वर्करों की उपस्थिति 21 साइट्स की हाजिरी शीट में स्वतः फेच कर ली गई!"
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route("/export/manpower-excel")
 def export_manpower_excel():

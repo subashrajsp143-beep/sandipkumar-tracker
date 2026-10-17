@@ -746,6 +746,104 @@ def save_daily_manpower(att_date, rows_data, updated_by=""):
     conn.close()
     return True
 
+
+def auto_sync_gps_to_manpower(att_date=None):
+    """
+    10:30 AM GPS Auto-Analyzer & Attendance Sync:
+    Analyzes all GPS attendance pings of workers who checked in within 500m of their site,
+    maps their roles (Incharge, Supervisor, Electrician, GI Mistri, DEO, Plumber, Helper, Other),
+    and automatically populates/updates the daily_manpower table and 21-sites sheet.
+    """
+    import datetime as dt
+    if not att_date:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        att_date = ist_now.strftime("%Y-%m-%d")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Query all GPS attendances for this date where worker checked in
+    cursor.execute("""
+        SELECT a.site_id, w.role, COUNT(*) as cnt
+        FROM geo_attendance a
+        JOIN site_workers w ON a.worker_id = w.id
+        WHERE a.att_date = ? AND (a.status IN ('present', 'left') OR a.check_in_time IS NOT NULL)
+        GROUP BY a.site_id, w.role
+    """, (att_date,))
+    rows = [dict(r) for r in cursor.fetchall()]
+
+    # Aggregate counts per site
+    site_counts = {}
+    for r in rows:
+        sid = r["site_id"]
+        role = (r["role"] or "").strip().lower()
+        cnt = int(r["cnt"])
+
+        if sid not in site_counts:
+            site_counts[sid] = {
+                "site_incharge": 0, "supervisor": 0, "electrician": 0,
+                "gi_mistri": 0, "deo": 0, "plumber": 0, "helper": 0, "other": 0
+            }
+
+        if "incharge" in role:
+            site_counts[sid]["site_incharge"] += cnt
+        elif "supervisor" in role:
+            site_counts[sid]["supervisor"] += cnt
+        elif "electrician" in role:
+            site_counts[sid]["electrician"] += cnt
+        elif "mistri" in role or "mason" in role:
+            site_counts[sid]["gi_mistri"] += cnt
+        elif "deo" in role or "data" in role:
+            site_counts[sid]["deo"] += cnt
+        elif "plumber" in role:
+            site_counts[sid]["plumber"] += cnt
+        elif "helper" in role or "labour" in role or "majdoor" in role:
+            site_counts[sid]["helper"] += cnt
+        else:
+            site_counts[sid]["other"] += cnt
+
+    # Now upsert into daily_manpower
+    updated_sites = 0
+    total_workers_synced = 0
+    all_sites = get_all_sites()
+    for s in all_sites:
+        sid = s["id"]
+        if sid in site_counts:
+            c = site_counts[sid]
+            tot = sum(c.values())
+            if tot > 0:
+                cursor.execute("""
+                    INSERT INTO daily_manpower 
+                    (site_id, att_date, site_incharge, supervisor, electrician, gi_mistri, deo, plumber, helper, other, total, remarks, updated_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'GPS Auto-Synced', 'GPS System 10:30')
+                    ON CONFLICT(site_id, att_date) DO UPDATE SET
+                        site_incharge = excluded.site_incharge,
+                        supervisor = excluded.supervisor,
+                        electrician = excluded.electrician,
+                        gi_mistri = excluded.gi_mistri,
+                        deo = excluded.deo,
+                        plumber = excluded.plumber,
+                        helper = excluded.helper,
+                        other = excluded.other,
+                        total = excluded.total,
+                        remarks = 'GPS Auto-Synced',
+                        updated_by = 'GPS System 10:30'
+                """, (sid, att_date, c["site_incharge"], c["supervisor"], c["electrician"],
+                      c["gi_mistri"], c["deo"], c["plumber"], c["helper"], c["other"], tot))
+                updated_sites += 1
+                total_workers_synced += tot
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "att_date": att_date,
+        "updated_sites": updated_sites,
+        "total_workers": total_workers_synced,
+        "site_counts": site_counts
+    }
+
+
 # ==========================================
 # SITE STOCK & INVENTORY FUNCTIONS
 # ==========================================
