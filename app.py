@@ -1915,6 +1915,7 @@ def geo_attendance_admin():
     absent_w = total_w - present_w - left_w
 
     points_counts = database.get_geo_points_counts_by_site()
+    site_points_map = {s["id"]: database.get_site_geo_points(s["id"]) for s in sites}
 
     return render_template(
         "geo_attendance.html",
@@ -1927,7 +1928,8 @@ def geo_attendance_admin():
         present_w=present_w,
         left_w=left_w,
         absent_w=absent_w,
-        points_counts=points_counts
+        points_counts=points_counts,
+        site_points_map=site_points_map
     )
 
 
@@ -1964,7 +1966,7 @@ def worker_location_ping():
 
         site_lat = worker.get("site_lat")
         site_lng = worker.get("site_lng")
-        radius = worker.get("site_radius") or 500
+        radius = worker.get("site_radius") or 1000
 
         result = database.process_location_ping(
             worker_id=worker["id"],
@@ -2057,19 +2059,20 @@ def delete_worker_api(worker_id):
 
 @app.route("/api/sites/<int:site_id>/gps", methods=["POST", "OPTIONS"])
 def set_site_gps(site_id):
-    """Admin: save GPS coordinates for a site."""
+    """Admin / Supervisor: save GPS coordinates for a site."""
     if request.method == "OPTIONS":
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
         is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
-        if not is_owner:
-            return jsonify({"success": False, "message": "❌ गलत पिन!"}), 403
+        is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
+        if not (is_owner or is_supervisor_of_site):
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS सेट कर सकते हैं।"}), 403
 
         lat = float(data.get("latitude", 0))
         lng = float(data.get("longitude", 0))
-        radius = int(data.get("radius", 500))
+        radius = int(data.get("radius", 1000))
 
         if not lat or not lng:
             return jsonify({"success": False, "message": "Latitude aur longitude zaruri hai."}), 400
@@ -2082,7 +2085,7 @@ def set_site_gps(site_id):
 
 @app.route("/api/sites/<int:site_id>/points", methods=["GET", "POST", "OPTIONS"])
 def site_geo_points_api(site_id):
-    """Admin: view and add multi-location GPS points for wide-radius sites."""
+    """Admin / Supervisor: view and add multi-location GPS points for wide-radius sites."""
     if request.method == "OPTIONS":
         return "", 200
     if request.method == "GET":
@@ -2093,13 +2096,14 @@ def site_geo_points_api(site_id):
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
         is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
-        if not is_owner:
-            return jsonify({"success": False, "message": "❌ केवल मालिक ही GPS पॉइंट्स जोड़ सकते हैं।"}), 403
+        is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
+        if not (is_owner or is_supervisor_of_site):
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल जोड़ सकते हैं।"}), 403
 
         point_name = data.get("point_name", "").strip()
         lat = float(data.get("latitude", 0))
         lng = float(data.get("longitude", 0))
-        radius = int(data.get("radius", 300))
+        radius = int(data.get("radius", 1000))
 
         if not point_name or not lat or not lng:
             return jsonify({"success": False, "message": "पॉइंट का नाम, Latitude और Longitude अनिवार्य हैं।"}), 400
@@ -2108,7 +2112,7 @@ def site_geo_points_api(site_id):
         return jsonify({
             "success": True,
             "point_id": pid,
-            "message": f"✅ GPS पॉइंट '{point_name}' ({lat:.4f}, {lng:.4f}) सफलतापूर्वक जोड़ा गया!"
+            "message": f"✅ GPS पॉइंट '{point_name}' ({lat:.4f}, {lng:.4f} — {radius}m) सफलतापूर्वक जोड़ा गया!"
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -2116,15 +2120,20 @@ def site_geo_points_api(site_id):
 
 @app.route("/api/sites/points/<int:point_id>/delete", methods=["POST", "OPTIONS"])
 def delete_site_geo_point_api(point_id):
-    """Admin: delete a multi-location GPS point."""
+    """Admin / Supervisor: delete a multi-location GPS point."""
     if request.method == "OPTIONS":
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
+        point = database.get_site_geo_point(point_id)
+        if not point:
+            return jsonify({"success": False, "message": "GPS पॉइंट नहीं मिला।"}), 404
+
         is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
-        if not is_owner:
-            return jsonify({"success": False, "message": "❌ केवल मालिक ही GPS पॉइंट्स हटा सकते हैं।"}), 403
+        is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == int(point["site_id"]))
+        if not (is_owner or is_supervisor_of_site):
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल हटा सकते हैं।"}), 403
 
         database.delete_site_geo_point(point_id)
         return jsonify({"success": True, "message": "GPS पॉइंट हटा दिया गया।"})

@@ -17,6 +17,9 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ url_for('geo_attendance_admin') }}" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-map-location-dot text-violet-600"></i> <span>📍 आज का कार्य स्थल (1 KM GPS)</span>
+            </a>
             <a href="{{ url_for('site_report') }}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-2">
                 <i class="fa-solid fa-file-lines"></i> View Reports
             </a>

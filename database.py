@@ -1387,9 +1387,9 @@ def get_site_geo_points(site_id):
     return rows
 
 
-def add_site_geo_point(site_id, point_name, latitude, longitude, radius_meters=300):
+def add_site_geo_point(site_id, point_name, latitude, longitude, radius_meters=1000):
     """
-    Adds a new GPS sub-location point for a site with customized geofence radius.
+    Adds a new GPS sub-location point for a site with customized geofence radius (default 1 KM / 1000m).
     """
     conn = get_db()
     cursor = conn.cursor()
@@ -1401,6 +1401,18 @@ def add_site_geo_point(site_id, point_name, latitude, longitude, radius_meters=3
     conn.commit()
     conn.close()
     return pid
+
+
+def get_site_geo_point(point_id):
+    """
+    Returns single GPS sub-location point by ID.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM site_geo_points WHERE id = ?", (point_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
 
 
 def delete_site_geo_point(point_id):
@@ -1431,10 +1443,11 @@ def get_geo_points_counts_by_site():
     return res
 
 
-def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=500):
+def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=1000):
     """
     Calculates proximity of worker (lat, lng) against all sub-location points of the site.
-    - If worker is within radius of ANY point (Pump House, Tank, Ward 4 Pipeline, etc.), is_on_site = True!
+    - If worker is within radius of ANY point (Pump House, Tank, Ward 1/2/3, Pipeline, etc.), is_on_site = True!
+    - Defaults to 1000m (1 KM) geofence radius.
     - Returns (min_distance, is_on_site, nearest_point_name, effective_radius, all_points_summary)
     """
     points = get_site_geo_points(site_id)
@@ -1446,7 +1459,7 @@ def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, de
             "name": pt["point_name"],
             "lat": float(pt["latitude"]),
             "lng": float(pt["longitude"]),
-            "radius": int(pt.get("radius_meters") or default_radius or 300)
+            "radius": int(pt.get("radius_meters") or default_radius or 1000)
         })
 
     # 2. Add main site GPS if configured
@@ -1455,11 +1468,11 @@ def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, de
             "name": "मुख्य केंद्र (Main Center)",
             "lat": float(default_site_lat),
             "lng": float(default_site_lng),
-            "radius": int(default_radius or 500)
+            "radius": int(default_radius or 1000)
         })
 
     if not candidates:
-        return 99999.0, False, "GPS सेट नहीं", int(default_radius or 500), []
+        return 99999.0, False, "GPS सेट नहीं", int(default_radius or 1000), []
 
     evaluated = []
     for c in candidates:
@@ -1486,7 +1499,7 @@ def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, de
         return closest["distance"], False, closest["name"], closest["radius"], evaluated
 
 
-def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=None, radius=500):
+def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=None, radius=1000):
     """
     Called when a worker sends a location ping.
     - Supports multi-point GPS coordinates for wide-radius sites

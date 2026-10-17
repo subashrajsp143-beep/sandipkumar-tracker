@@ -37,7 +37,7 @@
 
                 <button onclick="openMultiGpsModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-draw-polygon"></i>
-                    <span>📍 4-5 GPS पॉइंट्स (Multi-Point)</span>
+                    <span>📍 आज का कार्य स्थल व वार्ड (1 KM दायरा)</span>
                 </button>
 
                 <button onclick="openSiteGpsModal()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
@@ -61,7 +61,7 @@
                     साइट पर मौजूद (Present)
                 </div>
                 <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">{{ present_w }}</div>
-                <div class="text-[11px] text-emerald-300/80 mt-1">अभी 500m के अंदर हैं</div>
+                <div class="text-[11px] text-emerald-300/80 mt-1">अभी 1 KM (1000m) दायरे के अंदर हैं</div>
             </div>
 
             <div class="bg-amber-950/40 backdrop-blur rounded-2xl p-4 border border-amber-500/30">
@@ -74,6 +74,71 @@
                 <div class="text-[11px] font-bold uppercase text-rose-300">साइट पर नहीं पहुंचे</div>
                 <div class="text-2xl sm:text-3xl font-black text-rose-400 mt-1">{{ absent_w }}</div>
                 <div class="text-[11px] text-rose-300/80 mt-1">आज कोई सिग्नल नहीं</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEDICATED SUPERVISOR SECTION: TODAY'S WORK SPOTS & WARDS (1 KM GEOFENCE) -->
+    <div class="bg-gradient-to-br from-violet-950 via-indigo-950 to-slate-900 rounded-3xl p-5 sm:p-7 text-white shadow-xl border border-violet-800/60 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-indigo-800/60">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> 1 KM (1000 मीटर) ऑटो-हाजिरी दायरा
+                    </span>
+                    <span class="text-xs text-indigo-300 font-semibold">सुपरवाइज़र डेली कंट्रोल</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-white mt-2 flex items-center gap-2.5">
+                    <i class="fa-solid fa-map-location-dot text-amber-400"></i>
+                    <span>आज का कार्य स्थल व वार्ड लोकेशन (Ward Geofencing)</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl leading-relaxed">
+                    सुपरवाइज़र आज जहाँ काम हो रहा है (जैसे <strong>वार्ड 1, वार्ड 2, पानी टंकी या पाइपलाइन</strong>) वहाँ का लोकेशन सेट करें। 
+                    उस लोकेशन के <strong>1 KM (1000 मीटर) के दायरे</strong> में जो भी वर्कर काम कर रहे हैं, उनकी हाजिरी <strong>स्वतः On-Site (Present)</strong> दर्ज हो जाएगी।
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- 1-Click Set Current Phone GPS as Today's Work Ward -->
+                <button type="button" onclick="quickSetTodayWorkSpot()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-crosshairs text-base"></i>
+                    <span>📍 मेरी फोन लोकेशन से आज का वार्ड बनाएं</span>
+                </button>
+                <button type="button" onclick="openMultiGpsModal()" class="px-3.5 py-2.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 border border-violet-500/40 cursor-pointer">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>+ वार्ड / पॉइंट जोड़ें</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Ward Points Grid for Selected / Assigned Site -->
+        <div class="mt-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-bold text-indigo-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-layer-group text-amber-400"></i>
+                    <span>आज सक्रिय कार्य स्थल व वार्ड (Active Work Wards):</span>
+                </span>
+                <div class="flex items-center gap-2">
+                    {% if session.get('is_owner') and sites|length > 1 %}
+                    <label class="text-xs text-indigo-300 font-bold">साइट:</label>
+                    <select id="supervisorSitePicker" onchange="switchSupervisorSiteView(this.value)" class="bg-indigo-950 text-white border border-indigo-600 rounded-xl px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-amber-400">
+                        {% for s in sites %}
+                        <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <span class="text-xs font-black text-amber-300 bg-indigo-950/90 px-3 py-1 rounded-xl border border-indigo-700/80">
+                        साइट: {{ sites[0].name if sites else 'Mairwa' }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Dynamic Ward Cards Grid -->
+            <div id="activeWardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div class="col-span-full text-center py-6 text-xs text-indigo-300">
+                    <i class="fa-solid fa-spinner animate-spin"></i> कार्य स्थल लोड हो रहे हैं...
+                </div>
             </div>
         </div>
     </div>
@@ -440,8 +505,8 @@
                     <i class="fa-solid fa-draw-polygon"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-slate-900 text-base sm:text-lg">साइट मल्टी-लोकेशन GPS पॉइंट्स (4-5 Points)</h3>
-                    <p class="text-[11px] text-slate-500">बड़े दायरे वाले काम (पाइपलाइन, पंप हाउस, पानी टंकी आदि) के लिए एकाधिक GPS</p>
+                    <h3 class="font-black text-slate-900 text-base sm:text-lg">📍 आज का कार्य स्थल व वार्ड लोकेशन (1 KM दायरा)</h3>
+                    <p class="text-[11px] text-slate-500">वार्ड 1, 2, पानी टंकी आदि जोड़ें — 1 KM (1000m) दायरे के अंदर वर्कर की उपस्थिति स्वतः दर्ज होगी</p>
                 </div>
             </div>
             <button onclick="closeMultiGpsModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
@@ -478,13 +543,13 @@
         <div class="mt-5 pt-4 border-t border-slate-200">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-plus-circle text-emerald-600"></i>
-                <span>+ नया कार्य स्थल / पॉइंट जोड़ें</span>
+                <span>+ नया कार्य स्थल / वार्ड लोकेशन जोड़ें</span>
             </h4>
 
             <form id="addPointForm" onsubmit="submitNewPoint(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">पॉइंट का नाम / कार्य स्थल *</label>
-                    <input type="text" id="newPointName" required placeholder="उदा. पंप हाउस, पानी टंकी, वार्ड 4 पाइपलाइन, स्टोर कैंप"
+                    <label class="block text-xs font-bold text-slate-700 mb-1">पॉइंट का नाम / वार्ड *</label>
+                    <input type="text" id="newPointName" required placeholder="उदा. वार्ड 1 (पाइपलाइन), वार्ड 2 (पानी टंकी), बोरिंग कैंप"
                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-violet-500">
                 </div>
 
@@ -502,20 +567,29 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Latitude *</label>
                         <input type="number" step="any" id="newPointLat" required placeholder="उदा. 26.21950"
-                               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Longitude *</label>
                         <input type="number" step="any" id="newPointLng" required placeholder="उदा. 84.35670"
-                               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">हाजिरी का दायरा (Radius in Meters) *</label>
-                    <input type="number" id="newPointRadius" value="300" min="50" max="5000" required
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">हाजिरी का दायरा (Geofence Radius) *</label>
+                        <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded">डिफ़ॉल्ट 1000m (1 KM)</span>
+                    </div>
+                    <input type="number" id="newPointRadius" value="1000" min="50" max="5000" required
                            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
-                    <span class="text-[10px] text-slate-500">इस पॉइंट के इतने मीटर के अंदर आते ही वर्कर 'On-Site' माना जाएगा (डिफ़ॉल्ट 300 मीटर)</span>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span class="text-[10px] text-slate-500 font-bold mr-1">त्वरित दायरा चुनें:</span>
+                        <button type="button" onclick="setRadiusVal(500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">500m</button>
+                        <button type="button" onclick="setRadiusVal(1000)" class="px-2.5 py-1 rounded-lg bg-violet-100 hover:bg-violet-200 text-[11px] font-black text-violet-800 border border-violet-300 transition">⭐ 1 KM (1000m)</button>
+                        <button type="button" onclick="setRadiusVal(1500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">1.5 KM</button>
+                        <button type="button" onclick="setRadiusVal(2000)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">2.0 KM</button>
+                    </div>
                 </div>
 
                 <div class="pt-2 flex items-center justify-end gap-2">
@@ -710,83 +784,238 @@
         }
     }
 
+    // Current Selected Site for Multi-Gps / Ward Management
+    let currentSelectedSiteId = {{ session.get('site_id') or (sites[0].id if sites else 1) }};
+
+    function setRadiusVal(val) {
+        const inp = document.getElementById('newPointRadius');
+        if (inp) inp.value = val;
+    }
+
+    function switchSupervisorSiteView(siteId) {
+        currentSelectedSiteId = parseInt(siteId);
+        const sel = document.getElementById('multiGpsSiteSelect');
+        if (sel) sel.value = siteId;
+        loadSiteGeoPoints(siteId);
+    }
+
     // Multi-Point GPS Modal Controls
     function openMultiGpsModal() {
         document.getElementById('multiGpsModal').classList.remove('hidden');
         const sel = document.getElementById('multiGpsSiteSelect');
-        if (sel && sel.value) loadSiteGeoPoints(sel.value);
+        if (sel) {
+            sel.value = currentSelectedSiteId;
+            loadSiteGeoPoints(currentSelectedSiteId);
+        }
     }
 
     function openMultiGpsModalForSite(siteId, siteName) {
+        currentSelectedSiteId = parseInt(siteId);
         document.getElementById('multiGpsModal').classList.remove('hidden');
         const sel = document.getElementById('multiGpsSiteSelect');
-        if (sel) {
-            sel.value = siteId;
-            loadSiteGeoPoints(siteId);
-        }
+        if (sel) sel.value = siteId;
+        const supSel = document.getElementById('supervisorSitePicker');
+        if (supSel) supSel.value = siteId;
+        loadSiteGeoPoints(siteId);
     }
 
     function closeMultiGpsModal() {
         document.getElementById('multiGpsModal').classList.add('hidden');
     }
 
+    // 1-Click Quick Set Supervisor Phone GPS as Today's Work Ward (1 KM)
+    async function quickSetTodayWorkSpot() {
+        const siteId = currentSelectedSiteId;
+        const sel = document.getElementById('supervisorSitePicker') || document.getElementById('multiGpsSiteSelect');
+        const siteName = sel && sel.options && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : "साइट";
+
+        if (!navigator.geolocation) {
+            alert('❌ इस डिवाइस में GPS सपोर्ट नहीं है।');
+            return;
+        }
+
+        const wardName = prompt(`📍 आज ${siteName} में किस वार्ड / जगह पर काम होगा?\n(वार्ड का नाम दर्ज करें — 1 KM के अंदर सभी वर्कर की हाजिरी स्वतः 'On-Site' बनेगी):`, "वार्ड 1 (आज का कार्य स्थल)");
+        if (!wardName || !wardName.trim()) return;
+
+        // Feedback in grid
+        const grid = document.getElementById('activeWardsGrid');
+        if (grid) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-6 text-xs text-amber-300 font-bold bg-indigo-950/60 rounded-2xl border border-amber-400/40 animate-pulse">
+                    <i class="fa-solid fa-satellite-dish fa-spin mr-1.5"></i>
+                    फोन GPS से सैटेलाइट लोकेशन ली जा रही है... कृपया प्रतीक्षा करें।
+                </div>
+            `;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                try {
+                    const res = await fetch(`/api/sites/${siteId}/points`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            point_name: wardName.trim(),
+                            latitude: lat,
+                            longitude: lng,
+                            radius: 1000,
+                            pin: '7808'
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert(`✅ '${wardName.trim()}' (${lat.toFixed(5)}, ${lng.toFixed(5)}) को आज का कार्य स्थल सेट कर दिया गया!\n\n⚡ 1 KM (1000 मीटर) के दायरे में काम करने वाले सभी वर्कर की हाजिरी 'साइट पर मौजूद' दर्ज होगी।`);
+                        loadSiteGeoPoints(siteId);
+                    } else {
+                        alert('❌ ' + data.message);
+                        loadSiteGeoPoints(siteId);
+                    }
+                } catch (err) {
+                    alert('❌ नेटवर्क एरर: ' + err.message);
+                    loadSiteGeoPoints(siteId);
+                }
+            },
+            (err) => {
+                alert('❌ GPS एरर: ' + err.message + ' — कृपया फोन में Location On करें।');
+                loadSiteGeoPoints(siteId);
+            },
+            { enableHighAccuracy: true, timeout: 15000 }
+        );
+    }
+
     async function loadSiteGeoPoints(siteId) {
-        const container = document.getElementById('pointsListContainer');
+        siteId = siteId || currentSelectedSiteId;
+        const modalContainer = document.getElementById('pointsListContainer');
         const badge = document.getElementById('pointCountBadge');
-        container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-spinner animate-spin"></i> पॉइंट्स लोड हो रहे हैं...</div>';
+        if (modalContainer) {
+            modalContainer.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-spinner animate-spin"></i> पॉइंट्स लोड हो रहे हैं...</div>';
+        }
 
         try {
             const res = await fetch(`/api/sites/${siteId}/points`);
             const data = await res.json();
             if (data.success) {
                 const pts = data.points || [];
-                badge.textContent = `${pts.length} पॉइंट्स`;
+                if (badge) badge.textContent = `${pts.length} पॉइंट्स`;
 
-                if (pts.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-5 px-3 bg-white rounded-xl border border-dashed border-slate-200">
-                            <i class="fa-solid fa-map-pin text-2xl text-slate-300 mb-1"></i>
-                            <div class="text-xs font-bold text-slate-700">अभी तक कोई उप-लोकेशन पॉइंट नहीं जुड़ा है</div>
-                            <div class="text-[11px] text-slate-400 mt-0.5">नीचे दिए गए फॉर्म से सीवान/साइट के 4–5 पॉइंट्स (पंप हाउस, टंकी, वार्ड पाइपलाइन) जोड़ें।</div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                let html = '';
-                pts.forEach((p, idx) => {
-                    html += `
-                        <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-6 h-6 rounded-lg bg-violet-100 text-violet-800 text-xs font-black flex items-center justify-center">${idx + 1}</span>
-                                <div>
-                                    <div class="text-xs font-extrabold text-slate-900">${p.point_name}</div>
-                                    <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
-                                        <span>Lat: ${p.latitude.toFixed(5)}, Lng: ${p.longitude.toFixed(5)}</span>
-                                        <span class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded font-sans">दायरा: ${p.radius_meters || 300}m</span>
+                // 1. Render in Modal List
+                if (modalContainer) {
+                    if (pts.length === 0) {
+                        modalContainer.innerHTML = `
+                            <div class="text-center py-5 px-3 bg-white rounded-xl border border-dashed border-slate-200">
+                                <i class="fa-solid fa-map-pin text-2xl text-slate-300 mb-1"></i>
+                                <div class="text-xs font-bold text-slate-700">अभी तक कोई उप-लोकेशन पॉइंट नहीं जुड़ा है</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">नीचे दिए गए फॉर्म से वार्ड 1, वार्ड 2, पंप हाउस आदि जोड़ें (1 KM दायरा)।</div>
+                            </div>
+                        `;
+                    } else {
+                        let html = '';
+                        pts.forEach((p, idx) => {
+                            const radStr = p.radius_meters >= 1000 ? (p.radius_meters/1000).toFixed(1) + ' KM' : p.radius_meters + 'm';
+                            const escapedName = (p.point_name || '').replace(/'/g, "\\'");
+                            html += `
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="w-6 h-6 rounded-lg bg-violet-100 text-violet-800 text-xs font-black flex items-center justify-center">${idx + 1}</span>
+                                        <div>
+                                            <div class="text-xs font-extrabold text-slate-900">${p.point_name}</div>
+                                            <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
+                                                <span>Lat: ${p.latitude.toFixed(5)}, Lng: ${p.longitude.toFixed(5)}</span>
+                                                <span class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded font-sans">दायरा: ${radStr} (${p.radius_meters || 1000}m)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
+                                           class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center gap-1">
+                                            <i class="fa-solid fa-map-pin text-rose-500"></i> Map ↗
+                                        </a>
+                                        <button type="button" onclick="deleteGeoPoint(${p.id}, '${escapedName}', ${siteId})" 
+                                                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs" title="हटाएं">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
-                                   class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center gap-1">
-                                    <i class="fa-solid fa-map-pin text-rose-500"></i> Map ↗
-                                </a>
-                                <button type="button" onclick="deleteGeoPoint(${p.id}, '${p.point_name}')" 
-                                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs" title="हटाएं">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
+                            `;
+                        });
+                        modalContainer.innerHTML = html;
+                    }
+                }
+
+                // 2. Render on Dashboard Ward Grid
+                renderActiveWardsGrid(pts, siteId);
             } else {
-                container.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'एरर'}</div>`;
+                if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'एरर'}</div>`;
             }
         } catch (err) {
-            container.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">नेटवर्क एरर: ${err.message}</div>`;
+            if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">नेटवर्क एरर: ${err.message}</div>`;
         }
+    }
+
+    function renderActiveWardsGrid(pts, siteId) {
+        const grid = document.getElementById('activeWardsGrid');
+        if (!grid) return;
+
+        if (pts.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full bg-indigo-950/40 rounded-2xl p-6 border border-dashed border-indigo-700/60 text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center text-xl mx-auto mb-2 border border-amber-400/20">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h4 class="font-black text-sm text-white">आज का कोई कार्य स्थल (वार्ड) सेट नहीं है</h4>
+                    <p class="text-xs text-indigo-200 mt-1 max-w-md mx-auto">
+                        सुपरवाइज़र जहाँ खड़े होकर काम करवा रहे हैं, ऊपर <strong>'📍 मेरी फोन लोकेशन से आज का वार्ड बनाएं'</strong> दबाकर तुरंत 1 KM दायरा सक्रिय करें।
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        pts.forEach((p, idx) => {
+            const radStr = p.radius_meters >= 1000 ? (p.radius_meters/1000).toFixed(1) + ' KM' : p.radius_meters + 'm';
+            const escapedName = (p.point_name || '').replace(/'/g, "\\'");
+            html += `
+                <div class="bg-indigo-950/80 backdrop-blur rounded-2xl p-4 border border-indigo-700/70 shadow-md flex flex-col justify-between transition hover:border-amber-400/50">
+                    <div>
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs shrink-0">
+                                    ${idx + 1}
+                                </span>
+                                <div>
+                                    <h4 class="font-black text-sm text-white">${p.point_name}</h4>
+                                    <span class="text-[10px] text-amber-300 font-black bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/30 inline-block mt-0.5">
+                                        ⚡ दायरा: ${radStr} (${p.radius_meters || 1000}m Geofence)
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="deleteGeoPoint(${p.id}, '${escapedName}', ${siteId})" 
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition text-xs" title="यह कार्य स्थल हटाएं">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2.5 text-[11px] font-mono text-indigo-200/90 flex items-center gap-2">
+                            <i class="fa-solid fa-location-crosshairs text-amber-400 text-xs"></i>
+                            <span>${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}</span>
+                        </div>
+                    </div>
+                    <div class="mt-3.5 pt-2.5 border-t border-indigo-800/60 flex items-center justify-between">
+                        <span class="text-[11px] text-emerald-300 font-bold flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span>हाजिरी मान्य (1 KM)</span>
+                        </span>
+                        <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
+                           class="px-2.5 py-1 rounded-lg bg-indigo-900/90 hover:bg-indigo-800 text-amber-300 text-[11px] font-bold transition flex items-center gap-1 border border-indigo-700/80">
+                            <i class="fa-solid fa-map-pin text-rose-400"></i> Google Map ↗
+                        </a>
+                    </div>
+                </div>
+            `;
+        });
+        grid.innerHTML = html;
     }
 
     function getCurrentLocationForNewPoint() {
@@ -813,7 +1042,7 @@
         const name = document.getElementById('newPointName').value.trim();
         const lat = document.getElementById('newPointLat').value;
         const lng = document.getElementById('newPointLng').value;
-        const radius = document.getElementById('newPointRadius').value;
+        const radius = document.getElementById('newPointRadius').value || 1000;
 
         const btn = document.getElementById('savePointBtn');
         btn.disabled = true;
@@ -849,9 +1078,9 @@
         }
     }
 
-    async function deleteGeoPoint(pointId, pointName) {
-        if (!confirm(`क्या आप '${pointName}' GPS पॉइंट को हटाना चाहते हैं?`)) return;
-        const siteId = document.getElementById('multiGpsSiteSelect').value;
+    async function deleteGeoPoint(pointId, pointName, optSiteId) {
+        if (!confirm(`क्या आप '${pointName}' कार्य स्थल को हटाना चाहते हैं?`)) return;
+        const siteId = optSiteId || document.getElementById('multiGpsSiteSelect').value || currentSelectedSiteId;
         try {
             const res = await fetch(`/api/sites/points/${pointId}/delete`, {
                 method: 'POST',
@@ -868,5 +1097,10 @@
             alert('❌ ' + err.message);
         }
     }
+
+    // Auto load active wards on page ready
+    window.addEventListener('DOMContentLoaded', () => {
+        loadSiteGeoPoints(currentSelectedSiteId);
+    });
 </script>
 {% endblock %}

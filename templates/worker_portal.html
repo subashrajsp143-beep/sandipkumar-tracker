@@ -82,21 +82,21 @@
         <div id="statusBadge" class="text-center py-4 px-3 rounded-2xl mb-4 bg-slate-800 border border-slate-700">
             <div class="text-4xl mb-2" id="statusEmoji">📍</div>
             <div class="text-lg font-black text-white" id="statusText">GPS लोकेशन चेक हो रही है...</div>
-            <div class="text-xs text-slate-400 mt-1" id="statusSub">कृपया 500m दायरे के अंदर रहें</div>
+            <div class="text-xs text-slate-400 mt-1" id="statusSub">कृपया 1 KM (1000m) दायरे के अंदर रहें</div>
         </div>
 
         <!-- Distance Bar -->
         <div class="bg-slate-950/80 rounded-2xl p-3.5 border border-slate-800/80 mb-4">
             <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                <span>साइट से आपकी दूरी:</span>
+                <span>कार्य स्थल / वार्ड से दूरी:</span>
                 <span class="font-bold text-slate-200" id="distText">—</span>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
                 <div id="distBar" class="h-2.5 rounded-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
             </div>
             <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
-                <span>0m (साइट पर)</span>
-                <span>मान्य दायरा: <strong>500 मीटर</strong></span>
+                <span>0m (स्थल पर)</span>
+                <span>मान्य दायरा: <strong>1 KM (1000 मीटर)</strong></span>
             </div>
         </div>
 
@@ -191,12 +191,12 @@
 
     <!-- Simple Footer Note -->
     <div class="w-full max-w-md text-center py-4 text-[11px] text-slate-600 font-medium">
-        GPS 500m ऑटोमैटिक उपस्थिति &bull; M/S Sandip Kumar
+        GPS 1 KM (1000m) ऑटोमैटिक उपस्थिति &bull; M/S Sandip Kumar
     </div>
 
     <script>
         const WORKER_TOKEN = "{{ worker.worker_token }}";
-        const SITE_RADIUS = {{ worker.site_radius or 500 }};
+        const SITE_RADIUS = {{ worker.site_radius or 1000 }};
         let currentLat = null, currentLng = null;
         let isPinging = false;
 
@@ -287,16 +287,18 @@
                 emoji.textContent = '🟢';
                 text.textContent = 'आप साइट पर मौजूद हैं!';
                 text.className = 'text-lg font-black text-emerald-400';
-                sub.textContent = `${data.site_name} (500m दायरे के अंदर)`;
+                const ptName = data.nearest_point_name && data.nearest_point_name !== 'GPS सेट नहीं' ? ` &bull; 📍 ${data.nearest_point_name}` : '';
+                sub.innerHTML = `<strong>${data.site_name}</strong>${ptName} <span class="text-emerald-300 font-bold">(1 KM दायरे में)</span>`;
                 document.getElementById('punchBtnText').textContent = '✅ हाजिरी सक्रिय है';
                 document.getElementById('punchBtn').className = 'w-full py-4 px-4 rounded-2xl bg-emerald-700 text-white font-black text-base shadow-lg flex items-center justify-center gap-2';
             } else {
                 badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-rose-950/60 border border-rose-500/50';
                 emoji.textContent = '🚶';
-                text.textContent = 'आप साइट से बाहर हैं';
+                text.textContent = 'आप कार्य स्थल से बाहर हैं';
                 text.className = 'text-lg font-black text-rose-400';
-                sub.textContent = `${data.site_name} से दूर हैं — साइट पर पहुंचकर हाजिरी लगाएं`;
-                document.getElementById('punchBtnText').textContent = 'साइट पर पहुंचकर हाजिरी लगेगी';
+                const ptName = data.nearest_point_name && data.nearest_point_name !== 'GPS सेट नहीं' ? ` (${data.nearest_point_name})` : '';
+                sub.textContent = `${data.site_name}${ptName} से 1 KM से अधिक दूर हैं — कार्य स्थल पर पहुंचकर हाजिरी लगाएं`;
+                document.getElementById('punchBtnText').textContent = 'कार्य स्थल पर पहुंचकर हाजिरी लगेगी';
             }
         }
 
