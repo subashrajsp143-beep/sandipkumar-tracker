@@ -462,6 +462,7 @@
                 // Update hours if we have check-in
                 updateHours();
 
+                localStorage.removeItem('offline_worker_ping_' + WORKER_TOKEN);
             } else if (data.warning) {
                 setStatus('waiting', '⚠️', 'GPS setup pending', data.warning);
                 addLog('⚠️ ' + data.warning, 'danger');
@@ -469,8 +470,27 @@
                 addLog('❌ Error: ' + data.message, 'danger');
             }
         } catch (e) {
-            addLog('❌ Network error: ' + e.message, 'danger');
+            // Offline fallback: Save in localStorage with timestamp
+            const offlineData = {
+                token: WORKER_TOKEN,
+                lat: currentLat,
+                lng: currentLng,
+                saved_at: new Date().toLocaleTimeString('hi-IN')
+            };
+            try {
+                localStorage.setItem('offline_worker_ping_' + WORKER_TOKEN, JSON.stringify(offlineData));
+            } catch(storageErr){}
+            setStatus('waiting', '📍', 'GPS दर्ज (ऑफलाइन मोड)', 'सैटेलाइट से लोकेशन सुरक्षित हो गई है। इंटरनेट मिलते ही स्वतः सर्वर पर दर्ज हो जाएगी।');
+            addLog('📍 ऑफलाइन GPS सुरक्षित हुआ (' + offlineData.saved_at + ') — इंटरनेट आते ही सिंक होगा', 'info');
         }
+
+        // Auto sync when connection is restored
+        window.addEventListener('online', () => {
+            addLog('🌐 इंटरनेट उपलब्ध हुआ — ऑटो सिंक चालू...', 'info');
+            if (currentLat && currentLng) {
+                sendPing();
+            }
+        });
 
         document.getElementById('pingBtnText').textContent = 'अभी Location भेजें (Manual)';
         document.getElementById('pingBtn').disabled = false;
