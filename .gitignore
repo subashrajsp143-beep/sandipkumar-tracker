@@ -6,3 +6,8 @@ venv/
 *.log
 cloudflared.exe
 backups/
+*.apk
+.gradle/
+build/
+android-app/**/build/
+
