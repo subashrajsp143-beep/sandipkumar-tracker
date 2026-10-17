@@ -559,14 +559,26 @@ def parse_text():
 def material_store():
     is_owner = session.get("is_owner", False)
     user_site_id = session.get("site_id")
-    if not is_owner and user_site_id:
-        return redirect(url_for("site_stock"))
 
     sites = database.get_all_sites()
+    locked_site = None
+    if not is_owner and user_site_id:
+        user_site_id = int(user_site_id)
+        locked_site = database.get_site_by_id(user_site_id)
+        sites = [s for s in sites if s["id"] == user_site_id]
+
     materials = database.get_all_materials()
     today_str = datetime.date.today().strftime("%Y-%m-%d")
     categories = sorted(list(set(m["category"] for m in materials if m.get("category"))))
-    return render_template("store.html", sites=sites, materials=materials, categories=categories, today=today_str)
+    return render_template(
+        "store.html", 
+        sites=sites, 
+        materials=materials, 
+        categories=categories, 
+        today=today_str,
+        locked_site_id=user_site_id if not is_owner else None,
+        locked_site=locked_site
+    )
 
 def process_and_save_photo(url_or_path, material_id):
     """
