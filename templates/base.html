@@ -162,6 +162,11 @@
                         <i class="fa-solid fa-users-gear text-xs"></i> <span>हाजिरी</span>
                     </a>
 
+                    <!-- 4.1 GPS 500m Auto Attendance -->
+                    <a href="/geo-attendance" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-md border border-violet-400/40 transition flex items-center gap-1.5" title="GPS 500m ऑटोमैटिक हाजिरी व कार्य घंटे">
+                        <i class="fa-solid fa-satellite-dish text-amber-300 text-xs"></i> <span>GPS हाजिरी</span>
+                    </a>
+
                     <!-- 5. Unified Reports Hub (Daily, Monthly, Site) -->
                     <a href="{{ url_for('reports_hub') }}" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black bg-blue-800 hover:bg-blue-700 text-white shadow-sm border border-blue-600/50 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-chart-line text-amber-300 text-xs"></i> <span>रिपोर्ट्स (Reports)</span>
@@ -173,6 +178,9 @@
                             <i class="fa-solid fa-ellipsis-vertical text-xs"></i> <span>अधिक</span> <i class="fa-solid fa-chevron-down text-[9px] opacity-70"></i>
                         </button>
                         <div class="hidden group-hover:block absolute right-0 top-full mt-1 w-52 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-50 text-white space-y-1">
+                            <a href="/geo-attendance" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-violet-900/60 text-amber-300">
+                                <i class="fa-solid fa-satellite-dish w-4 text-amber-400"></i> <span>GPS 500m हाजिरी मॉनिटर</span>
+                            </a>
                             <a href="{{ url_for('company_website') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-blue-900/60 text-cyan-300">
                                 <i class="fa-solid fa-globe w-4 text-cyan-400"></i> <span>कंपनी वेबसाइट</span>
                             </a>
@@ -241,6 +249,9 @@
                 </a>
                 <a href="{{ url_for('attendance_view') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow flex items-center gap-2.5">
                     <i class="fa-solid fa-users-gear w-4"></i> <span>दैनिक हाजिरी (Attendance)</span>
+                </a>
+                <a href="/geo-attendance" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 text-white border border-violet-400/50 shadow flex items-center gap-2.5">
+                    <i class="fa-solid fa-satellite-dish text-amber-300 w-4"></i> <span>GPS 500m हाजिरी मॉनिटर</span>
                 </a>
                 <a href="{{ url_for('reports_hub') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-blue-800 text-white border border-blue-600/60 shadow flex items-center gap-2.5">
                     <i class="fa-solid fa-chart-line text-amber-300 w-4"></i> <span>रिपोर्ट्स केंद्र (Daily & Monthly)</span>

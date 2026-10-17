@@ -140,6 +140,9 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Initialize GPS attendance tables (added in v3.0 update)
+    init_gps_tables()
+
 # Helper query functions
 def get_all_sites():
     conn = get_db()
@@ -1001,6 +1004,307 @@ def get_all_sites_stock_overview():
         "sites_with_stock": inw_stat.get("sites_with_inward", 0),
         "site_cards": site_cards
     }
+
+
+# ==========================================
+# GPS ATTENDANCE SYSTEM - DATABASE FUNCTIONS
+# ==========================================
+
+def init_gps_tables():
+    """
+    Creates GPS attendance tables if they don't already exist.
+    Called on every app startup via init_db().
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. Add GPS lat/lng columns to sites table if missing
+    cursor.execute("PRAGMA table_info(sites)")
+    site_cols = [r[1] for r in cursor.fetchall()]
+    if "latitude" not in site_cols:
+        cursor.execute("ALTER TABLE sites ADD COLUMN latitude REAL")
+    if "longitude" not in site_cols:
+        cursor.execute("ALTER TABLE sites ADD COLUMN longitude REAL")
+    if "geo_radius" not in site_cols:
+        cursor.execute("ALTER TABLE sites ADD COLUMN geo_radius INTEGER DEFAULT 500")
+
+    # 2. Workers table: individual worker profiles per site
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS site_workers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'Helper',
+        phone TEXT,
+        worker_token TEXT UNIQUE NOT NULL,
+        is_active INTEGER DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
+    );
+    """)
+
+    # 3. GPS Attendance log: check-in / check-out events
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS geo_attendance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        worker_id INTEGER NOT NULL,
+        site_id INTEGER NOT NULL,
+        att_date TEXT NOT NULL,
+        check_in_time TEXT,
+        check_out_time TEXT,
+        total_minutes INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'absent',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(worker_id) REFERENCES site_workers(id) ON DELETE CASCADE,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE,
+        UNIQUE(worker_id, att_date)
+    );
+    """)
+
+    # 4. Live location pings from worker devices
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS worker_location_pings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        worker_id INTEGER NOT NULL,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        distance_meters REAL,
+        is_on_site INTEGER DEFAULT 0,
+        ping_time TEXT NOT NULL,
+        FOREIGN KEY(worker_id) REFERENCES site_workers(id) ON DELETE CASCADE
+    );
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Returns distance in metres between two GPS coordinates.
+    Uses Haversine formula.
+    """
+    import math
+    R = 6371000.0  # Earth radius in metres
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def get_worker_by_token(token):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.*, s.name as site_name, s.code as site_code,
+               s.latitude as site_lat, s.longitude as site_lng,
+               s.geo_radius as site_radius
+        FROM site_workers w
+        JOIN sites s ON w.site_id = s.id
+        WHERE w.worker_token = ? AND w.is_active = 1
+    """, (token,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_all_workers_for_site(site_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.*, s.name as site_name
+        FROM site_workers w
+        JOIN sites s ON w.site_id = s.id
+        WHERE w.site_id = ? AND w.is_active = 1
+        ORDER BY w.role, w.name
+    """, (site_id,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_all_workers():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.*, s.name as site_name, s.code as site_code
+        FROM site_workers w
+        JOIN sites s ON w.site_id = s.id
+        WHERE w.is_active = 1
+        ORDER BY s.name, w.role, w.name
+    """)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def add_worker(site_id, name, role, phone=""):
+    import uuid
+    token = uuid.uuid4().hex
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO site_workers (site_id, name, role, phone, worker_token)
+        VALUES (?, ?, ?, ?, ?)
+    """, (site_id, name, role, phone, token))
+    worker_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return worker_id, token
+
+
+def delete_worker(worker_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE site_workers SET is_active = 0 WHERE id = ?", (worker_id,))
+    conn.commit()
+    conn.close()
+
+
+def process_location_ping(worker_id, site_id, lat, lng, site_lat, site_lng, radius):
+    """
+    Called when a worker sends a location ping.
+    - Calculates distance from site
+    - Marks check-in if within radius and not already checked in today
+    - Marks check-out if outside radius and currently checked in
+    - Returns dict with status info
+    """
+    import datetime as dt
+    distance = haversine_distance(lat, lng, site_lat, site_lng) if (site_lat and site_lng) else 99999
+    is_on_site = distance <= radius
+
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+    now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Save location ping
+    cursor.execute("""
+        INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, ping_time)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (worker_id, lat, lng, round(distance, 1), 1 if is_on_site else 0, now_str))
+
+    # Fetch or create today's attendance record
+    cursor.execute("""
+        SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
+    """, (worker_id, today))
+    att = cursor.fetchone()
+    att = dict(att) if att else None
+
+    action = "ping"
+    if not att:
+        # No record yet for today
+        if is_on_site:
+            cursor.execute("""
+                INSERT INTO geo_attendance (worker_id, site_id, att_date, check_in_time, status)
+                VALUES (?, ?, ?, ?, 'present')
+            """, (worker_id, site_id, today, now_str))
+            action = "checked_in"
+        else:
+            cursor.execute("""
+                INSERT INTO geo_attendance (worker_id, site_id, att_date, status)
+                VALUES (?, ?, ?, 'absent')
+            """, (worker_id, site_id, today))
+    else:
+        # Record exists
+        if is_on_site and att["status"] == "absent":
+            # Worker arrived – check in
+            cursor.execute("""
+                UPDATE geo_attendance SET check_in_time = ?, status = 'present'
+                WHERE worker_id = ? AND att_date = ?
+            """, (now_str, worker_id, today))
+            action = "checked_in"
+        elif not is_on_site and att["status"] == "present" and att["check_in_time"] and not att["check_out_time"]:
+            # Worker left – check out, compute minutes
+            try:
+                cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S")
+                minutes = int((ist_now - cin).total_seconds() / 60)
+            except Exception:
+                minutes = 0
+            cursor.execute("""
+                UPDATE geo_attendance
+                SET check_out_time = ?, total_minutes = ?, status = 'left'
+                WHERE worker_id = ? AND att_date = ?
+            """, (now_str, minutes, worker_id, today))
+            action = "checked_out"
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "distance_m": round(distance, 1),
+        "is_on_site": is_on_site,
+        "action": action,
+        "timestamp": now_str
+    }
+
+
+def get_geo_attendance_today(date_str=None):
+    """
+    Returns today's GPS attendance status for all workers across all sites.
+    """
+    import datetime as dt
+    if not date_str:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        date_str = ist_now.strftime("%Y-%m-%d")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.id as worker_id, w.name as worker_name, w.role, w.phone, w.worker_token,
+               s.id as site_id, s.name as site_name, s.code as site_code,
+               a.check_in_time, a.check_out_time, a.total_minutes,
+               a.status as att_status,
+               p.latitude as last_lat, p.longitude as last_lng,
+               p.distance_meters as last_dist, p.ping_time as last_ping,
+               p.is_on_site as last_on_site
+        FROM site_workers w
+        JOIN sites s ON w.site_id = s.id
+        LEFT JOIN geo_attendance a ON a.worker_id = w.id AND a.att_date = ?
+        LEFT JOIN worker_location_pings p ON p.id = (
+            SELECT id FROM worker_location_pings WHERE worker_id = w.id ORDER BY id DESC LIMIT 1
+        )
+        WHERE w.is_active = 1
+        ORDER BY s.name, w.role, w.name
+    """, (date_str,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows, date_str
+
+
+def get_geo_attendance_monthly(site_id, month_str):
+    """
+    Returns monthly geo-attendance summary for a site.
+    month_str format: YYYY-MM
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT w.id as worker_id, w.name as worker_name, w.role,
+               a.att_date, a.check_in_time, a.check_out_time, a.total_minutes, a.status
+        FROM site_workers w
+        LEFT JOIN geo_attendance a ON a.worker_id = w.id AND a.att_date LIKE ?
+        WHERE w.site_id = ? AND w.is_active = 1
+        ORDER BY a.att_date, w.role, w.name
+    """, (month_str + "%", site_id))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def update_site_gps(site_id, latitude, longitude, radius=500):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE sites SET latitude = ?, longitude = ?, geo_radius = ?
+        WHERE id = ?
+    """, (latitude, longitude, radius, site_id))
+    conn.commit()
+    conn.close()
+
 
 def backup_database():
     """

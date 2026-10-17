@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>{{ worker.name }} — GPS हाजिरी</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 16px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .header .logo {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 32px;
+            box-shadow: 0 8px 32px rgba(59,130,246,0.4);
+        }
+        .header h1 { font-size: 22px; font-weight: 800; color: #fff; }
+        .header .site-badge {
+            display: inline-block;
+            background: #1e3a8a;
+            color: #93c5fd;
+            padding: 4px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+        .header .role-badge {
+            display: inline-block;
+            background: #166534;
+            color: #86efac;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+
+        /* STATUS CARD */
+        .status-card {
+            width: 100%;
+            max-width: 420px;
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            border: 2px solid #334155;
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .status-text {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .status-sub {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        /* STATUS COLORS */
+        .on-site .status-card { border-color: #22c55e; background: #14532d; }
+        .on-site .status-text { color: #86efac; }
+        .off-site .status-card { border-color: #ef4444; background: #450a0a; }
+        .off-site .status-text { color: #fca5a5; }
+        .waiting .status-card { border-color: #f59e0b; background: #1c1408; }
+        .waiting .status-text { color: #fcd34d; }
+
+        /* DISTANCE BAR */
+        .distance-wrap {
+            width: 100%;
+            max-width: 420px;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            border: 1px solid #334155;
+        }
+        .distance-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .distance-value {
+            font-size: 36px;
+            font-weight: 900;
+            color: #f8fafc;
+            line-height: 1;
+        }
+        .distance-unit { font-size: 14px; color: #94a3b8; font-weight: 400; }
+        .distance-bar-wrap { margin-top: 10px; background: #0f172a; border-radius: 99px; height: 10px; overflow: hidden; }
+        .distance-bar { height: 10px; border-radius: 99px; transition: width 0.5s ease, background 0.5s ease; }
+
+        /* TIME CARD */
+        .time-grid {
+            width: 100%;
+            max-width: 420px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .time-tile {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #334155;
+        }
+        .time-tile .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .time-tile .value { font-size: 18px; font-weight: 800; color: #f1f5f9; }
+
+        /* PING BUTTON */
+        .btn-ping {
+            width: 100%;
+            max-width: 420px;
+            padding: 18px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.4);
+        }
+        .btn-ping:active { transform: scale(0.97); }
+        .btn-ping:disabled { background: #334155; box-shadow: none; cursor: not-allowed; }
+
+        /* LOG */
+        .log-wrap {
+            width: 100%;
+            max-width: 420px;
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #334155;
+            margin-bottom: 16px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .log-title { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .log-entry {
+            font-size: 12px;
+            color: #94a3b8;
+            padding: 4px 0;
+            border-bottom: 1px solid #0f172a;
+        }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry.success { color: #86efac; }
+        .log-entry.danger { color: #fca5a5; }
+
+        /* Footer */
+        .footer {
+            width: 100%; max-width: 420px;
+            text-align: center;
+            font-size: 11px;
+            color: #334155;
+            margin-top: 8px;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .ping-animation {
+            position: relative;
+            display: inline-block;
+        }
+        .ping-animation::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse-ring 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">👷</div>
+    <h1>{{ worker.name }}</h1>
+    <span class="site-badge"><i class="fa-solid fa-location-dot"></i> {{ worker.site_name }}</span>
+    <span class="role-badge">{{ worker.role }}</span>
+</div>
+
+<!-- Status Card -->
+<div id="statusWrap" class="waiting">
+    <div class="status-card" id="statusCard">
+        <span class="status-icon" id="statusIcon">📍</span>
+        <div class="status-text" id="statusText">Location ढूंढ रहे हैं...</div>
+        <div class="status-sub" id="statusSub">कृपया प्रतीक्षा करें</div>
+    </div>
+</div>
+
+<!-- Distance -->
+<div class="distance-wrap">
+    <div class="distance-label">📏 साइट से दूरी</div>
+    <div>
+        <span class="distance-value" id="distVal">—</span>
+        <span class="distance-unit" id="distUnit">मीटर</span>
+    </div>
+    <div class="distance-bar-wrap">
+        <div class="distance-bar" id="distBar" style="width:0%; background:#3b82f6;"></div>
+    </div>
+    <div style="margin-top:6px; font-size:11px; color:#475569;">
+        अनुमत दायरा: <strong id="radiusVal">{{ worker.site_radius or 500 }}</strong> मीटर
+    </div>
+</div>
+
+<!-- Time tiles -->
+<div class="time-grid">
+    <div class="time-tile">
+        <div class="label">🟢 Check-in</div>
+        <div class="value" id="checkIn">—</div>
+    </div>
+    <div class="time-tile">
+        <div class="label">🔴 Check-out</div>
+        <div class="value" id="checkOut">—</div>
+    </div>
+    <div class="time-tile">
+        <div class="label">⏱ काम के घंटे</div>
+        <div class="value" id="hoursWorked">—</div>
+    </div>
+    <div class="time-tile">
+        <div class="label">📡 अंतिम पिंग</div>
+        <div class="value" id="lastPing" style="font-size:13px;">—</div>
+    </div>
+</div>
+
+<!-- Manual ping button -->
+<button class="btn-ping" id="pingBtn" onclick="sendPing()" disabled>
+    <i class="fa-solid fa-satellite-dish"></i>
+    <span id="pingBtnText">GPS लोड हो रहा है...</span>
+</button>
+
+<!-- Log -->
+<div class="log-wrap">
+    <div class="log-title">📋 आज की गतिविधि</div>
+    <div id="logList">
+        <div class="log-entry">— कोई गतिविधि नहीं —</div>
+    </div>
+</div>
+
+<div class="footer">
+    हर 60 सेकंड में GPS अपने आप update होती है<br>
+    M/S Sandip Kumar — Jal Jeevan Mission Tracker
+</div>
+
+<script>
+    const WORKER_TOKEN = "{{ worker.worker_token }}";
+    const SITE_RADIUS = {{ worker.site_radius or 500 }};
+    const PING_INTERVAL_MS = 60000; // 60 seconds
+
+    let currentLat = null, currentLng = null;
+    let pingTimer = null;
+    let todayCheckIn = null;
+    let todayCheckOut = null;
+    let todayMinutes = 0;
+
+    // Fetch today's status on load
+    async function fetchTodayStatus() {
+        try {
+            const res = await fetch('/api/geo-attendance/today');
+            const data = await res.json();
+            if (data.success && data.workers) {
+                const me = data.workers.find(w => w.worker_id_via_token === WORKER_TOKEN);
+                // We don't have this data directly; ping will update it
+            }
+        } catch(e) {}
+    }
+
+    // Start GPS watching
+    function startGPS() {
+        if (!navigator.geolocation) {
+            setStatus('error', '❌', 'GPS उपलब्ध नहीं', 'आपका ब्राउज़र GPS support नहीं करता।');
+            return;
+        }
+        addLog('GPS शुरू हो रही है...', 'info');
+        navigator.geolocation.watchPosition(onPosition, onGeoError, {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 30000
+        });
+    }
+
+    function onPosition(pos) {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+        document.getElementById('pingBtn').disabled = false;
+        document.getElementById('pingBtnText').textContent = 'अभी Location भेजें (Manual)';
+
+        // Auto-ping if not running
+        if (!pingTimer) {
+            sendPing();
+            pingTimer = setInterval(sendPing, PING_INTERVAL_MS);
+        }
+    }
+
+    function onGeoError(err) {
+        let msg = 'GPS error';
+        if (err.code === 1) msg = 'GPS की अनुमति दें — Settings > Site permissions > Location';
+        else if (err.code === 2) msg = 'GPS signal नहीं मिल रहा। बाहर जाएं।';
+        else if (err.code === 3) msg = 'GPS timeout। फिर से कोशिश करें।';
+        setStatus('error', '🚫', 'GPS error', msg);
+        addLog(msg, 'danger');
+    }
+
+    async function sendPing() {
+        if (!currentLat || !currentLng) {
+            addLog('Location उपलब्ध नहीं, GPS enable करें।', 'danger');
+            return;
+        }
+
+        document.getElementById('pingBtnText').textContent = '⏳ भेज रहे हैं...';
+        document.getElementById('pingBtn').disabled = true;
+
+        try {
+            const res = await fetch('/api/worker/ping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: WORKER_TOKEN,
+                    lat: currentLat,
+                    lng: currentLng
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const dist = data.distance_m;
+                const onSite = data.is_on_site;
+                const action = data.action;
+
+                // Update distance display
+                if (dist !== null && dist !== undefined) {
+                    document.getElementById('distVal').textContent = dist >= 1000
+                        ? (dist / 1000).toFixed(2)
+                        : Math.round(dist);
+                    document.getElementById('distUnit').textContent = dist >= 1000 ? 'किलोमीटर' : 'मीटर';
+
+                    // Bar width: 0% = on site, 100% = 2x radius away
+                    const pct = Math.min(100, (dist / (SITE_RADIUS * 2)) * 100);
+                    const barColor = onSite ? '#22c55e' : (dist < SITE_RADIUS * 1.5 ? '#f59e0b' : '#ef4444');
+                    document.getElementById('distBar').style.width = pct + '%';
+                    document.getElementById('distBar').style.background = barColor;
+                }
+
+                // Status
+                const now = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
+
+                if (onSite) {
+                    setStatus('on-site', '✅', 'साइट पर हैं!', `${data.site_name} — ${dist}m अंदर`);
+                    if (action === 'checked_in') {
+                        todayCheckIn = now;
+                        document.getElementById('checkIn').textContent = now;
+                        addLog(`✅ Check-in: ${now} — ${dist}m`, 'success');
+                    }
+                } else {
+                    setStatus('off-site', '🚶', 'साइट से बाहर', `${data.site_name} से ${dist}m दूर`);
+                    if (action === 'checked_out') {
+                        todayCheckOut = now;
+                        document.getElementById('checkOut').textContent = now;
+                        addLog(`🔴 Check-out: ${now}`, 'danger');
+                    }
+                }
+
+                if (data.action === 'no_gps') {
+                    setStatus('waiting', '⚠️', 'Site GPS not set', 'Admin se GPS set karwayein.');
+                }
+
+                document.getElementById('lastPing').textContent = now;
+                addLog(`📡 Ping: ${dist}m — ${onSite ? 'साइट पर' : 'बाहर'}`, onSite ? 'success' : '');
+
+                // Update hours if we have check-in
+                updateHours();
+
+            } else if (data.warning) {
+                setStatus('waiting', '⚠️', 'GPS setup pending', data.warning);
+                addLog('⚠️ ' + data.warning, 'danger');
+            } else {
+                addLog('❌ Error: ' + data.message, 'danger');
+            }
+        } catch (e) {
+            addLog('❌ Network error: ' + e.message, 'danger');
+        }
+
+        document.getElementById('pingBtnText').textContent = 'अभी Location भेजें (Manual)';
+        document.getElementById('pingBtn').disabled = false;
+    }
+
+    function setStatus(type, icon, text, sub) {
+        document.getElementById('statusWrap').className = type;
+        document.getElementById('statusIcon').textContent = icon;
+        document.getElementById('statusText').textContent = text;
+        document.getElementById('statusSub').textContent = sub;
+    }
+
+    function updateHours() {
+        if (todayMinutes > 0) {
+            const h = Math.floor(todayMinutes / 60);
+            const m = todayMinutes % 60;
+            document.getElementById('hoursWorked').textContent = h + 'h ' + m + 'm';
+        } else if (todayCheckIn && !todayCheckOut) {
+            document.getElementById('hoursWorked').textContent = 'काम जारी...';
+        }
+    }
+
+    function addLog(msg, cls) {
+        const list = document.getElementById('logList');
+        if (list.children[0] && list.children[0].textContent === '— कोई गतिविधि नहीं —') {
+            list.innerHTML = '';
+        }
+        const t = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const el = document.createElement('div');
+        el.className = 'log-entry ' + (cls || '');
+        el.textContent = `[${t}] ${msg}`;
+        list.insertBefore(el, list.firstChild);
+        // Keep max 20 entries
+        while (list.children.length > 20) list.removeChild(list.lastChild);
+    }
+
+    // Start immediately
+    startGPS();
+</script>
+</body>
+</html>

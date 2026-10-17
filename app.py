@@ -1207,6 +1207,193 @@ def export_stock_excel():
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+
+# ==========================================
+# GPS ATTENDANCE SYSTEM ROUTES
+# ==========================================
+
+@app.route("/geo-attendance")
+def geo_attendance_admin():
+    """Admin view — live GPS attendance dashboard for all sites/workers."""
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    date_str = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    rows, date_used = database.get_geo_attendance_today(date_str)
+    sites = database.get_all_sites()
+    workers = database.get_all_workers()
+
+    # Group rows by site for display
+    by_site = {}
+    for r in rows:
+        sid = r["site_id"]
+        if sid not in by_site:
+            by_site[sid] = {"site_name": r["site_name"], "site_code": r["site_code"], "workers": []}
+        by_site[sid]["workers"].append(r)
+
+    # Summary counts
+    total_w = len(rows)
+    present_w = sum(1 for r in rows if r.get("att_status") == "present")
+    left_w = sum(1 for r in rows if r.get("att_status") == "left")
+    absent_w = total_w - present_w - left_w
+
+    return render_template(
+        "geo_attendance.html",
+        rows=rows,
+        by_site=by_site,
+        date_str=date_str,
+        sites=sites,
+        workers=workers,
+        total_w=total_w,
+        present_w=present_w,
+        left_w=left_w,
+        absent_w=absent_w
+    )
+
+
+@app.route("/api/geo-attendance/today")
+def geo_attendance_today_api():
+    """JSON API for live refresh of GPS attendance data."""
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    date_str = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    rows, _ = database.get_geo_attendance_today(date_str)
+    return jsonify({"success": True, "date": date_str, "workers": rows})
+
+
+@app.route("/api/worker/ping", methods=["POST", "OPTIONS"])
+def worker_location_ping():
+    """Receives GPS coordinates from a worker's phone and updates attendance."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        token = data.get("token", "").strip()
+        lat = float(data.get("lat", 0))
+        lng = float(data.get("lng", 0))
+
+        if not token or not lat or not lng:
+            return jsonify({"success": False, "message": "Token aur location zaruri hai."}), 400
+
+        worker = database.get_worker_by_token(token)
+        if not worker:
+            return jsonify({"success": False, "message": "Worker nahi mila ya inactive hai."}), 404
+
+        site_lat = worker.get("site_lat")
+        site_lng = worker.get("site_lng")
+        radius = worker.get("site_radius") or 500
+
+        if not site_lat or not site_lng:
+            return jsonify({
+                "success": True,
+                "warning": "Site ka GPS set nahi hua. Admin se GPS set karwayein.",
+                "is_on_site": False,
+                "distance_m": None,
+                "action": "no_gps"
+            })
+
+        result = database.process_location_ping(
+            worker_id=worker["id"],
+            site_id=worker["site_id"],
+            lat=lat,
+            lng=lng,
+            site_lat=site_lat,
+            site_lng=site_lng,
+            radius=radius
+        )
+
+        return jsonify({
+            "success": True,
+            "worker_name": worker["name"],
+            "site_name": worker["site_name"],
+            "radius": radius,
+            **result
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/worker/<token>")
+def worker_tracking_page(token):
+    """Worker's personal GPS tracking page — opened on their phone."""
+    worker = database.get_worker_by_token(token)
+    if not worker:
+        return "<h2 style='font-family:sans-serif;text-align:center;margin-top:40px;color:#c00'>❌ Link invalid hai ya worker inactive hai.<br>Admin se naya link maangein.</h2>", 404
+    return render_template("worker_tracking.html", worker=worker)
+
+
+@app.route("/api/workers", methods=["POST", "OPTIONS"])
+def add_worker_api():
+    """Admin: add a new worker to a site."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक ही worker जोड़ सकते हैं।"}), 403
+
+        site_id = int(data.get("site_id", 0))
+        name = data.get("name", "").strip()
+        role = data.get("role", "Helper").strip()
+        phone = data.get("phone", "").strip()
+
+        if not site_id or not name:
+            return jsonify({"success": False, "message": "Site aur naam zaruri hai."}), 400
+
+        worker_id, token = database.add_worker(site_id, name, role, phone)
+        worker_link = f"https://sandipkumar-tracker.onrender.com/worker/{token}"
+        return jsonify({
+            "success": True,
+            "worker_id": worker_id,
+            "token": token,
+            "worker_link": worker_link,
+            "message": f"✅ {name} ({role}) ko successfully add kar diya! Unhe yeh link bhejein."
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/workers/<int:worker_id>/delete", methods=["POST", "OPTIONS"])
+def delete_worker_api(worker_id):
+    """Admin: soft-delete a worker (is_active = 0)."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक ही worker हटा सकते हैं।"}), 403
+        database.delete_worker(worker_id)
+        return jsonify({"success": True, "message": "Worker hataya gaya."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/sites/<int:site_id>/gps", methods=["POST", "OPTIONS"])
+def set_site_gps(site_id):
+    """Admin: save GPS coordinates for a site."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ गलत पिन!"}), 403
+
+        lat = float(data.get("latitude", 0))
+        lng = float(data.get("longitude", 0))
+        radius = int(data.get("radius", 500))
+
+        if not lat or not lng:
+            return jsonify({"success": False, "message": "Latitude aur longitude zaruri hai."}), 400
+
+        database.update_site_gps(site_id, lat, lng, radius)
+        return jsonify({"success": True, "message": f"✅ Site GPS set ho gaya! ({lat:.5f}, {lng:.5f}) — {radius}m radius."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 
