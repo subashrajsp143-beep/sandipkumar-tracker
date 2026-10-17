@@ -1169,8 +1169,29 @@ def init_gps_tables():
         longitude REAL NOT NULL,
         distance_meters REAL,
         is_on_site INTEGER DEFAULT 0,
+        nearest_point_name TEXT,
         ping_time TEXT NOT NULL,
         FOREIGN KEY(worker_id) REFERENCES site_workers(id) ON DELETE CASCADE
+    );
+    """)
+
+    # Migration for worker_location_pings: nearest_point_name if missing
+    cursor.execute("PRAGMA table_info(worker_location_pings)")
+    ping_cols = [r[1] for r in cursor.fetchall()]
+    if "nearest_point_name" not in ping_cols:
+        cursor.execute("ALTER TABLE worker_location_pings ADD COLUMN nearest_point_name TEXT")
+
+    # 5. Multi-location sub-points per site (e.g. Siwan 4-5 points: Pump House, Tank, Ward 4 Pipeline, etc.)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS site_geo_points (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        point_name TEXT NOT NULL,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        radius_meters INTEGER DEFAULT 300,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
     );
     """)
 
@@ -1345,17 +1366,140 @@ def delete_worker(worker_id):
     conn.close()
 
 
-def process_location_ping(worker_id, site_id, lat, lng, site_lat, site_lng, radius):
+# ==========================================
+# MULTI-POINT GPS SUB-LOCATIONS (WIDE RADIUS WORK)
+# ==========================================
+
+def get_site_geo_points(site_id):
+    """
+    Returns all sub-location GPS points configured for a site
+    (e.g. Siwan 4-5 points: Pump House, Tank, Ward 4 Pipeline, Store, etc.)
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM site_geo_points
+        WHERE site_id = ?
+        ORDER BY id ASC
+    """, (site_id,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def add_site_geo_point(site_id, point_name, latitude, longitude, radius_meters=300):
+    """
+    Adds a new GPS sub-location point for a site with customized geofence radius.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO site_geo_points (site_id, point_name, latitude, longitude, radius_meters)
+        VALUES (?, ?, ?, ?, ?)
+    """, (site_id, point_name.strip(), float(latitude), float(longitude), int(radius_meters)))
+    pid = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return pid
+
+
+def delete_site_geo_point(point_id):
+    """
+    Removes a GPS sub-location point.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM site_geo_points WHERE id = ?", (point_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def get_geo_points_counts_by_site():
+    """
+    Returns a dict mapping site_id -> count of configured geo-points.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT site_id, COUNT(*) as cnt
+        FROM site_geo_points
+        GROUP BY site_id
+    """)
+    res = {r["site_id"]: r["cnt"] for r in cursor.fetchall()}
+    conn.close()
+    return res
+
+
+def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=500):
+    """
+    Calculates proximity of worker (lat, lng) against all sub-location points of the site.
+    - If worker is within radius of ANY point (Pump House, Tank, Ward 4 Pipeline, etc.), is_on_site = True!
+    - Returns (min_distance, is_on_site, nearest_point_name, effective_radius, all_points_summary)
+    """
+    points = get_site_geo_points(site_id)
+    candidates = []
+
+    # 1. Add all configured sub-points
+    for pt in points:
+        candidates.append({
+            "name": pt["point_name"],
+            "lat": float(pt["latitude"]),
+            "lng": float(pt["longitude"]),
+            "radius": int(pt.get("radius_meters") or default_radius or 300)
+        })
+
+    # 2. Add main site GPS if configured
+    if default_site_lat and default_site_lng:
+        candidates.append({
+            "name": "मुख्य केंद्र (Main Center)",
+            "lat": float(default_site_lat),
+            "lng": float(default_site_lng),
+            "radius": int(default_radius or 500)
+        })
+
+    if not candidates:
+        return 99999.0, False, "GPS सेट नहीं", int(default_radius or 500), []
+
+    evaluated = []
+    for c in candidates:
+        dist = haversine_distance(lat, lng, c["lat"], c["lng"])
+        is_in = (dist <= c["radius"])
+        evaluated.append({
+            "name": c["name"],
+            "distance": round(dist, 1),
+            "radius": c["radius"],
+            "is_within": is_in,
+            "lat": c["lat"],
+            "lng": c["lng"]
+        })
+
+    # Sort by closest distance
+    evaluated.sort(key=lambda x: x["distance"])
+    closest = evaluated[0]
+
+    # Check if worker is inside ANY of the candidate points
+    inside_point = next((p for p in evaluated if p["is_within"]), None)
+    if inside_point:
+        return inside_point["distance"], True, inside_point["name"], inside_point["radius"], evaluated
+    else:
+        return closest["distance"], False, closest["name"], closest["radius"], evaluated
+
+
+def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=None, radius=500):
     """
     Called when a worker sends a location ping.
-    - Calculates distance from site
-    - Marks check-in if within radius and not already checked in today
-    - Marks check-out if outside radius and currently checked in
+    - Supports multi-point GPS coordinates for wide-radius sites
+    - Calculates distance from closest sub-point
+    - Marks check-in if within radius of ANY site point and not already checked in today
+    - Marks check-out if outside all points and currently checked in
     - Returns dict with status info
     """
     import datetime as dt
-    distance = haversine_distance(lat, lng, site_lat, site_lng) if (site_lat and site_lng) else 99999
-    is_on_site = distance <= radius
+
+    distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+        site_id, lat, lng, default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius
+    )
 
     ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
     today = ist_now.strftime("%Y-%m-%d")
@@ -1364,11 +1508,11 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat, site_lng, radi
     conn = get_db()
     cursor = conn.cursor()
 
-    # Save location ping
+    # Save location ping with lat, lng, nearest_point_name
     cursor.execute("""
-        INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, ping_time)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (worker_id, lat, lng, round(distance, 1), 1 if is_on_site else 0, now_str))
+        INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, nearest_point_name, ping_time)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (worker_id, lat, lng, round(distance, 1), 1 if is_on_site else 0, nearest_point, now_str))
 
     # Fetch or create today's attendance record
     cursor.execute("""
@@ -1420,6 +1564,9 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat, site_lng, radi
     return {
         "distance_m": round(distance, 1),
         "is_on_site": is_on_site,
+        "nearest_point_name": nearest_point,
+        "lat": lat,
+        "lng": lng,
         "action": action,
         "timestamp": now_str
     }
@@ -1428,6 +1575,7 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat, site_lng, radi
 def get_geo_attendance_today(date_str=None):
     """
     Returns today's GPS attendance status for all workers across all sites.
+    Includes exact last_lat, last_lng, last_dist, last_point_name, last_ping.
     """
     import datetime as dt
     if not date_str:
@@ -1443,7 +1591,8 @@ def get_geo_attendance_today(date_str=None):
                a.status as att_status,
                p.latitude as last_lat, p.longitude as last_lng,
                p.distance_meters as last_dist, p.ping_time as last_ping,
-               p.is_on_site as last_on_site
+               p.is_on_site as last_on_site,
+               p.nearest_point_name as last_point_name
         FROM site_workers w
         JOIN sites s ON w.site_id = s.id
         LEFT JOIN geo_attendance a ON a.worker_id = w.id AND a.att_date = ?

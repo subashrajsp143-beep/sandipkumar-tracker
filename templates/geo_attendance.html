@@ -30,14 +30,19 @@
                        onchange="window.location.href='/geo-attendance?date=' + this.value"
                        class="px-3 py-2 rounded-xl bg-slate-800/90 text-white border border-slate-700 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-indigo-400">
 
-                <button onclick="openAddWorkerModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                <button onclick="openAddWorkerModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-user-plus"></i>
-                    <span>+ नया वर्कर जोड़ें</span>
+                    <span>+ नया वर्कर</span>
                 </button>
 
-                <button onclick="openSiteGpsModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                <button onclick="openMultiGpsModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-draw-polygon"></i>
+                    <span>📍 4-5 GPS पॉइंट्स (Multi-Point)</span>
+                </button>
+
+                <button onclick="openSiteGpsModal()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-map-location-dot"></i>
-                    <span>📍 साइट GPS सेट करें</span>
+                    <span>केंद्र GPS</span>
                 </button>
             </div>
         </div>
@@ -113,9 +118,19 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
                         <span class="font-black text-slate-900 text-sm sm:text-base">{{ site_data.site_name }}</span>
                         <span class="text-xs text-slate-500 font-semibold">({{ site_data.site_code }})</span>
+                        <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[10px] font-bold">
+                            📍 {{ points_counts.get(site_id, 0) if points_counts else 0 }} मल्टी-पॉइंट्स
+                        </span>
                     </div>
-                    <div class="text-xs font-bold text-slate-600">
-                        {{ site_data.workers|length }} वर्कर पंजीकृत
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-600 mr-1">
+                            {{ site_data.workers|length }} वर्कर
+                        </span>
+                        <button onclick="openMultiGpsModalForSite({{ site_id }}, '{{ site_data.site_name }}')" 
+                                class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[11px] shadow-xs transition flex items-center gap-1">
+                            <i class="fa-solid fa-draw-polygon text-[10px]"></i>
+                            <span>4-5 GPS पॉइंट्स</span>
+                        </button>
                     </div>
                 </div>
 
@@ -128,8 +143,9 @@
                                 <th class="py-3 px-3">स्थिति (Status)</th>
                                 <th class="py-3 px-3">चेक-इन (आए)</th>
                                 <th class="py-3 px-3">चेक-आउट (गए)</th>
-                                <th class="py-3 px-3 text-center">कुल कार्य समय</th>
-                                <th class="py-3 px-3">साइट से दूरी</th>
+                                <th class="py-3 px-3 text-center">कार्य समय</th>
+                                <th class="py-3 px-3">वर्कर GPS लोकेशन (Lat, Lng)</th>
+                                <th class="py-3 px-3">दूरी व नजदीकी पॉइंट</th>
                                 <th class="py-3 px-4 text-right">वर्कर लिंक (Share)</th>
                             </tr>
                         </thead>
@@ -200,21 +216,56 @@
                                     {% endif %}
                                 </td>
 
-                                <!-- Distance -->
-                                <td class="py-3 px-3 text-xs text-slate-600">
-                                    {% if w.last_dist is not none %}
-                                    {% if w.last_dist < 500 %}
-                                    <span class="font-bold text-emerald-600">{{ w.last_dist|round(0)|int }}m (अंदर)</span>
+                                <!-- Worker GPS Location (Lat, Lng) -->
+                                <td class="py-3 px-3 text-xs">
+                                    {% if w.last_lat and w.last_lng %}
+                                    <div class="font-mono font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                                        <i class="fa-solid fa-location-crosshairs text-indigo-600"></i>
+                                        <span>{{ "%.5f"|format(w.last_lat) }}, {{ "%.5f"|format(w.last_lng) }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <a href="https://www.google.com/maps?q={{ w.last_lat }},{{ w.last_lng }}" target="_blank" 
+                                           class="inline-flex items-center gap-1 text-[10px] text-blue-700 hover:text-blue-900 font-bold bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 transition">
+                                            <i class="fa-solid fa-map-pin text-rose-500"></i> Google Map ↗
+                                        </a>
+                                        {% if w.last_ping %}
+                                        <span class="text-[10px] text-slate-400 font-medium">
+                                            <i class="fa-solid fa-clock text-[9px]"></i> {{ w.last_ping.split(' ')[1][:5] }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
                                     {% else %}
-                                    <span class="font-semibold text-rose-500">{{ (w.last_dist / 1000)|round(2) }} km दूर</span>
+                                    <span class="text-slate-400 text-xs italic">सिग्नल प्रतीक्षारत</span>
                                     {% endif %}
+                                </td>
+
+                                <!-- Distance & Nearest Sub-Location -->
+                                <td class="py-3 px-3 text-xs">
+                                    {% if w.last_dist is not none %}
+                                        {% if w.last_point_name %}
+                                        <div class="font-bold text-slate-800 flex items-center gap-1 text-[11px] mb-0.5">
+                                            <i class="fa-solid fa-location-dot text-violet-600"></i>
+                                            <span>{{ w.last_point_name }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if w.last_on_site %}
+                                        <span class="inline-flex items-center gap-1 font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[11px]">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            {{ w.last_dist|round(0)|int }}m (On-Site)
+                                        </span>
+                                        {% else %}
+                                        <span class="inline-flex items-center gap-1 font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 text-[11px]">
+                                            {{ (w.last_dist / 1000)|round(2) }} km दूर
+                                        </span>
+                                        {% endif %}
                                     {% else %}
-                                    <span class="text-slate-400">GPS नहीं मिला</span>
+                                        <span class="text-slate-400">GPS नहीं मिला</span>
                                     {% endif %}
                                 </td>
 
                                 <!-- Link Share Button -->
                                 <td class="py-3 px-4 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
                                         <button onclick="copyWorkerLink('{{ w.worker_token }}', '{{ w.worker_name }}')" 
                                                 title="Worker का हाजिरी लिंक कॉपी व WhatsApp शेयर करें"
                                                 class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition flex items-center gap-1 border border-emerald-200">
@@ -377,6 +428,107 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- MODAL: MULTI-LOCATION GPS SUB-POINTS (4-5 POINTS PER SITE) -->
+<div id="multiGpsModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center font-bold text-lg">
+                    <i class="fa-solid fa-draw-polygon"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-base sm:text-lg">साइट मल्टी-लोकेशन GPS पॉइंट्स (4-5 Points)</h3>
+                    <p class="text-[11px] text-slate-500">बड़े दायरे वाले काम (पाइपलाइन, पंप हाउस, पानी टंकी आदि) के लिए एकाधिक GPS</p>
+                </div>
+            </div>
+            <button onclick="closeMultiGpsModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+        </div>
+
+        <!-- Site Selector inside Modal -->
+        <div class="mt-4">
+            <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें (Select Site) *</label>
+            <select id="multiGpsSiteSelect" onchange="loadSiteGeoPoints(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if s.name == 'Siwan' or s.id == 4 %}selected{% endif %}>
+                    {{ s.name }} ({{ s.code }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Currently Saved Points List -->
+        <div class="mt-4 bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-violet-600"></i>
+                    <span>मौजूदा सक्रिय GPS पॉइंट्स (Active Sub-Locations)</span>
+                </span>
+                <span id="pointCountBadge" class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[11px] font-black">0 पॉइंट्स</span>
+            </div>
+
+            <div id="pointsListContainer" class="space-y-2 mt-2">
+                <div class="text-center py-4 text-xs text-slate-400">पॉइंट्स लोड हो रहे हैं...</div>
+            </div>
+        </div>
+
+        <!-- Add New Sub-Location Form -->
+        <div class="mt-5 pt-4 border-t border-slate-200">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-plus-circle text-emerald-600"></i>
+                <span>+ नया कार्य स्थल / पॉइंट जोड़ें</span>
+            </h4>
+
+            <form id="addPointForm" onsubmit="submitNewPoint(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">पॉइंट का नाम / कार्य स्थल *</label>
+                    <input type="text" id="newPointName" required placeholder="उदा. पंप हाउस, पानी टंकी, वार्ड 4 पाइपलाइन, स्टोर कैंप"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                </div>
+
+                <div class="bg-violet-50 p-3 rounded-xl border border-violet-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div class="text-[11px] text-violet-900 font-medium">
+                        यदि आप उस स्थान पर खड़े हैं, तो सीधे फोन से लोकेशन लें:
+                    </div>
+                    <button type="button" onclick="getCurrentLocationForNewPoint()" class="w-full sm:w-auto px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-crosshairs"></i>
+                        <span>मेरी फोन लोकेशन लें</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Latitude *</label>
+                        <input type="number" step="any" id="newPointLat" required placeholder="उदा. 26.21950"
+                               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Longitude *</label>
+                        <input type="number" step="any" id="newPointLng" required placeholder="उदा. 84.35670"
+                               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">हाजिरी का दायरा (Radius in Meters) *</label>
+                    <input type="number" id="newPointRadius" value="300" min="50" max="5000" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
+                    <span class="text-[10px] text-slate-500">इस पॉइंट के इतने मीटर के अंदर आते ही वर्कर 'On-Site' माना जाएगा (डिफ़ॉल्ट 300 मीटर)</span>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeMultiGpsModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                        बंद करें
+                    </button>
+                    <button type="submit" id="savePointBtn" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>+ यह GPS पॉइंट सुरक्षित करें</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -555,6 +707,165 @@
             window.location.reload();
         } else {
             alert('❌ ' + data.message);
+        }
+    }
+
+    // Multi-Point GPS Modal Controls
+    function openMultiGpsModal() {
+        document.getElementById('multiGpsModal').classList.remove('hidden');
+        const sel = document.getElementById('multiGpsSiteSelect');
+        if (sel && sel.value) loadSiteGeoPoints(sel.value);
+    }
+
+    function openMultiGpsModalForSite(siteId, siteName) {
+        document.getElementById('multiGpsModal').classList.remove('hidden');
+        const sel = document.getElementById('multiGpsSiteSelect');
+        if (sel) {
+            sel.value = siteId;
+            loadSiteGeoPoints(siteId);
+        }
+    }
+
+    function closeMultiGpsModal() {
+        document.getElementById('multiGpsModal').classList.add('hidden');
+    }
+
+    async function loadSiteGeoPoints(siteId) {
+        const container = document.getElementById('pointsListContainer');
+        const badge = document.getElementById('pointCountBadge');
+        container.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-spinner animate-spin"></i> पॉइंट्स लोड हो रहे हैं...</div>';
+
+        try {
+            const res = await fetch(`/api/sites/${siteId}/points`);
+            const data = await res.json();
+            if (data.success) {
+                const pts = data.points || [];
+                badge.textContent = `${pts.length} पॉइंट्स`;
+
+                if (pts.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-5 px-3 bg-white rounded-xl border border-dashed border-slate-200">
+                            <i class="fa-solid fa-map-pin text-2xl text-slate-300 mb-1"></i>
+                            <div class="text-xs font-bold text-slate-700">अभी तक कोई उप-लोकेशन पॉइंट नहीं जुड़ा है</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">नीचे दिए गए फॉर्म से सीवान/साइट के 4–5 पॉइंट्स (पंप हाउस, टंकी, वार्ड पाइपलाइन) जोड़ें।</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                pts.forEach((p, idx) => {
+                    html += `
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-6 h-6 rounded-lg bg-violet-100 text-violet-800 text-xs font-black flex items-center justify-center">${idx + 1}</span>
+                                <div>
+                                    <div class="text-xs font-extrabold text-slate-900">${p.point_name}</div>
+                                    <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
+                                        <span>Lat: ${p.latitude.toFixed(5)}, Lng: ${p.longitude.toFixed(5)}</span>
+                                        <span class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded font-sans">दायरा: ${p.radius_meters || 300}m</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
+                                   class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-map-pin text-rose-500"></i> Map ↗
+                                </a>
+                                <button type="button" onclick="deleteGeoPoint(${p.id}, '${p.point_name}')" 
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs" title="हटाएं">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'एरर'}</div>`;
+            }
+        } catch (err) {
+            container.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">नेटवर्क एरर: ${err.message}</div>`;
+        }
+    }
+
+    function getCurrentLocationForNewPoint() {
+        if (!navigator.geolocation) {
+            alert('इस डिवाइस में GPS सपोर्ट नहीं है।');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                document.getElementById('newPointLat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('newPointLng').value = pos.coords.longitude.toFixed(6);
+                alert(`✅ लोकेशन प्राप्त हुई: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+            },
+            (err) => {
+                alert('GPS एरर: ' + err.message + ' — कृपया फोन में Location चालू करें।');
+            },
+            { enableHighAccuracy: true, timeout: 15000 }
+        );
+    }
+
+    async function submitNewPoint(e) {
+        e.preventDefault();
+        const siteId = document.getElementById('multiGpsSiteSelect').value;
+        const name = document.getElementById('newPointName').value.trim();
+        const lat = document.getElementById('newPointLat').value;
+        const lng = document.getElementById('newPointLng').value;
+        const radius = document.getElementById('newPointRadius').value;
+
+        const btn = document.getElementById('savePointBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+
+        try {
+            const res = await fetch(`/api/sites/${siteId}/points`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    point_name: name,
+                    latitude: lat,
+                    longitude: lng,
+                    radius: radius,
+                    pin: '7808'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('newPointName').value = '';
+                document.getElementById('newPointLat').value = '';
+                document.getElementById('newPointLng').value = '';
+                loadSiteGeoPoints(siteId);
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>+ यह GPS पॉइंट सुरक्षित करें</span>';
+        }
+    }
+
+    async function deleteGeoPoint(pointId, pointName) {
+        if (!confirm(`क्या आप '${pointName}' GPS पॉइंट को हटाना चाहते हैं?`)) return;
+        const siteId = document.getElementById('multiGpsSiteSelect').value;
+        try {
+            const res = await fetch(`/api/sites/points/${pointId}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: '7808' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                loadSiteGeoPoints(siteId);
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ ' + err.message);
         }
     }
 </script>

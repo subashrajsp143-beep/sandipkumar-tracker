@@ -234,9 +234,14 @@
     </div>
 </div>
 
-<!-- Distance -->
+<!-- Distance & Sub-Location -->
 <div class="distance-wrap">
-    <div class="distance-label">📏 साइट से दूरी</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="distance-label">📏 साइट से दूरी</div>
+        <div id="subLocationBadge" style="display:none; background:#312e81; color:#c7d2fe; font-size:11px; font-weight:800; padding:2px 10px; border-radius:99px; border:1px solid #4338ca;">
+            📍 <span id="nearestPointText">—</span>
+        </div>
+    </div>
     <div>
         <span class="distance-value" id="distVal">—</span>
         <span class="distance-unit" id="distUnit">मीटर</span>
@@ -244,8 +249,9 @@
     <div class="distance-bar-wrap">
         <div class="distance-bar" id="distBar" style="width:0%; background:#3b82f6;"></div>
     </div>
-    <div style="margin-top:6px; font-size:11px; color:#475569;">
-        अनुमत दायरा: <strong id="radiusVal">{{ worker.site_radius or 500 }}</strong> मीटर
+    <div style="margin-top:8px; display:flex; justify-content:space-between; font-size:11px; color:#94a3b8;">
+        <span>आपकी GPS: <strong id="coordsText" style="color:#f8fafc; font-family:monospace;">—</strong></span>
+        <span>दायरा: <strong id="radiusVal">{{ worker.site_radius or 500 }}</strong>m</span>
     </div>
 </div>
 
@@ -410,18 +416,35 @@
                     document.getElementById('distBar').style.background = barColor;
                 }
 
+                // Update worker coordinates display
+                if (currentLat && currentLng) {
+                    const cEl = document.getElementById('coordsText');
+                    if (cEl) cEl.textContent = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`;
+                }
+
+                // Update sub-location badge
+                if (data.nearest_point_name) {
+                    const badge = document.getElementById('subLocationBadge');
+                    const txt = document.getElementById('nearestPointText');
+                    if (badge && txt) {
+                        badge.style.display = 'block';
+                        txt.textContent = data.nearest_point_name;
+                    }
+                }
+
                 // Status
                 const now = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
+                const locTag = data.nearest_point_name ? ` (${data.nearest_point_name})` : '';
 
                 if (onSite) {
-                    setStatus('on-site', '✅', 'साइट पर हैं!', `${data.site_name} — ${dist}m अंदर`);
+                    setStatus('on-site', '✅', 'साइट पर हैं!', `${data.site_name}${locTag} — ${dist}m अंदर`);
                     if (action === 'checked_in') {
                         todayCheckIn = now;
                         document.getElementById('checkIn').textContent = now;
-                        addLog(`✅ Check-in: ${now} — ${dist}m`, 'success');
+                        addLog(`✅ Check-in: ${now} — ${dist}m${locTag}`, 'success');
                     }
                 } else {
-                    setStatus('off-site', '🚶', 'साइट से बाहर', `${data.site_name} से ${dist}m दूर`);
+                    setStatus('off-site', '🚶', 'साइट से बाहर', `${data.site_name}${locTag} से ${dist}m दूर`);
                     if (action === 'checked_out') {
                         todayCheckOut = now;
                         document.getElementById('checkOut').textContent = now;
@@ -434,7 +457,7 @@
                 }
 
                 document.getElementById('lastPing').textContent = now;
-                addLog(`📡 Ping: ${dist}m — ${onSite ? 'साइट पर' : 'बाहर'}`, onSite ? 'success' : '');
+                addLog(`📡 Ping: ${dist}m${locTag} — ${onSite ? 'साइट पर' : 'बाहर'}`, onSite ? 'success' : '');
 
                 // Update hours if we have check-in
                 updateHours();

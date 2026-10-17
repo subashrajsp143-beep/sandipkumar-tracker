@@ -227,15 +227,15 @@ def api_supervisor_login():
         lng = data.get("longitude")
         location_status = "pending"
         distance_m = None
-        if lat and lng and worker.get("site_lat") and worker.get("site_lng"):
+        if lat and lng:
             try:
                 ping_res = database.process_location_ping(
                     worker_id=worker["id"],
                     site_id=worker["site_id"],
                     lat=float(lat),
                     lng=float(lng),
-                    site_lat=float(worker["site_lat"]),
-                    site_lng=float(worker["site_lng"]),
+                    site_lat=worker.get("site_lat"),
+                    site_lng=worker.get("site_lng"),
                     radius=worker.get("site_radius") or 500
                 )
                 location_status = "on_site" if ping_res.get("is_on_site") else "off_site"
@@ -943,7 +943,8 @@ def export_monthly_excel():
 @app.route("/sites")
 def sites_list():
     sites = database.get_all_sites()
-    return render_template("sites.html", sites=sites)
+    points_counts = database.get_geo_points_counts_by_site()
+    return render_template("sites.html", sites=sites, points_counts=points_counts)
 
 @app.route("/api/sites/<int:site_id>/edit", methods=["POST"])
 def edit_site(site_id):
@@ -1791,6 +1792,8 @@ def geo_attendance_admin():
     left_w = sum(1 for r in rows if r.get("att_status") == "left")
     absent_w = total_w - present_w - left_w
 
+    points_counts = database.get_geo_points_counts_by_site()
+
     return render_template(
         "geo_attendance.html",
         rows=rows,
@@ -1801,7 +1804,8 @@ def geo_attendance_admin():
         total_w=total_w,
         present_w=present_w,
         left_w=left_w,
-        absent_w=absent_w
+        absent_w=absent_w,
+        points_counts=points_counts
     )
 
 
@@ -1840,15 +1844,6 @@ def worker_location_ping():
         site_lng = worker.get("site_lng")
         radius = worker.get("site_radius") or 500
 
-        if not site_lat or not site_lng:
-            return jsonify({
-                "success": True,
-                "warning": "Site ka GPS set nahi hua. Admin se GPS set karwayein.",
-                "is_on_site": False,
-                "distance_m": None,
-                "action": "no_gps"
-            })
-
         result = database.process_location_ping(
             worker_id=worker["id"],
             site_id=worker["site_id"],
@@ -1858,6 +1853,15 @@ def worker_location_ping():
             site_lng=site_lng,
             radius=radius
         )
+
+        if result.get("distance_m") == 99999.0 and not result.get("is_on_site") and result.get("nearest_point_name") == "GPS सेट नहीं":
+            return jsonify({
+                "success": True,
+                "warning": "Site ka GPS set nahi hua. Admin se GPS set karwayein.",
+                "is_on_site": False,
+                "distance_m": None,
+                "action": "no_gps"
+            })
 
         return jsonify({
             "success": True,
@@ -1950,6 +1954,58 @@ def set_site_gps(site_id):
 
         database.update_site_gps(site_id, lat, lng, radius)
         return jsonify({"success": True, "message": f"✅ Site GPS set ho gaya! ({lat:.5f}, {lng:.5f}) — {radius}m radius."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/sites/<int:site_id>/points", methods=["GET", "POST", "OPTIONS"])
+def site_geo_points_api(site_id):
+    """Admin: view and add multi-location GPS points for wide-radius sites."""
+    if request.method == "OPTIONS":
+        return "", 200
+    if request.method == "GET":
+        points = database.get_site_geo_points(site_id)
+        return jsonify({"success": True, "site_id": site_id, "points": points})
+
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ केवल मालिक ही GPS पॉइंट्स जोड़ सकते हैं।"}), 403
+
+        point_name = data.get("point_name", "").strip()
+        lat = float(data.get("latitude", 0))
+        lng = float(data.get("longitude", 0))
+        radius = int(data.get("radius", 300))
+
+        if not point_name or not lat or not lng:
+            return jsonify({"success": False, "message": "पॉइंट का नाम, Latitude और Longitude अनिवार्य हैं।"}), 400
+
+        pid = database.add_site_geo_point(site_id, point_name, lat, lng, radius)
+        return jsonify({
+            "success": True,
+            "point_id": pid,
+            "message": f"✅ GPS पॉइंट '{point_name}' ({lat:.4f}, {lng:.4f}) सफलतापूर्वक जोड़ा गया!"
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/sites/points/<int:point_id>/delete", methods=["POST", "OPTIONS"])
+def delete_site_geo_point_api(point_id):
+    """Admin: delete a multi-location GPS point."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ केवल मालिक ही GPS पॉइंट्स हटा सकते हैं।"}), 403
+
+        database.delete_site_geo_point(point_id)
+        return jsonify({"success": True, "message": "GPS पॉइंट हटा दिया गया।"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

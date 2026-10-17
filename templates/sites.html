@@ -96,11 +96,16 @@
                 <!-- GPS Geofence Status & Setup Button -->
                 <div class="mt-3.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
                     <div>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">GPS लोकेशन (500M Geofence)</span>
-                        {% if s.latitude and s.longitude %}
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">GPS लोकेशन स्थिति</span>
+                        {% if points_counts and points_counts.get(s.id) %}
+                        <span class="text-violet-700 font-bold flex items-center gap-1 mt-0.5 text-[11px]">
+                            <i class="fa-solid fa-draw-polygon text-violet-600"></i>
+                            <span>{{ points_counts.get(s.id) }} मल्टी-पॉइंट्स सेट</span>
+                        </span>
+                        {% elif s.latitude and s.longitude %}
                         <span class="text-emerald-700 font-bold flex items-center gap-1 mt-0.5 text-[11px]">
                             <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                            <span>{{ s.latitude|round(3) }}, {{ s.longitude|round(3) }} ({{ s.geo_radius or 500 }}m)</span>
+                            <span>{{ s.latitude|round(3) }}, {{ s.longitude|round(3) }}</span>
                         </span>
                         {% else %}
                         <span class="text-amber-600 font-semibold flex items-center gap-1 mt-0.5 text-[11px]">
@@ -109,11 +114,18 @@
                         </span>
                         {% endif %}
                     </div>
-                    <button onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 500 }})'
-                            class="px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 font-bold text-xs transition flex items-center gap-1 border border-violet-200">
-                        <i class="fa-solid fa-map-location-dot"></i>
-                        <span>GPS सेट करें</span>
-                    </button>
+                    <div class="flex items-center gap-1">
+                        <a href="/geo-attendance" title="4-5 GPS पॉइंट्स मैनेज करें"
+                           class="px-2 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[10px] transition flex items-center gap-1 shadow-xs">
+                            <i class="fa-solid fa-draw-polygon"></i>
+                            <span>4-5 पॉइंट्स</span>
+                        </a>
+                        <button onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 500 }})'
+                                class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition flex items-center gap-1 border border-slate-300">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <span>केंद्र</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
