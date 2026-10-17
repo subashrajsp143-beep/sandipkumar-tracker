@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String APP_URL = "https://sandipkumar-tracker.onrender.com";
 
     private WebView webView;
-    private SwipeRefreshLayout swipeRefresh;
     private ProgressBar progressBar;
 
     private ValueCallback<Uri[]> uploadMessage;
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         webView = findViewById(R.id.webView);
-        swipeRefresh = findViewById(R.id.swipeRefresh);
         progressBar = findViewById(R.id.progressBar);
 
         setupLaunchers();
@@ -77,19 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        // Swipe down to refresh (Strictly guarded so scrolling content never triggers reload)
-        swipeRefresh.setOnRefreshListener(() -> webView.reload());
-        swipeRefresh.setColorSchemeColors(
-                ContextCompat.getColor(this, R.color.accent),
-                ContextCompat.getColor(this, R.color.primary)
-        );
-        // Only allow pull-to-refresh when webView is at the absolute top (cannot scroll up)
-        swipeRefresh.setOnChildScrollUpCallback((parent, child) -> {
-            return webView != null && (webView.canScrollVertically(-1) || webView.getScrollY() > 0);
-        });
-        // Require a deliberate 450px pull instead of accidental micro-swipes
-        swipeRefresh.setDistanceToTriggerSync(450);
 
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
@@ -156,7 +141,10 @@ public class MainActivity extends AppCompatActivity {
 
         webView.setInitialScale(0); // 0 = standard viewport meta scale
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setOverScrollMode(View.OVER_SCROLL_NEVER); // Prevents overscroll bouncing
+        webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+        webView.setVerticalScrollBarEnabled(true);
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
@@ -186,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                swipeRefresh.setRefreshing(false);
             }
         });
 

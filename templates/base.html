@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi" class="h-full bg-slate-50">
+<html lang="hi" class="bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -30,15 +30,16 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            width: 100%;
-            max-width: 100%;
+        html {
             overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
-            -moz-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            touch-action: pan-y;
+        }
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
             font-family: 'Inter', sans-serif;
+            -webkit-overflow-scrolling: touch;
         }
         @media print {
             .no-print { display: none !important; }
@@ -274,8 +275,11 @@
                     </a>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden flex items-center">
+                <!-- Mobile Action: Quick Refresh & Menu -->
+                <div class="md:hidden flex items-center gap-1">
+                    <button type="button" onclick="window.location.reload()" class="text-blue-200 hover:text-white focus:outline-none p-2 rounded-xl active:bg-blue-800 transition" title="पेज रिफ्रेश करें">
+                        <i class="fa-solid fa-rotate text-base"></i>
+                    </button>
                     <button id="mobileMenuBtn" class="text-blue-200 hover:text-white focus:outline-none p-2" title="Menu">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
