@@ -284,6 +284,11 @@ def logout_user():
 @app.route("/dashboard")
 @app.route("/portal")
 def dashboard():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        return redirect(url_for("site_stock"))
+
     stats = database.get_dashboard_stats()
     sites = database.get_all_sites()
     return render_template("dashboard.html", stats=stats, sites=sites)
@@ -415,6 +420,9 @@ def update_entry(entry_id):
 # Full Database Backup Export API (JSON)
 @app.route("/api/backup", methods=["GET"])
 def export_database_backup():
+    is_owner = session.get("is_owner", False)
+    if not is_owner:
+        return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अधिकृत मालिक ही पूरा डेटा बैकअप डाउनलोड कर सकते हैं।"}), 403
     try:
         conn = database.get_db()
         cursor = conn.cursor()
@@ -549,6 +557,11 @@ def parse_text():
 # 2.3 Material Store & Requisition
 @app.route("/store")
 def material_store():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        return redirect(url_for("site_stock"))
+
     sites = database.get_all_sites()
     materials = database.get_all_materials()
     today_str = datetime.date.today().strftime("%Y-%m-%d")
@@ -967,12 +980,20 @@ def export_monthly_excel():
 # 8. Sites Master Management
 @app.route("/sites")
 def sites_list():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        return redirect(url_for("site_stock"))
+
     sites = database.get_all_sites()
     points_counts = database.get_geo_points_counts_by_site()
     return render_template("sites.html", sites=sites, points_counts=points_counts)
 
 @app.route("/api/sites/<int:site_id>/edit", methods=["POST"])
 def edit_site(site_id):
+    is_owner = session.get("is_owner", False)
+    if not is_owner:
+        return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अधिकृत मालिक ही साइट विवरण बदल सकते हैं।"}), 403
     try:
         data = request.form
         name = data.get("name", "").strip()
@@ -1013,6 +1034,11 @@ def add_site():
         incharge = data.get("incharge", "").strip()
         incharge_phone = data.get("incharge_phone", "").strip()
 
+        is_owner = session.get("is_owner", False)
+        if not is_owner:
+            flash("❌ केवल अधिकृत मालिक ही नई साइट जोड़ सकते हैं।", "error")
+            return redirect(url_for("site_stock"))
+
         if not name:
             flash("Site name bharna anivarya hai!", "error")
             return redirect(url_for("sites_list"))
@@ -1039,6 +1065,10 @@ def add_site():
 
 @app.route("/api/sites/<int:site_id>/delete", methods=["POST"])
 def delete_site(site_id):
+    is_owner = session.get("is_owner", False)
+    if not is_owner:
+        flash("❌ केवल अधिकृत मालिक ही साइट हटा सकते हैं।", "error")
+        return redirect(url_for("site_stock"))
     try:
         conn = database.get_db()
         cursor = conn.cursor()
@@ -1062,11 +1092,20 @@ def delete_site(site_id):
 # 9. Materials Master Management
 @app.route("/materials")
 def materials_list():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        return redirect(url_for("site_stock"))
+
     materials = database.get_all_materials()
     return render_template("materials.html", materials=materials)
 
 @app.route("/api/materials", methods=["POST"])
 def add_material():
+    is_owner = session.get("is_owner", False)
+    if not is_owner:
+        flash("❌ केवल अधिकृत मालिक ही सामग्री जोड़ सकते हैं।", "error")
+        return redirect(url_for("site_stock"))
     try:
         data = request.form
         name = data.get("name", "").strip()

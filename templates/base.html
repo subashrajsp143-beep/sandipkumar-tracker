@@ -127,8 +127,8 @@
                         </div>
                     </div>
 
-                    <!-- Brand / Company Name (links to Dashboard) -->
-                    <a href="{{ url_for('dashboard') }}" class="flex flex-col group py-1">
+                    <!-- Brand / Company Name (links to Dashboard / Site Stock) -->
+                    <a href="{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}{{ url_for('site_stock') }}{% else %}{{ url_for('dashboard') }}{% endif %}" class="flex flex-col group py-1">
                         <span class="font-extrabold text-sm sm:text-lg tracking-wide text-white group-hover:text-amber-300 transition leading-tight" data-i18n="app_title">M/S SANDIP KUMAR</span>
                         <div class="flex items-center gap-1.5">
                             <span class="text-[10px] sm:text-xs text-blue-200 font-medium">
@@ -148,10 +148,12 @@
 
                 <!-- Desktop Menu: 5 Core Workflows + Clean More Menu -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-1.5">
-                    <!-- 1. Dashboard -->
+                    <!-- 1. Dashboard (Owner Only) -->
+                    {% if session.get('is_owner') or user_role == 'owner' %}
                     <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-1.5">
                         <i class="fa-solid fa-chart-pie text-xs"></i> <span>डैशबोर्ड</span>
                     </a>
+                    {% endif %}
 
                     <!-- 2. Daily Entry -->
                     <a href="{{ url_for('daily_entry') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-1.5">
@@ -267,9 +269,11 @@
             <!-- Section 1: Main Daily Actions -->
             <div class="space-y-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">मुख्य कार्य (Main Actions)</span>
+                {% if session.get('is_owner') or user_role == 'owner' %}
                 <a href="{{ url_for('dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-blue-100 bg-slate-900 hover:bg-blue-900/50 flex items-center gap-2.5">
                     <i class="fa-solid fa-chart-pie text-blue-400 w-4"></i> <span>डैशबोर्ड (Dashboard)</span>
                 </a>
+                {% endif %}
                 <a href="{{ url_for('daily_entry') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow flex items-center gap-2.5">
                     <i class="fa-solid fa-circle-plus w-4"></i> <span>दैनिक एंट्री (Daily Entry)</span>
                 </a>
