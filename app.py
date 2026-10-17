@@ -19,6 +19,7 @@ import ocr_extractor
 
 app = Flask(__name__)
 app.secret_key = "construction-material-secret-key-19-sites"
+app.permanent_session_lifetime = datetime.timedelta(days=365)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -34,15 +35,44 @@ database.init_db()
 def inject_common():
     return {
         "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
-        "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year
+        "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year,
+        "user_role": session.get("role", "guest"),
+        "user_name": session.get("worker_name", ""),
+        "user_site_id": session.get("site_id", None),
+        "user_site_name": session.get("site_name", "")
     }
 
 @app.before_request
-def ensure_canonical_domain():
+def ensure_canonical_and_auth():
     host = request.host.lower()
     if "ms-sandipkumar-tracker.onrender.com" in host:
         url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker.onrender.com")
         return redirect(url, code=301)
+
+    # Public paths that never require login
+    path = request.path
+    if (path.startswith("/static") or 
+        path.startswith("/uploads") or 
+        path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
+                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website"] or
+        path.startswith("/worker/") or 
+        path == "/api/worker/ping"):
+        return None
+
+    role = session.get("role")
+    is_owner = session.get("is_owner", False) or role == "owner"
+
+    # If worker is logged in, restrict to worker portal only (privacy protection)
+    if role == "worker":
+        if path not in ["/my-attendance", "/logout", "/api/worker/ping"]:
+            return redirect(url_for("my_attendance_portal"))
+
+    # If not logged in at all, direct them to login
+    if not role and not is_owner:
+        if path in ["/", "/dashboard", "/portal", "/stock", "/entry", "/daily-entry", 
+                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store"]:
+            return redirect(url_for("login_page"))
+
 
 # 24/7 Keep-Alive Background Worker (Prevents Render Free Tier Cold-Start Sleep)
 def _start_keep_alive_daemon():
@@ -77,13 +107,128 @@ def _start_keep_alive_daemon():
 
 _start_keep_alive_daemon()
 
-# 0. Official Company Website (Public Home Page)
+# 0. App Root Landing - Role-Based Smart Router
 @app.route("/")
+def home_index():
+    role = session.get("role")
+    if role == "worker":
+        return redirect(url_for("my_attendance_portal"))
+    elif role == "supervisor":
+        sid = session.get("site_id")
+        return redirect(url_for("site_stock", site_id=sid) if sid else url_for("site_stock"))
+    elif role == "owner" or session.get("is_owner"):
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("login_page"))
+
+# 0.1 Public Showcase Website
+@app.route("/website")
 def company_website():
     stats = database.get_dashboard_stats()
     sites = database.get_all_sites()
     materials = database.get_all_materials()
     return render_template("website.html", stats=stats, sites=sites, materials=materials)
+
+# 0.2 Universal Login Page
+@app.route("/login")
+def login_page():
+    role = session.get("role")
+    if role == "worker":
+        return redirect(url_for("my_attendance_portal"))
+    elif role == "supervisor":
+        return redirect(url_for("site_stock"))
+    elif role == "owner" or session.get("is_owner"):
+        return redirect(url_for("dashboard"))
+    
+    sites = database.get_all_sites()
+    return render_template("login.html", sites=sites)
+
+# 0.3 Worker Login API
+@app.route("/api/auth/worker-login", methods=["POST", "OPTIONS"])
+def api_worker_login():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        site_id = int(data.get("site_id", 0))
+        role = data.get("role", "Helper").strip()
+        name = data.get("name", "").strip()
+        phone = data.get("phone", "").strip()
+
+        if not site_id or not name:
+            return jsonify({"success": False, "message": "साइट और नाम भरना अनिवार्य है।"}), 400
+
+        worker = database.get_or_create_worker(site_id, name, role, phone)
+        session.permanent = True
+        session["role"] = "worker"
+        session["worker_id"] = worker["id"]
+        session["worker_token"] = worker["worker_token"]
+        session["worker_name"] = worker["name"]
+        session["worker_role"] = worker["role"]
+        session["worker_phone"] = worker["phone"]
+        session["site_id"] = worker["site_id"]
+        session["site_name"] = worker["site_name"]
+
+        return jsonify({"success": True, "worker": worker})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# 0.4 Supervisor Login API
+@app.route("/api/auth/supervisor-login", methods=["POST", "OPTIONS"])
+def api_supervisor_login():
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        site_id = int(data.get("site_id", 0))
+        role = data.get("role", "Supervisor").strip()
+        name = data.get("name", "").strip()
+        phone = data.get("phone", "").strip()
+
+        if not site_id or not name:
+            return jsonify({"success": False, "message": "साइट और नाम भरना अनिवार्य है।"}), 400
+
+        worker = database.get_or_create_worker(site_id, name, role, phone)
+        session.permanent = True
+        session["role"] = "supervisor"
+        session["worker_id"] = worker["id"]
+        session["worker_token"] = worker["worker_token"]
+        session["worker_name"] = worker["name"]
+        session["worker_role"] = worker["role"]
+        session["worker_phone"] = worker["phone"]
+        session["site_id"] = worker["site_id"]
+        session["site_name"] = worker["site_name"]
+
+        return jsonify({"success": True, "worker": worker})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+# 0.5 Worker Dedicated Portal (Only Their Own Attendance & GPS)
+@app.route("/my-attendance")
+def my_attendance_portal():
+    wid = session.get("worker_id")
+    if not wid:
+        return redirect(url_for("login_page"))
+    
+    token = session.get("worker_token")
+    worker = database.get_worker_by_token(token) if token else None
+    if not worker:
+        return redirect(url_for("login_page"))
+
+    today_att = database.get_worker_today_status(wid)
+    history = database.get_worker_attendance_history(wid, limit=30)
+
+    return render_template(
+        "worker_portal.html",
+        worker=worker,
+        today_att=today_att,
+        history=history
+    )
+
+# 0.6 Universal Logout
+@app.route("/logout")
+def logout_user():
+    session.clear()
+    return redirect(url_for("login_page"))
 
 # 1. Internal Contractor Portal & Tracker Dashboard
 @app.route("/dashboard")
@@ -956,8 +1101,11 @@ def owner_login_api():
     data = request.get_json(silent=True) or {}
     pin = str(data.get("pin", "")).strip()
     if pin == "7808":
+        session.permanent = True
         session["is_owner"] = True
-        return jsonify({"success": True, "is_owner": True, "message": "👑 मालिक मोड सक्रिय (Owner Mode Active)!"})
+        session["role"] = "owner"
+        session["worker_name"] = "मालिक"
+        return jsonify({"success": True, "is_owner": True, "role": "owner", "message": "👑 मालिक मोड सक्रिय (Owner Mode Active)!"})
     return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही लॉगिन कर सकते हैं।"}), 401
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
@@ -1096,11 +1244,13 @@ def save_stock_inward():
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
-        # Require Owner PIN
+        # Require Owner PIN or logged-in Supervisor / Site Incharge
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
-        if not is_owner_auth:
-            return jsonify({"success": False, "message": "❌ गलत पिन! स्टॉक एंट्री (माल भेजना) केवल अधिकृत मालिक ही कर सकते हैं।"}), 403
+        is_authorized = (session.get("is_owner", False) or 
+                         (pin and str(pin).strip() == "7808") or 
+                         session.get("role") in ["supervisor", "owner"])
+        if not is_authorized:
+            return jsonify({"success": False, "message": "❌ स्टॉक एंट्री (माल भेजना) केवल अधिकृत सुपरवाइज़र, साइट इनचार्ज या मालिक ही कर सकते हैं।"}), 403
 
         site_id = data.get("site_id")
         inward_date = data.get("inward_date") or datetime.date.today().strftime("%Y-%m-%d")

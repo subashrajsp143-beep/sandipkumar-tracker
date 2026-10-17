@@ -1154,6 +1154,90 @@ def add_worker(site_id, name, role, phone=""):
     return worker_id, token
 
 
+def get_or_create_worker(site_id, name, role, phone=""):
+    """
+    Finds existing worker by phone+site or name+site, or creates a new worker profile.
+    Saves phone and role.
+    """
+    import uuid
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    worker = None
+    if phone:
+        cursor.execute("SELECT * FROM site_workers WHERE phone = ? AND site_id = ? AND is_active = 1", (phone, site_id))
+        row = cursor.fetchone()
+        if row:
+            worker = dict(row)
+
+    if not worker:
+        cursor.execute("SELECT * FROM site_workers WHERE LOWER(name) = LOWER(?) AND site_id = ? AND is_active = 1", (name.strip(), site_id))
+        row = cursor.fetchone()
+        if row:
+            worker = dict(row)
+
+    if worker:
+        # Update phone or role if provided
+        cursor.execute("UPDATE site_workers SET phone = ?, role = ? WHERE id = ?", (phone or worker.get("phone", ""), role or worker.get("role", "Helper"), worker["id"]))
+        conn.commit()
+        cursor.execute("""
+            SELECT w.*, s.name as site_name, s.code as site_code, s.latitude as site_lat, s.longitude as site_lng, s.geo_radius as site_radius
+            FROM site_workers w
+            JOIN sites s ON w.site_id = s.id
+            WHERE w.id = ?
+        """, (worker["id"],))
+        res = dict(cursor.fetchone())
+        conn.close()
+        return res
+    else:
+        token = uuid.uuid4().hex
+        cursor.execute("""
+            INSERT INTO site_workers (site_id, name, role, phone, worker_token)
+            VALUES (?, ?, ?, ?, ?)
+        """, (site_id, name.strip(), role, phone, token))
+        wid = cursor.lastrowid
+        conn.commit()
+        cursor.execute("""
+            SELECT w.*, s.name as site_name, s.code as site_code, s.latitude as site_lat, s.longitude as site_lng, s.geo_radius as site_radius
+            FROM site_workers w
+            JOIN sites s ON w.site_id = s.id
+            WHERE w.id = ?
+        """, (wid,))
+        res = dict(cursor.fetchone())
+        conn.close()
+        return res
+
+
+def get_worker_attendance_history(worker_id, limit=30):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT a.*, s.name as site_name
+        FROM geo_attendance a
+        JOIN sites s ON a.site_id = s.id
+        WHERE a.worker_id = ?
+        ORDER BY a.att_date DESC
+        LIMIT ?
+    """, (worker_id, limit))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_worker_today_status(worker_id):
+    import datetime as dt
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
+    """, (worker_id, today))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def delete_worker(worker_id):
     conn = get_db()
     cursor = conn.cursor()

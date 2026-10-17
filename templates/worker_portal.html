@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>{{ worker.name }} — मेरी हाजिरी | M/S SANDIP KUMAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="min-h-full bg-slate-950 text-slate-100 flex flex-col items-center p-3 sm:p-5">
+
+    <!-- Top App Bar -->
+    <div class="w-full max-w-md flex items-center justify-between py-2 mb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md">
+                <i class="fa-solid fa-faucet-drip"></i>
+            </div>
+            <div>
+                <div class="text-xs font-black text-white leading-tight">M/S SANDIP KUMAR</div>
+                <div class="text-[10px] text-blue-300 font-semibold">Jal Jeevan Mission Tracker</div>
+            </div>
+        </div>
+
+        <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" 
+           class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+            <i class="fa-solid fa-right-from-bracket text-rose-400"></i>
+            <span>लॉगआउट</span>
+        </a>
+    </div>
+
+    <!-- Worker Profile Card -->
+    <div class="w-full max-w-md bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 rounded-3xl p-5 border border-indigo-800/50 shadow-xl mb-4 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-13 h-13 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg border border-indigo-400/40">
+                    👷
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-white">{{ worker.name }}</h1>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold">{{ worker.role }}</span>
+                        {% if worker.phone %}
+                        <span class="text-xs text-slate-400 font-medium"><i class="fa-solid fa-phone text-[10px]"></i> {{ worker.phone }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Site Badge -->
+        <div class="mt-4 pt-3 border-t border-indigo-900/60 flex items-center justify-between text-xs">
+            <span class="text-slate-400">कार्य स्थल (Site):</span>
+            <span class="font-bold text-amber-300 flex items-center gap-1">
+                <i class="fa-solid fa-location-dot text-amber-400"></i>
+                <span>{{ worker.site_name }}</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Attendance Action / Status Card -->
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-xl mb-4">
+        
+        <!-- Live Status Banner -->
+        <div id="statusBadge" class="text-center py-4 px-3 rounded-2xl mb-4 bg-slate-800 border border-slate-700">
+            <div class="text-4xl mb-2" id="statusEmoji">📍</div>
+            <div class="text-lg font-black text-white" id="statusText">GPS लोकेशन चेक हो रही है...</div>
+            <div class="text-xs text-slate-400 mt-1" id="statusSub">कृपया 500m दायरे के अंदर रहें</div>
+        </div>
+
+        <!-- Distance Bar -->
+        <div class="bg-slate-950/80 rounded-2xl p-3.5 border border-slate-800/80 mb-4">
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>साइट से आपकी दूरी:</span>
+                <span class="font-bold text-slate-200" id="distText">—</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div id="distBar" class="h-2.5 rounded-full bg-blue-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
+                <span>0m (साइट पर)</span>
+                <span>मान्य दायरा: <strong>500 मीटर</strong></span>
+            </div>
+        </div>
+
+        <!-- Big Punch In / Out Button -->
+        <div class="space-y-2">
+            <button id="punchBtn" onclick="doManualPunch()" disabled
+                    class="w-full py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-fingerprint text-xl" id="punchIcon"></i>
+                <span id="punchBtnText">📍 GPS लोड हो रहा है...</span>
+            </button>
+
+            <button id="gpsPermBtn" onclick="requestGpsPermission()" 
+                    class="w-full py-2.5 px-3 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 text-xs font-bold border border-blue-500/40 transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span>लोकेशन अनुमति दें (Allow Location)</span>
+            </button>
+        </div>
+
+        <!-- Today's Time Tiles -->
+        <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800 text-center">
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+                <div class="text-[10px] text-emerald-400 font-bold uppercase">Check-in</div>
+                <div class="text-sm font-black text-white mt-0.5" id="checkInTime">
+                    {{ today_att.check_in_time.split(' ')[1][:5] if (today_att and today_att.check_in_time) else '—' }}
+                </div>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+                <div class="text-[10px] text-amber-400 font-bold uppercase">Check-out</div>
+                <div class="text-sm font-black text-white mt-0.5" id="checkOutTime">
+                    {{ today_att.check_out_time.split(' ')[1][:5] if (today_att and today_att.check_out_time) else '—' }}
+                </div>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+                <div class="text-[10px] text-indigo-400 font-bold uppercase">कुल घंटे</div>
+                <div class="text-sm font-black text-amber-300 mt-0.5" id="stayDuration">
+                    {% if today_att and today_att.total_minutes %}
+                        {{ today_att.total_minutes // 60 }}h {{ today_att.total_minutes % 60 }}m
+                    {% elif today_att and today_att.check_in_time and not today_att.check_out_time %}
+                        चालू...
+                    {% else %}
+                        0h 0m
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- My Personal Attendance History (Worker can only see their own!) -->
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl p-5 border border-slate-800 shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <h2 class="text-sm font-black text-white flex items-center gap-2">
+                <i class="fa-solid fa-calendar-check text-indigo-400"></i>
+                <span>मेरी पिछली हाजिरी का रिकॉर्ड</span>
+            </h2>
+            <span class="text-[10px] text-slate-400 font-bold">केवल आपका डेटा</span>
+        </div>
+
+        {% if not history %}
+        <div class="text-center py-6 text-xs text-slate-500">
+            अभी तक कोई पिछला रिकॉर्ड नहीं है। आज पहली बार हाजिरी लगाएं!
+        </div>
+        {% else %}
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+            {% for h in history %}
+            <div class="bg-slate-950/70 p-3 rounded-2xl border border-slate-800/70 flex items-center justify-between text-xs">
+                <div>
+                    <div class="font-extrabold text-white">{{ h.att_date }}</div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">
+                        आए: <span class="text-emerald-400 font-semibold">{{ h.check_in_time.split(' ')[1][:5] if h.check_in_time else '—' }}</span>
+                        &bull; गए: <span class="text-amber-400 font-semibold">{{ h.check_out_time.split(' ')[1][:5] if h.check_out_time else '—' }}</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    {% if h.total_minutes and h.total_minutes > 0 %}
+                    <span class="px-2 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-black text-[11px] border border-indigo-500/30">
+                        {{ h.total_minutes // 60 }}h {{ h.total_minutes % 60 }}m
+                    </span>
+                    {% elif h.status == 'present' %}
+                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
+                        साइट पर
+                    </span>
+                    {% else %}
+                    <span class="text-slate-500 text-[11px]">—</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Simple Footer Note -->
+    <div class="w-full max-w-md text-center py-4 text-[11px] text-slate-600 font-medium">
+        GPS 500m ऑटोमैटिक उपस्थिति &bull; M/S Sandip Kumar
+    </div>
+
+    <script>
+        const WORKER_TOKEN = "{{ worker.worker_token }}";
+        const SITE_RADIUS = {{ worker.site_radius or 500 }};
+        let currentLat = null, currentLng = null;
+        let isPinging = false;
+
+        // Ask for location on tap
+        function requestGpsPermission() {
+            if (!navigator.geolocation) {
+                alert('इस डिवाइस में GPS सपोर्ट नहीं है।');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    handlePosition(pos);
+                    // Start continuous watcher
+                    navigator.geolocation.watchPosition(handlePosition, handleGeoError, {
+                        enableHighAccuracy: true, timeout: 20000, maximumAge: 30000
+                    });
+                    const btn = document.getElementById('gpsPermBtn');
+                    if (btn) btn.style.display = 'none';
+                },
+                (err) => {
+                    handleGeoError(err);
+                },
+                { enableHighAccuracy: true, timeout: 15000 }
+            );
+        }
+
+        function handlePosition(pos) {
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
+            document.getElementById('punchBtn').disabled = false;
+            document.getElementById('punchBtnText').textContent = '📍 अभी हाजिरी पंच करें (Check)';
+            sendLocationPing();
+        }
+
+        function handleGeoError(err) {
+            let msg = 'लोकेशन चालू करें (फोन में GPS ऑन करें)';
+            if (err.code === 1) msg = 'कृपया ब्राउज़र सेटिंग्स में Location Allow करें।';
+            document.getElementById('statusText').textContent = 'GPS अनुमति नहीं मिली';
+            document.getElementById('statusSub').textContent = msg;
+            document.getElementById('statusEmoji').textContent = '⚠️';
+        }
+
+        async function sendLocationPing() {
+            if (!currentLat || !currentLng || isPinging) return;
+            isPinging = true;
+
+            try {
+                const res = await fetch('/api/worker/ping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: WORKER_TOKEN,
+                        lat: currentLat,
+                        lng: currentLng
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    updateUI(data);
+                }
+            } catch(e) {}
+            finally {
+                isPinging = false;
+            }
+        }
+
+        function updateUI(data) {
+            const dist = data.distance_m;
+            const onSite = data.is_on_site;
+
+            if (dist !== null && dist !== undefined) {
+                const distStr = dist >= 1000 ? (dist/1000).toFixed(2) + ' किमी' : Math.round(dist) + ' मीटर';
+                document.getElementById('distText').textContent = distStr;
+                
+                const pct = Math.min(100, (dist / (SITE_RADIUS * 2)) * 100);
+                const bar = document.getElementById('distBar');
+                bar.style.width = pct + '%';
+                bar.className = 'h-2.5 rounded-full transition-all duration-500 ' + (onSite ? 'bg-emerald-500' : 'bg-rose-500');
+            }
+
+            const badge = document.getElementById('statusBadge');
+            const emoji = document.getElementById('statusEmoji');
+            const text = document.getElementById('statusText');
+            const sub = document.getElementById('statusSub');
+
+            if (onSite) {
+                badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-emerald-950/60 border border-emerald-500/50';
+                emoji.textContent = '🟢';
+                text.textContent = 'आप साइट पर मौजूद हैं!';
+                text.className = 'text-lg font-black text-emerald-400';
+                sub.textContent = `${data.site_name} (500m दायरे के अंदर)`;
+                document.getElementById('punchBtnText').textContent = '✅ हाजिरी सक्रिय है';
+                document.getElementById('punchBtn').className = 'w-full py-4 px-4 rounded-2xl bg-emerald-700 text-white font-black text-base shadow-lg flex items-center justify-center gap-2';
+            } else {
+                badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-rose-950/60 border border-rose-500/50';
+                emoji.textContent = '🚶';
+                text.textContent = 'आप साइट से बाहर हैं';
+                text.className = 'text-lg font-black text-rose-400';
+                sub.textContent = `${data.site_name} से दूर हैं — साइट पर पहुंचकर हाजिरी लगाएं`;
+                document.getElementById('punchBtnText').textContent = 'साइट पर पहुंचकर हाजिरी लगेगी';
+            }
+        }
+
+        async function doManualPunch() {
+            if (!currentLat || !currentLng) {
+                requestGpsPermission();
+                return;
+            }
+            document.getElementById('punchBtnText').textContent = '⏳ जांच रहे हैं...';
+            await sendLocationPing();
+            alert('✅ आपकी लोकेशन जांच ली गई है!');
+            window.location.reload();
+        }
+
+        // Auto request on page load
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => { handlePosition(pos); },
+                () => {},
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        }
+
+        // Periodic ping every 60 seconds
+        setInterval(() => {
+            if (currentLat && currentLng) sendLocationPing();
+        }, 60000);
+    </script>
+</body>
+</html>
