@@ -211,14 +211,19 @@
                         <i class="fa-solid fa-users-gear text-[10px]"></i> <span>हाजिरी</span>
                     </a>
 
-                    <button type="button" id="navOwnerLoginBtn" onclick="openOwnerPinModal()" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline" data-i18n="owner_login">मालिक लॉगिन</span><span class="sm:hidden" data-i18n="owner_login">मालिक</span>
-                    </button>
-                    <div id="navOwnerActiveBadge" class="hidden flex items-center gap-1.5">
-                        <span class="px-2.5 py-1 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 animate-pulse">
-                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline" data-i18n="owner_active">👑 मालिक</span>
+                    {% if session.get('is_owner') or user_role == 'owner' %}
+                    <div id="navOwnerActiveBadge" class="flex items-center gap-1.5">
+                        <span class="px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline">👑 मालिक</span>
                         </span>
                     </div>
+                    {% elif user_role == 'supervisor' %}
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-2.5 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-tie"></i> <span class="hidden sm:inline">सुपरवाइज़र</span>
+                        </span>
+                    </div>
+                    {% endif %}
 
                     <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" title="लॉगआउट करें" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 border border-slate-700">
                         <i class="fa-solid fa-right-from-bracket text-rose-400"></i>
@@ -682,18 +687,14 @@
     // Apply role-based visibility across the page
     document.addEventListener('DOMContentLoaded', () => {
         const isOwner = isOwnerLoggedIn();
-        const ownerBtn = document.getElementById('navOwnerLoginBtn');
         const ownerActiveBadge = document.getElementById('navOwnerActiveBadge');
 
         if (isOwner) {
-            if (ownerBtn) ownerBtn.classList.add('hidden');
             if (ownerActiveBadge) ownerActiveBadge.classList.remove('hidden');
             document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
         } else {
-            if (ownerBtn) ownerBtn.classList.remove('hidden');
-            if (ownerActiveBadge) ownerActiveBadge.classList.add('hidden');
             document.querySelectorAll('.owner-only').forEach(el => el.classList.add('hidden'));
-            // Hide delete buttons in tables for workers
+            // Hide delete buttons in tables for non-owners
             document.querySelectorAll('.owner-delete-btn').forEach(el => el.classList.add('hidden'));
         }
     });
