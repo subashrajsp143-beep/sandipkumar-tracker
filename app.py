@@ -372,6 +372,30 @@ def save_entries():
                 )
                 added_count += 1
 
+        # Optional: Save DPR (Daily Progress Report) if provided in the voucher
+        dpr_data = data.get("dpr")
+        if dpr_data and isinstance(dpr_data, dict):
+            pipe_len = float(dpr_data.get("pipe_laying_meters", 0) or 0)
+            fhtc_cnt = int(dpr_data.get("fhtc_connections", 0) or 0)
+            boring_d = float(dpr_data.get("boring_depth_feet", 0) or 0)
+            road_res = float(dpr_data.get("road_restoration_meters", 0) or 0)
+            ward_n = str(dpr_data.get("ward_no", "")).strip()
+            desc = str(dpr_data.get("work_description", "")).strip() or purpose
+            if pipe_len > 0 or fhtc_cnt > 0 or boring_d > 0 or road_res > 0 or ward_n or desc:
+                database.save_dpr(
+                    site_id=site_id,
+                    report_date=usage_date,
+                    ward_no=ward_n,
+                    pipe_laying_meters=pipe_len,
+                    fhtc_connections=fhtc_cnt,
+                    boring_depth_feet=boring_d,
+                    road_restoration_meters=road_res,
+                    civil_stage=str(dpr_data.get("civil_stage", "")).strip(),
+                    work_description=desc,
+                    supervisor_name=entered_by,
+                    supervisor_phone=session.get("worker_phone", "")
+                )
+
         return jsonify({"success": True, "message": f"{added_count} material entries safalta-purvak save ho gayi hain!", "count": added_count})
     except Exception as e:
         return jsonify({"success": False, "message": f"Error saving entries: {str(e)}"}), 500
@@ -2143,6 +2167,137 @@ def delete_site_geo_point_api(point_id):
 
         database.delete_site_geo_point(point_id)
         return jsonify({"success": True, "message": "GPS पॉइंट हटा दिया गया।"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ==========================================
+# 1. DAILY ACTIVE WARDS (SUPERVISOR SELECTION FOR GEOFENCING)
+# ==========================================
+@app.route("/api/sites/<int:site_id>/active-wards", methods=["GET", "POST", "OPTIONS"])
+def site_active_wards_api(site_id):
+    """Supervisor / Owner: get or set today's active work wards for a site (1 KM geofence)."""
+    if request.method == "OPTIONS":
+        return "", 200
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    if request.method == "GET":
+        date_str = request.args.get("date") or today
+        record = database.get_daily_active_wards(site_id, date_str)
+        all_points = database.get_site_geo_points(site_id)
+        return jsonify({
+            "success": True,
+            "site_id": site_id,
+            "date": date_str,
+            "active_wards": record,
+            "all_points": all_points
+        })
+
+    try:
+        data = request.get_json(silent=True) or {}
+        work_date = data.get("date") or today
+        active_point_ids = str(data.get("active_point_ids", "")).strip() or "all"
+        active_ward_names = str(data.get("active_ward_names", "")).strip()
+
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() == "7808")
+        is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
+        if not (is_owner or is_supervisor):
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही सक्रिय वार्ड सेट कर सकते हैं।"}), 403
+
+        updater = session.get("worker_name") or session.get("supervisor_name") or ("Owner" if is_owner else "Supervisor")
+        database.set_daily_active_wards(site_id, work_date, active_point_ids, active_ward_names, updater)
+
+        return jsonify({
+            "success": True,
+            "message": f"✅ {work_date} के लिए सक्रिय कार्यस्थल '{active_ward_names or 'सभी वार्ड'}' सेट हो गया! अब इसी 1 KM के अंदर के वर्करों की हाजिरी बनेगी।",
+            "active_point_ids": active_point_ids,
+            "active_ward_names": active_ward_names
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ==========================================
+# 2. DPR (DAILY PROGRESS REPORT) ROUTES & APIS
+# ==========================================
+@app.route("/dpr")
+def dpr_dashboard():
+    """Jal Jeevan Mission DPR (Daily Progress Report) Dashboard."""
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    selected_site = request.args.get("site_id")
+
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+    if not is_owner and user_site_id:
+        selected_site = int(user_site_id)
+
+    sites = database.get_all_sites()
+    if not is_owner and user_site_id:
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
+
+    dpr_list = database.get_dpr_list(site_id=int(selected_site) if selected_site else None, date_from=selected_date, date_to=selected_date)
+    stats = database.get_dpr_summary_stats(selected_date)
+
+    return render_template(
+        "dpr.html",
+        sites=sites,
+        dpr_list=dpr_list,
+        stats=stats,
+        selected_date=selected_date,
+        selected_site_id=int(selected_site) if selected_site else None,
+        is_owner=is_owner,
+        user_site_id=user_site_id
+    )
+
+
+@app.route("/api/dpr", methods=["GET", "POST", "OPTIONS"])
+def dpr_api():
+    """API for DPR (Daily Progress Report) - Read & Write."""
+    if request.method == "OPTIONS":
+        return "", 200
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    if request.method == "GET":
+        site_id = request.args.get("site_id")
+        date_str = request.args.get("date") or today
+        dpr = database.get_dpr(int(site_id), date_str) if site_id else None
+        dpr_list = database.get_dpr_list(site_id=int(site_id) if site_id else None, date_from=date_str, date_to=date_str)
+        stats = database.get_dpr_summary_stats(date_str)
+        return jsonify({"success": True, "dpr": dpr, "dpr_list": dpr_list, "stats": stats})
+
+    try:
+        data = request.get_json(silent=True) or request.form
+        site_id = int(data.get("site_id", 0))
+        report_date = data.get("report_date") or today
+
+        if not site_id:
+            return jsonify({"success": False, "message": "Site ID zaruri hai."}), 400
+
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() == "7808")
+        is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
+        if not (is_owner or is_supervisor):
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही DPR भर सकते हैं।"}), 403
+
+        supervisor_name = data.get("supervisor_name") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
+        supervisor_phone = data.get("supervisor_phone") or session.get("worker_phone") or ""
+
+        database.save_dpr(
+            site_id=site_id,
+            report_date=report_date,
+            ward_no=data.get("ward_no", ""),
+            pipe_laying_meters=float(data.get("pipe_laying_meters", 0) or 0),
+            fhtc_connections=int(data.get("fhtc_connections", 0) or 0),
+            boring_depth_feet=float(data.get("boring_depth_feet", 0) or 0),
+            road_restoration_meters=float(data.get("road_restoration_meters", 0) or 0),
+            civil_stage=data.get("civil_stage", ""),
+            work_description=data.get("work_description", ""),
+            supervisor_name=supervisor_name,
+            supervisor_phone=supervisor_phone
+        )
+        return jsonify({"success": True, "message": f"✅ {report_date} का DPR (कार्य प्रगति रिपोर्ट) सफलतापूर्वक सेव हो गया!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

@@ -108,6 +108,59 @@
 
         </div>
 
+        <!-- DPR Section: Jal Jeevan Mission Physical Progress -->
+        <div class="bg-gradient-to-r from-sky-50 via-indigo-50/50 to-slate-50 p-5 rounded-2xl border border-sky-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                        <i class="fa-solid fa-faucet-drip"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-black text-sky-950 uppercase tracking-wide">
+                            DPR (दैनिक कार्य प्रगति - Daily Progress)
+                        </h3>
+                        <p class="text-[11px] text-slate-500">आज कितनी पाइपलाइन बिछी और कितने घरों में नल लगा (वैकल्पिक / Optional)</p>
+                    </div>
+                </div>
+                <a href="/dpr" target="_blank" class="text-xs font-bold text-sky-700 hover:text-sky-900 transition flex items-center gap-1">
+                    <span>पूरा DPR देखें</span> &rarr;
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">वार्ड (Ward No.)</label>
+                    <input type="text" id="dprWardNo" placeholder="वार्ड 2" class="w-full py-2 px-3 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-sky-900 uppercase mb-1">पाइपलाइन (मीटर)</label>
+                    <input type="number" step="0.1" id="dprPipeMeters" placeholder="0 m" class="w-full py-2 px-3 rounded-xl border border-sky-300 bg-white text-xs font-black text-sky-800 focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-emerald-900 uppercase mb-1">नल कनेक्शन (FHTC)</label>
+                    <input type="number" id="dprFhtcCount" placeholder="0 घर" class="w-full py-2 px-3 rounded-xl border border-emerald-300 bg-white text-xs font-black text-emerald-800 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-amber-900 uppercase mb-1">बोरिंग (फीट)</label>
+                    <input type="number" step="0.1" id="dprBoringFeet" placeholder="0 ft" class="w-full py-2 px-3 rounded-xl border border-amber-300 bg-white text-xs font-black text-amber-800 focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-violet-900 uppercase mb-1">सड़क रिस्टोर (मीटर)</label>
+                    <input type="number" step="0.1" id="dprRoadMeters" placeholder="0 m" class="w-full py-2 px-3 rounded-xl border border-violet-300 bg-white text-xs font-black text-violet-800 focus:ring-2 focus:ring-violet-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">सिविल / पंप हाउस</label>
+                    <select id="dprCivilStage" class="w-full py-2 px-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                        <option value="पाइपलाइन कार्य">पाइपलाइन कार्य</option>
+                        <option value="बाउंड्री / प्लिंथ">बाउंड्री स्तर</option>
+                        <option value="स्लैब ढलाई">स्लैब ढलाई</option>
+                        <option value="मोटर फिटिंग">मोटर फिटिंग</option>
+                        <option value="सफल टेस्टिंग">सफल टेस्टिंग</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- Materials Table (Multi-Item Dynamic List) -->
         <div class="space-y-3">
             <div class="flex items-center justify-between">
@@ -734,7 +787,16 @@ document.addEventListener('DOMContentLoaded', function() {
             purpose: purpose,
             entered_by: enteredByName,
             items: items,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            dpr: {
+                ward_no: document.getElementById('dprWardNo') ? document.getElementById('dprWardNo').value.trim() : '',
+                pipe_laying_meters: parseFloat(document.getElementById('dprPipeMeters') ? document.getElementById('dprPipeMeters').value : 0) || 0,
+                fhtc_connections: parseInt(document.getElementById('dprFhtcCount') ? document.getElementById('dprFhtcCount').value : 0) || 0,
+                boring_depth_feet: parseFloat(document.getElementById('dprBoringFeet') ? document.getElementById('dprBoringFeet').value : 0) || 0,
+                road_restoration_meters: parseFloat(document.getElementById('dprRoadMeters') ? document.getElementById('dprRoadMeters').value : 0) || 0,
+                civil_stage: document.getElementById('dprCivilStage') ? document.getElementById('dprCivilStage').value : '',
+                work_description: purpose
+            }
         };
 
         // If explicitly offline, save to offline queue immediately

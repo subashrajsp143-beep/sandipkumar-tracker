@@ -1195,6 +1195,42 @@ def init_gps_tables():
     );
     """)
 
+    # 6. Daily active work wards selected by supervisor for geofencing
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS daily_site_active_wards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        work_date TEXT NOT NULL,
+        active_point_ids TEXT NOT NULL,
+        active_ward_names TEXT,
+        updated_by TEXT,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(site_id, work_date)
+    );
+    """)
+
+    # 7. DPR (Daily Progress Report) - Jal Jeevan Mission physical progress
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS daily_progress_reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        report_date TEXT NOT NULL,
+        ward_no TEXT,
+        pipe_laying_meters REAL DEFAULT 0,
+        fhtc_connections INTEGER DEFAULT 0,
+        boring_depth_feet REAL DEFAULT 0,
+        road_restoration_meters REAL DEFAULT 0,
+        civil_stage TEXT,
+        work_description TEXT,
+        supervisor_name TEXT,
+        supervisor_phone TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE,
+        UNIQUE(site_id, report_date)
+    );
+    """)
+
     conn.commit()
     conn.close()
 
@@ -1443,33 +1479,230 @@ def get_geo_points_counts_by_site():
     return res
 
 
-def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=1000):
+# ==========================================
+# DAILY ACTIVE WARDS SELECTION (SUPERVISOR CONTROL)
+# ==========================================
+
+def set_daily_active_wards(site_id, work_date, active_point_ids, active_ward_names="", updated_by="Supervisor"):
+    """
+    Sets today's active work wards / points for a site.
+    active_point_ids: comma-separated string e.g. "1,2" or "all"
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO daily_site_active_wards (site_id, work_date, active_point_ids, active_ward_names, updated_by, updated_at)
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(site_id, work_date) DO UPDATE SET
+            active_point_ids = excluded.active_point_ids,
+            active_ward_names = excluded.active_ward_names,
+            updated_by = excluded.updated_by,
+            updated_at = CURRENT_TIMESTAMP
+    """, (int(site_id), str(work_date), str(active_point_ids).strip(), str(active_ward_names).strip(), str(updated_by).strip()))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def get_daily_active_wards(site_id, work_date):
+    """
+    Returns active ward configuration for a site on a specific date.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM daily_site_active_wards
+        WHERE site_id = ? AND work_date = ?
+    """, (int(site_id), str(work_date)))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+# ==========================================
+# DAILY PROGRESS REPORT (DPR) - JAL JEEVAN MISSION
+# ==========================================
+
+def save_dpr(site_id, report_date, ward_no="", pipe_laying_meters=0.0, fhtc_connections=0,
+             boring_depth_feet=0.0, road_restoration_meters=0.0, civil_stage="",
+             work_description="", supervisor_name="", supervisor_phone=""):
+    """
+    Saves or updates daily work progress report (DPR) for a site and date.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO daily_progress_reports (
+            site_id, report_date, ward_no, pipe_laying_meters, fhtc_connections,
+            boring_depth_feet, road_restoration_meters, civil_stage,
+            work_description, supervisor_name, supervisor_phone, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(site_id, report_date) DO UPDATE SET
+            ward_no = excluded.ward_no,
+            pipe_laying_meters = excluded.pipe_laying_meters,
+            fhtc_connections = excluded.fhtc_connections,
+            boring_depth_feet = excluded.boring_depth_feet,
+            road_restoration_meters = excluded.road_restoration_meters,
+            civil_stage = excluded.civil_stage,
+            work_description = excluded.work_description,
+            supervisor_name = excluded.supervisor_name,
+            supervisor_phone = excluded.supervisor_phone,
+            updated_at = CURRENT_TIMESTAMP
+    """, (
+        int(site_id), str(report_date), str(ward_no or "").strip(),
+        float(pipe_laying_meters or 0), int(fhtc_connections or 0),
+        float(boring_depth_feet or 0), float(road_restoration_meters or 0),
+        str(civil_stage or "").strip(), str(work_description or "").strip(),
+        str(supervisor_name or "").strip(), str(supervisor_phone or "").strip()
+    ))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def get_dpr(site_id, report_date):
+    """
+    Returns single DPR for site and date.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM daily_progress_reports d
+        JOIN sites s ON d.site_id = s.id
+        WHERE d.site_id = ? AND d.report_date = ?
+    """, (int(site_id), str(report_date)))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_dpr_list(site_id=None, date_from=None, date_to=None, limit=100):
+    """
+    Returns list of DPR entries with optional site and date filters.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+        SELECT d.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM daily_progress_reports d
+        JOIN sites s ON d.site_id = s.id
+        WHERE 1=1
+    """
+    params = []
+    if site_id:
+        query += " AND d.site_id = ?"
+        params.append(int(site_id))
+    if date_from:
+        query += " AND d.report_date >= ?"
+        params.append(str(date_from))
+    if date_to:
+        query += " AND d.report_date <= ?"
+        params.append(str(date_to))
+    
+    query += " ORDER BY d.report_date DESC, d.id DESC LIMIT ?"
+    params.append(limit)
+
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_dpr_summary_stats(report_date=None):
+    """
+    Returns aggregated metrics for DPR on a specific date (or overall if None).
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT 
+            COALESCE(SUM(pipe_laying_meters), 0) as total_pipe,
+            COALESCE(SUM(fhtc_connections), 0) as total_fhtc,
+            COALESCE(SUM(boring_depth_feet), 0) as total_boring,
+            COALESCE(SUM(road_restoration_meters), 0) as total_road,
+            COUNT(DISTINCT site_id) as total_active_sites,
+            COUNT(*) as total_dpr_count
+        FROM daily_progress_reports
+    """)
+    overall = dict(cursor.fetchone() or {})
+
+    today_stats = {"pipe": 0, "fhtc": 0, "boring": 0, "road": 0, "sites_reported": 0}
+    if report_date:
+        cursor.execute("""
+            SELECT 
+                COALESCE(SUM(pipe_laying_meters), 0) as pipe,
+                COALESCE(SUM(fhtc_connections), 0) as fhtc,
+                COALESCE(SUM(boring_depth_feet), 0) as boring,
+                COALESCE(SUM(road_restoration_meters), 0) as road,
+                COUNT(DISTINCT site_id) as sites_reported
+            FROM daily_progress_reports
+            WHERE report_date = ?
+        """, (str(report_date),))
+        row = cursor.fetchone()
+        if row:
+            today_stats = dict(row)
+
+    conn.close()
+    return {
+        "overall": overall,
+        "today": today_stats
+    }
+
+
+def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=1000, work_date=None):
     """
     Calculates proximity of worker (lat, lng) against all sub-location points of the site.
-    - If worker is within radius of ANY point (Pump House, Tank, Ward 1/2/3, Pipeline, etc.), is_on_site = True!
+    - If supervisor has selected active ward(s) for today (work_date), evaluates ONLY against those active wards!
+    - If worker is within radius of ANY active point (Ward 1/2/3, Tank, etc.), is_on_site = True!
     - Defaults to 1000m (1 KM) geofence radius.
     - Returns (min_distance, is_on_site, nearest_point_name, effective_radius, all_points_summary)
     """
-    points = get_site_geo_points(site_id)
+    import datetime as dt
+    if not work_date:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        work_date = ist_now.strftime("%Y-%m-%d")
+
+    all_points = get_site_geo_points(site_id)
+    active_record = get_daily_active_wards(site_id, work_date)
+    points = all_points
+
+    if active_record and active_record.get("active_point_ids"):
+        raw_ids = active_record["active_point_ids"].strip()
+        if raw_ids != "all":
+            active_ids = set()
+            for x in raw_ids.split(","):
+                if x.strip().isdigit():
+                    active_ids.add(int(x.strip()))
+            if active_ids:
+                filtered = [p for p in all_points if p["id"] in active_ids]
+                if filtered:
+                    points = filtered
+
     candidates = []
 
-    # 1. Add all configured sub-points
+    # 1. Add sub-points
     for pt in points:
         candidates.append({
+            "id": pt["id"],
             "name": pt["point_name"],
             "lat": float(pt["latitude"]),
             "lng": float(pt["longitude"]),
             "radius": int(pt.get("radius_meters") or default_radius or 1000)
         })
 
-    # 2. Add main site GPS if configured
-    if default_site_lat and default_site_lng:
-        candidates.append({
-            "name": "मुख्य केंद्र (Main Center)",
-            "lat": float(default_site_lat),
-            "lng": float(default_site_lng),
-            "radius": int(default_radius or 1000)
-        })
+    # 2. Add main site GPS if configured and either no active record or set to 'all' or no candidate points
+    if not candidates or not active_record or (active_record and active_record.get("active_point_ids") == "all"):
+        if default_site_lat and default_site_lng:
+            candidates.append({
+                "id": 0,
+                "name": "मुख्य केंद्र (Main Center)",
+                "lat": float(default_site_lat),
+                "lng": float(default_site_lng),
+                "radius": int(default_radius or 1000)
+            })
 
     if not candidates:
         return 99999.0, False, "GPS सेट नहीं", int(default_radius or 1000), []
@@ -1479,6 +1712,7 @@ def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, de
         dist = haversine_distance(lat, lng, c["lat"], c["lng"])
         is_in = (dist <= c["radius"])
         evaluated.append({
+            "id": c.get("id"),
             "name": c["name"],
             "distance": round(dist, 1),
             "radius": c["radius"],
@@ -1503,20 +1737,21 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=
     """
     Called when a worker sends a location ping.
     - Supports multi-point GPS coordinates for wide-radius sites
+    - Evaluates against supervisor's selected active wards for today
     - Calculates distance from closest sub-point
-    - Marks check-in if within radius of ANY site point and not already checked in today
+    - Marks check-in if within radius of ANY active site point and not already checked in today
     - Marks check-out if outside all points and currently checked in
     - Returns dict with status info
     """
     import datetime as dt
 
-    distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
-        site_id, lat, lng, default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius
-    )
-
     ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
     today = ist_now.strftime("%Y-%m-%d")
     now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
+
+    distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+        site_id, lat, lng, default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=today
+    )
 
     conn = get_db()
     cursor = conn.cursor()

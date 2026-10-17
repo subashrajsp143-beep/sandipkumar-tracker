@@ -944,8 +944,15 @@
                     }
                 }
 
-                // 2. Render on Dashboard Ward Grid
-                renderActiveWardsGrid(pts, siteId);
+                // 2. Fetch today's active wards for site and render
+                try {
+                    const activeRes = await fetch(`/api/sites/${siteId}/active-wards?date={{ date_str }}`);
+                    const activeData = await activeRes.json();
+                    const activeRecord = (activeData && activeData.success) ? activeData.active_wards : null;
+                    renderActiveWardsGrid(pts, siteId, activeRecord);
+                } catch(e) {
+                    renderActiveWardsGrid(pts, siteId, null);
+                }
             } else {
                 if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'एरर'}</div>`;
             }
@@ -954,9 +961,14 @@
         }
     }
 
-    function renderActiveWardsGrid(pts, siteId) {
+    function renderActiveWardsGrid(pts, siteId, activeRecord) {
         const grid = document.getElementById('activeWardsGrid');
         if (!grid) return;
+
+        const activeIdsStr = (activeRecord && activeRecord.active_point_ids) ? activeRecord.active_point_ids : 'all';
+        const activeIds = activeIdsStr === 'all' ? [] : activeIdsStr.split(',').map(s => parseInt(s.trim()));
+        const isAllActive = (activeIdsStr === 'all' || activeIds.length === 0);
+        const activeWardNames = (activeRecord && activeRecord.active_ward_names) ? activeRecord.active_ward_names : (isAllActive ? 'सभी वार्ड सक्रिय' : '');
 
         if (pts.length === 0) {
             grid.innerHTML = `
@@ -973,23 +985,68 @@
             return;
         }
 
-        let html = '';
+        // Active Ward Selector Header Bar
+        let selectorHtml = `
+            <div class="col-span-full bg-gradient-to-r from-amber-500/20 via-indigo-950 to-indigo-900/80 p-4 rounded-2xl border border-amber-400/40 mb-2 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 font-black flex items-center justify-center text-base shadow-sm shrink-0">
+                        <i class="fa-solid fa-crosshairs"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-black text-white flex flex-wrap items-center gap-2">
+                            <span>🎯 आज काम कहाँ चल रहा है? (Active Work Ward):</span>
+                            <span class="px-2.5 py-0.5 rounded-full ${isAllActive ? 'bg-indigo-500/30 text-indigo-200 border-indigo-400/40' : 'bg-emerald-500 text-slate-950 font-black'} text-[11px] border">
+                                ${activeWardNames || 'सभी वार्ड सक्रिय'}
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-indigo-200 mt-0.5">
+                            सुपरवाइज़र जिस वार्ड को चुनेंगे, केवल उसके <strong>1 KM (1000m) दायरे</strong> के अंदर के वर्करों की हाजिरी स्वतः 'Present' बनेगी।
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <select id="quickWardPicker" class="bg-slate-900 text-amber-300 font-bold text-xs rounded-xl px-3 py-2 border border-amber-400/40 focus:ring-2 focus:ring-amber-400">
+                        <option value="all" ${isAllActive ? 'selected' : ''}>⚡ सभी वार्ड / केंद्र सक्रिय (All Points)</option>
+                        ${pts.map(p => `<option value="${p.id}" ${(!isAllActive && activeIds.includes(p.id)) ? 'selected' : ''}>📍 ${p.point_name}</option>`).join('')}
+                    </select>
+                    <button type="button" onclick="applySelectedWard(${siteId})" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-check"></i>
+                        <span>सक्रिय करें</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        let cardsHtml = '';
         pts.forEach((p, idx) => {
             const radStr = p.radius_meters >= 1000 ? (p.radius_meters/1000).toFixed(1) + ' KM' : p.radius_meters + 'm';
             const escapedName = (p.point_name || '').replace(/'/g, "\\'");
-            html += `
-                <div class="bg-indigo-950/80 backdrop-blur rounded-2xl p-4 border border-indigo-700/70 shadow-md flex flex-col justify-between transition hover:border-amber-400/50">
+            const isThisPointActive = isAllActive || activeIds.includes(p.id);
+
+            cardsHtml += `
+                <div class="rounded-2xl p-4 border transition flex flex-col justify-between shadow-md ${isThisPointActive ? 'bg-indigo-950/90 border-amber-400/70 shadow-amber-950/20 ring-1 ring-amber-400/40' : 'bg-slate-900/60 border-slate-700/60 opacity-75'}">
                     <div>
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-xl bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs shrink-0">
+                                <span class="w-7 h-7 rounded-xl ${isThisPointActive ? 'bg-amber-400 text-slate-950' : 'bg-slate-700 text-slate-300'} font-black text-xs flex items-center justify-center shadow-xs shrink-0">
                                     ${idx + 1}
                                 </span>
                                 <div>
                                     <h4 class="font-black text-sm text-white">${p.point_name}</h4>
-                                    <span class="text-[10px] text-amber-300 font-black bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/30 inline-block mt-0.5">
-                                        ⚡ दायरा: ${radStr} (${p.radius_meters || 1000}m Geofence)
-                                    </span>
+                                    <div class="flex items-center gap-1.5 mt-1">
+                                        ${isThisPointActive ? 
+                                            `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-400/30 flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 🟢 आज सक्रिय (1 KM)
+                                             </span>` : 
+                                            `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-medium text-[10px] border border-slate-700">
+                                                ⚪ आज बंद
+                                             </span>`
+                                        }
+                                        <span class="text-[10px] text-indigo-300 font-mono bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-800">
+                                            दायरा: ${radStr}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <button type="button" onclick="deleteGeoPoint(${p.id}, '${escapedName}', ${siteId})" 
@@ -1002,20 +1059,55 @@
                             <span>${p.latitude.toFixed(5)}, ${p.longitude.toFixed(5)}</span>
                         </div>
                     </div>
-                    <div class="mt-3.5 pt-2.5 border-t border-indigo-800/60 flex items-center justify-between">
-                        <span class="text-[11px] text-emerald-300 font-bold flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span>हाजिरी मान्य (1 KM)</span>
-                        </span>
+
+                    <div class="mt-3.5 pt-2.5 border-t border-indigo-800/60 flex items-center justify-between gap-2">
+                        <button type="button" onclick="setSingleActiveWard(${siteId}, ${p.id}, '${escapedName}')" 
+                                class="px-3 py-1.5 rounded-xl ${isThisPointActive ? 'bg-amber-400 text-slate-950 font-black' : 'bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 font-bold'} text-[11px] transition flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <span>${isThisPointActive ? '✓ सक्रिय वार्ड है' : '🎯 आज यहाँ काम है'}</span>
+                        </button>
                         <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
-                           class="px-2.5 py-1 rounded-lg bg-indigo-900/90 hover:bg-indigo-800 text-amber-300 text-[11px] font-bold transition flex items-center gap-1 border border-indigo-700/80">
-                            <i class="fa-solid fa-map-pin text-rose-400"></i> Google Map ↗
+                           class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition flex items-center gap-1 border border-slate-700">
+                            <i class="fa-solid fa-map-pin text-rose-400"></i> Map ↗
                         </a>
                     </div>
                 </div>
             `;
         });
-        grid.innerHTML = html;
+
+        grid.innerHTML = selectorHtml + cardsHtml;
+    }
+
+    async function applySelectedWard(siteId) {
+        const sel = document.getElementById('quickWardPicker');
+        if (!sel) return;
+        const val = sel.value;
+        const text = sel.options[sel.selectedIndex].text.replace('📍 ', '');
+        await setSingleActiveWard(siteId, val, text);
+    }
+
+    async function setSingleActiveWard(siteId, pointId, wardName) {
+        try {
+            const res = await fetch(`/api/sites/${siteId}/active-wards`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: '{{ date_str }}',
+                    active_point_ids: String(pointId),
+                    active_ward_names: wardName,
+                    pin: '7808'
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`🎯 ${data.message}`);
+                loadSitePoints(siteId);
+            } else {
+                alert('एरर: ' + data.message);
+            }
+        } catch(err) {
+            alert('नेटवर्क एरर: ' + err.message);
+        }
     }
 
     function getCurrentLocationForNewPoint() {

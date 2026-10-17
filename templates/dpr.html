@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}DPR (दैनिक कार्य प्रगति रिपोर्ट) - Jal Jeevan Mission - M/S SANDIP KUMAR{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Header Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-blue-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-sky-800/40 relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-sky-500/20 text-sky-300 border border-sky-400/30 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Jal Jeevan Mission &bull; Bihar 21 Sites Progress</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-faucet-drip text-amber-400"></i>
+                    <span>DPR (दैनिक कार्य प्रगति रिपोर्ट)</span>
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
+                    पाइपलाइन बिछाई (Rmt), घरेलू नल कनेक्शन (FHTC), बोरिंग व सिविल कार्य का दैनिक भौतिक प्रगति रिकॉर्ड।
+                </p>
+            </div>
+
+            <!-- Action Buttons & Filters -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openDprModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <span>+ आज का DPR भरें</span>
+                </button>
+                <button type="button" onclick="shareDprWhatsApp()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>WhatsApp रिपोर्ट</span>
+                </button>
+                <a href="{{ url_for('daily_entry') }}" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-packing text-teal-300"></i>
+                    <span>सामग्री वाउचर</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 5 Essential Metric Tiles -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
+            <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
+                <div class="text-[11px] font-bold uppercase text-slate-400 flex items-center gap-1">
+                    <i class="fa-solid fa-arrows-left-right text-sky-400"></i> आज पाइपलाइन
+                </div>
+                <div class="text-2xl font-black text-sky-400 mt-1">{{ stats.today.pipe }} <span class="text-xs font-semibold text-slate-300">मीटर</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_pipe }}</strong> m</div>
+            </div>
+
+            <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
+                <div class="text-[11px] font-bold uppercase text-emerald-300 flex items-center gap-1">
+                    <i class="fa-solid fa-house-chimney-user text-emerald-400"></i> आज नल कनेक्शन (FHTC)
+                </div>
+                <div class="text-2xl font-black text-emerald-400 mt-1">{{ stats.today.fhtc }} <span class="text-xs font-semibold text-slate-300">घर</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_fhtc }}</strong> घर</div>
+            </div>
+
+            <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
+                <div class="text-[11px] font-bold uppercase text-amber-300 flex items-center gap-1">
+                    <i class="fa-solid fa-bore-hole text-amber-400"></i> आज बोरिंग
+                </div>
+                <div class="text-2xl font-black text-amber-400 mt-1">{{ stats.today.boring }} <span class="text-xs font-semibold text-slate-300">फीट</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_boring }}</strong> ft</div>
+            </div>
+
+            <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
+                <div class="text-[11px] font-bold uppercase text-violet-300 flex items-center gap-1">
+                    <i class="fa-solid fa-road text-violet-400"></i> सड़क मरम्मत
+                </div>
+                <div class="text-2xl font-black text-violet-400 mt-1">{{ stats.today.road }} <span class="text-xs font-semibold text-slate-300">मीटर</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_road }}</strong> m</div>
+            </div>
+
+            <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60 col-span-2 sm:col-span-1">
+                <div class="text-[11px] font-bold uppercase text-teal-300 flex items-center gap-1">
+                    <i class="fa-solid fa-clipboard-check text-teal-400"></i> रिपोर्ट प्राप्त
+                </div>
+                <div class="text-2xl font-black text-teal-400 mt-1">{{ stats.today.sites_reported }} / {{ sites|length }}</div>
+                <div class="text-[10px] text-slate-400 mt-1">कार्यरत साइट्स से</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date & Site Filter Bar -->
+    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-600">तारीख:</label>
+                <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+            </div>
+
+            {% if is_owner and sites|length > 1 %}
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-600">साइट:</label>
+                <select name="site_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                    <option value="">-- सभी 21 साइट्स --</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                <i class="fa-solid fa-filter"></i> फ़िल्टर
+            </button>
+        </form>
+
+        <div class="text-xs text-slate-500 font-semibold">
+            कुल <strong>{{ dpr_list|length }}</strong> साइट्स की DPR रिपोर्ट
+        </div>
+    </div>
+
+    <!-- DPR Table -->
+    <div class="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+                <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-sky-600"></i>
+                    <span>दैनिक कार्य प्रगति विवरण ({{ selected_date }})</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">सभी 21 साइट्स की जल जीवन मिशन पाइपलाइन एवं नल कनेक्शन प्रविष्टि</p>
+            </div>
+        </div>
+
+        {% if not dpr_list %}
+        <div class="text-center py-16 px-4">
+            <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-clipboard-question"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-800">{{ selected_date }} की कोई DPR प्रविष्टि नहीं मिली</h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
+                सुपरवाइज़र या इनचार्ज नीचे बटन दबाकर आज की पाइपलाइन, नल कनेक्शन और प्रगति तुरंत दर्ज करें।
+            </p>
+            <button type="button" onclick="openDprModal()" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition">
+                + आज का DPR भरें
+            </button>
+        </div>
+        {% else %}
+        <div class="overflow-x-auto mt-4">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                        <th class="py-3 px-3">साइट</th>
+                        <th class="py-3 px-3">वार्ड</th>
+                        <th class="py-3 px-3 text-right">पाइपलाइन (Rmt)</th>
+                        <th class="py-3 px-3 text-right">FHTC नल कनेक्शन</th>
+                        <th class="py-3 px-3 text-right">बोरिंग (Ft)</th>
+                        <th class="py-3 px-3 text-right">सड़क मरम्मत</th>
+                        <th class="py-3 px-3">पंप हाउस / स्टेज</th>
+                        <th class="py-3 px-4 min-w-[200px]">कार्य विवरण / टिप्पणी</th>
+                        <th class="py-3 px-3">सुपरवाइज़र</th>
+                        <th class="py-3 px-2 text-center">एक्शन</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for row in dpr_list %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-3 font-bold text-slate-900">
+                            {{ row.site_name }}
+                            <span class="block text-[10px] text-slate-400 font-normal">{{ row.site_code }}</span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold text-[11px] border border-indigo-200">
+                                {{ row.ward_no or 'मुख्य केंद्र' }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-right font-black text-sky-700 text-sm">
+                            {{ row.pipe_laying_meters }} <span class="text-[10px] text-slate-400 font-normal">m</span>
+                        </td>
+                        <td class="py-3 px-3 text-right font-black text-emerald-700 text-sm">
+                            {{ row.fhtc_connections }} <span class="text-[10px] text-slate-400 font-normal">घर</span>
+                        </td>
+                        <td class="py-3 px-3 text-right font-semibold text-amber-700">
+                            {{ row.boring_depth_feet }} <span class="text-[10px] text-slate-400 font-normal">ft</span>
+                        </td>
+                        <td class="py-3 px-3 text-right font-semibold text-violet-700">
+                            {{ row.road_restoration_meters }} <span class="text-[10px] text-slate-400 font-normal">m</span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">
+                                {{ row.civil_stage or 'प्रगति पर' }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-700 leading-relaxed">
+                            {{ row.work_description or '—' }}
+                        </td>
+                        <td class="py-3 px-3 font-medium text-slate-600">
+                            {{ row.supervisor_name or 'स्टाफ' }}
+                            {% if row.supervisor_phone %}
+                            <span class="block text-[10px] text-slate-400">{{ row.supervisor_phone }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-2 text-center">
+                            <button type="button" onclick="editDprRow({{ row|tojson }})" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition" title="एडिट">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- DPR ENTRY / EDIT MODAL -->
+<div id="dprModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-faucet-drip"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900" id="dprModalTitle">DPR (दैनिक कार्य प्रगति) दर्ज करें</h3>
+                    <p class="text-[11px] text-slate-500">Jal Jeevan Mission - भौतिक कार्य प्रगति</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeDprModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form id="dprForm" onsubmit="submitDprForm(event)" class="space-y-4">
+            <!-- Site and Date -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">साइट <span class="text-rose-500">*</span></label>
+                    {% if user_site_id and not is_owner %}
+                    <input type="hidden" id="dprSiteId" value="{{ user_site_id }}">
+                    <div class="py-2.5 px-3 rounded-xl bg-teal-50 border border-teal-200 text-xs font-bold text-teal-900">
+                        🔒 {{ sites[0].name if sites else 'आपकी अधिकृत साइट' }}
+                    </div>
+                    {% else %}
+                    <select id="dprSiteId" required class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                        <option value="">-- साइट चुनें --</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}">{{ s.code }} - {{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">तारीख <span class="text-rose-500">*</span></label>
+                    <input type="date" id="dprDate" value="{{ selected_date }}" required class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                </div>
+            </div>
+
+            <!-- Ward & Civil Stage -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">कार्यरत वार्ड (Ward No.)</label>
+                    <input type="text" id="dprWardNo" placeholder="e.g. वार्ड 2, वार्ड 3" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">पंप हाउस / सिविल स्थिति</label>
+                    <select id="dprCivilStage" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                        <option value="पाइपलाइन कार्य">पाइपलाइन कार्य प्रगति पर</option>
+                        <option value="बाउंड्री / प्लिंथ">बाउंड्री / प्लिंथ स्तर</option>
+                        <option value="स्लैब ढलाई">स्लैब ढलाई पूर्ण</option>
+                        <option value="मोटर / स्टार्टर फिट">मोटर / स्टार्टर फिट</option>
+                        <option value="सफल टेस्टिंग पूर्ण">सफल टेस्टिंग पूर्ण</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Pipeline and Tap connections -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-sky-50/60 p-3.5 rounded-2xl border border-sky-100">
+                <div>
+                    <label class="block text-[11px] font-black text-sky-900 uppercase mb-1">पाइपलाइन (मीटर)</label>
+                    <input type="number" step="0.1" id="dprPipe" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-sky-300 bg-white text-xs font-black text-sky-800">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black text-emerald-900 uppercase mb-1">नल कनेक्शन (FHTC)</label>
+                    <input type="number" id="dprFhtc" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-emerald-300 bg-white text-xs font-black text-emerald-800">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black text-amber-900 uppercase mb-1">बोरिंग (फीट)</label>
+                    <input type="number" step="0.1" id="dprBoring" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-amber-300 bg-white text-xs font-black text-amber-800">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-black text-violet-900 uppercase mb-1">सड़क रिस्टोर (मीटर)</label>
+                    <input type="number" step="0.1" id="dprRoad" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-violet-300 bg-white text-xs font-black text-violet-800">
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">आज का कार्य विवरण व टिप्पणी</label>
+                <textarea id="dprDescription" rows="2" placeholder="e.g. वार्ड 2 में 63mm HDPE पाइप 150m बिछाया गया एवं 15 घरों में नल कनेक्शन चालू किया गया।" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800 focus:ring-2 focus:ring-sky-500"></textarea>
+            </div>
+
+            <!-- Supervisor Name -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">सुपरवाइज़र / इनचार्ज का नाम</label>
+                <input type="text" id="dprSupervisor" placeholder="सुपरवाइज़र का नाम" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800">
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeDprModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
+                    रद्द करें
+                </button>
+                <button type="submit" id="saveDprBtn" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>DPR सुरक्षित करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openDprModal() {
+        document.getElementById('dprModal').classList.remove('hidden');
+    }
+    function closeDprModal() {
+        document.getElementById('dprModal').classList.add('hidden');
+    }
+
+    async function submitDprForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('saveDprBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+
+        const payload = {
+            site_id: document.getElementById('dprSiteId').value,
+            report_date: document.getElementById('dprDate').value,
+            ward_no: document.getElementById('dprWardNo').value,
+            civil_stage: document.getElementById('dprCivilStage').value,
+            pipe_laying_meters: parseFloat(document.getElementById('dprPipe').value) || 0,
+            fhtc_connections: parseInt(document.getElementById('dprFhtc').value) || 0,
+            boring_depth_feet: parseFloat(document.getElementById('dprBoring').value) || 0,
+            road_restoration_meters: parseFloat(document.getElementById('dprRoad').value) || 0,
+            work_description: document.getElementById('dprDescription').value,
+            supervisor_name: document.getElementById('dprSupervisor').value
+        };
+
+        try {
+            const res = await fetch('/api/dpr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'DPR सुरक्षित हो गई!');
+                window.location.reload();
+            } else {
+                alert('एरर: ' + data.message);
+            }
+        } catch(err) {
+            alert('नेटवर्क एरर: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>DPR सुरक्षित करें</span>';
+        }
+    }
+
+    function editDprRow(row) {
+        document.getElementById('dprSiteId').value = row.site_id;
+        document.getElementById('dprDate').value = row.report_date;
+        document.getElementById('dprWardNo').value = row.ward_no || '';
+        document.getElementById('dprCivilStage').value = row.civil_stage || 'पाइपलाइन कार्य';
+        document.getElementById('dprPipe').value = row.pipe_laying_meters || '';
+        document.getElementById('dprFhtc').value = row.fhtc_connections || '';
+        document.getElementById('dprBoring').value = row.boring_depth_feet || '';
+        document.getElementById('dprRoad').value = row.road_restoration_meters || '';
+        document.getElementById('dprDescription').value = row.work_description || '';
+        document.getElementById('dprSupervisor').value = row.supervisor_name || '';
+        openDprModal();
+    }
+
+    function shareDprWhatsApp() {
+        const dateStr = "{{ selected_date }}";
+        const totalPipe = "{{ stats.today.pipe }}";
+        const totalFhtc = "{{ stats.today.fhtc }}";
+        const totalBoring = "{{ stats.today.boring }}";
+        const reportedSites = "{{ stats.today.sites_reported }}";
+        const totalSites = "{{ sites|length }}";
+
+        let text = `📊 *M/S SANDIP KUMAR — DPR दैनिक कार्य प्रगति*\n`;
+        text += `📅 *तारीख:* ${dateStr}\n`;
+        text += `📍 *कार्यरत साइट्स:* ${reportedSites} / ${totalSites}\n`;
+        text += `--------------------------------\n`;
+        text += `🚰 *घरेलू नल कनेक्शन (FHTC):* ${totalFhtc} घर\n`;
+        text += `📏 *पाइपलाइन बिछाई:* ${totalPipe} मीटर (Rmt)\n`;
+        text += `⛏️ *बोरिंग कार्य:* ${totalBoring} फीट\n`;
+        text += `--------------------------------\n`;
+        text += `*Jal Jeevan Mission Project Tracker*\n`;
+
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+</script>
+{% endblock %}
