@@ -1604,8 +1604,6 @@ def site_stock():
     materials = database.get_all_materials()
     stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
     overview = database.get_all_sites_stock_overview()
-    if not is_owner and user_site_id:
-        overview = [o for o in overview if o["id"] == int(user_site_id)]
 
     selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
 
