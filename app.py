@@ -737,8 +737,14 @@ def update_material_photo(material_id):
 # 3. Unified Reports Hub (All-in-One: Daily, Monthly, Site, Material, Matrix)
 @app.route("/reports")
 def reports_hub():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     tab = request.args.get("tab", "daily")
     sites = database.get_all_sites()
+    if not is_owner and user_site_id:
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
+
     materials = database.get_all_materials()
 
     report_date = request.args.get("date", datetime.date.today().strftime("%Y-%m-%d"))
@@ -749,6 +755,10 @@ def reports_hub():
     total_day_cost = 0.0
     if tab == "daily":
         daily_entries, site_summaries = database.get_daily_report(report_date)
+        if not is_owner and user_site_id:
+            uid = int(user_site_id)
+            daily_entries = [e for e in daily_entries if e.get("site_id") == uid]
+            site_summaries = [s for s in site_summaries if s.get("id") == uid or s.get("site_id") == uid]
         total_day_cost = sum(s["site_total_cost"] or 0 for s in site_summaries)
 
     # Monthly Data
@@ -762,6 +772,8 @@ def reports_hub():
 
     # Site Wise Data
     site_id_arg = request.args.get("site_id", type=int)
+    if not is_owner and user_site_id:
+        site_id_arg = int(user_site_id)
     from_date = request.args.get("from_date", "")
     to_date = request.args.get("to_date", "")
     selected_site_id = site_id_arg if site_id_arg else (sites[0]["id"] if sites else None)
@@ -856,10 +868,18 @@ def matrix_report():
 # 5.1 Dedicated Item Date Timeline (Kab Kab Use Hua)
 @app.route("/item-history")
 def item_history():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     materials = database.get_all_materials()
     sites = database.get_all_sites()
     mat_id_arg = request.args.get("material_id", type=int)
     site_id_arg = request.args.get("site_id", type=int)
+
+    # Security Lock: If not owner, lock to user's assigned site
+    if not is_owner and user_site_id:
+        site_id_arg = int(user_site_id)
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
 
     selected_mat_id = mat_id_arg if mat_id_arg else (materials[0]["id"] if materials else None)
     selected_material = database.get_material_by_id(selected_mat_id) if selected_mat_id else None
@@ -881,7 +901,12 @@ def item_history():
 # 7. Excel Exports
 @app.route("/export/site-excel")
 def export_site_excel():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     site_id = request.args.get("site_id", type=int)
+    if not is_owner and user_site_id:
+        site_id = int(user_site_id)
     from_date = request.args.get("from_date", "")
     to_date = request.args.get("to_date", "")
     
@@ -1373,18 +1398,24 @@ def export_manpower_pdf():
 
 @app.route("/site-photos")
 def site_photos_view():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
 
-    # If supervisor logged in, default to supervisor's site
-    if not selected_site_id and session.get("supervisor_site_id"):
-        selected_site_id = int(session.get("supervisor_site_id"))
+    # SECURITY LOCK: If supervisor / non-owner, strictly lock to assigned site
+    if not is_owner and user_site_id:
+        selected_site_id = int(user_site_id)
 
     selected_month = request.args.get("month", "").strip()
     selected_date = request.args.get("date", "").strip()
     selected_category = request.args.get("category", "").strip()
 
     sites = database.get_all_sites()
+    if not is_owner and user_site_id:
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
+
     selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
     available_months = database.get_available_photo_months(site_id=selected_site_id)
 
@@ -1413,6 +1444,7 @@ def site_photos_view():
         sites=sites,
         selected_site=selected_site,
         selected_site_id=selected_site_id,
+        locked_site_id=int(user_site_id) if (not is_owner and user_site_id) else None,
         months=available_months,
         selected_month=selected_month,
         selected_date=selected_date,
@@ -1427,12 +1459,20 @@ def site_photos_view():
 
 @app.route("/site-photos/upload", methods=["GET", "POST"])
 def site_photo_upload():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     if request.method == "POST":
         try:
             site_id_raw = request.form.get("site_id")
             if not site_id_raw:
                 return jsonify({"success": False, "message": "कृपया साइट चुनें"}), 400
             
+            # SECURITY RESTRICTION: Non-owners can only upload photos for their own assigned site
+            if not is_owner and user_site_id:
+                if int(site_id_raw) != int(user_site_id):
+                    return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की फोटो अपलोड कर सकते हैं।"}), 403
+
             site = database.get_site_by_id(int(site_id_raw))
             if not site:
                 return jsonify({"success": False, "message": "अमान्य साइट"}), 400
@@ -1475,9 +1515,12 @@ def site_photo_upload():
     # GET: Render Mobile Upload Page
     sites = database.get_all_sites()
     site_id_arg = request.args.get("site_id")
-    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else session.get("supervisor_site_id")
-    if selected_site_id:
-        selected_site_id = int(selected_site_id)
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+
+    # SECURITY LOCK: If non-owner, lock strictly to assigned site
+    if not is_owner and user_site_id:
+        selected_site_id = int(user_site_id)
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
 
     uploader_name = session.get("worker_name") or session.get("supervisor_name") or ""
     categories = photo_service.PHOTO_CATEGORIES
@@ -1488,6 +1531,7 @@ def site_photo_upload():
         "photo_upload.html",
         sites=sites,
         selected_site_id=selected_site_id,
+        locked_site_id=int(user_site_id) if (not is_owner and user_site_id) else None,
         uploader_name=uploader_name,
         categories=categories,
         today=today
@@ -1497,6 +1541,19 @@ def site_photo_upload():
 @app.route("/api/site-photos/delete/<int:photo_id>", methods=["POST", "DELETE"])
 def delete_site_photo_api(photo_id):
     try:
+        is_owner = session.get("is_owner", False)
+        user_site_id = session.get("site_id")
+
+        # Security check: If not owner, verify photo belongs to user's site
+        if not is_owner and user_site_id:
+            conn = database.get_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT site_id FROM site_work_photos WHERE id = ?", (photo_id,))
+            row = cursor.fetchone()
+            conn.close()
+            if not row or row[0] != int(user_site_id):
+                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की फोटो हटा सकते हैं।"}), 403
+
         url = database.delete_site_work_photo(photo_id)
         if url and url.startswith("/static/"):
             disk_path = url.lstrip("/")
@@ -1512,8 +1569,16 @@ def delete_site_photo_api(photo_id):
 
 @app.route("/export/site-photos-pdf")
 def export_site_photos_pdf():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+
+    # SECURITY LOCK: If non-owner, strictly lock to assigned site
+    if not is_owner and user_site_id:
+        selected_site_id = int(user_site_id)
+
     selected_month = request.args.get("month", "").strip()
     selected_date = request.args.get("date", "").strip()
     selected_category = request.args.get("category", "").strip()
@@ -1552,8 +1617,16 @@ def export_site_photos_pdf():
 
 @app.route("/site-photos/print-album")
 def site_photos_print_album():
+    is_owner = session.get("is_owner", False)
+    user_site_id = session.get("site_id")
+
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+
+    # SECURITY LOCK: If non-owner, strictly lock to assigned site
+    if not is_owner and user_site_id:
+        selected_site_id = int(user_site_id)
+
     selected_month = request.args.get("month", "").strip()
     selected_date = request.args.get("date", "").strip()
     selected_category = request.args.get("category", "").strip()
