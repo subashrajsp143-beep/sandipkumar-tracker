@@ -1241,6 +1241,19 @@ def download_apk():
     return redirect("https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk")
 
 
+@app.route("/api/app-version")
+def app_version():
+    """Returns the latest available Android APK version and release metadata."""
+    return jsonify({
+        "status": "ok",
+        "version_code": 6,
+        "version_name": "1.5.0",
+        "apk_url": "https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk",
+        "changelog": "सुपरवाइज़र हाजिरी केंद्र: नया वर्कर तुरंत जोड़ें और लाइव फोटो हाजिरी दर्ज करें",
+        "release_date": "2026-10-21"
+    })
+
+
 @app.route("/api/sync/batch", methods=["POST", "OPTIONS"])
 def sync_batch_entries():
     if request.method == "OPTIONS":

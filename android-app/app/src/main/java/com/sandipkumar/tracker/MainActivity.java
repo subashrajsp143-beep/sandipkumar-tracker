@@ -34,12 +34,19 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -116,6 +123,9 @@ public class MainActivity extends AppCompatActivity {
             showLoadingState();
             webView.loadUrl(APP_URL);
         }
+
+        // Check for app updates in the background
+        checkForAppUpdates();
     }
 
     private void setupLaunchers() {
@@ -470,5 +480,72 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
+    }
+
+    private void checkForAppUpdates() {
+        new Thread(() -> {
+            HttpURLConnection conn = null;
+            try {
+                URL url = new URL(APP_URL + "/api/app-version");
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(6000);
+                conn.setReadTimeout(6000);
+                conn.setRequestMethod("GET");
+                if (conn.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    reader.close();
+
+                    JSONObject json = new JSONObject(sb.toString());
+                    int latestVersionCode = json.optInt("version_code", 0);
+                    String latestVersionName = json.optString("version_name", "");
+                    String apkUrl = json.optString("apk_url", "");
+                    String changelog = json.optString("changelog", "");
+
+                    int currentVersionCode = 0;
+                    try {
+                        android.content.pm.PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            currentVersionCode = (int) pInfo.getLongVersionCode();
+                        } else {
+                            currentVersionCode = pInfo.versionCode;
+                        }
+                    } catch (Exception ignored) {}
+
+                    if (latestVersionCode > currentVersionCode && !apkUrl.isEmpty()) {
+                        runOnUiThread(() -> showUpdateDialog(latestVersionName, changelog, apkUrl));
+                    }
+                }
+            } catch (Exception ignored) {
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+        }).start();
+    }
+
+    private void showUpdateDialog(String versionName, String changelog, String apkUrl) {
+        if (isFinishing() || isDestroyed()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("🚀 नया ऐप अपडेट उपलब्ध है (v" + versionName + ")")
+                .setMessage("M/S Sandip Kumar ऐप का नया वर्शन उपलब्ध है:\n\n• " +
+                        (changelog.isEmpty() ? "नए सुधार और फीचर्स जोड़े गए हैं।" : changelog) +
+                        "\n\nक्या आप अभी 1-क्लिक में अपडेट करना चाहते हैं?")
+                .setPositiveButton("अभी अपडेट करें", (dialog, which) -> {
+                    try {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl));
+                        startActivity(browserIntent);
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "अपडेट लिंक खोलने में असमर्थ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("बाद में", null)
+                .setCancelable(true)
+                .show();
     }
 }
