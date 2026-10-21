@@ -8,7 +8,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -17,11 +20,14 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -31,7 +37,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,15 +47,29 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final String APP_URL = "https://sandipkumar-tracker.onrender.com";
+    private static final int MAX_AUTO_RETRIES = 5;
 
     private WebView webView;
     private ProgressBar progressBar;
+    private View errorLayout;
+    private Button btnRetry;
+    private TextView errorTitle;
+    private TextView errorSubtitle;
+    private TextView autoRetryCountdown;
+    private ProgressBar retrySpinner;
 
     private ValueCallback<Uri[]> uploadMessage;
     private Uri cameraImageUri;
 
+    private String pendingGeoOrigin;
+    private GeolocationPermissions.Callback pendingGeoCallback;
+
     private ActivityResultLauncher<Intent> fileChooserLauncher;
     private ActivityResultLauncher<String[]> permissionLauncher;
+
+    private int retryCount = 0;
+    private CountDownTimer retryTimer;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,16 +78,31 @@ public class MainActivity extends AppCompatActivity {
 
         webView = findViewById(R.id.webView);
         progressBar = findViewById(R.id.progressBar);
+        errorLayout = findViewById(R.id.errorLayout);
+        btnRetry = findViewById(R.id.btnRetry);
+        errorTitle = findViewById(R.id.errorTitle);
+        errorSubtitle = findViewById(R.id.errorSubtitle);
+        autoRetryCountdown = findViewById(R.id.autoRetryCountdown);
+        retrySpinner = findViewById(R.id.retrySpinner);
 
         setupLaunchers();
         requestRequiredPermissions();
         configureWebView();
 
-        // Handle hardware back button
+        btnRetry.setOnClickListener(v -> {
+            cancelRetryTimer();
+            retryCount = 0;
+            showLoadingState();
+            webView.loadUrl(APP_URL);
+        });
+
+        // Handle hardware back button navigation
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (webView.canGoBack()) {
+                if (errorLayout.getVisibility() == View.VISIBLE) {
+                    finish();
+                } else if (webView.canGoBack()) {
                     webView.goBack();
                 } else {
                     finish();
@@ -79,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
         } else {
+            showLoadingState();
             webView.loadUrl(APP_URL);
         }
     }
@@ -103,22 +138,47 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // Runtime permissions launcher
+        // Runtime permissions launcher (Location, Camera, Storage)
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 result -> {
-                    // Permissions granted/denied callback
+                    Boolean fineGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                    Boolean coarseGranted = result.get(Manifest.permission.ACCESS_COARSE_LOCATION);
+                    boolean locationOk = (fineGranted != null && fineGranted) || (coarseGranted != null && coarseGranted);
+
+                    if (locationOk && pendingGeoCallback != null && pendingGeoOrigin != null) {
+                        pendingGeoCallback.invoke(pendingGeoOrigin, true, false);
+                        pendingGeoCallback = null;
+                        pendingGeoOrigin = null;
+                    }
                 }
         );
     }
 
     private void requestRequiredPermissions() {
-        String[] permissions = new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.CAMERA
-        };
-        permissionLauncher.launch(permissions);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_MEDIA_IMAGES
+            });
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            });
+        } else {
+            permissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            });
+        }
     }
 
     private void configureWebView() {
@@ -129,19 +189,27 @@ public class MainActivity extends AppCompatActivity {
         settings.setGeolocationEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
-        settings.setUseWideViewPort(true);
-        settings.setLoadWithOverviewMode(true);
-        
-        // Accurate Screen Fit & Anti-Zoom Fixes:
-        settings.setTextZoom(100); // Forces exact 100% scale regardless of Android system font blowout
-        settings.setSupportZoom(false); // Disables accidental pinch-to-zoom that makes the page oversized
+
+        // 1:1 Pixel-Perfect Mobile Viewport Calibration:
+        // setUseWideViewPort(false) strictly locks webview to device-width meta tag
+        settings.setUseWideViewPort(false);
+        settings.setLoadWithOverviewMode(false);
+        settings.setTextZoom(100); // Prevents Android OS Accessibility font blowout
+        settings.setSupportZoom(false); // Disables accidental pinch-to-zoom stretching
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
+        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+        settings.setDefaultTextEncodingName("utf-8");
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        webView.setInitialScale(0); // 0 = standard viewport meta scale
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+
+        // Hardware accelerated smooth native scrolling
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER); // Prevents bounce & accidental pull reloads
         webView.setVerticalScrollBarEnabled(true);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -153,27 +221,42 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
+                return handleSpecialUrls(url);
+            }
 
-                // Open external dialer, WhatsApp, email, maps in native apps
-                if (url.startsWith("tel:") || url.startsWith("mailto:") || 
-                    url.startsWith("whatsapp:") || url.startsWith("geo:") || 
-                    url.contains("maps.google.com") || url.contains("api.whatsapp.com")) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        startActivity(intent);
-                        return true;
-                    } catch (Exception ignored) {
-                        return false;
-                    }
-                }
+            @SuppressWarnings("deprecation")
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return handleSpecialUrls(url);
+            }
 
-                // Keep app navigation inside WebView
-                return false;
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                progressBar.setVisibility(View.GONE);
+                cancelRetryTimer();
+                retryCount = 0;
+                errorLayout.setVisibility(View.GONE);
+                webView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame()) {
+                    handlePageError();
+                }
+            }
+
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                handlePageError();
             }
         });
 
@@ -191,10 +274,22 @@ public class MainActivity extends AppCompatActivity {
             // Auto-grant Geolocation to the site
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
+                boolean hasFine = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                boolean hasCoarse = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+                if (hasFine || hasCoarse) {
+                    callback.invoke(origin, true, false);
+                } else {
+                    pendingGeoOrigin = origin;
+                    pendingGeoCallback = callback;
+                    permissionLauncher.launch(new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    });
+                }
             }
 
-            // File Chooser for Photo Uploads
+            // File Chooser for Camera Capture & Photo Attendance Uploads
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
                 if (uploadMessage != null) {
@@ -206,15 +301,13 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     File photoFile = createImageFile();
                     if (photoFile != null) {
-                        cameraImageUri = FileProvider.getUriForFile(
-                                MainActivity.this,
-                                getPackageName() + ".fileprovider",
-                                photoFile
-                        );
+                        String authority = getPackageName() + ".fileprovider";
+                        cameraImageUri = FileProvider.getUriForFile(MainActivity.this, authority, photoFile);
                         takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
+                        takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     }
-                } catch (IOException e) {
+                } catch (Throwable t) {
                     cameraImageUri = null;
                 }
 
@@ -222,24 +315,28 @@ public class MainActivity extends AppCompatActivity {
                 contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 contentSelectionIntent.setType("image/*");
 
-                Intent[] intentArray;
-                if (takePictureIntent != null) {
-                    intentArray = new Intent[]{takePictureIntent};
-                } else {
-                    intentArray = new Intent[0];
-                }
-
                 Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
                 chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
                 chooserIntent.putExtra(Intent.EXTRA_TITLE, "फोटो चुनें या कैमरा से खींचें");
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentArray);
 
-                fileChooserLauncher.launch(chooserIntent);
-                return true;
+                if (takePictureIntent != null) {
+                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takePictureIntent});
+                }
+
+                try {
+                    fileChooserLauncher.launch(chooserIntent);
+                    return true;
+                } catch (Throwable t) {
+                    if (uploadMessage != null) {
+                        uploadMessage.onReceiveValue(null);
+                        uploadMessage = null;
+                    }
+                    return false;
+                }
             }
         });
 
-        // Download handling for Excel and PDF files
+        // Download handling for Excel and PDF reports
         webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long contentLength) {
@@ -261,19 +358,112 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "फाइल डाउनलोड हो रही है: " + filename, Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
-                    // Fallback to opening in browser
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    startActivity(intent);
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                    } catch (Exception ignored) {}
                 }
             }
         });
     }
 
-    private File createImageFile() throws IOException {
+    private boolean handleSpecialUrls(String url) {
+        if (url == null) return false;
+
+        // Open external dialer, WhatsApp, email, maps in native apps
+        if (url.startsWith("tel:") || url.startsWith("mailto:") ||
+                url.startsWith("whatsapp:") || url.startsWith("geo:") ||
+                url.contains("maps.google.com") || url.contains("api.whatsapp.com")) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+                return true;
+            } catch (Exception ignored) {
+                return false;
+            }
+        }
+
+        // Keep app navigation inside WebView
+        return false;
+    }
+
+    private File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "IMG_" + timeStamp + "_";
+
+        // Primary: App external pictures dir
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return File.createTempFile(imageFileName, ".jpg", storageDir);
+        if (storageDir != null && (storageDir.exists() || storageDir.mkdirs())) {
+            try {
+                return File.createTempFile(imageFileName, ".jpg", storageDir);
+            } catch (IOException ignored) {}
+        }
+
+        // Secondary: Cache dir
+        File cacheDir = getCacheDir();
+        if (cacheDir != null && (cacheDir.exists() || cacheDir.mkdirs())) {
+            try {
+                return File.createTempFile(imageFileName, ".jpg", cacheDir);
+            } catch (IOException ignored) {}
+        }
+
+        // Fallback: Internal files dir
+        return new File(getFilesDir(), imageFileName + ".jpg");
+    }
+
+    private void showLoadingState() {
+        progressBar.setVisibility(View.VISIBLE);
+        errorLayout.setVisibility(View.GONE);
+        webView.setVisibility(View.VISIBLE);
+    }
+
+    private void handlePageError() {
+        progressBar.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+        errorLayout.setVisibility(View.VISIBLE);
+
+        if (retryCount < MAX_AUTO_RETRIES) {
+            retryCount++;
+            startAutoRetryCountdown(6);
+        } else {
+            retrySpinner.setVisibility(View.GONE);
+            autoRetryCountdown.setText("कृपया अपना इंटरनेट जांचें और 'दोबारा प्रयास करें' बटन दबाएं।");
+        }
+    }
+
+    private void startAutoRetryCountdown(int seconds) {
+        cancelRetryTimer();
+        retrySpinner.setVisibility(View.VISIBLE);
+
+        retryTimer = new CountDownTimer(seconds * 1000L, 1000L) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long sec = (millisUntilFinished / 1000L) + 1;
+                autoRetryCountdown.setText("सर्वर चालू (Wake Up) हो रहा है... " + sec + " सेकंड में पुनः प्रयास (" + retryCount + "/" + MAX_AUTO_RETRIES + ")");
+            }
+
+            @Override
+            public void onFinish() {
+                autoRetryCountdown.setText("कनेक्ट किया जा रहा है...");
+                webView.loadUrl(APP_URL);
+            }
+        }.start();
+    }
+
+    private void cancelRetryTimer() {
+        if (retryTimer != null) {
+            retryTimer.cancel();
+            retryTimer = null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        cancelRetryTimer();
+        if (webView != null) {
+            webView.destroy();
+        }
+        super.onDestroy();
     }
 
     @Override

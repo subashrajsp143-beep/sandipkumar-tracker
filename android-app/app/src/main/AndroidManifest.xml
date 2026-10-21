@@ -12,11 +12,13 @@
 
     <!-- Camera & Storage Permissions (For Work Photo Uploads) -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" tools:ignore="ScopedStorage" />
 
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -28,12 +30,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SandipKumarTracker"
         android:usesCleartextTraffic="true"
-        tools:targetApi="31">
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
+        tools:targetApi="34">
         
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.SandipKumarTracker.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,7 +46,7 @@
             </intent-filter>
         </activity>
 
-        <!-- FileProvider for camera capture -->
+        <!-- FileProvider for camera capture & photo uploads -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

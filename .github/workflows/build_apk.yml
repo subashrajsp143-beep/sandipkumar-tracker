@@ -51,16 +51,20 @@ jobs:
         with:
           tag_name: v1.0-apk
           name: "📲 M/S Sandip Kumar Android App (APK)"
+          overwrite: true
+          make_latest: true
           body: |
             ### 📱 M/S Sandip Kumar - Jal Jeevan Mission Android App
             
             - **App Name:** M/S Sandip Kumar
-            - **Version:** 1.0.0 (Build 1)
+            - **Version:** 1.3.0 (Build 4)
             - **Covered Features:**
               - 21 Sites Inventory & Live Stock Balance Register
               - 1 KM Ward Geo-Attendance & Real-Time Worker Pings
-              - Jal Jeevan Mission Site Work Photos with Auto-Watermark & A4 4-Photo Album
-              - Live Material Store (270+ Products) & Daily Consumption Entry
+              - Silent Supervisor Background Location Tracking (Owner Only)
+              - Live Photo Attendance with GPS & Timestamp Watermark
+              - Offline & Slow Connection Auto-Retry Engine
+              - 100% Mobile Screen Fit & Anti-Zoom Fixes
             
             #### 📥 Download & Install:
             Click below to download `SandipKumarTracker.apk` and install it on any Android mobile phone.
