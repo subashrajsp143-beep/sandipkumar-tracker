@@ -57,8 +57,9 @@ jobs:
             ### 📱 M/S Sandip Kumar - Jal Jeevan Mission Android App
             
             - **App Name:** M/S Sandip Kumar
-            - **Version:** 1.4.0 (Build 5) - Fluid Touch Scrolling Fix
+            - **Version:** 1.5.0 (Build 6) - Supervisor Photo Attendance & Quick Worker Hub
             - **Covered Features:**
+              - Top-Level Supervisor Attendance Desk: Quick Add Worker + Live Photo Punch
               - 21 Sites Inventory & Live Stock Balance Register
               - 1 KM Ward Geo-Attendance & Real-Time Worker Pings
               - Silent Supervisor Background Location Tracking (Owner Only)

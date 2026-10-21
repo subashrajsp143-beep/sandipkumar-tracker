@@ -78,6 +78,145 @@
         </div>
     </div>
 
+    <!-- ======================================================== -->
+    <!-- SUPERVISOR ACTION CENTER: QUICK PHOTO ATTENDANCE & ADD WORKER (TOP PRIORITY) -->
+    <!-- ("worker ka naam number likh ke unko option aayega attendence ka") -->
+    <!-- ======================================================== -->
+    <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-2xl border-2 border-emerald-500/60 relative">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-700/80">
+            <div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Attendance Desk)
+                </span>
+                <h3 class="text-lg sm:text-xl font-black text-white mt-1 flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span>वर्कर का नाम व नंबर लिख कर जोड़ें और लाइव फोटो हाजिरी लें</span>
+                </h3>
+                <p class="text-xs text-slate-300 mt-0.5">
+                    नया वर्कर तुरंत जोड़ें या लिस्ट में से वर्कर चुनकर मोबाइल कैमरे से उनकी ऑन-साइट फोटो हाजिरी दर्ज करें।
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="openAddWorkerModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>+ वर्कर फॉर्म</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
+            <!-- Box 1: Quick Photo Attendance Punch (7 cols) -->
+            <div class="lg:col-span-7 bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-check text-emerald-400"></i>
+                            <span>1. वर्कर चुनें व फोटो हाजिरी लें (Photo Punch)</span>
+                        </label>
+                        <span class="text-[11px] text-slate-400 font-semibold" id="quickWorkerCountBadge">{{ rows|length }} वर्कर उपलब्ध</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <select id="quickPunchWorkerSelect" class="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                                <option value="">-- वर्कर का नाम चुनें (Select Worker) --</option>
+                                {% for w in rows %}
+                                <option value="{{ w.worker_id }}" 
+                                        data-name="{{ w.worker_name }}" 
+                                        data-role="{{ w.role }}" 
+                                        data-site-id="{{ w.site_id }}" 
+                                        data-site-name="{{ w.site_name }}"
+                                        data-phone="{{ w.phone or '' }}">
+                                    {{ w.worker_name }} ({{ w.role }}) {% if w.phone %}- 📱 {{ w.phone }}{% endif %} [{{ w.site_code }}]
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Check-in or Check-out switch -->
+                        <div class="flex items-center gap-3">
+                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold text-xs cursor-pointer">
+                                <input type="radio" name="quickPunchCheckType" value="check_in" checked class="text-emerald-500 focus:ring-0">
+                                <span>🟢 चेक-इन (आए)</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold text-xs cursor-pointer">
+                                <input type="radio" name="quickPunchCheckType" value="check_out" class="text-amber-500 focus:ring-0">
+                                <span>🔴 चेक-आउट (गए)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="launchQuickWorkerPunch()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-camera text-base"></i>
+                        <span>📸 कैमरा खोलें व फोटो हाजिरी दर्ज करें</span>
+                    </button>
+                    {% if by_site %}
+                    {% set first_site_id = (by_site.keys() | list)[0] %}
+                    <button type="button" onclick="openGroupPhotoModal({{ first_site_id }}, '{{ by_site[first_site_id].site_name|replace("'", "\\'") }}')" class="py-3 px-3.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer" title="पूरी टीम की 1 सामूहिक फोटो लें">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        <span>सामूहिक फोटो</span>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Box 2: Quick Register Worker Inline (5 cols) -->
+            <div class="lg:col-span-5 bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                <div>
+                    <label class="block text-xs font-black text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus text-amber-400"></i>
+                        <span>2. नया वर्कर तुरंत जोड़ें (नाम व नंबर)</span>
+                    </label>
+
+                    <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
+                        {% if session.get('is_owner') and sites|length > 1 %}
+                        <div>
+                            <select id="quickAddSiteId" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
+                                {% for s in sites %}
+                                <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% else %}
+                        <input type="hidden" id="quickAddSiteId" value="{{ sites[0].id if sites else 1 }}">
+                        {% endif %}
+
+                        <div>
+                            <input type="text" id="quickAddWorkerName" required placeholder="वर्कर का पूरा नाम (उदा. मुकेश कुमार) *" 
+                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="tel" id="quickAddWorkerPhone" placeholder="मोबाइल नंबर (10 अंक)" 
+                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
+                            <select id="quickAddWorkerRole" required class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
+                                <option value="Plumber">प्लंबर (Plumber)</option>
+                                <option value="Helper" selected>हेल्पर (Helper)</option>
+                                <option value="GI Mistri">जी.आई. मिस्त्री</option>
+                                <option value="Electrician">इलेक्ट्रीशियन</option>
+                                <option value="Fitter">फिटर (Fitter)</option>
+                                <option value="Supervisor">सुपरवाइज़र</option>
+                                <option value="Data Entry">डाटा एंट्री (DEO)</option>
+                                <option value="Other">अन्य (Other)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="quickAddSubmitBtn" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>+ यह वर्कर सुरक्षित करें</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-2 text-center">
+                    सेव होते ही वर्कर ऊपर फोटो हाजिरी लिस्ट में तुरंत आ जाएगा।
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if session.get('is_owner') and supervisors_tracking %}
     <!-- ======================================================== -->
     <!-- OWNER ONLY: SILENT SUPERVISOR & SITE INCHARGE LIVE GPS MONITOR -->
@@ -328,143 +467,7 @@
         </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- SUPERVISOR ACTION CENTER: QUICK PHOTO ATTENDANCE & ADD WORKER -->
-    <!-- ("worker ka naam number likh ke unko option aayega attendence ka") -->
-    <!-- ======================================================== -->
-    <div class="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/90 rounded-3xl p-5 sm:p-6 text-white shadow-xl border border-emerald-500/40 relative">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-700/80">
-            <div>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider">
-                    ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Attendance Desk)
-                </span>
-                <h3 class="text-lg sm:text-xl font-black text-white mt-1 flex items-center gap-2">
-                    <i class="fa-solid fa-camera-retro text-amber-400"></i>
-                    <span>वर्कर का नाम व नंबर लिख कर जोड़ें और लाइव फोटो हाजिरी लें</span>
-                </h3>
-                <p class="text-xs text-slate-300 mt-0.5">
-                    नया वर्कर तुरंत जोड़ें या लिस्ट में से वर्कर चुनकर मोबाइल कैमरे से उनकी ऑन-साइट फोटो हाजिरी दर्ज करें।
-                </p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="openAddWorkerModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>+ वर्कर फॉर्म</span>
-                </button>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
-            <!-- Box 1: Quick Photo Attendance Punch (7 cols) -->
-            <div class="lg:col-span-7 bg-slate-950/70 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <label class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-check text-emerald-400"></i>
-                            <span>1. वर्कर चुनें व फोटो हाजिरी लें (Photo Punch)</span>
-                        </label>
-                        <span class="text-[11px] text-slate-400 font-semibold" id="quickWorkerCountBadge">{{ rows|length }} वर्कर उपलब्ध</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div>
-                            <select id="quickPunchWorkerSelect" class="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
-                                <option value="">-- वर्कर का नाम चुनें (Select Worker) --</option>
-                                {% for w in rows %}
-                                <option value="{{ w.worker_id }}" 
-                                        data-name="{{ w.worker_name }}" 
-                                        data-role="{{ w.role }}" 
-                                        data-site-id="{{ w.site_id }}" 
-                                        data-site-name="{{ w.site_name }}"
-                                        data-phone="{{ w.phone or '' }}">
-                                    {{ w.worker_name }} ({{ w.role }}) {% if w.phone %}- 📱 {{ w.phone }}{% endif %} [{{ w.site_code }}]
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Check-in or Check-out switch -->
-                        <div class="flex items-center gap-3">
-                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold text-xs cursor-pointer">
-                                <input type="radio" name="quickPunchCheckType" value="check_in" checked class="text-emerald-500 focus:ring-0">
-                                <span>🟢 चेक-इन (आए)</span>
-                            </label>
-                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold text-xs cursor-pointer">
-                                <input type="radio" name="quickPunchCheckType" value="check_out" class="text-amber-500 focus:ring-0">
-                                <span>🔴 चेक-आउट (गए)</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-slate-800">
-                    <button type="button" onclick="launchQuickWorkerPunch()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
-                        <i class="fa-solid fa-camera text-base"></i>
-                        <span>📸 कैमरा खोलें व फोटो हाजिरी दर्ज करें</span>
-                    </button>
-                    {% if by_site %}
-                    {% set first_site_id = (by_site.keys() | list)[0] %}
-                    <button type="button" onclick="openGroupPhotoModal({{ first_site_id }}, '{{ by_site[first_site_id].site_name|replace("'", "\\'") }}')" class="py-3 px-3.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer" title="पूरी टीम की 1 सामूहिक फोटो लें">
-                        <i class="fa-solid fa-users-viewfinder"></i>
-                        <span>सामूहिक फोटो</span>
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Box 2: Quick Register Worker Inline (5 cols) -->
-            <div class="lg:col-span-5 bg-slate-950/70 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
-                <div>
-                    <label class="block text-xs font-black text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                        <i class="fa-solid fa-user-plus text-amber-400"></i>
-                        <span>2. नया वर्कर तुरंत जोड़ें (नाम व नंबर)</span>
-                    </label>
-
-                    <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
-                        {% if session.get('is_owner') and sites|length > 1 %}
-                        <div>
-                            <select id="quickAddSiteId" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
-                                {% for s in sites %}
-                                <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        {% else %}
-                        <input type="hidden" id="quickAddSiteId" value="{{ sites[0].id if sites else 1 }}">
-                        {% endif %}
-
-                        <div>
-                            <input type="text" id="quickAddWorkerName" required placeholder="वर्कर का पूरा नाम (उदा. मुकेश कुमार) *" 
-                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="tel" id="quickAddWorkerPhone" placeholder="मोबाइल नंबर (10 अंक)" 
-                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
-                            <select id="quickAddWorkerRole" required class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
-                                <option value="Plumber">प्लंबर (Plumber)</option>
-                                <option value="Helper" selected>हेल्पर (Helper)</option>
-                                <option value="GI Mistri">जी.आई. मिस्त्री</option>
-                                <option value="Electrician">इलेक्ट्रीशियन</option>
-                                <option value="Fitter">फिटर (Fitter)</option>
-                                <option value="Supervisor">सुपरवाइज़र</option>
-                                <option value="Data Entry">डाटा एंट्री (DEO)</option>
-                                <option value="Other">अन्य (Other)</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" id="quickAddSubmitBtn" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
-                            <i class="fa-solid fa-plus-circle"></i>
-                            <span>+ यह वर्कर सुरक्षित करें</span>
-                        </button>
-                    </form>
-                </div>
-                <div class="text-[10px] text-slate-400 mt-2 text-center">
-                    सेव होते ही वर्कर ऊपर फोटो हाजिरी लिस्ट में तुरंत आ जाएगा।
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Live Attendance Table by Site -->
     <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">

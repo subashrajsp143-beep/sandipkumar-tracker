@@ -1375,6 +1375,15 @@ def attendance_view():
     except:
         formatted_date = selected_date
 
+    # Fetch workers & sites for quick photo punch & quick add
+    all_sites = database.get_all_sites()
+    if is_supervisor_view and user_site_id:
+        site_workers = database.get_all_workers_for_site(user_site_id)
+        sites = [s for s in all_sites if s["id"] == user_site_id]
+    else:
+        site_workers = database.get_all_workers()
+        sites = all_sites
+
     return render_template(
         "attendance.html",
         selected_date=selected_date,
@@ -1382,7 +1391,9 @@ def attendance_view():
         rows=rows,
         totals=totals,
         is_supervisor_view=is_supervisor_view,
-        locked_site=locked_site
+        locked_site=locked_site,
+        site_workers=site_workers,
+        sites=sites
     )
 
 @app.route("/api/attendance", methods=["GET", "POST", "OPTIONS"])

@@ -98,6 +98,149 @@
         </div>
     </div>
 
+    <!-- Quick Navigation Toggle between Photo GPS Attendance & Manpower Register -->
+    <div class="flex items-center gap-2 p-1.5 bg-slate-900 rounded-2xl text-xs font-bold text-white shadow-md border border-slate-800 no-print">
+        <a href="/geo-attendance" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-black text-center shadow flex items-center justify-center gap-1.5 transition">
+            <i class="fa-solid fa-camera text-amber-300"></i>
+            <span>📸 लाइव फोटो व GPS हाजिरी (/geo-attendance)</span>
+        </a>
+        <a href="/attendance" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-800 text-amber-300 text-center font-black flex items-center justify-center gap-1.5 border border-amber-400/40 transition">
+            <i class="fa-solid fa-users-gear text-amber-300"></i>
+            <span>📋 दैनिक हाजिरी रजिस्टर</span>
+        </a>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SUPERVISOR ACTION CENTER: QUICK PHOTO ATTENDANCE & ADD WORKER -->
+    <!-- ======================================================== -->
+    <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 rounded-3xl p-5 sm:p-6 text-white shadow-2xl border-2 border-emerald-500/60 relative no-print">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-700/80">
+            <div>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Attendance Desk)
+                </span>
+                <h3 class="text-lg sm:text-xl font-black text-white mt-1 flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span>वर्कर का नाम व नंबर लिख कर जोड़ें और लाइव फोटो हाजिरी लें</span>
+                </h3>
+                <p class="text-xs text-slate-300 mt-0.5">
+                    नया वर्कर तुरंत जोड़ें या लिस्ट में से वर्कर चुनकर मोबाइल कैमरे से उनकी ऑन-साइट फोटो हाजिरी दर्ज करें।
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-satellite-dish text-amber-300"></i>
+                    <span>GPS 500M मॉनिटर खोलें &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
+            <!-- Box 1: Quick Photo Attendance Punch (7 cols) -->
+            <div class="lg:col-span-7 bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-check text-emerald-400"></i>
+                            <span>1. वर्कर चुनें व फोटो हाजिरी लें (Photo Punch)</span>
+                        </label>
+                        <span class="text-[11px] text-slate-400 font-semibold" id="quickWorkerCountBadge">{{ site_workers|length }} वर्कर उपलब्ध</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <select id="quickPunchWorkerSelect" class="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
+                                <option value="">-- वर्कर का नाम चुनें (Select Worker) --</option>
+                                {% for w in site_workers %}
+                                <option value="{{ w.id }}" 
+                                        data-name="{{ w.name }}" 
+                                        data-role="{{ w.role }}" 
+                                        data-site-id="{{ w.site_id }}" 
+                                        data-site-name="{{ w.site_name or '' }}"
+                                        data-phone="{{ w.phone or '' }}">
+                                    {{ w.name }} ({{ w.role }}) {% if w.phone %}- 📱 {{ w.phone }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Check-in or Check-out switch -->
+                        <div class="flex items-center gap-3">
+                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold text-xs cursor-pointer">
+                                <input type="radio" name="quickPunchCheckType" value="check_in" checked class="text-emerald-500 focus:ring-0">
+                                <span>🟢 चेक-इन (आए)</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold text-xs cursor-pointer">
+                                <input type="radio" name="quickPunchCheckType" value="check_out" class="text-amber-500 focus:ring-0">
+                                <span>🔴 चेक-आउट (गए)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-slate-800">
+                    <button type="button" onclick="launchQuickWorkerPunch()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-camera text-base"></i>
+                        <span>📸 कैमरा खोलें व फोटो हाजिरी दर्ज करें</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Box 2: Quick Register Worker Inline (5 cols) -->
+            <div class="lg:col-span-5 bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                <div>
+                    <label class="block text-xs font-black text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus text-amber-400"></i>
+                        <span>2. नया वर्कर तुरंत जोड़ें (नाम व नंबर)</span>
+                    </label>
+
+                    <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
+                        {% if sites|length > 1 %}
+                        <div>
+                            <select id="quickAddSiteId" required class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
+                                {% for s in sites %}
+                                <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% else %}
+                        <input type="hidden" id="quickAddSiteId" value="{{ sites[0].id if sites else (locked_site.id if locked_site else 1) }}">
+                        {% endif %}
+
+                        <div>
+                            <input type="text" id="quickAddWorkerName" required placeholder="वर्कर का पूरा नाम (उदा. मुकेश कुमार) *" 
+                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="tel" id="quickAddWorkerPhone" placeholder="मोबाइल नंबर (10 अंक)" 
+                                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
+                            <select id="quickAddWorkerRole" required class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
+                                <option value="Plumber">प्लंबर (Plumber)</option>
+                                <option value="Helper" selected>हेल्पर (Helper)</option>
+                                <option value="GI Mistri">जी.आई. मिस्त्री</option>
+                                <option value="Electrician">इलेक्ट्रीशियन</option>
+                                <option value="Fitter">फिटर (Fitter)</option>
+                                <option value="Supervisor">सुपरवाइज़र</option>
+                                <option value="Data Entry">डाटा एंट्री (DEO)</option>
+                                <option value="Other">अन्य (Other)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" id="quickAddSubmitBtn" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>+ यह वर्कर सुरक्षित करें</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="text-[10px] text-slate-400 mt-2 text-center">
+                    सेव होते ही वर्कर ऊपर फोटो हाजिरी लिस्ट में तुरंत आ जाएगा।
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 10:30 AM Smart Auto-Analysis Banner -->
     <div class="bg-gradient-to-r from-violet-50 via-indigo-50 to-blue-50 border border-indigo-200/80 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
         <div class="flex items-start md:items-center gap-3">
@@ -522,5 +665,360 @@ async function autoFetchFromGps() {
         if (txt) txt.textContent = 'GPS ऑटो-फेच (Auto Sync)';
     }
 }
+
+// ==========================================
+// SUPERVISOR QUICK ACTION: PHOTO ATTENDANCE & ADD WORKER
+// ==========================================
+function launchQuickWorkerPunch() {
+    const sel = document.getElementById('quickPunchWorkerSelect');
+    if (!sel || !sel.value) {
+        alert("कृपया पहले वर्कर का नाम चुनें!");
+        if (sel) sel.focus();
+        return;
+    }
+    const opt = sel.options[sel.selectedIndex];
+    const workerId = opt.value;
+    const workerName = opt.getAttribute('data-name');
+    const workerRole = opt.getAttribute('data-role');
+    const siteId = opt.getAttribute('data-site-id');
+    const siteName = opt.getAttribute('data-site-name');
+
+    const checkTypeEl = document.querySelector('input[name="quickPunchCheckType"]:checked');
+    const checkType = checkTypeEl ? checkTypeEl.value : 'check_in';
+
+    openIndividualPhotoModal(workerId, workerName, workerRole, siteId, siteName, checkType);
+}
+
+async function submitQuickInlineWorker(e) {
+    e.preventDefault();
+    const siteId = document.getElementById('quickAddSiteId').value;
+    const name = document.getElementById('quickAddWorkerName').value.trim();
+    const phone = document.getElementById('quickAddWorkerPhone').value.trim();
+    const role = document.getElementById('quickAddWorkerRole').value;
+
+    if (!name) {
+        alert("कृपया वर्कर का नाम लिखें!");
+        return;
+    }
+
+    const btn = document.getElementById('quickAddSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+
+    try {
+        const res = await fetch('/api/workers/quick-add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ site_id: siteId, name: name, phone: phone, role: role })
+        });
+        const data = await res.json();
+        if (data.success && data.worker) {
+            alert(`✅ वर्कर '${name}' (${role}) सफलतापूर्वक जोड़ा गया! अब आप इनकी फोटो हाजिरी ले सकते हैं।`);
+            
+            // Add to quick select dropdown
+            const sel = document.getElementById('quickPunchWorkerSelect');
+            if (sel) {
+                const newOpt = document.createElement('option');
+                newOpt.value = data.worker.id;
+                newOpt.setAttribute('data-name', data.worker.name);
+                newOpt.setAttribute('data-role', data.worker.role);
+                newOpt.setAttribute('data-site-id', data.worker.site_id);
+                newOpt.setAttribute('data-site-name', data.worker.site_name || '');
+                newOpt.setAttribute('data-phone', data.worker.phone || '');
+                newOpt.textContent = `${data.worker.name} (${data.worker.role}) ${data.worker.phone ? '- 📱 ' + data.worker.phone : ''}`;
+                sel.appendChild(newOpt);
+                sel.value = data.worker.id;
+            }
+
+            // Reset inputs
+            document.getElementById('quickAddWorkerName').value = '';
+            document.getElementById('quickAddWorkerPhone').value = '';
+            
+            // Prompt supervisor to take photo immediately
+            if (confirm(`क्या आप अभी '${name}' की लाइव फोटो हाजिरी लेना चाहते हैं?`)) {
+                launchQuickWorkerPunch();
+            } else {
+                window.location.reload();
+            }
+        } else {
+            alert('❌ ' + (data.message || 'वर्कर सेव नहीं हो सका।'));
+        }
+    } catch (err) {
+        alert('❌ नेटवर्क एरर: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> <span>+ यह वर्कर सुरक्षित करें</span>';
+    }
+}
+
+// Helper: Resize File to base64 WebP/JPEG using Canvas
+function fileToBase64Resized(file, maxDim = 1280, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width;
+                let h = img.height;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Helper: Acquire high-accuracy GPS
+function getLiveGpsCoords() {
+    return new Promise((resolve, reject) => {
+        if (!("geolocation" in navigator)) {
+            return reject(new Error("फोन में Geolocation समर्थित नहीं है"));
+        }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy || 0
+            }),
+            (err) => reject(err),
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+        );
+    });
+}
+
+// Individual Photo Modal Handlers
+async function openIndividualPhotoModal(workerId, workerName, workerRole, siteId, siteName, optCheckType = 'check_in') {
+    document.getElementById('indivWorkerId').value = workerId;
+    document.getElementById('indivSiteId').value = siteId;
+    document.getElementById('indivWorkerName').textContent = workerName;
+    document.getElementById('indivWorkerRole').textContent = workerRole;
+    document.getElementById('indivSiteName').textContent = siteName || 'साइट';
+    document.getElementById('indivPhotoBase64').value = '';
+    document.getElementById('indivLat').value = '';
+    document.getElementById('indivLng').value = '';
+    document.getElementById('indivAccuracy').value = '';
+
+    toggleCheckType(optCheckType);
+    const radioIn = document.querySelector('input[name="indivCheckType"][value="check_in"]');
+    const radioOut = document.querySelector('input[name="indivCheckType"][value="check_out"]');
+    if (optCheckType === 'check_out') {
+        if (radioOut) radioOut.checked = true;
+    } else {
+        if (radioIn) radioIn.checked = true;
+    }
+
+    document.getElementById('indivPreviewImg').classList.add('hidden');
+    document.getElementById('indivPlaceholder').classList.remove('hidden');
+    document.getElementById('indivGpsBadge').classList.add('hidden');
+    document.getElementById('indivSubmitBtn').disabled = true;
+
+    document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2";
+    document.getElementById('indivLocText').textContent = "फोन की GPS लोकेशन खोजी जा रही है...";
+
+    document.getElementById('individualPhotoModal').classList.remove('hidden');
+
+    try {
+        const gps = await getLiveGpsCoords();
+        document.getElementById('indivLat').value = gps.latitude.toFixed(6);
+        document.getElementById('indivLng').value = gps.longitude.toFixed(6);
+        document.getElementById('indivAccuracy').value = Math.round(gps.accuracy);
+        document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
+        document.getElementById('indivLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+        document.getElementById('indivGpsCoordsText').textContent = `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`;
+        document.getElementById('indivGpsBadge').classList.remove('hidden');
+    } catch (e) {
+        document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
+        document.getElementById('indivLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+    }
+}
+
+function closeIndividualPhotoModal() {
+    document.getElementById('individualPhotoModal').classList.add('hidden');
+}
+
+function toggleCheckType(type) {
+    const lblIn = document.getElementById('lblCheckIn');
+    const lblOut = document.getElementById('lblCheckOut');
+    if (type === 'check_in') {
+        lblIn.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer";
+        lblOut.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer";
+    } else {
+        lblOut.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-900 font-black text-xs cursor-pointer";
+        lblIn.className = "flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer";
+    }
+}
+
+async function handleNativePhotoFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const b64 = await fileToBase64Resized(file, 1280, 0.85);
+    document.getElementById('indivPhotoBase64').value = b64;
+    const img = document.getElementById('indivPreviewImg');
+    img.src = b64;
+    img.classList.remove('hidden');
+    document.getElementById('indivPlaceholder').classList.add('hidden');
+    document.getElementById('indivSubmitBtn').disabled = false;
+}
+
+async function submitIndividualPhoto(e) {
+    e.preventDefault();
+    const workerId = document.getElementById('indivWorkerId').value;
+    const siteId = document.getElementById('indivSiteId').value;
+    const b64 = document.getElementById('indivPhotoBase64').value;
+    const lat = document.getElementById('indivLat').value;
+    const lng = document.getElementById('indivLng').value;
+    const acc = document.getElementById('indivAccuracy').value;
+    const checkType = document.querySelector('input[name="indivCheckType"]:checked').value;
+
+    if (!b64) {
+        alert("कृपया पहले कैमरे से फोटो खींचें!");
+        return;
+    }
+
+    const btn = document.getElementById('indivSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> फोटो व उपस्थिति दर्ज हो रही है...';
+
+    try {
+        const res = await fetch('/api/geo-attendance/photo-checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                worker_id: workerId,
+                site_id: siteId,
+                photo_base64: b64,
+                latitude: lat ? parseFloat(lat) : null,
+                longitude: lng ? parseFloat(lng) : null,
+                accuracy: acc ? parseFloat(acc) : 0,
+                check_type: checkType
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`✅ फोटो हाजिरी सफलतापूर्वक दर्ज हो गई!\n\n${data.message}`);
+            closeIndividualPhotoModal();
+            window.location.reload();
+        } else {
+            alert("❌ " + (data.message || "फोटो हाजिरी दर्ज नहीं हो सकी"));
+        }
+    } catch (err) {
+        alert("❌ नेटवर्क एरर: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>उपस्थिति दर्ज करें</span>';
+    }
+}
 </script>
+
+<!-- 4. Individual Worker Photo Attendance Modal -->
+<div id="individualPhotoModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+        <div class="px-5 py-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center text-amber-300">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black leading-tight" id="indivWorkerName">वर्कर का नाम</h3>
+                    <p class="text-[11px] text-indigo-300 font-medium" id="indivWorkerRole">प्लंबर</p>
+                </div>
+            </div>
+            <button onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none">&times;</button>
+        </div>
+
+        <div class="px-5 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs">
+            <div>
+                <span class="text-slate-400 block text-[10px]">तारीख:</span>
+                <strong class="text-slate-700">{{ selected_date }}</strong>
+            </div>
+            <div class="text-right">
+                <span class="text-slate-400 block text-[10px]">साइट:</span>
+                <strong class="text-teal-700 font-bold" id="indivSiteName">—</strong>
+            </div>
+        </div>
+
+        <form onsubmit="submitIndividualPhoto(event)" class="p-5 space-y-4">
+            <input type="hidden" id="indivWorkerId">
+            <input type="hidden" id="indivSiteId">
+            <input type="hidden" id="indivPhotoBase64">
+            <input type="hidden" id="indivLat">
+            <input type="hidden" id="indivLng">
+            <input type="hidden" id="indivAccuracy">
+
+            <!-- Check-in / Check-out Toggle -->
+            <div class="grid grid-cols-2 gap-2">
+                <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
+                    <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
+                    <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
+                    <span>आए (Check-In)</span>
+                </label>
+                <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
+                    <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
+                    <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
+                    <span>गए (Check-Out)</span>
+                </label>
+            </div>
+
+            <!-- Viewfinder / Preview Box -->
+            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-800">
+                <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
+                <div id="indivPlaceholder" class="text-center p-6 text-slate-400">
+                    <i class="fa-solid fa-camera text-4xl mb-2 text-slate-500 block"></i>
+                    <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">GPS वॉटरमार्क व समय स्वतः दर्ज होगा</p>
+                </div>
+                <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/75 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+                    </div>
+                    <span class="text-emerald-300 font-bold ml-1">On-Site</span>
+                </div>
+            </div>
+
+            <!-- Native Camera Button -->
+            <div class="flex items-center gap-2">
+                <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
+                <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="flex-1 py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition flex items-center justify-center gap-2 border border-slate-700 shadow-sm active:scale-95">
+                    <i class="fa-solid fa-camera text-emerald-400"></i>
+                    <span>फोन कैमरे से फोटो खींचें</span>
+                </button>
+            </div>
+
+            <!-- Location Status Row -->
+            <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
+                <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
+                <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeIndividualPhotoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    रद्द करें
+                </button>
+                <button type="submit" id="indivSubmitBtn" disabled class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>उपस्थिति दर्ज करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
