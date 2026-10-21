@@ -954,14 +954,36 @@ async function submitIndividualPhoto(e) {
         });
         const data = await res.json();
         if (data.success) {
-            alert(`✅ उपस्थिति सफलतापूर्वक दर्ज हो गई!\n\n${data.message}`);
-            closeIndividualPhotoModal();
-            window.location.reload();
+            const banner = document.getElementById('indivAutoSubmitBanner');
+            if (banner) {
+                banner.className = 'p-3 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg animate-in fade-in zoom-in-95 duration-150';
+                banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>✅ ${data.message || 'उपस्थिति सफलतापूर्वक दर्ज हो गई!'}</span>`;
+                banner.classList.remove('hidden');
+            }
+            if (btnText) btnText.innerHTML = '✅ उपस्थिति दर्ज हो गई!';
+            setTimeout(() => {
+                closeIndividualPhotoModal();
+                window.location.reload();
+            }, 750);
         } else {
-            alert("❌ " + (data.message || "फोटो हाजिरी दर्ज नहीं हो सकी"));
+            const banner = document.getElementById('indivAutoSubmitBanner');
+            if (banner) {
+                banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ ${data.message || 'फोटो हाजिरी दर्ज नहीं हो सकी'}</span>`;
+                banner.classList.remove('hidden');
+            } else {
+                alert("❌ " + (data.message || "फोटो हाजिरी दर्ज नहीं हो सकी"));
+            }
         }
     } catch (err) {
-        alert("❌ नेटवर्क एरर: " + err.message);
+        const banner = document.getElementById('indivAutoSubmitBanner');
+        if (banner) {
+            banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
+            banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ नेटवर्क एरर: ${err.message}</span>`;
+            banner.classList.remove('hidden');
+        } else {
+            alert("❌ नेटवर्क एरर: " + err.message);
+        }
     } finally {
         btn.disabled = false;
         if (btnText) btnText.innerHTML = '✓ उपस्थिति दर्ज करें (SAVE)';
