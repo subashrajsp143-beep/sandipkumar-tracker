@@ -5,18 +5,53 @@ Database configuration and queries using SQLite.
 
 import sqlite3
 import os
+import time
+from functools import wraps
 from data_seed import INITIAL_SITES, get_unique_materials
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
 
+def db_retry(max_retries=6, delay=0.25):
+    """Decorator to retry SQLite operations if the database is busy or locked."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_err = None
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except sqlite3.OperationalError as e:
+                    err_str = str(e).lower()
+                    if ("locked" in err_str or "busy" in err_str) and attempt < max_retries - 1:
+                        last_err = e
+                        time.sleep(delay * (attempt + 1))
+                    else:
+                        raise
+            if last_err:
+                raise last_err
+        return wrapper
+    return decorator
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=60.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=60000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
     return conn
 
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
+    try:
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA busy_timeout=60000;")
+        cursor.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
 
     # Sites Table
     cursor.execute("""
@@ -1899,6 +1934,7 @@ def get_geo_attendance_today(date_str=None):
     return rows, date_str
 
 
+@db_retry(max_retries=6, delay=0.25)
 def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_date=None, check_type='check_in'):
     """
     Saves an attendance photo entry for a worker:
@@ -1912,78 +1948,82 @@ def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_da
     now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM sites WHERE id = ?", (site_id,))
-    site = cursor.fetchone()
-    site_lat = site["latitude"] if site and "latitude" in site.keys() else None
-    site_lng = site["longitude"] if site and "longitude" in site.keys() else None
-    radius = site["geo_radius"] if site and "geo_radius" in site.keys() and site["geo_radius"] else 1000
+        cursor.execute("SELECT * FROM sites WHERE id = ?", (site_id,))
+        site = cursor.fetchone()
+        site_lat = site["latitude"] if site and "latitude" in site.keys() else None
+        site_lng = site["longitude"] if site and "longitude" in site.keys() else None
+        radius = site["geo_radius"] if site and "geo_radius" in site.keys() and site["geo_radius"] else 1000
 
-    distance = 0.0
-    is_on_site = True
-    nearest_point = "फोटो हाजिरी"
+        distance = 0.0
+        is_on_site = True
+        nearest_point = "फोटो हाजिरी"
 
-    if lat and lng:
-        try:
-            distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
-                site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=att_date
-            )
-        except Exception:
-            distance = 0.0
-            is_on_site = True
-            nearest_point = "फोटो हाजिरी"
-
-        cursor.execute("""
-            INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, nearest_point_name, ping_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (worker_id, float(lat), float(lng), round(distance, 1), 1 if is_on_site else 0, f"📸 फोटो हाजिरी ({nearest_point})", now_str))
-
-    cursor.execute("""
-        SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
-    """, (worker_id, att_date))
-    att = cursor.fetchone()
-
-    action = "checked_in"
-    if not att:
-        cursor.execute("""
-            INSERT INTO geo_attendance (worker_id, site_id, att_date, check_in_time, status, photo_url)
-            VALUES (?, ?, ?, ?, 'present', ?)
-        """, (worker_id, site_id, att_date, now_str, photo_url))
-        action = "checked_in"
-    else:
-        att = dict(att)
-        if check_type == 'check_out':
+        if lat and lng:
             try:
-                cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S") if att.get("check_in_time") else ist_now
-                minutes = int((ist_now - cin).total_seconds() / 60)
+                distance, is_on_site, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+                    site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=att_date
+                )
             except Exception:
-                minutes = 0
-            cursor.execute("""
-                UPDATE geo_attendance
-                SET check_out_time = ?, total_minutes = ?, status = 'left', photo_url = COALESCE(?, photo_url)
-                WHERE worker_id = ? AND att_date = ?
-            """, (now_str, max(0, minutes), photo_url, worker_id, att_date))
-            action = "checked_out"
-        else:
-            new_cin = att["check_in_time"] if att.get("check_in_time") else now_str
-            cursor.execute("""
-                UPDATE geo_attendance
-                SET check_in_time = ?, status = 'present', photo_url = ?
-                WHERE worker_id = ? AND att_date = ?
-            """, (new_cin, photo_url, worker_id, att_date))
-            action = "photo_saved"
+                distance = 0.0
+                is_on_site = True
+                nearest_point = "फोटो हाजिरी"
 
-    cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
-    conn.commit()
-    conn.close()
+            cursor.execute("""
+                INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, nearest_point_name, ping_time)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (worker_id, float(lat), float(lng), round(distance, 1), 1 if is_on_site else 0, f"📸 फोटो हाजिरी ({nearest_point})", now_str))
+
+        cursor.execute("""
+            SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
+        """, (worker_id, att_date))
+        att = cursor.fetchone()
+
+        action = "checked_in"
+        if not att:
+            cursor.execute("""
+                INSERT INTO geo_attendance (worker_id, site_id, att_date, check_in_time, status, photo_url)
+                VALUES (?, ?, ?, ?, 'present', ?)
+            """, (worker_id, site_id, att_date, now_str, photo_url))
+            action = "checked_in"
+        else:
+            att = dict(att)
+            if check_type == 'check_out':
+                try:
+                    cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S") if att.get("check_in_time") else ist_now
+                    minutes = int((ist_now - cin).total_seconds() / 60)
+                except Exception:
+                    minutes = 0
+                cursor.execute("""
+                    UPDATE geo_attendance
+                    SET check_out_time = ?, total_minutes = ?, status = 'left', photo_url = COALESCE(?, photo_url)
+                    WHERE worker_id = ? AND att_date = ?
+                """, (now_str, max(0, minutes), photo_url, worker_id, att_date))
+                action = "checked_out"
+            else:
+                new_cin = att["check_in_time"] if att.get("check_in_time") else now_str
+                cursor.execute("""
+                    UPDATE geo_attendance
+                    SET check_in_time = ?, status = 'present', photo_url = ?
+                    WHERE worker_id = ? AND att_date = ?
+                """, (new_cin, photo_url, worker_id, att_date))
+                action = "photo_saved"
+
+        cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
+        conn.commit()
+    finally:
+        conn.close()
 
     return {
         "success": True,
         "action": action,
         "photo_url": photo_url,
         "is_on_site": is_on_site,
+        "distance": round(distance, 1),
         "distance_m": round(distance, 1),
+        "nearest_point": nearest_point,
         "timestamp": now_str
     }
 
@@ -2203,6 +2243,7 @@ def get_photo_category_counts(site_id=None, month_str=None):
 # SILENT SUPERVISOR & INCHARGE LOCATION TRACKING
 # ==========================================
 
+@db_retry(max_retries=6, delay=0.25)
 def log_supervisor_silent_ping(site_id, supervisor_name="", phone="", lat=0.0, lng=0.0, accuracy=0, page_source="background"):
     """
     Silently records the live GPS location of a site supervisor / incharge.
@@ -2217,56 +2258,57 @@ def log_supervisor_silent_ping(site_id, supervisor_name="", phone="", lat=0.0, l
     now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_db()
-    cursor = conn.cursor()
-
-    # Look up site info
-    cursor.execute("""
-        SELECT id, name, code, supervisor, contact, incharge, incharge_phone, latitude, longitude, geo_radius
-        FROM sites WHERE id = ?
-    """, (site_id,))
-    site = cursor.fetchone()
-    if not site:
-        conn.close()
-        return {"success": False, "message": "Site not found"}
-
-    site_dict = dict(site)
-    if not supervisor_name:
-        supervisor_name = site_dict.get("supervisor") or site_dict.get("incharge") or f"Supervisor Site {site_id}"
-    if not phone:
-        phone = site_dict.get("contact") or site_dict.get("incharge_phone") or ""
-
-    site_lat = site_dict.get("latitude")
-    site_lng = site_dict.get("longitude")
-    radius = site_dict.get("geo_radius") or 1000
-
-    # Calculate proximity
-    distance = 0.0
-    is_on_site = 0
-    nearest_point = "कार्य स्थल"
     try:
-        distance, on_site_bool, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
-            site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=today_str
-        )
-        is_on_site = 1 if on_site_bool else 0
-    except Exception:
-        if site_lat and site_lng:
-            distance = haversine_distance(float(lat), float(lng), float(site_lat), float(site_lng))
-            is_on_site = 1 if distance <= radius else 0
-            nearest_point = site_dict.get("name", "Site")
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO supervisor_location_logs (
-            site_id, supervisor_name, supervisor_phone, latitude, longitude,
-            accuracy, distance_meters, is_on_site, nearest_point_name, page_source,
-            ping_time, ping_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        site_id, str(supervisor_name), str(phone), float(lat), float(lng),
-        float(accuracy or 0), round(distance, 1), is_on_site, str(nearest_point), str(page_source),
-        now_str, today_str
-    ))
-    conn.commit()
-    conn.close()
+        # Look up site info
+        cursor.execute("""
+            SELECT id, name, code, supervisor, contact, incharge, incharge_phone, latitude, longitude, geo_radius
+            FROM sites WHERE id = ?
+        """, (site_id,))
+        site = cursor.fetchone()
+        if not site:
+            return {"success": False, "message": "Site not found"}
+
+        site_dict = dict(site)
+        if not supervisor_name:
+            supervisor_name = site_dict.get("supervisor") or site_dict.get("incharge") or f"Supervisor Site {site_id}"
+        if not phone:
+            phone = site_dict.get("contact") or site_dict.get("incharge_phone") or ""
+
+        site_lat = site_dict.get("latitude")
+        site_lng = site_dict.get("longitude")
+        radius = site_dict.get("geo_radius") or 1000
+
+        # Calculate proximity
+        distance = 0.0
+        is_on_site = 0
+        nearest_point = "कार्य स्थल"
+        try:
+            distance, on_site_bool, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+                site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=today_str
+            )
+            is_on_site = 1 if on_site_bool else 0
+        except Exception:
+            if site_lat and site_lng:
+                distance = haversine_distance(float(lat), float(lng), float(site_lat), float(site_lng))
+                is_on_site = 1 if distance <= radius else 0
+                nearest_point = site_dict.get("name", "Site")
+
+        cursor.execute("""
+            INSERT INTO supervisor_location_logs (
+                site_id, supervisor_name, supervisor_phone, latitude, longitude,
+                accuracy, distance_meters, is_on_site, nearest_point_name, page_source,
+                ping_time, ping_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            site_id, str(supervisor_name), str(phone), float(lat), float(lng),
+            float(accuracy or 0), round(distance, 1), is_on_site, str(nearest_point), str(page_source),
+            now_str, today_str
+        ))
+        conn.commit()
+    finally:
+        conn.close()
 
     return {
         "success": True,
