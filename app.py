@@ -1377,6 +1377,12 @@ def attendance_view():
         ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
         selected_date = ist_now.strftime("%Y-%m-%d")
 
+    # Auto-sync verified GPS/photo attendance pings to manpower sheet
+    try:
+        database.auto_sync_gps_to_manpower(selected_date)
+    except Exception:
+        pass
+
     rows, totals = database.get_daily_manpower(selected_date)
 
     is_owner = session.get("is_owner", False)
@@ -1424,6 +1430,12 @@ def attendance_view():
         site_workers = database.get_all_workers()
         sites = all_sites
 
+    # Fetch verified photo attendances for today to show live photo feed on this page
+    today_geo_rows, _ = database.get_geo_attendance_today(selected_date)
+    if is_supervisor_view and user_site_id:
+        today_geo_rows = [r for r in today_geo_rows if r["site_id"] == user_site_id]
+    today_photos = [r for r in today_geo_rows if r.get("photo_url")]
+
     return render_template(
         "attendance.html",
         selected_date=selected_date,
@@ -1433,7 +1445,8 @@ def attendance_view():
         is_supervisor_view=is_supervisor_view,
         locked_site=locked_site,
         site_workers=site_workers,
-        sites=sites
+        sites=sites,
+        today_photos=today_photos
     )
 
 @app.route("/api/attendance", methods=["GET", "POST", "OPTIONS"])

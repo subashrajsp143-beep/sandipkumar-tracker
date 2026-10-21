@@ -241,6 +241,58 @@
         </div>
     </div>
 
+    <!-- Live Verified Photo Attendance Gallery for Today -->
+    {% if today_photos %}
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-4 sm:p-6 border-2 border-amber-400/80 shadow-2xl text-white no-print">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center text-xl font-black shadow-lg">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
+                        <span>📸 आज दर्ज हुई लाइव फोटो हाजिरी (Live Photo Feed)</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-black shadow">{{ today_photos|length }} वर्कर उपस्थित</span>
+                    </h3>
+                    <p class="text-[11px] text-slate-300">साइट पर कैमरे से लाइव खींची गई फोटो — बड़ी फोटो व GPS देखने के लिए फोटो पर क्लिक करें</p>
+                </div>
+            </div>
+            <a href="/geo-attendance" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black transition flex items-center gap-1.5 self-start sm:self-auto shadow">
+                <i class="fa-solid fa-map-location-dot text-amber-300"></i>
+                <span>पूरा GPS मैप व रूट देखें ↗</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+            {% for p in today_photos %}
+            <div class="bg-slate-800/90 rounded-2xl border border-slate-700/80 overflow-hidden hover:border-amber-400 hover:shadow-xl transition group cursor-pointer"
+                 onclick="viewAttendanceLightbox('{{ p.photo_url }}', '{{ p.worker_name|replace("'", "\\'") }}', '{{ p.role }}', '{{ p.site_name|replace("'", "\\'") }}', '{{ p.check_in_time or '' }}', '{{ p.last_lat or '' }}', '{{ p.last_lng or '' }}')">
+                <div class="relative aspect-square bg-slate-950 overflow-hidden">
+                    <img src="{{ p.photo_url }}" alt="{{ p.worker_name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy">
+                    <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-full bg-emerald-600/95 backdrop-blur-xs text-white text-[9px] font-black shadow flex items-center gap-1 border border-emerald-400/40">
+                        <i class="fa-solid fa-check"></i> <span>उपस्थित</span>
+                    </span>
+                    <span class="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-xs text-amber-300 text-[10px] font-black border border-amber-400/30">
+                        📍 {{ p.site_name }}
+                    </span>
+                </div>
+                <div class="p-2.5 text-center">
+                    <h4 class="text-xs font-black text-white truncate" title="{{ p.worker_name }}">{{ p.worker_name }}</h4>
+                    <div class="flex items-center justify-center gap-1 mt-0.5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-900/80 text-indigo-200 font-bold border border-indigo-700/50">{{ p.role }}</span>
+                    </div>
+                    {% if p.check_in_time %}
+                    <div class="text-[10px] text-emerald-400 mt-1 font-mono font-semibold">
+                        <i class="fa-regular fa-clock text-[9px]"></i> {{ p.check_in_time[11:16] }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- 10:30 AM Smart Auto-Analysis Banner -->
     <div class="bg-gradient-to-r from-violet-50 via-indigo-50 to-blue-50 border border-indigo-200/80 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
         <div class="flex items-start md:items-center gap-3">
@@ -1095,4 +1147,58 @@ async function submitIndividualPhoto(e) {
         </form>
     </div>
 </div>
+
+<!-- 5. Attendance Photo Lightbox Modal -->
+<div id="attendanceLightboxModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5 no-print" onclick="if(event.target===this) closeAttendanceLightbox()">
+    <div class="bg-slate-900 text-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-800 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+        <div class="p-3 bg-slate-950 flex items-center justify-between border-b border-slate-800">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="font-bold text-slate-200" id="attLightboxTitle">—</span>
+            </div>
+            <button onclick="closeAttendanceLightbox()" class="text-slate-400 hover:text-white text-2xl font-bold px-2 leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <div class="relative bg-black flex items-center justify-center max-h-[60vh] overflow-hidden">
+            <img id="attLightboxImg" src="" class="max-h-[60vh] w-auto object-contain mx-auto">
+        </div>
+
+        <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-slate-300">
+                <span>साइट: <strong class="text-white" id="attLightboxSite">—</strong></span>
+                <span>समय: <strong class="text-emerald-400" id="attLightboxTime">—</strong></span>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span class="font-mono text-slate-400 text-[11px]" id="attLightboxGps">GPS: —</span>
+                <a id="attLightboxMapLink" href="#" target="_blank" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-map-location-dot"></i> Google Map ↗
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewAttendanceLightbox(photoUrl, workerName, role, siteName, checkinTime, lat, lng) {
+    document.getElementById('attLightboxImg').src = photoUrl;
+    document.getElementById('attLightboxTitle').textContent = `${workerName} (${role})`;
+    document.getElementById('attLightboxSite').textContent = siteName;
+    document.getElementById('attLightboxTime').textContent = checkinTime || '—';
+
+    if (lat && lng) {
+        document.getElementById('attLightboxGps').textContent = `GPS: ${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}`;
+        document.getElementById('attLightboxMapLink').href = `https://www.google.com/maps?q=${lat},${lng}`;
+        document.getElementById('attLightboxMapLink').classList.remove('hidden');
+    } else {
+        document.getElementById('attLightboxGps').textContent = 'GPS: ऑन-साइट रिकॉर्डेड';
+        document.getElementById('attLightboxMapLink').classList.add('hidden');
+    }
+
+    document.getElementById('attendanceLightboxModal').classList.remove('hidden');
+}
+
+function closeAttendanceLightbox() {
+    document.getElementById('attendanceLightboxModal').classList.add('hidden');
+}
+</script>
 {% endblock %}
