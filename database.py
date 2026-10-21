@@ -1209,10 +1209,17 @@ def init_gps_tables():
         phone TEXT,
         worker_token TEXT UNIQUE NOT NULL,
         is_active INTEGER DEFAULT 1,
+        last_active TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
     );
     """)
+
+    # Migration for site_workers: last_active if missing
+    cursor.execute("PRAGMA table_info(site_workers)")
+    worker_cols = [r[1] for r in cursor.fetchall()]
+    if "last_active" not in worker_cols:
+        cursor.execute("ALTER TABLE site_workers ADD COLUMN last_active TEXT")
 
     # 3. GPS Attendance log: check-in / check-out events
     cursor.execute("""
@@ -2048,7 +2055,15 @@ def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_da
                 """, (new_cin, photo_url, worker_id, att_date))
                 action = "photo_saved"
 
-        cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
+        try:
+            cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
+        except Exception:
+            try:
+                cursor.execute("ALTER TABLE site_workers ADD COLUMN last_active TEXT")
+                cursor.execute("UPDATE site_workers SET last_active = ? WHERE id = ?", (now_str, worker_id))
+            except Exception:
+                pass
+
         conn.commit()
     finally:
         conn.close()
