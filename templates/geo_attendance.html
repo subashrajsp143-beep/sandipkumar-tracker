@@ -964,11 +964,11 @@
     </div>
 </div>
 
-<!-- 4. Individual Photo Attendance Modal -->
-<div id="individualPhotoModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<!-- 4. Individual Photo Attendance Modal (Sticky Bottom Bar + Auto-Submit) -->
+<div id="individualPhotoModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[94vh]">
         <!-- Header -->
-        <div class="px-5 py-4 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between">
+        <div class="px-5 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between shrink-0">
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
                     <i class="fa-solid fa-camera"></i>
@@ -978,11 +978,11 @@
                     <p class="text-[11px] text-emerald-100 font-medium">वर्कर की लाइव फोटो लेकर हाजिरी लगाएं</p>
                 </div>
             </div>
-            <button onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none">&times;</button>
+            <button type="button" onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1">&times;</button>
         </div>
 
         <!-- Worker Info Bar -->
-        <div class="bg-slate-50 px-5 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs">
+        <div class="bg-slate-100 px-5 py-2 border-b border-slate-200 flex items-center justify-between text-xs shrink-0">
             <div>
                 <span class="text-slate-400 block text-[10px]">वर्कर:</span>
                 <strong class="text-slate-800 text-sm" id="indivWorkerName">—</strong>
@@ -994,7 +994,7 @@
             </div>
         </div>
 
-        <form onsubmit="submitIndividualPhoto(event)" class="p-5 space-y-4">
+        <form onsubmit="submitIndividualPhoto(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
             <input type="hidden" id="indivWorkerId">
             <input type="hidden" id="indivSiteId">
             <input type="hidden" id="indivPhotoBase64">
@@ -1002,60 +1002,68 @@
             <input type="hidden" id="indivLng">
             <input type="hidden" id="indivAccuracy">
 
-            <!-- Check-in / Check-out Toggle -->
-            <div class="grid grid-cols-2 gap-2">
-                <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
-                    <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
-                    <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
-                    <span>आए (Check-In)</span>
-                </label>
-                <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
-                    <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
-                    <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
-                    <span>गए (Check-Out)</span>
-                </label>
-            </div>
-
-            <!-- Viewfinder / Preview Box -->
-            <div class="relative bg-slate-900 rounded-2xl overflow-hidden aspect-4/3 flex items-center justify-center border border-slate-800">
-                <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
-                <div id="indivPlaceholder" class="text-center p-6 text-slate-400">
-                    <i class="fa-solid fa-camera text-4xl mb-2 text-slate-500 block"></i>
-                    <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
-                    <p class="text-[10px] text-slate-500 mt-0.5">GPS वॉटरमार्क व समय स्वतः दर्ज होगा</p>
+            <div class="p-4 overflow-y-auto space-y-3 flex-1">
+                <!-- Check-in / Check-out Toggle -->
+                <div class="grid grid-cols-2 gap-2">
+                    <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
+                        <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
+                        <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
+                        <span>🟢 आए (Check-In)</span>
+                    </label>
+                    <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
+                        <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
+                        <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
+                        <span>🔴 गए (Check-Out)</span>
+                    </label>
                 </div>
-                <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/75 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
-                    <div class="flex items-center gap-1.5 truncate">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+
+                <!-- Big Camera Button -->
+                <div>
+                    <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
+                    <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-600 text-white font-black text-sm shadow-md transition flex items-center justify-center gap-2 active:scale-95 border border-indigo-400/40 cursor-pointer">
+                        <i class="fa-solid fa-camera text-amber-300 text-lg"></i>
+                        <span>📸 फोन कैमरे से फोटो खींचें (कैमरा खोलें)</span>
+                    </button>
+                </div>
+
+                <!-- Viewfinder / Preview Box -->
+                <div class="relative bg-slate-900 rounded-2xl overflow-hidden h-44 sm:h-52 flex items-center justify-center border-2 border-dashed border-slate-700">
+                    <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
+                    <div id="indivPlaceholder" class="text-center p-4 text-slate-400">
+                        <i class="fa-solid fa-camera text-3xl mb-1 text-slate-500 block"></i>
+                        <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
+                        <p class="text-[10px] text-emerald-400 mt-1 font-semibold">फोटो खींचते ही हाजिरी अपने आप दर्ज हो जाएगी!</p>
                     </div>
-                    <span class="text-emerald-300 font-bold ml-1">On-Site</span>
+                    <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+                        </div>
+                        <span class="text-emerald-300 font-bold ml-1">On-Site</span>
+                    </div>
+                </div>
+
+                <!-- Auto-Submit Status Banner -->
+                <div id="indivAutoSubmitBanner" class="hidden p-3 rounded-xl bg-emerald-100 border-2 border-emerald-400 text-emerald-900 text-xs font-black flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-base animate-bounce"></i>
+                    <span>✅ फोटो प्राप्त हो गई! उपस्थिति अपने आप दर्ज की जा रही है...</span>
+                </div>
+
+                <!-- Location Status Row -->
+                <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
+                    <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
                 </div>
             </div>
 
-            <!-- Native Camera Button -->
-            <div class="flex items-center gap-2">
-                <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
-                <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="flex-1 py-3 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-xs transition flex items-center justify-center gap-2 border border-slate-700 shadow-sm active:scale-95">
-                    <i class="fa-solid fa-camera text-emerald-400"></i>
-                    <span>फोन कैमरे से फोटो खींचें</span>
-                </button>
-            </div>
-
-            <!-- Location Status Row -->
-            <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
-                <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
-                <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-2 flex items-center justify-end gap-2">
-                <button type="button" onclick="closeIndividualPhotoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <!-- ALWAYS-VISIBLE STICKY BOTTOM ACTION BAR -->
+            <div class="p-3 bg-white border-t-2 border-emerald-500 shrink-0 shadow-2xl flex items-center gap-2">
+                <button type="button" onclick="closeIndividualPhotoModal()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
                     रद्द करें
                 </button>
-                <button type="submit" id="indivSubmitBtn" disabled class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-check"></i>
-                    <span>उपस्थिति दर्ज करें</span>
+                <button type="submit" id="indivSubmitBtn" class="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer border border-emerald-400/50">
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                    <span id="indivSubmitBtnText">✓ उपस्थिति दर्ज करें (SAVE)</span>
                 </button>
             </div>
         </form>
@@ -1292,7 +1300,13 @@
         }
     }
 
+    let indivAutoSubmitTimer = null;
+
     function closeIndividualPhotoModal() {
+        if (indivAutoSubmitTimer) {
+            clearTimeout(indivAutoSubmitTimer);
+            indivAutoSubmitTimer = null;
+        }
         document.getElementById('individualPhotoModal').classList.add('hidden');
     }
 
@@ -1312,17 +1326,40 @@
         const file = e.target.files[0];
         if (!file) return;
 
+        if (indivAutoSubmitTimer) {
+            clearTimeout(indivAutoSubmitTimer);
+            indivAutoSubmitTimer = null;
+        }
+
         const b64 = await fileToBase64Resized(file, 1280, 0.85);
         document.getElementById('indivPhotoBase64').value = b64;
         const img = document.getElementById('indivPreviewImg');
         img.src = b64;
         img.classList.remove('hidden');
         document.getElementById('indivPlaceholder').classList.add('hidden');
-        document.getElementById('indivSubmitBtn').disabled = false;
+
+        // Status Banner
+        const banner = document.getElementById('indivAutoSubmitBanner');
+        if (banner) banner.classList.remove('hidden');
+
+        const btn = document.getElementById('indivSubmitBtn');
+        btn.disabled = false;
+        const btnText = document.getElementById('indivSubmitBtnText');
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> उपस्थिति दर्ज की जा रही है...';
+
+        // Auto-save automatically in 1.2 seconds!
+        indivAutoSubmitTimer = setTimeout(() => {
+            submitIndividualPhoto(new Event('submit'));
+        }, 1200);
     }
 
     async function submitIndividualPhoto(e) {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
+        if (indivAutoSubmitTimer) {
+            clearTimeout(indivAutoSubmitTimer);
+            indivAutoSubmitTimer = null;
+        }
+
         const workerId = document.getElementById('indivWorkerId').value;
         const siteId = document.getElementById('indivSiteId').value;
         const b64 = document.getElementById('indivPhotoBase64').value;
@@ -1338,7 +1375,8 @@
 
         const btn = document.getElementById('indivSubmitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> दर्ज हो रही है...';
+        const btnText = document.getElementById('indivSubmitBtnText');
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सुरक्षित हो रहा है...';
 
         try {
             const res = await fetch('/api/geo-attendance/photo-checkin', {
@@ -1348,6 +1386,7 @@
                     worker_id: workerId,
                     site_id: siteId,
                     photo: b64,
+                    photo_base64: b64,
                     latitude: lat,
                     longitude: lng,
                     accuracy: acc,
@@ -1357,7 +1396,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(data.message);
+                alert(`✅ उपस्थिति सफलतापूर्वक दर्ज हो गई!\n\n${data.message}`);
                 closeIndividualPhotoModal();
                 window.location.reload();
             } else {
@@ -1367,7 +1406,7 @@
             alert('❌ नेटवर्क एरर: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>उपस्थिति दर्ज करें</span>';
+            if (btnText) btnText.innerHTML = '✓ उपस्थिति दर्ज करें (SAVE)';
         }
     }
 
@@ -2236,6 +2275,12 @@
         const checkType = checkTypeEl ? checkTypeEl.value : 'check_in';
 
         openIndividualPhotoModal(workerId, workerName, workerRole, siteId, siteName, checkType);
+
+        // Auto-trigger camera directly in 1 step!
+        setTimeout(() => {
+            const inp = document.getElementById('indivNativeFileInput');
+            if (inp) inp.click();
+        }, 350);
     }
 
     async function submitQuickInlineWorker(e) {

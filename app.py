@@ -2108,7 +2108,7 @@ def geo_attendance_photo_checkin():
         is_json = request.is_json
         if is_json:
             data = request.get_json() or {}
-            photo_data = data.get("photo")
+            photo_data = data.get("photo") or data.get("photo_base64")
             worker_id_raw = data.get("worker_id")
             worker_ids = data.get("worker_ids")
             site_id = int(data.get("site_id", 0))
