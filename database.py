@@ -1237,6 +1237,27 @@ def init_gps_tables():
     );
     """)
 
+    # 8. Silent Supervisor & Site Incharge Location Tracking Logs
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS supervisor_location_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        supervisor_name TEXT,
+        supervisor_phone TEXT,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL,
+        accuracy REAL DEFAULT 0,
+        distance_meters REAL,
+        is_on_site INTEGER DEFAULT 0,
+        nearest_point_name TEXT,
+        page_source TEXT,
+        ping_time TEXT NOT NULL,
+        ping_date TEXT NOT NULL,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sup_logs_site_date ON supervisor_location_logs(site_id, ping_date);")
+
     conn.commit()
     conn.close()
 
@@ -2176,6 +2197,193 @@ def get_photo_category_counts(site_id=None, month_str=None):
     rows = [dict(r) for r in cursor.fetchall()]
     conn.close()
     return rows
+
+
+# ==========================================
+# SILENT SUPERVISOR & INCHARGE LOCATION TRACKING
+# ==========================================
+
+def log_supervisor_silent_ping(site_id, supervisor_name="", phone="", lat=0.0, lng=0.0, accuracy=0, page_source="background"):
+    """
+    Silently records the live GPS location of a site supervisor / incharge.
+    Calculates distance to site's designated GPS coordinate or active work wards.
+    """
+    import datetime as dt
+    if not lat or not lng:
+        return {"success": False, "message": "Invalid coordinates"}
+
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    today_str = ist_now.strftime("%Y-%m-%d")
+    now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Look up site info
+    cursor.execute("""
+        SELECT id, name, code, supervisor, contact, incharge, incharge_phone, latitude, longitude, geo_radius
+        FROM sites WHERE id = ?
+    """, (site_id,))
+    site = cursor.fetchone()
+    if not site:
+        conn.close()
+        return {"success": False, "message": "Site not found"}
+
+    site_dict = dict(site)
+    if not supervisor_name:
+        supervisor_name = site_dict.get("supervisor") or site_dict.get("incharge") or f"Supervisor Site {site_id}"
+    if not phone:
+        phone = site_dict.get("contact") or site_dict.get("incharge_phone") or ""
+
+    site_lat = site_dict.get("latitude")
+    site_lng = site_dict.get("longitude")
+    radius = site_dict.get("geo_radius") or 1000
+
+    # Calculate proximity
+    distance = 0.0
+    is_on_site = 0
+    nearest_point = "कार्य स्थल"
+    try:
+        distance, on_site_bool, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
+            site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=today_str
+        )
+        is_on_site = 1 if on_site_bool else 0
+    except Exception:
+        if site_lat and site_lng:
+            distance = haversine_distance(float(lat), float(lng), float(site_lat), float(site_lng))
+            is_on_site = 1 if distance <= radius else 0
+            nearest_point = site_dict.get("name", "Site")
+
+    cursor.execute("""
+        INSERT INTO supervisor_location_logs (
+            site_id, supervisor_name, supervisor_phone, latitude, longitude,
+            accuracy, distance_meters, is_on_site, nearest_point_name, page_source,
+            ping_time, ping_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        site_id, str(supervisor_name), str(phone), float(lat), float(lng),
+        float(accuracy or 0), round(distance, 1), is_on_site, str(nearest_point), str(page_source),
+        now_str, today_str
+    ))
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "site_id": site_id,
+        "supervisor_name": supervisor_name,
+        "distance_meters": round(distance, 1),
+        "is_on_site": bool(is_on_site),
+        "nearest_point": nearest_point,
+        "ping_time": now_str
+    }
+
+
+def get_supervisors_live_tracking_today(date_str=None):
+    """
+    Returns the latest live GPS tracking status of every site's supervisor for today.
+    Used exclusively by the owner to monitor supervisors across all 21 sites.
+    """
+    import datetime as dt
+    if not date_str:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        date_str = ist_now.strftime("%Y-%m-%d")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Get all sites
+    cursor.execute("""
+        SELECT id, code, name, location, supervisor, contact, incharge, incharge_phone,
+               latitude, longitude, geo_radius
+        FROM sites
+        ORDER BY name
+    """)
+    sites = [dict(s) for s in cursor.fetchall()]
+
+    results = []
+    for s in sites:
+        sid = s["id"]
+        # Fetch latest ping for today
+        cursor.execute("""
+            SELECT * FROM supervisor_location_logs
+            WHERE site_id = ? AND ping_date = ?
+            ORDER BY id DESC LIMIT 1
+        """, (sid, date_str))
+        last_ping_row = cursor.fetchone()
+
+        is_today = True
+        if not last_ping_row:
+            # Fallback to absolute latest ping for reference
+            cursor.execute("""
+                SELECT * FROM supervisor_location_logs
+                WHERE site_id = ?
+                ORDER BY id DESC LIMIT 1
+            """, (sid,))
+            last_ping_row = cursor.fetchone()
+            is_today = False
+
+        # Total pings today count
+        cursor.execute("""
+            SELECT COUNT(*) FROM supervisor_location_logs
+            WHERE site_id = ? AND ping_date = ?
+        """, (sid, date_str))
+        today_pings_count = cursor.fetchone()[0]
+
+        last_ping = dict(last_ping_row) if last_ping_row else None
+
+        sup_name = (last_ping.get("supervisor_name") if last_ping else None) or s.get("supervisor") or s.get("incharge") or "सुपरवाइजर"
+        sup_phone = (last_ping.get("supervisor_phone") if last_ping else None) or s.get("contact") or s.get("incharge_phone") or ""
+
+        results.append({
+            "site_id": sid,
+            "site_code": s.get("code"),
+            "site_name": s.get("name"),
+            "site_location": s.get("location"),
+            "supervisor_name": sup_name,
+            "supervisor_phone": sup_phone,
+            "incharge": s.get("incharge"),
+            "incharge_phone": s.get("incharge_phone"),
+            "site_lat": s.get("latitude"),
+            "site_lng": s.get("longitude"),
+            "geo_radius": s.get("geo_radius") or 1000,
+            "has_ping": bool(last_ping and is_today),
+            "is_today": is_today,
+            "today_pings_count": today_pings_count,
+            "last_lat": last_ping.get("latitude") if last_ping else None,
+            "last_lng": last_ping.get("longitude") if last_ping else None,
+            "last_accuracy": last_ping.get("accuracy") if last_ping else None,
+            "last_distance_m": last_ping.get("distance_meters") if last_ping else None,
+            "is_on_site": bool(last_ping.get("is_on_site")) if (last_ping and is_today) else False,
+            "nearest_point": last_ping.get("nearest_point_name") if last_ping else None,
+            "page_source": last_ping.get("page_source") if last_ping else None,
+            "last_ping_time": last_ping.get("ping_time") if last_ping else None,
+        })
+
+    conn.close()
+    return results
+
+
+def get_supervisor_route_today(site_id, date_str=None):
+    """
+    Returns all location points for a supervisor on a given date to view their movement trail.
+    """
+    import datetime as dt
+    if not date_str:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        date_str = ist_now.strftime("%Y-%m-%d")
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM supervisor_location_logs
+        WHERE site_id = ? AND ping_date = ?
+        ORDER BY id ASC
+    """, (site_id, date_str))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
 
 
 

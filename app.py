@@ -1982,6 +1982,11 @@ def geo_attendance_admin():
     points_counts = database.get_geo_points_counts_by_site()
     site_points_map = {s["id"]: database.get_site_geo_points(s["id"]) for s in sites}
 
+    # Silent Supervisor Live Tracking (Only visible to Owner, never to supervisors)
+    supervisors_tracking = []
+    if is_owner or session.get("role") == "owner":
+        supervisors_tracking = database.get_supervisors_live_tracking_today(date_str)
+
     return render_template(
         "geo_attendance.html",
         rows=rows,
@@ -1994,7 +1999,8 @@ def geo_attendance_admin():
         left_w=left_w,
         absent_w=absent_w,
         points_counts=points_counts,
-        site_points_map=site_points_map
+        site_points_map=site_points_map,
+        supervisors_tracking=supervisors_tracking
     )
 
 
@@ -2159,6 +2165,23 @@ def geo_attendance_photo_checkin():
             )
             results.append({"worker_id": wid, **res})
 
+        # Silently record supervisor's live location ping during worker photo attendance
+        if lat and lng:
+            try:
+                sup_name = session.get("worker_name") or (site.get("supervisor") if site else "Supervisor")
+                sup_phone = session.get("worker_phone") or (site.get("contact") if site else "")
+                database.log_supervisor_silent_ping(
+                    site_id=site_id,
+                    supervisor_name=sup_name,
+                    phone=sup_phone,
+                    lat=lat,
+                    lng=lng,
+                    accuracy=accuracy,
+                    page_source=f"Photo Attendance ({check_type})"
+                )
+            except Exception:
+                pass
+
         action_hindi = "चेक-इन (आए)" if check_type == 'check_in' else "चेक-आउट (गए)"
         msg = f"✅ {len(target_wids)} वर्कर की फोटो उपस्थिति ({action_hindi}) GPS के साथ दर्ज हो गई!"
 
@@ -2173,6 +2196,116 @@ def geo_attendance_photo_checkin():
         return jsonify({"success": False, "message": f"फोटो हाजिरी दर्ज करने में त्रुटि: {str(e)}"}), 500
 
 
+# ==========================================
+# SILENT SUPERVISOR LOCATION TRACKING ROUTES
+# ==========================================
+
+@app.route("/api/supervisor/silent-ping", methods=["POST", "OPTIONS"])
+def api_supervisor_silent_ping():
+    """
+    Silent background GPS tracking ping for site supervisors & incharges.
+    Fires quietly in the background on any page visit without user interruption.
+    """
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        if not data and request.form:
+            data = request.form.to_dict()
+
+        site_id = data.get("site_id") or session.get("site_id")
+        if not site_id:
+            return jsonify({"success": False, "message": "No site"}), 200
+
+        site_id = int(site_id)
+        sup_name = data.get("supervisor_name") or session.get("worker_name") or ""
+        sup_phone = data.get("phone") or session.get("worker_phone") or ""
+        lat = data.get("latitude")
+        lng = data.get("longitude")
+        acc = data.get("accuracy", 0)
+        page = data.get("page", "background")
+
+        if lat and lng:
+            res = database.log_supervisor_silent_ping(
+                site_id=site_id,
+                supervisor_name=sup_name,
+                phone=sup_phone,
+                lat=lat,
+                lng=lng,
+                accuracy=acc,
+                page_source=page
+            )
+            return jsonify({"success": True, "data": res})
+        return jsonify({"success": False, "message": "No coordinates"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 200
+
+
+@app.route("/api/supervisor/live-tracking")
+def api_supervisor_live_tracking():
+    """Owner-only API for live supervisor GPS status across all sites."""
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    date_str = request.args.get("date")
+    data = database.get_supervisors_live_tracking_today(date_str)
+    return jsonify({"success": True, "supervisors": data})
+
+
+@app.route("/api/supervisor/route/<int:site_id>")
+def api_supervisor_route(site_id):
+    """Owner-only API for viewing today's movement trail for a supervisor."""
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    date_str = request.args.get("date")
+    data = database.get_supervisor_route_today(site_id, date_str)
+    return jsonify({"success": True, "route": data})
+
+
+@app.route("/api/workers/quick-add", methods=["POST", "OPTIONS"])
+def api_worker_quick_add():
+    """Quickly register a new worker by name, phone and role (Accessible to Supervisor & Owner)."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or request.form
+        site_id = int(data.get("site_id", 0) or session.get("site_id", 0))
+        name = str(data.get("name", "")).strip()
+        phone = str(data.get("phone", "")).strip()
+        role = str(data.get("role", "Helper")).strip()
+
+        if not site_id:
+            return jsonify({"success": False, "message": "कृपया साइट चुनें।"}), 400
+        if not name:
+            return jsonify({"success": False, "message": "वर्कर का नाम लिखना अनिवार्य है।"}), 400
+
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner"
+        user_site_id = session.get("site_id")
+        if not is_owner and user_site_id and int(user_site_id) != site_id:
+            return jsonify({"success": False, "message": "केवल अपनी साइट में वर्कर जोड़ सकते हैं।"}), 403
+
+        worker_id, token = database.add_worker(site_id, name, role, phone)
+        site = database.get_site_by_id(site_id)
+        return jsonify({
+            "success": True,
+            "message": f"✅ वर्कर '{name}' ({role}) सफलतापूर्वक जोड़ा गया!",
+            "worker": {
+                "id": worker_id,
+                "site_id": site_id,
+                "site_name": site["name"] if site else "Site",
+                "name": name,
+                "phone": phone,
+                "role": role,
+                "token": token
+            }
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": f"वर्कर जोड़ने में त्रुटि: {str(e)}"}), 500
+
+
 @app.route("/worker/<token>")
 def worker_tracking_page(token):
     """Worker's personal GPS tracking page — opened on their phone."""
@@ -2184,17 +2317,23 @@ def worker_tracking_page(token):
 
 @app.route("/api/workers", methods=["POST", "OPTIONS"])
 def add_worker_api():
-    """Admin: add a new worker to a site."""
+    """Add a new worker to a site (Owner or Supervisor of that site)."""
     if request.method == "OPTIONS":
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
-        if not is_owner:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक ही worker जोड़ सकते हैं।"}), 403
+        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808") or session.get("role") == "owner"
+        user_site_id = session.get("site_id")
+        is_sup = session.get("role") in ["supervisor", "site_incharge"] or (user_site_id and not is_owner)
+
+        if not is_owner and not is_sup:
+            return jsonify({"success": False, "message": "❌ केवल मालिक या सुपरवाइजर ही वर्कर जोड़ सकते हैं।"}), 403
 
         site_id = int(data.get("site_id", 0))
+        if is_sup and not is_owner and user_site_id:
+            site_id = int(user_site_id)
+
         name = data.get("name", "").strip()
         role = data.get("role", "Helper").strip()
         phone = data.get("phone", "").strip()
@@ -2209,7 +2348,7 @@ def add_worker_api():
             "worker_id": worker_id,
             "token": token,
             "worker_link": worker_link,
-            "message": f"✅ {name} ({role}) ko successfully add kar diya! Unhe yeh link bhejein."
+            "message": f"✅ {name} ({role}) ko successfully add kar diya!"
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
