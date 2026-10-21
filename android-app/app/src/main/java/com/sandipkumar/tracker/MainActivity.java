@@ -191,9 +191,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
 
         // 1:1 Pixel-Perfect Mobile Viewport Calibration:
-        // setUseWideViewPort(false) strictly locks webview to device-width meta tag
-        settings.setUseWideViewPort(false);
-        settings.setLoadWithOverviewMode(false);
+        // setUseWideViewPort(true) enables WebView to honor the HTML viewport meta tag
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
         settings.setTextZoom(100); // Prevents Android OS Accessibility font blowout
         settings.setSupportZoom(false); // Disables accidental pinch-to-zoom stretching
         settings.setBuiltInZoomControls(false);
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Hardware accelerated smooth native scrolling
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-        webView.setOverScrollMode(View.OVER_SCROLL_NEVER); // Prevents bounce & accidental pull reloads
+        webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
         webView.setVerticalScrollBarEnabled(true);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);

@@ -30,16 +30,17 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html, body {
+        html {
             overflow-x: hidden;
-            overscroll-behavior-y: none;
-            overscroll-behavior-x: none;
+            overflow-y: auto;
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
-            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
         body {
             min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: visible;
             font-family: 'Inter', sans-serif;
             -webkit-overflow-scrolling: touch;
         }
