@@ -566,7 +566,7 @@
                                     {% if w.photo_url %}
                                     <div class="inline-flex items-center gap-1.5">
                                         <div class="relative group cursor-pointer inline-block" onclick="viewPhotoLightbox('{{ w.photo_url }}', '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', '{{ site_data.site_name|replace("'", "\\'") }}', '{{ w.check_in_time or '' }}', '{{ w.last_lat or '' }}', '{{ w.last_lng or '' }}')">
-                                            <img src="{{ w.photo_url }}" class="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-xs group-hover:scale-105 transition" title="बड़ी फोटो देखें">
+                                            <img src="{{ w.photo_url }}" class="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-xs group-hover:scale-105 transition" title="बड़ी फोटो देखें" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('{{ w.worker_name }}') + '&background=1e293b&color=38bdf8&size=128&bold=true';">
                                             <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] border border-white">
                                                 <i class="fa-solid fa-check"></i>
                                             </span>

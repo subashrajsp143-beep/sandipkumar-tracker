@@ -268,7 +268,10 @@
             <div class="bg-slate-800/90 rounded-2xl border border-slate-700/80 overflow-hidden hover:border-amber-400 hover:shadow-xl transition group cursor-pointer"
                  onclick="viewAttendanceLightbox('{{ p.photo_url }}', '{{ p.worker_name|replace("'", "\\'") }}', '{{ p.role }}', '{{ p.site_name|replace("'", "\\'") }}', '{{ p.check_in_time or '' }}', '{{ p.last_lat or '' }}', '{{ p.last_lng or '' }}')">
                 <div class="relative aspect-square bg-slate-950 overflow-hidden">
-                    <img src="{{ p.photo_url }}" alt="{{ p.worker_name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" loading="lazy">
+                    <img src="{{ p.photo_url }}" alt="{{ p.worker_name }}" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-200" 
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('{{ p.worker_name }}') + '&background=1e293b&color=38bdf8&size=256&bold=true';">
                     <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-full bg-emerald-600/95 backdrop-blur-xs text-white text-[9px] font-black shadow flex items-center gap-1 border border-emerald-400/40">
                         <i class="fa-solid fa-check"></i> <span>उपस्थित</span>
                     </span>

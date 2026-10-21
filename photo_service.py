@@ -169,7 +169,7 @@ def process_and_save_attendance_photo(file_storage, worker_name, worker_role, si
     if img.mode != "RGB":
         img = img.convert("RGB")
 
-    max_dim = 1280
+    max_dim = 800
     if img.width > max_dim or img.height > max_dim:
         img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
 
@@ -197,7 +197,15 @@ def process_and_save_attendance_photo(file_storage, worker_name, worker_role, si
     draw_overlay.text((14, y_start + 40), line3, fill=(110, 231, 183, 255))
 
     img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
-    img.save(full_path, "WEBP", quality=80, method=6)
+    try:
+        img.save(full_path, "WEBP", quality=75, method=6)
+    except Exception:
+        pass
 
-    rel_url = f"/static/uploads/attendance/{year_month}/{filename}"
-    return rel_url
+    # Save as high-efficiency Base64 WebP Data URI so it persists permanently in database
+    # and NEVER breaks even on Render ephemeral disk restarts!
+    buf = io.BytesIO()
+    img.save(buf, format="WEBP", quality=75)
+    b64_str = base64.b64encode(buf.getvalue()).decode("utf-8")
+    data_url = f"data:image/webp;base64,{b64_str}"
+    return data_url
