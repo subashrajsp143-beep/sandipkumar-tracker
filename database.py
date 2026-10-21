@@ -204,6 +204,43 @@ def get_all_materials():
     conn.close()
     return materials
 
+def get_materials_sent_to_site(site_id):
+    """
+    Returns only the materials that have been dispatched (material_inward)
+    by the Owner to the specified site, along with total inward count and current balance stock.
+    """
+    if not site_id:
+        return []
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+    SELECT 
+        m.id, m.name, m.unit, m.rate, m.category, m.image_url,
+        COALESCE(i.total_inward, 0) as total_inward,
+        COALESCE(c.total_consumed, 0) as total_consumed,
+        (COALESCE(i.total_inward, 0) - COALESCE(c.total_consumed, 0)) as balance_stock,
+        i.last_inward_date
+    FROM materials m
+    INNER JOIN (
+        SELECT material_id, SUM(quantity) as total_inward, MAX(inward_date) as last_inward_date
+        FROM material_inward
+        WHERE site_id = ?
+        GROUP BY material_id
+        HAVING SUM(quantity) > 0
+    ) i ON m.id = i.material_id
+    LEFT JOIN (
+        SELECT material_id, SUM(quantity) as total_consumed
+        FROM daily_consumption
+        WHERE site_id = ?
+        GROUP BY material_id
+    ) c ON m.id = c.material_id
+    ORDER BY m.category ASC, m.name ASC
+    """
+    cursor.execute(query, (int(site_id), int(site_id)))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
 def get_material_by_id(material_id):
     conn = get_db()
     cursor = conn.cursor()

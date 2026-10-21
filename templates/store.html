@@ -23,12 +23,26 @@
                     <i class="fa-solid fa-boxes-stacked"></i> M/S SANDIP KUMAR - MATERIAL STORE
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2">
+                    {% if not is_owner and locked_site %}
+                    {{ locked_site.name }} - साइट मटेरियल स्टोर
+                    <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} प्राप्त सामग्री</span>
+                    {% elif is_owner and locked_site %}
+                    {{ locked_site.name }} - साइट मटेरियल स्टोर (भेजा गया माल)
+                    <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} सामग्री</span>
+                    {% else %}
                     M/S SANDIP KUMAR Material Catalog
-                    <span class="text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30 px-2.5 py-1 rounded-full font-medium">270+ Products</span>
+                    <span class="text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Products</span>
+                    {% endif %}
                 </h1>
+                {% if not is_owner and locked_site %}
+                <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
+                    इस स्टोर में केवल वही सामग्री दिखाई दे रही है जो <strong>मालिक (Owner) द्वारा आपकी साइट ({{ locked_site.name }}) पर भेजी गई है</strong>। यहाँ से आप लाइव बैलेंस देखकर साइट पर खर्च/इश्यू कर सकते हैं।
+                </p>
+                {% else %}
                 <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
                     Yahan se sabhi materials ki photo dekhkar <strong>"+ ADD"</strong> karke kisi bhi site par ek sath issue (entry) kar sakte hain. Online photo badalne ki suvidha bhi upalabdh hai!
                 </p>
+                {% endif %}
             </div>
 
             <!-- Quick Cart Widget in Header -->
@@ -48,6 +62,31 @@
                 </button>
             </div>
         </div>
+
+        {% if is_owner %}
+        <!-- Owner Site Filter Dropdown -->
+        <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs relative z-10">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-filter text-amber-400"></i>
+                <span class="font-bold text-white">साइट के अनुसार भेजा गया माल देखें:</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <select onchange="window.location.href = this.value ? '/store?site_id=' + this.value : '/store'" class="px-3 py-1.5 rounded-xl bg-white text-slate-800 font-bold text-xs border border-slate-300 shadow-sm">
+                    <option value="" {% if not site_filter_id %}selected{% endif %}>⚡ सभी 270+ सामग्री (कंपनी कैटलॉग)</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if site_filter_id|string == s.id|string %}selected{% endif %}>
+                        📍 {{ s.code }} - {{ s.name }} (भेजा गया माल)
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if site_filter_id %}
+                <a href="/store" class="px-2.5 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition flex items-center gap-1">
+                    <i class="fa-solid fa-xmark"></i> फ़िल्टर हटाएं
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Search & Filter Controls -->
@@ -61,7 +100,13 @@
 
             <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                 <span class="text-xs text-slate-500 font-medium">
+                    {% if not is_owner and locked_site %}
+                    साइट पर प्राप्त सामग्री: <strong id="visibleProductsCount" class="text-emerald-600 font-mono font-bold">{{ materials|length }}</strong>
+                    {% elif is_owner and locked_site %}
+                    साइट ({{ locked_site.code }}) भेजा गया माल: <strong id="visibleProductsCount" class="text-emerald-600 font-mono font-bold">{{ materials|length }}</strong>
+                    {% else %}
                     Dikhaye ja rahe hain: <strong id="visibleProductsCount" class="text-blue-600 font-mono font-bold">{{ materials|length }}</strong> Materials
+                    {% endif %}
                 </span>
                 <button onclick="clearSearch()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 underline">
                     Clear Filter
@@ -88,10 +133,13 @@
         <div class="product-card bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-blue-300 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
              data-id="{{ m.id }}"
              data-name="{{ m.name|lower }}"
+             data-title="{{ m.name }}"
              data-category="{{ m.category }}"
              data-unit="{{ m.unit }}"
              data-rate="{{ m.rate }}"
-             data-img="{{ m.image_url or '' }}">
+             data-img="{{ m.image_url or '' }}"
+             data-inward="{{ m.total_inward if m.total_inward is defined else '' }}"
+             data-balance="{{ m.balance_stock if m.balance_stock is defined else '' }}">
             
             <!-- Product Image Container -->
             <div class="relative bg-slate-100 aspect-[4/3] overflow-hidden flex items-center justify-center">
@@ -132,6 +180,32 @@
                     <h3 class="text-sm font-bold text-slate-800 line-clamp-2 leading-snug" title="{{ m.name }}">
                         {{ m.name }}
                     </h3>
+
+                    <!-- Inward & Balance Stock Info (Sent by Owner) -->
+                    {% if m.total_inward is defined and m.total_inward is not none %}
+                    <div class="mt-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] space-y-1">
+                        <div class="flex items-center justify-between text-slate-600">
+                            <span class="flex items-center gap-1 font-medium">
+                                <i class="fa-solid fa-truck-ramp-box text-blue-600"></i> भेजा गया माल:
+                            </span>
+                            <span class="font-bold font-mono text-slate-900">{{ m.total_inward }} {{ m.unit }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1 font-medium text-slate-600">
+                                <i class="fa-solid fa-boxes-stacked text-teal-600"></i> साइट बैलेंस:
+                            </span>
+                            {% if m.balance_stock <= 0 %}
+                            <span class="font-black font-mono text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 text-[10px]">
+                                0 {{ m.unit }} (खत्म)
+                            </span>
+                            {% else %}
+                            <span class="font-black font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">
+                                {{ m.balance_stock }} {{ m.unit }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Price & Add Section -->
@@ -162,6 +236,36 @@
 
         </div>
         {% endfor %}
+
+        <!-- Empty State if no materials found/sent -->
+        {% if materials|length == 0 %}
+        <div class="col-span-full py-14 px-6 text-center bg-white rounded-3xl border border-slate-200 shadow-sm my-4">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl shadow-inner">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800">आपकी साइट पर अभी तक कोई माल नहीं भेजा गया है</h3>
+            <p class="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto mt-2 leading-relaxed">
+                {% if locked_site %}
+                साइट <strong>"{{ locked_site.name }}" ({{ locked_site.code }})</strong> के लिए मालिक (Owner) द्वारा अभी तक कोई सामग्री चालान/इनवर्ड दर्ज नहीं किया गया है।
+                {% else %}
+                आपकी साइट के लिए मालिक (Owner) द्वारा अभी तक कोई सामग्री चालान/इनवर्ड दर्ज नहीं किया गया है।
+                {% endif %}
+                <br>जैसे ही मालिक द्वारा आपकी साइट के नाम माल (Material Inward) भेजा जाएगा, वह तुरंत यहाँ उपलब्ध बैलेंस स्टॉक और फोटो के साथ दिखने लगेगा।
+            </p>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <a href="{{ url_for('site_stock') }}" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>साइट स्टॉक स्थिति देखें</span>
+                </a>
+                {% if is_owner %}
+                <a href="/stock?tab=inward" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>इस साइट पर माल भेजें (+ Inward)</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- No results message -->
@@ -531,7 +635,7 @@
         } else {
             const card = document.querySelector(`.product-card[data-id="${id}"]`);
             if (card) {
-                const name = card.dataset.name;
+                const name = card.dataset.title || card.dataset.name;
                 const rate = parseFloat(card.dataset.rate) || 0;
                 const unit = card.dataset.unit || 'NOS';
                 const img = card.dataset.img || '';
@@ -780,7 +884,7 @@
 
         document.getElementById('visibleProductsCount').textContent = count;
         const noResults = document.getElementById('noStoreResults');
-        if (count === 0) {
+        if (cards.length > 0 && count === 0) {
             noResults.classList.remove('hidden');
         } else {
             noResults.classList.add('hidden');

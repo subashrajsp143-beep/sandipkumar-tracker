@@ -322,8 +322,14 @@ def daily_entry():
         user_site_id = int(user_site_id)
         locked_site = database.get_site_by_id(user_site_id)
         sites = [s for s in sites if s["id"] == user_site_id]
+        site_sent = database.get_materials_sent_to_site(user_site_id)
+        if site_sent and len(site_sent) > 0:
+            materials = site_sent
+        else:
+            materials = database.get_all_materials()
+    else:
+        materials = database.get_all_materials()
 
-    materials = database.get_all_materials()
     if not is_owner:
         # Strict Price Shield: Zero out rates so they never leak to supervisors/DEO via JSON or DOM
         sanitized_materials = []
@@ -602,21 +608,41 @@ def material_store():
     is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
 
+    # If owner passed a site_id query param to preview a site's store
+    site_filter_id = request.args.get("site_id")
+
     sites = database.get_all_sites()
     locked_site = None
-    if not is_owner and user_site_id:
-        user_site_id = int(user_site_id)
-        locked_site = database.get_site_by_id(user_site_id)
-        sites = [s for s in sites if s["id"] == user_site_id]
 
-    materials = database.get_all_materials()
     if not is_owner:
+        # Supervisors ONLY see materials dispatched to their assigned site by the Owner
+        if user_site_id:
+            user_site_id = int(user_site_id)
+            locked_site = database.get_site_by_id(user_site_id)
+            sites = [s for s in sites if s["id"] == user_site_id]
+            materials = database.get_materials_sent_to_site(user_site_id)
+        else:
+            sites = []
+            materials = []
+
+        # Strict Price Shield: Zero out rates so they never leak to supervisors
         sanitized_materials = []
         for m in materials:
             mc = dict(m)
             mc["rate"] = 0
             sanitized_materials.append(mc)
         materials = sanitized_materials
+    elif is_owner and site_filter_id:
+        # Owner can filter by a specific site to see what was dispatched to that site
+        try:
+            site_filter_id = int(site_filter_id)
+            locked_site = database.get_site_by_id(site_filter_id)
+            materials = database.get_materials_sent_to_site(site_filter_id)
+        except Exception:
+            materials = database.get_all_materials()
+    else:
+        # Owner full view: 270+ catalog items
+        materials = database.get_all_materials()
 
     today_str = datetime.date.today().strftime("%Y-%m-%d")
     categories = sorted(list(set(m["category"] for m in materials if m.get("category"))))
@@ -626,9 +652,10 @@ def material_store():
         materials=materials, 
         categories=categories, 
         today=today_str,
-        locked_site_id=user_site_id if not is_owner else None,
+        locked_site_id=user_site_id if not is_owner else (site_filter_id if site_filter_id else None),
         locked_site=locked_site,
-        is_owner=is_owner
+        is_owner=is_owner,
+        site_filter_id=site_filter_id
     )
 
 def process_and_save_photo(url_or_path, material_id):
