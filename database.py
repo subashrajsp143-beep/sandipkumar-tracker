@@ -9,6 +9,13 @@ import time
 from functools import wraps
 from data_seed import INITIAL_SITES, get_unique_materials
 
+def _notify_cloud_backup():
+    try:
+        import github_sync
+        github_sync.trigger_cloud_backup_async()
+    except Exception:
+        pass
+
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
 
 def db_retry(max_retries=6, delay=0.25):
@@ -817,6 +824,7 @@ def save_daily_manpower(att_date, rows_data, updated_by=""):
 
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return True
 
 
@@ -1429,6 +1437,7 @@ def add_worker(site_id, name, role, phone=""):
     worker_id = cursor.lastrowid
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return worker_id, token
 
 
@@ -1522,6 +1531,7 @@ def delete_worker(worker_id):
     cursor.execute("UPDATE site_workers SET is_active = 0 WHERE id = ?", (worker_id,))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
 
 def reset_today_attendance(date_str, site_id=None):
     """
@@ -1551,6 +1561,7 @@ def reset_all_workers(site_id=None):
         cursor.execute("UPDATE site_workers SET is_active = 0")
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return True
 
 
@@ -2193,6 +2204,8 @@ def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_da
         conn.commit()
     finally:
         conn.close()
+
+    _notify_cloud_backup()
 
     return {
         "success": True,
