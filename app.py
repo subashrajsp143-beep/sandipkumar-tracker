@@ -2032,13 +2032,16 @@ def geo_attendance_admin():
         sites = [s for s in sites if s["id"] == user_site_id]
         workers = [w for w in workers if w["site_id"] == user_site_id]
 
-    # Group rows by site for display
+    # Group rows by site for display - initialize all sites so any site can be selected and viewed
     by_site = {}
+    for s in sites:
+        by_site[s["id"]] = {"site_name": s["name"], "site_code": s["code"], "workers": []}
     for r in rows:
         sid = r["site_id"]
-        if sid not in by_site:
-            by_site[sid] = {"site_name": r["site_name"], "site_code": r["site_code"], "workers": []}
-        by_site[sid]["workers"].append(r)
+        if sid in by_site:
+            by_site[sid]["workers"].append(r)
+        else:
+            by_site[sid] = {"site_name": r["site_name"], "site_code": r["site_code"], "workers": [r]}
 
     # Summary counts
     total_w = len(rows)

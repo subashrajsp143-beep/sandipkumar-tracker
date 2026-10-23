@@ -452,7 +452,8 @@
                 <div class="flex items-center gap-2">
                     {% if session.get('is_owner') and sites|length > 1 %}
                     <label class="text-xs text-indigo-300 font-bold">साइट:</label>
-                    <select id="supervisorSitePicker" onchange="switchSupervisorSiteView(this.value)" class="bg-indigo-950 text-white border border-indigo-600 rounded-xl px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-amber-400">
+                    <select id="supervisorSitePicker" onchange="switchSupervisorSiteView(this.value); filterAttendanceBySite(this.value);" class="bg-indigo-950 text-white border border-indigo-600 rounded-xl px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-amber-400">
+                        <option value="all">🌟 सभी साइट्स (All Sites)</option>
                         {% for s in sites %}
                         <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                         {% endfor %}
@@ -486,10 +487,22 @@
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5">तारीख: <strong>{{ date_str }}</strong> — हर 30 सेकंड में ऑटो-रिफ्रेश</p>
             </div>
-            <button onclick="refreshData()" class="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-rotate text-indigo-600" id="refreshIcon"></i>
-                <span>अभी ताज़ा करें</span>
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-1.5 bg-indigo-50 border-2 border-indigo-500 rounded-xl px-3 py-1.5 shadow-sm">
+                    <i class="fa-solid fa-filter text-indigo-600 text-xs"></i>
+                    <span class="text-xs font-black text-indigo-950">साइट चुनें:</span>
+                    <select id="attendanceTableSiteFilter" onchange="filterAttendanceBySite(this.value)" class="bg-transparent text-indigo-950 font-black text-xs sm:text-sm focus:outline-none cursor-pointer">
+                        <option value="all">🌟 सभी साइट्स (All Sites)</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button onclick="refreshData()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate text-indigo-600" id="refreshIcon"></i>
+                    <span>अभी ताज़ा करें</span>
+                </button>
+            </div>
         </div>
 
         {% if not by_site %}
@@ -509,7 +522,7 @@
 
         <div class="space-y-6 mt-6">
             {% for site_id, site_data in by_site.items() %}
-            <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs transition-all duration-200" id="site-card-{{ site_id }}" data-site-card="{{ site_id }}">
                 <!-- Site Bar -->
                 <div class="bg-gradient-to-r from-slate-100 to-indigo-50/50 px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
@@ -740,6 +753,21 @@
                                 </td>
                             </tr>
                             {% endfor %}
+                            {% if site_data.workers|length == 0 %}
+                            <tr>
+                                <td colspan="9" class="text-center py-10 px-4 text-slate-400">
+                                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-2 text-xl">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-700">इस साइट ({{ site_data.site_name }}) पर अभी कोई वर्कर नहीं जुड़ा है।</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">मिस्त्री, प्लंबर व हेल्पर जोड़ने के लिए नीचे दिया गया बटन दबाएं।</p>
+                                    <button type="button" onclick="openAddWorkerModalForSite({{ site_id }})" class="mt-3 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs shadow-md transition inline-flex items-center gap-1.5 active:scale-95">
+                                        <i class="fa-solid fa-user-plus"></i>
+                                        <span>+ {{ site_data.site_name }} में वर्कर जोड़ें</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
@@ -1860,10 +1888,53 @@
     }
 
     function switchSupervisorSiteView(siteId) {
+        if (siteId === 'all') return;
         currentSelectedSiteId = parseInt(siteId);
         const sel = document.getElementById('multiGpsSiteSelect');
         if (sel) sel.value = siteId;
         loadSiteGeoPoints(siteId);
+    }
+
+    function filterAttendanceBySite(siteId) {
+        // Sync both dropdowns
+        const topPicker = document.getElementById('supervisorSitePicker');
+        const tableFilter = document.getElementById('attendanceTableSiteFilter');
+        if (topPicker && topPicker.value !== String(siteId)) topPicker.value = siteId;
+        if (tableFilter && tableFilter.value !== String(siteId)) tableFilter.value = siteId;
+
+        const cards = document.querySelectorAll('[data-site-card]');
+        if (!cards || cards.length === 0) return;
+
+        if (siteId === 'all' || !siteId) {
+            cards.forEach(card => card.classList.remove('hidden'));
+        } else {
+            let matchedCard = null;
+            cards.forEach(card => {
+                const cardSiteId = card.getAttribute('data-site-card');
+                if (String(cardSiteId) === String(siteId)) {
+                    card.classList.remove('hidden');
+                    matchedCard = card;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            if (matchedCard) {
+                matchedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        if (siteId !== 'all') {
+            currentSelectedSiteId = parseInt(siteId);
+            const multiSel = document.getElementById('multiGpsSiteSelect');
+            if (multiSel) multiSel.value = siteId;
+            if (typeof loadSiteGeoPoints === 'function') loadSiteGeoPoints(siteId);
+        }
+    }
+
+    function openAddWorkerModalForSite(siteId) {
+        openAddWorkerModal();
+        const sel = document.getElementById('newWorkerSite');
+        if (sel && siteId) sel.value = siteId;
     }
 
     // Multi-Point GPS Modal Controls
