@@ -30,6 +30,26 @@
 
 <div class="space-y-6">
 
+    <!-- Dual Attendance Mode Switcher Header -->
+    <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-clipboard-list text-amber-300"></i>
+                <span>1. 📝 मैन्युअल हाजिरी (21 साइट्स शीट)</span>
+            </span>
+            <a href="/geo-attendance" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-200 transition">
+                <i class="fa-solid fa-satellite-dish text-violet-600"></i>
+                <span>2. 📍 GPS हाजिरी (ट्रायल मोड) ↗</span>
+            </a>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span>मुख्य हाजिरी सक्रिय है (सुरक्षित)</span>
+            </span>
+        </div>
+    </div>
+
     <!-- Top Action Bar -->
     <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -77,6 +97,13 @@
 
             <button type="button" onclick="saveAllManpower()" id="saveAllBtn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
                 <i class="fa-solid fa-floppy-disk"></i> <span>हाजिरी सेव करें</span>
+            </button>
+
+            <button type="button" onclick="copyFromLatestSavedDate()" id="copyLatestBtn" 
+                    class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-black shadow-sm transition flex items-center gap-1.5" 
+                    title="पिछली तारीख (जैसे 11/10/2026) का हाजिरी डेटा आज की शीट में लाएं">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                <span>📋 पिछली हाजिरी से भरें</span>
             </button>
 
             <!-- 1 PAGE PDF DOWNLOAD BUTTON -->
@@ -606,6 +633,46 @@ function setQuickRemark(text) {
 }
 
 // Save all rows to server
+async function copyFromLatestSavedDate() {
+    const btn = document.getElementById('copyLatestBtn');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ला रहे हैं...';
+    try {
+        const res = await fetch('/api/attendance/latest-data');
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.message || 'कोई पिछला रिकॉर्ड नहीं मिला');
+            return;
+        }
+        if (!confirm(`क्या आप पिछली तारीख (${data.latest_date}) का हाजिरी डेटा (कुल ${data.totals.total} वर्कर) आज की शीट में भरना चाहते हैं?`)) {
+            return;
+        }
+        
+        const rows = data.rows || [];
+        rows.forEach(r => {
+            const tr = document.querySelector(`.site-row[data-site-id="${r.site_id}"]`);
+            if (tr) {
+                const roles = ['site_incharge', 'supervisor', 'electrician', 'gi_mistri', 'deo', 'plumber', 'helper', 'other'];
+                roles.forEach(role => {
+                    const inp = tr.querySelector(`input[data-role="${role}"]`);
+                    if (inp) {
+                        inp.value = r[role] > 0 ? r[role] : '';
+                    }
+                });
+                const rem = tr.querySelector('.inp-remarks');
+                if (rem && r.remarks) rem.value = r.remarks;
+                const firstInp = tr.querySelector('.inp-count');
+                if (firstInp) recalcRow(firstInp);
+            }
+        });
+        recalcAllTotals();
+        alert(`✅ तारीख ${data.latest_date} का डेटा सफलतापूर्वक भर दिया गया है! अब 'हाजिरी सेव करें' बटन दबाएं।`);
+    } catch (e) {
+        alert('डेटा लाने में त्रुटि: ' + e);
+    } finally {
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-clock-rotate-left text-amber-600"></i> <span>📋 पिछली हाजिरी से भरें</span>';
+    }
+}
+
 async function saveAllManpower() {
     const saveBtn = document.getElementById('saveAllBtn');
     const attDate = document.getElementById('attDateInput').value;

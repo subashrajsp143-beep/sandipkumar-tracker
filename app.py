@@ -1377,11 +1377,8 @@ def attendance_view():
         ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
         selected_date = ist_now.strftime("%Y-%m-%d")
 
-    # Auto-sync verified GPS/photo attendance pings to manpower sheet
-    try:
-        database.auto_sync_gps_to_manpower(selected_date)
-    except Exception:
-        pass
+    # Manual Attendance View: Preserves manual entries.
+    # Note: GPS auto-sync only runs when user explicitly clicks 'GPS ऑटो-फेच' button.
 
     rows, totals = database.get_daily_manpower(selected_date)
 
@@ -2483,6 +2480,48 @@ def reset_all_workers_api():
         return jsonify({"success": True, "message": "✅ वर्कर सूची सफलतापूर्वक रीसेट हो गई!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/attendance/latest-data")
+def api_attendance_latest_data():
+    """Returns the most recent saved daily manpower attendance rows to pre-fill or restore."""
+    date_req = request.args.get("date")
+    conn = database.get_db()
+    cur = conn.cursor()
+    if date_req:
+        latest_date = date_req
+    else:
+        # Prefer the most recent comprehensive register (with total > 5 or multiple sites)
+        cur.execute("""
+            SELECT att_date, count(*) as c_cnt, sum(total) as s_tot 
+            FROM daily_manpower 
+            GROUP BY att_date 
+            HAVING s_tot > 5 
+            ORDER BY att_date DESC LIMIT 1
+        """)
+        row = cur.fetchone()
+        if not row:
+            cur.execute("""
+                SELECT att_date, count(*) as c_cnt, sum(total) as s_tot 
+                FROM daily_manpower 
+                GROUP BY att_date 
+                HAVING s_tot > 0 
+                ORDER BY att_date DESC LIMIT 1
+            """)
+            row = cur.fetchone()
+        if not row:
+            conn.close()
+            return jsonify({"success": False, "message": "कोई पिछला रिकॉर्ड नहीं मिला"})
+        latest_date = row["att_date"]
+
+    rows, totals = database.get_daily_manpower(latest_date)
+    conn.close()
+    return jsonify({
+        "success": True,
+        "latest_date": latest_date,
+        "rows": rows,
+        "totals": totals
+    })
 
 
 @app.route("/api/attendance/auto-checkout", methods=["POST", "GET", "OPTIONS"])

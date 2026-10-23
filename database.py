@@ -1525,17 +1525,15 @@ def delete_worker(worker_id):
 
 def reset_today_attendance(date_str, site_id=None):
     """
-    Resets attendance records for the given date.
-    Clears geo_attendance and daily_manpower for that date.
+    Resets GPS trial attendance records for the given date.
+    Clears ONLY geo_attendance (preserves official manual daily_manpower sheet).
     """
     conn = get_db()
     cursor = conn.cursor()
     if site_id:
         cursor.execute("DELETE FROM geo_attendance WHERE att_date = ? AND site_id = ?", (date_str, site_id))
-        cursor.execute("DELETE FROM daily_manpower WHERE att_date = ? AND site_id = ?", (date_str, site_id))
     else:
         cursor.execute("DELETE FROM geo_attendance WHERE att_date = ?", (date_str,))
-        cursor.execute("DELETE FROM daily_manpower WHERE att_date = ?", (date_str,))
     conn.commit()
     conn.close()
     return True

@@ -178,14 +178,14 @@
                         <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>साइट स्टॉक</span>
                     </a>
 
-                    <!-- 4. Attendance -->
-                    <a href="{{ url_for('attendance_view') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-users-gear text-xs"></i> <span>हाजिरी</span>
+                    <!-- 4. Manual Attendance -->
+                    <a href="{{ url_for('attendance_view') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition flex items-center gap-1.5" title="21 साइट्स मैन्युअल हाजिरी शीट (मुख्य रजिस्टर)">
+                        <i class="fa-solid fa-clipboard-list text-amber-300 text-xs"></i> <span>📝 मैन्युअल हाजिरी</span>
                     </a>
 
-                    <!-- 4.1 GPS 500m Auto Attendance -->
-                    <a href="/geo-attendance" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-md border border-violet-400/40 transition flex items-center gap-1.5" title="GPS 500m ऑटोमैटिक हाजिरी व कार्य घंटे">
-                        <i class="fa-solid fa-satellite-dish text-amber-300 text-xs"></i> <span>GPS हाजिरी</span>
+                    <!-- 4.1 GPS Trial Attendance -->
+                    <a href="/geo-attendance" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-md border border-violet-400/40 transition flex items-center gap-1.5" title="GPS ऑटोमैटिक हाजिरी व कार्य घंटे (ट्रायल मोड)">
+                        <i class="fa-solid fa-satellite-dish text-amber-300 text-xs"></i> <span>📍 GPS हाजिरी (ट्रायल)</span>
                     </a>
 
                     <!-- 4.2 DPR Physical Progress (Pipeline, FHTC) -->
@@ -323,10 +323,10 @@
                     <i class="fa-solid fa-boxes-stacked w-4"></i> <span>साइट स्टॉक व बैलेंस (Site Stock)</span>
                 </a>
                 <a href="{{ url_for('attendance_view') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-users-gear w-4"></i> <span>दैनिक हाजिरी (Attendance)</span>
+                    <i class="fa-solid fa-clipboard-list text-amber-300 w-4"></i> <span>📝 1. मैन्युअल हाजिरी (21 साइट्स शीट)</span>
                 </a>
                 <a href="/geo-attendance" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 text-white border border-violet-400/50 shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-satellite-dish text-amber-300 w-4"></i> <span>GPS 500m हाजिरी मॉनिटर</span>
+                    <i class="fa-solid fa-satellite-dish text-amber-300 w-4"></i> <span>📍 2. GPS हाजिरी (ट्रायल मोड)</span>
                 </a>
                 <a href="/dpr" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-sky-700 text-white border border-sky-500/50 shadow flex items-center gap-2.5">
                     <i class="fa-solid fa-faucet-drip text-amber-300 w-4"></i> <span>DPR कार्य प्रगति (पाइपलाइन, नल)</span>
@@ -434,7 +434,7 @@
             <a href="{{ url_for('attendance_view') }}" 
                class="flex flex-col items-center justify-center -mt-4 group active:scale-95 transition">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-xl border-2 border-amber-400 group-hover:scale-105 transition">
-                    <i class="fa-solid fa-camera"></i>
+                    <i class="fa-solid fa-clipboard-user"></i>
                 </div>
                 <span class="text-[10px] font-black text-amber-300 mt-0.5">हाजिरी</span>
             </a>
