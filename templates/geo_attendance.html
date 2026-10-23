@@ -5,102 +5,119 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Dual Attendance Mode Switcher Header -->
+    <!-- Dual Attendance Mode Switcher Header (Same Clean Design) -->
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <a href="/attendance" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-200 transition">
                 <i class="fa-solid fa-clipboard-list text-indigo-600"></i>
                 <span>1. 📝 मैन्युअल हाजिरी (21 साइट्स शीट) ↗</span>
             </a>
-            <span class="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+            <span class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-satellite-dish text-amber-300"></i>
-                <span>2. 📍 GPS हाजिरी (ट्रायल मोड)</span>
+                <span>2. 📍 GPS हाजिरी (जियो-लोकेशन)</span>
             </span>
         </div>
         <div class="flex items-center gap-2">
-            <span class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1.5 shadow-xs">
-                <i class="fa-solid fa-flask-vial text-amber-600 text-sm"></i>
-                <span>🧪 GPS हाजिरी अभी ट्रायल (Trial) में है — मुख्य डेटा 'मैन्युअल हाजिरी' में सुरक्षित है</span>
+            <span class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold text-xs flex items-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
+                <span>GPS हाजिरी रजिस्टर सक्रिय है</span>
             </span>
         </div>
     </div>
 
-    <!-- Top Header Banner -->
-    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-800/40 relative overflow-hidden">
-        <div class="absolute -right-12 -top-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 mb-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>500M ऑटोमैटिक GPS जियो-फेंस ट्रैकिंग</span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                    <i class="fa-solid fa-satellite-dish text-amber-400"></i>
-                    <span>GPS लाइव हाजिरी व कार्य घंटे मॉनिटर</span>
-                </h1>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-                    वर्कर जैसे ही साइट के 500 मीटर के दायरे में पहुंचेंगे, उनकी हाजिरी स्वतः मार्क हो जाएगी। कितने घंटे रहे और कब निकले, सब लाइव देखें।
-                </p>
+    <!-- Top Action Bar (Matching Manual Attendance Design) -->
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase">GPS Geo Register</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites GPS</span>
             </div>
+            <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
+                <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
+                <span>GPS Live Attendance (दैनिक GPS हाजिरी व समय)</span>
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                साइट के 500m दायरे में लाइव GPS हाजिरी, कार्य समय व फोटो मॉनिटर
+            </p>
+        </div>
 
-            <!-- Date Selector & Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2">
+        <!-- Controls: Date Picker & Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2.5 no-print">
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
+                <i class="fa-solid fa-calendar-days text-slate-400 text-xs"></i>
+                <label for="dateSelector" class="text-xs font-bold text-slate-700">तारीख:</label>
                 <input type="date" id="dateSelector" value="{{ date_str }}" 
                        onchange="window.location.href='/geo-attendance?date=' + this.value"
-                       class="px-3 py-2 rounded-xl bg-slate-800/90 text-white border border-slate-700 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-indigo-400">
+                       class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
+            </div>
 
-                <button onclick="openAddWorkerModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>+ नया वर्कर</span>
-                </button>
+            <button onclick="openAddWorkerModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>+ नया वर्कर</span>
+            </button>
 
-                <button onclick="openMultiGpsModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-draw-polygon"></i>
-                    <span>📍 आज का कार्य स्थल व वार्ड (1 KM दायरा)</span>
-                </button>
+            <button onclick="openMultiGpsModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 border border-violet-400/40 cursor-pointer">
+                <i class="fa-solid fa-draw-polygon"></i>
+                <span>📍 कार्य स्थल व वार्ड</span>
+            </button>
 
-                <button onclick="openSiteGpsModal()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                    <span>केंद्र GPS</span>
-                </button>
+            <button onclick="openSiteGpsModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>केंद्र GPS</span>
+            </button>
 
-                {% if session.get('is_owner') or user_role == 'owner' %}
-                <button onclick="handleResetSiteAttendance(null, 'सभी 21 साइट्स')" class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5" title="आज की पूरी हाजिरी रीसेट करें">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>आज की हाजिरी रीसेट</span>
-                </button>
-                {% endif %}
+            {% if session.get('is_owner') or user_role == 'owner' %}
+            <button onclick="handleResetSiteAttendance(null, 'सभी 21 साइट्स')" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer" title="आज की पूरी GPS हाजिरी रीसेट करें">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>हाजिरी रीसेट</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 4 KPI Summary Cards (Identical clean white design to Manual Attendance) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल पंजीकृत वर्कर</span>
+                <p class="text-2xl font-black text-slate-900 mt-1">{{ total_w }} लोग</p>
+                <span class="text-[11px] text-slate-500 font-semibold block mt-0.5">सभी 21 साइट्स मिलाकर</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-users"></i>
             </div>
         </div>
 
-        <!-- 4 Metric Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6">
-            <div class="bg-slate-800/60 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
-                <div class="text-[11px] font-bold uppercase text-slate-400">कुल पंजीकृत वर्कर</div>
-                <div class="text-2xl sm:text-3xl font-black text-white mt-1">{{ total_w }}</div>
-                <div class="text-[11px] text-slate-400 mt-1">सभी साइट्स मिलाकर</div>
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">साइट पर मौजूद</span>
+                <p class="text-2xl font-black text-emerald-600 mt-1">{{ present_w }} वर्कर</p>
+                <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">🟢 On-Site (दायरे में)</span>
             </div>
-
-            <div class="bg-emerald-950/40 backdrop-blur rounded-2xl p-4 border border-emerald-500/30">
-                <div class="text-[11px] font-bold uppercase text-emerald-300 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                    साइट पर मौजूद (Present)
-                </div>
-                <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">{{ present_w }}</div>
-                <div class="text-[11px] text-emerald-300/80 mt-1">अभी 1 KM (1000m) दायरे के अंदर हैं</div>
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-user-check"></i>
             </div>
+        </div>
 
-            <div class="bg-amber-950/40 backdrop-blur rounded-2xl p-4 border border-amber-500/30">
-                <div class="text-[11px] font-bold uppercase text-amber-300">काम पूरा करके निकले (Left)</div>
-                <div class="text-2xl sm:text-3xl font-black text-amber-400 mt-1">{{ left_w }}</div>
-                <div class="text-[11px] text-amber-300/80 mt-1">चेक-आउट दर्ज हो चुका है</div>
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">काम पूरा / चेक-आउट</span>
+                <p class="text-2xl font-black text-amber-600 mt-1">{{ left_w }} वर्कर</p>
+                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">🚶 Checked Out (निकल चुके)</span>
             </div>
+            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-person-walking-arrow-right"></i>
+            </div>
+        </div>
 
-            <div class="bg-rose-950/40 backdrop-blur rounded-2xl p-4 border border-rose-500/30">
-                <div class="text-[11px] font-bold uppercase text-rose-300">साइट पर नहीं पहुंचे</div>
-                <div class="text-2xl sm:text-3xl font-black text-rose-400 mt-1">{{ absent_w }}</div>
-                <div class="text-[11px] text-rose-300/80 mt-1">आज कोई सिग्नल नहीं</div>
+        <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">अनुपस्थित / नहीं पहुंचे</span>
+                <p class="text-2xl font-black text-rose-600 mt-1">{{ absent_w }} वर्कर</p>
+                <span class="text-[11px] text-rose-500 font-semibold block mt-0.5">⚪ No Signal / Absent</span>
+            </div>
+            <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-user-xmark"></i>
             </div>
         </div>
     </div>
@@ -498,7 +515,15 @@
 
 
     <!-- Live Attendance Table by Site -->
-    <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 sm:p-7">
+        
+        <!-- Big Red Date Header matching manual register -->
+        <div class="py-3 px-6 -mx-5 sm:-mx-7 -mt-5 sm:-mt-7 bg-slate-50 border-b border-slate-200 text-center mb-5">
+            <h2 class="text-xl sm:text-2xl font-black text-rose-600 tracking-wider">
+                DATE {{ date_str }} — GPS ATTENDANCE REGISTER
+            </h2>
+        </div>
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
             <div>
                 <h2 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
