@@ -486,6 +486,10 @@
                     <span>साइट अनुसार वर्कर हाजिरी व समय (Working Hours)</span>
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5">तारीख: <strong>{{ date_str }}</strong> — हर 30 सेकंड में ऑटो-रिफ्रेश</p>
+                <p class="text-[11px] text-amber-700 font-bold mt-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                    <span>⚡ ऑटो चेक-आउट: शाम 5:00 बजे के बाद जैसे ही वर्कर साइट से बाहर निकलेंगे, सिस्टम स्वतः चेक-आउट दर्ज कर लेगा।</span>
+                </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <div class="flex items-center gap-1.5 bg-indigo-50 border-2 border-indigo-500 rounded-xl px-3 py-1.5 shadow-sm">
@@ -665,9 +669,12 @@
                                 <!-- Check-out -->
                                 <td class="py-3 px-3 font-semibold text-slate-800">
                                     {% if w.check_out_time %}
-                                    <span class="text-amber-700 font-bold">{{ w.check_out_time.split(' ')[1][:5] }}</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-amber-700 font-black text-sm">{{ w.check_out_time.split(' ')[1][:5] }}</span>
+                                        <span class="text-[10px] text-slate-400 font-semibold">चेक-आउट</span>
+                                    </div>
                                     {% elif w.att_status == 'present' %}
-                                    <span class="text-emerald-600 text-xs italic">काम जारी...</span>
+                                    <span class="text-emerald-600 text-xs italic font-bold">काम जारी...</span>
                                     {% else %}
                                     <span class="text-slate-400">—</span>
                                     {% endif %}

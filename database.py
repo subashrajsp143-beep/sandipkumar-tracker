@@ -1947,18 +1947,25 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=
             """, (now_str, worker_id, today))
             action = "checked_in"
         elif not is_on_site and att["status"] == "present" and att["check_in_time"] and not att["check_out_time"]:
-            # Worker left – check out, compute minutes
-            try:
-                cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S")
-                minutes = int((ist_now - cin).total_seconds() / 60)
-            except Exception:
-                minutes = 0
-            cursor.execute("""
-                UPDATE geo_attendance
-                SET check_out_time = ?, total_minutes = ?, status = 'left'
-                WHERE worker_id = ? AND att_date = ?
-            """, (now_str, minutes, worker_id, today))
-            action = "checked_out"
+            # Auto-checkout rule: Only checkout if time is at or after 5:00 PM (17:00 IST)
+            is_after_5pm = (ist_now.hour >= 17)
+            if is_after_5pm:
+                # Worker left after 5:00 PM -> auto check out, compute minutes
+                try:
+                    cin = dt.datetime.strptime(att["check_in_time"], "%Y-%m-%d %H:%M:%S")
+                    minutes = int((ist_now - cin).total_seconds() / 60)
+                except Exception:
+                    minutes = 0
+                cursor.execute("""
+                    UPDATE geo_attendance
+                    SET check_out_time = ?, total_minutes = ?, status = 'left'
+                    WHERE worker_id = ? AND att_date = ?
+                """, (now_str, max(0, minutes), worker_id, today))
+                action = "checked_out"
+            else:
+                # Before 5:00 PM -> worker is temporarily outside work area (tea, lunch, shifting materials)
+                # Keep status as 'present' and do not check out prematurely
+                action = "temporarily_off_site"
 
     conn.commit()
     conn.close()
@@ -1974,6 +1981,89 @@ def process_location_ping(worker_id, site_id, lat, lng, site_lat=None, site_lng=
     }
 
 
+def auto_checkout_workers_after_5pm(att_date=None):
+    """
+    Automatic 5:00 PM+ Exit Analyzer:
+    Checks out any worker who has left their work location after 5:00 PM (17:00 IST).
+    - If current time is < 17:00 IST for today's date, does nothing (preserves active work hours).
+    - Finds all workers who checked in (status = 'present', check_in_time set, check_out_time empty).
+    - Checks their latest location ping in worker_location_pings:
+      * If ping is outside work site (is_on_site = 0):
+        Automatically checks them out with check_out_time = ping_time (or now_str if ping was after 5pm),
+        computes total_minutes, and sets status = 'left'.
+    Returns count of workers auto-checked out.
+    """
+    import datetime as dt
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    now_str = ist_now.strftime("%Y-%m-%d %H:%M:%S")
+    today = ist_now.strftime("%Y-%m-%d")
+
+    target_date = att_date or today
+
+    # Only run auto-checkout if target date is a previous date, or if today and time is >= 17:00 IST
+    if target_date == today and ist_now.hour < 17:
+        return 0
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT a.id, a.worker_id, a.site_id, a.check_in_time, a.status
+        FROM geo_attendance a
+        WHERE a.att_date = ? AND a.status = 'present' AND a.check_in_time IS NOT NULL AND (a.check_out_time IS NULL OR a.check_out_time = '')
+    """, (target_date,))
+    active_rows = [dict(r) for r in cursor.fetchall()]
+
+    checked_out_count = 0
+    for row in active_rows:
+        wid = row["worker_id"]
+        cursor.execute("""
+            SELECT latitude, longitude, distance_meters, is_on_site, ping_time
+            FROM worker_location_pings
+            WHERE worker_id = ?
+            ORDER BY id DESC LIMIT 1
+        """, (wid,))
+        last_ping = cursor.fetchone()
+        last_ping = dict(last_ping) if last_ping else None
+
+        should_checkout = False
+        checkout_timestamp = now_str
+
+        if last_ping:
+            if last_ping.get("is_on_site") == 0:
+                should_checkout = True
+                ping_time = last_ping.get("ping_time")
+                if ping_time:
+                    try:
+                        p_dt = dt.datetime.strptime(ping_time, "%Y-%m-%d %H:%M:%S")
+                        if p_dt.hour >= 17:
+                            checkout_timestamp = ping_time
+                    except Exception:
+                        pass
+        elif target_date != today:
+            should_checkout = True
+            checkout_timestamp = f"{target_date} 17:00:00"
+
+        if should_checkout:
+            try:
+                cin = dt.datetime.strptime(row["check_in_time"], "%Y-%m-%d %H:%M:%S")
+                cout = dt.datetime.strptime(checkout_timestamp, "%Y-%m-%d %H:%M:%S")
+                minutes = int((cout - cin).total_seconds() / 60)
+            except Exception:
+                minutes = 0
+
+            cursor.execute("""
+                UPDATE geo_attendance
+                SET check_out_time = ?, total_minutes = ?, status = 'left'
+                WHERE id = ?
+            """, (checkout_timestamp, max(0, minutes), row["id"]))
+            checked_out_count += 1
+
+    conn.commit()
+    conn.close()
+    return checked_out_count
+
+
 def get_geo_attendance_today(date_str=None):
     """
     Returns today's GPS attendance status for all workers across all sites.
@@ -1983,6 +2073,12 @@ def get_geo_attendance_today(date_str=None):
     if not date_str:
         ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
         date_str = ist_now.strftime("%Y-%m-%d")
+
+    # Automatically check out any workers who exited their work location after 5:00 PM
+    try:
+        auto_checkout_workers_after_5pm(date_str)
+    except Exception:
+        pass
 
     conn = get_db()
     cursor = conn.cursor()

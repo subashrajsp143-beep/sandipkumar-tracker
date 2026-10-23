@@ -2485,6 +2485,23 @@ def reset_all_workers_api():
         return jsonify({"success": False, "message": str(e)}), 500
 
 
+@app.route("/api/attendance/auto-checkout", methods=["POST", "GET", "OPTIONS"])
+def api_attendance_auto_checkout():
+    """Triggers auto-checkout for workers who left work location after 5:00 PM (17:00 IST)."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        date_str = request.args.get("date") or (request.get_json(silent=True) or {}).get("date") or request.form.get("date")
+        count = database.auto_checkout_workers_after_5pm(date_str)
+        return jsonify({
+            "success": True,
+            "message": f"शाम 5:00 बजे के बाद साइट से बाहर निकले {count} वर्कर का स्वतः चेक-आउट किया गया।",
+            "checked_out_count": count
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
 @app.route("/api/sites/<int:site_id>/gps", methods=["POST", "OPTIONS"])
 def set_site_gps(site_id):
     """Admin / Supervisor: save GPS coordinates for a site."""

@@ -315,13 +315,31 @@
                 document.getElementById('punchBtnText').textContent = '✅ हाजिरी सक्रिय है';
                 document.getElementById('punchBtn').className = 'w-full py-4 px-4 rounded-2xl bg-emerald-700 text-white font-black text-base shadow-lg flex items-center justify-center gap-2';
             } else {
-                badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-rose-950/60 border border-rose-500/50';
-                emoji.textContent = '🚶';
-                text.textContent = 'आप कार्य स्थल से बाहर हैं';
-                text.className = 'text-lg font-black text-rose-400';
-                const ptName = data.nearest_point_name && data.nearest_point_name !== 'GPS सेट नहीं' ? ` (${data.nearest_point_name})` : '';
-                sub.textContent = `${data.site_name}${ptName} से 1 KM से अधिक दूर हैं — कार्य स्थल पर पहुंचकर हाजिरी लगाएं`;
-                document.getElementById('punchBtnText').textContent = 'कार्य स्थल पर पहुंचकर हाजिरी लगेगी';
+                if (data.action === 'checked_out') {
+                    badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-amber-950/60 border border-amber-500/50';
+                    emoji.textContent = '🔴';
+                    text.textContent = 'ड्यूटी समाप्त — स्वतः चेक-आउट';
+                    text.className = 'text-lg font-black text-amber-400';
+                    sub.textContent = `${data.site_name} से 5:00 PM के बाद बाहर निकलने पर आपका चेक-आउट स्वतः दर्ज हो चुका है।`;
+                    document.getElementById('punchBtnText').textContent = '🔴 आज की ड्यूटी समाप्त';
+                    const co = document.getElementById('checkOutTime');
+                    if (co) co.textContent = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
+                } else if (data.action === 'temporarily_off_site') {
+                    badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-amber-950/60 border border-amber-500/50';
+                    emoji.textContent = '🚶';
+                    text.textContent = 'साइट से बाहर (काम जारी)';
+                    text.className = 'text-lg font-black text-amber-400';
+                    sub.textContent = `${data.site_name} से बाहर हैं — 5:00 PM से पहले हाजिरी सुरक्षित है।`;
+                    document.getElementById('punchBtnText').textContent = '✅ हाजिरी सक्रिय है (साइट से बाहर)';
+                } else {
+                    badge.className = 'text-center py-4 px-3 rounded-2xl mb-4 bg-rose-950/60 border border-rose-500/50';
+                    emoji.textContent = '🚶';
+                    text.textContent = 'आप कार्य स्थल से बाहर हैं';
+                    text.className = 'text-lg font-black text-rose-400';
+                    const ptName = data.nearest_point_name && data.nearest_point_name !== 'GPS सेट नहीं' ? ` (${data.nearest_point_name})` : '';
+                    sub.textContent = `${data.site_name}${ptName} से 1 KM से अधिक दूर हैं — कार्य स्थल पर पहुंचकर हाजिरी लगाएं`;
+                    document.getElementById('punchBtnText').textContent = 'कार्य स्थल पर पहुंचकर हाजिरी लगेगी';
+                }
             }
         }
 

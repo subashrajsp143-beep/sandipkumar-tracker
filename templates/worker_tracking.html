@@ -444,11 +444,21 @@
                         addLog(`✅ Check-in: ${now} — ${dist}m${locTag}`, 'success');
                     }
                 } else {
-                    setStatus('off-site', '🚶', 'साइट से बाहर', `${data.site_name}${locTag} से ${dist}m दूर`);
                     if (action === 'checked_out') {
+                        setStatus('off-site', '🔴', 'ड्यूटी समाप्त (चेक-आउट)', `${data.site_name} से बाहर — 5:00 PM के बाद स्वतः चेक-आउट दर्ज`);
                         todayCheckOut = now;
                         document.getElementById('checkOut').textContent = now;
-                        addLog(`🔴 Check-out: ${now}`, 'danger');
+                        addLog(`🔴 स्वतः Check-out: ${now} (5 बजे के बाद साइट से बाहर)`, 'danger');
+                    } else if (action === 'temporarily_off_site') {
+                        setStatus('waiting', '🚶', 'साइट से बाहर (काम जारी)', `${data.site_name}${locTag} से ${dist}m दूर — 5:00 PM से पहले हाजिरी चालू रहेगी`);
+                        addLog(`🚶 साइट से बाहर: ${dist}m — 5:00 PM से पहले चेक-आउट नहीं होगा`, 'info');
+                    } else {
+                        setStatus('off-site', '🚶', 'साइट से बाहर', `${data.site_name}${locTag} से ${dist}m दूर`);
+                        if (action === 'checked_out') {
+                            todayCheckOut = now;
+                            document.getElementById('checkOut').textContent = now;
+                            addLog(`🔴 Check-out: ${now}`, 'danger');
+                        }
                     }
                 }
 
