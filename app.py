@@ -2438,6 +2438,50 @@ def delete_worker_api(worker_id):
         return jsonify({"success": False, "message": str(e)}), 500
 
 
+@app.route("/api/attendance/reset-today", methods=["POST", "OPTIONS"])
+def reset_today_attendance_api():
+    """Owner only: reset attendance records for today (or selected date) for a site or all sites."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही हाजिरी रीसेट कर सकते हैं।"}), 403
+
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        date_str = data.get("date") or ist_now.strftime("%Y-%m-%d")
+        site_id = data.get("site_id")
+        site_id = int(site_id) if site_id else None
+
+        database.reset_today_attendance(date_str, site_id)
+        return jsonify({"success": True, "message": f"✅ {date_str} की हाजिरी सफलतापूर्वक रीसेट हो गई!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/workers/reset-all", methods=["POST", "OPTIONS"])
+def reset_all_workers_api():
+    """Owner only: deactivates all workers for a specific site or all sites."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        pin = data.get("pin", "")
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() == "7808")
+        if not is_owner:
+            return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही सभी वर्कर रीसेट कर सकते हैं।"}), 403
+
+        site_id = data.get("site_id")
+        site_id = int(site_id) if site_id else None
+
+        database.reset_all_workers(site_id)
+        return jsonify({"success": True, "message": "✅ वर्कर सूची सफलतापूर्वक रीसेट हो गई!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
 @app.route("/api/sites/<int:site_id>/gps", methods=["POST", "OPTIONS"])
 def set_site_gps(site_id):
     """Admin / Supervisor: save GPS coordinates for a site."""

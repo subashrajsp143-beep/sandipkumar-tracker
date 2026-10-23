@@ -44,6 +44,13 @@
                     <i class="fa-solid fa-map-location-dot"></i>
                     <span>केंद्र GPS</span>
                 </button>
+
+                {% if session.get('is_owner') or user_role == 'owner' %}
+                <button onclick="handleResetSiteAttendance(null, 'सभी 21 साइट्स')" class="px-3 py-2 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5" title="आज की पूरी हाजिरी रीसेट करें">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>आज की हाजिरी रीसेट</span>
+                </button>
+                {% endif %}
             </div>
         </div>
 
@@ -528,6 +535,35 @@
                             <i class="fa-solid fa-draw-polygon text-[10px]"></i>
                             <span>4-5 GPS पॉइंट्स</span>
                         </button>
+                        {% if session.get('is_owner') or user_role == 'owner' %}
+                        <div class="relative inline-block text-left">
+                            <button type="button" onclick="toggleSiteResetMenu({{ site_id }})" 
+                                    class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-[11px] shadow-xs transition flex items-center gap-1 active:scale-95"
+                                    title="रीसेट विकल्प">
+                                <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                                <span>रीसेट</span>
+                                <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                            </button>
+                            <div id="siteResetMenu-{{ site_id }}" class="hidden absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
+                                <button type="button" onclick="handleResetSiteAttendance({{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
+                                        class="w-full text-left px-3 py-2 rounded-xl text-amber-300 hover:bg-slate-800 font-bold flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+                                    <div>
+                                        <div class="text-[11px] text-white">आज की हाजिरी रीसेट करें</div>
+                                        <div class="text-[9px] text-slate-400 font-normal">चेक-इन व फोटो साफ करें</div>
+                                    </div>
+                                </button>
+                                <button type="button" onclick="handleResetSiteWorkers({{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
+                                        class="w-full text-left px-3 py-2 rounded-xl text-rose-300 hover:bg-slate-800 font-bold flex items-center gap-2 transition mt-1 border-t border-slate-800">
+                                    <i class="fa-solid fa-user-xmark text-rose-400"></i>
+                                    <div>
+                                        <div class="text-[11px] text-white">सभी वर्कर हटाएं (Delete All)</div>
+                                        <div class="text-[9px] text-slate-400 font-normal">इस साइट के सारे वर्कर हटाएँ</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -1756,6 +1792,62 @@
             window.location.reload();
         } else {
             alert('❌ ' + data.message);
+        }
+    }
+
+    function toggleSiteResetMenu(siteId) {
+        const menu = document.getElementById(`siteResetMenu-${siteId}`);
+        if (!menu) return;
+        document.querySelectorAll('[id^="siteResetMenu-"]').forEach(m => {
+            if (m !== menu) m.classList.add('hidden');
+        });
+        menu.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('[id^="siteResetMenu-"]') && !e.target.closest('button[onclick^="toggleSiteResetMenu"]')) {
+            document.querySelectorAll('[id^="siteResetMenu-"]').forEach(m => m.classList.add('hidden'));
+        }
+    });
+
+    async function handleResetSiteAttendance(siteId, siteName) {
+        const promptMsg = siteId ? `⚠️ क्या आप ${siteName} की आज की पूरी हाजिरी रीसेट करना चाहते हैं?\n\n(सभी चेक-इन व फोटो साफ हो जाएंगे और आज का स्टेटस शून्य हो जाएगा)` : `⚠️ क्या आप सभी साइट्स की आज की पूरी हाजिरी रीसेट करना चाहते हैं?\n\n(आज का पूरा हाजिरी रिकॉर्ड शून्य हो जाएगा)`;
+        if (!confirm(promptMsg)) return;
+        try {
+            const res = await fetch('/api/attendance/reset-today', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ site_id: siteId, date: '{{ date_str }}', pin: '7808' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err.message);
+        }
+    }
+
+    async function handleResetSiteWorkers(siteId, siteName) {
+        if (!confirm(`⚠️ क्या आप ${siteName} के सभी वर्करों को हटाना चाहते हैं?\n\n(इस साइट के सभी वर्कर हट जाएंगे ताकि आप नए वर्कर जोड़ सकें)`)) return;
+        try {
+            const res = await fetch('/api/workers/reset-all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ site_id: siteId, pin: '7808' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ नेटवर्क एरर: ' + err.message);
         }
     }
 

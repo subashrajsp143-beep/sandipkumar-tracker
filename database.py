@@ -1523,6 +1523,38 @@ def delete_worker(worker_id):
     conn.commit()
     conn.close()
 
+def reset_today_attendance(date_str, site_id=None):
+    """
+    Resets attendance records for the given date.
+    Clears geo_attendance and daily_manpower for that date.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    if site_id:
+        cursor.execute("DELETE FROM geo_attendance WHERE att_date = ? AND site_id = ?", (date_str, site_id))
+        cursor.execute("DELETE FROM daily_manpower WHERE att_date = ? AND site_id = ?", (date_str, site_id))
+    else:
+        cursor.execute("DELETE FROM geo_attendance WHERE att_date = ?", (date_str,))
+        cursor.execute("DELETE FROM daily_manpower WHERE att_date = ?", (date_str,))
+    conn.commit()
+    conn.close()
+    return True
+
+
+def reset_all_workers(site_id=None):
+    """
+    Deactivates all workers (or all workers of a specific site) by setting is_active = 0.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    if site_id:
+        cursor.execute("UPDATE site_workers SET is_active = 0 WHERE site_id = ?", (site_id,))
+    else:
+        cursor.execute("UPDATE site_workers SET is_active = 0")
+    conn.commit()
+    conn.close()
+    return True
+
 
 # ==========================================
 # MULTI-POINT GPS SUB-LOCATIONS (WIDE RADIUS WORK)
