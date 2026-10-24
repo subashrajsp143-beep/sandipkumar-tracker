@@ -1738,27 +1738,30 @@ const AppTranslations = {
      * Update TAP ICON in UP LEFT
      */
     updateTapIconButton: function(lang) {
-        const codeEl = document.getElementById('tapLangCode');
-        const nameEl = document.getElementById('tapLangName');
-        const checkHi = document.getElementById('langCheckHi');
-        const checkEn = document.getElementById('langCheckEn');
-        const optHi = document.getElementById('langOptHi');
-        const optEn = document.getElementById('langOptEn');
+        // 1. Top Bar Prominent Direct Toggle
+        const topHi = document.getElementById('topBtnLangHi');
+        const topEn = document.getElementById('topBtnLangEn');
+        if (topHi && topEn) {
+            if (lang === 'hi') {
+                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs';
+                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
+            } else {
+                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
+                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs';
+            }
+        }
 
-        if (lang === 'hi') {
-            if (codeEl) codeEl.textContent = 'HI';
-            if (nameEl) nameEl.textContent = '🇮🇳 हिंदी';
-            if (checkHi) checkHi.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
-            if (checkEn) checkEn.className = 'fa-regular fa-circle text-slate-500 text-base';
-            if (optHi) optHi.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white';
-            if (optEn) optEn.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent';
-        } else {
-            if (codeEl) codeEl.textContent = 'EN';
-            if (nameEl) nameEl.textContent = '🇬🇧 English';
-            if (checkHi) checkHi.className = 'fa-regular fa-circle text-slate-500 text-base';
-            if (checkEn) checkEn.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
-            if (optHi) optHi.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent';
-            if (optEn) optEn.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white';
+        // 2. Sidebar Direct Toggle
+        const sideHi = document.getElementById('sideBtnLangHi');
+        const sideEn = document.getElementById('sideBtnLangEn');
+        if (sideHi && sideEn) {
+            if (lang === 'hi') {
+                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white';
+                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white';
+            } else {
+                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white';
+                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white';
+            }
         }
     },
 

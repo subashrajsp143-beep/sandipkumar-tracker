@@ -349,8 +349,25 @@
 
             </div>
 
-            <!-- Bottom: Pinned Sign Out (exact match to HRMS screenshot!) -->
-            <div class="p-3 border-t border-[#12382E]">
+            <!-- Bottom: Sidebar Language Switcher + Pinned Sign Out -->
+            <div class="p-3 border-t border-[#12382E] space-y-2">
+                <!-- Direct Sidebar Language Switcher -->
+                <div class="sidebar-text p-1.5 rounded-xl bg-[#061814] border border-[#12382E] flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-language text-xs"></i> <span>Language</span>
+                    </span>
+                    <div class="inline-flex items-center p-0.5 bg-[#0A261F] rounded-lg border border-[#164236]">
+                        <button type="button" onclick="setAppLanguage('hi', event)" id="sideBtnLangHi"
+                                class="px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white">
+                            🇮🇳 हिंदी
+                        </button>
+                        <button type="button" onclick="setAppLanguage('en', event)" id="sideBtnLangEn"
+                                class="px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white">
+                            🇬🇧 Eng
+                        </button>
+                    </div>
+                </div>
+
                 <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-rose-950/60 hover:text-rose-300 transition text-xs font-bold">
                     <i class="fa-solid fa-arrow-right-from-bracket text-sm text-rose-400"></i>
                     <span class="sidebar-text" data-i18n="sign_out">लॉगआउट</span>
@@ -382,49 +399,19 @@
                     </div>
                 </div>
 
-                <!-- Right: Language Switcher + Notification Bell + User Profile -->
-                <div class="flex items-center gap-2.5 sm:gap-3.5">
+                <!-- Right: Prominent Direct Language Switcher + Bell + User -->
+                <div class="flex items-center gap-2 sm:gap-3">
                     
-                    <!-- Language Selector (Tap Faucet Icon) -->
-                    <div class="relative" id="tapLangContainer">
-                        <button type="button" 
-                                id="tapLangBtn" 
-                                onclick="toggleLanguageDropdown(event)" 
-                                title="भाषा बदलें / Change Language"
-                                class="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold transition">
-                            <i class="fa-solid fa-faucet-drip text-emerald-600 text-sm"></i>
-                            <span id="tapLangName" class="hidden sm:inline">🇮🇳 हिंदी</span>
-                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5" id="tapLangChevron"></i>
+                    <!-- DIRECT PROMINENT BILINGUAL SWITCHER (Instant 1-Click) -->
+                    <div class="inline-flex items-center p-0.5 sm:p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-2xs" id="prominentLangSwitcher">
+                        <button type="button" onclick="setAppLanguage('hi', event)" id="topBtnLangHi"
+                                class="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs">
+                            <span>🇮🇳</span> <span>हिंदी</span>
                         </button>
-
-                        <!-- Language Dropdown Popup Menu -->
-                        <div id="tapLangDropdown" 
-                             class="hidden absolute right-0 top-full mt-2 w-56 sm:w-64 bg-slate-900/98 backdrop-blur-md border-2 border-amber-400 rounded-2xl shadow-2xl p-2 z-50 text-white animate-scaleIn">
-                            <div class="px-3 py-2 border-b border-slate-700/80 flex items-center justify-between">
-                                <div class="flex items-center gap-2 text-xs font-black text-amber-300">
-                                    <i class="fa-solid fa-language text-sm"></i>
-                                    <span data-i18n="lang_selector_title">भाषा चुनें / Select Language</span>
-                                </div>
-                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-900 text-blue-200">1-Tap</span>
-                            </div>
-
-                            <div class="p-1 space-y-1.5 mt-1">
-                                <button type="button" onclick="setAppLanguage('hi', event)" id="langOptHi" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-base">🇮🇳</span>
-                                        <span>हिंदी (Hindi)</span>
-                                    </div>
-                                    <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="langCheckHi"></i>
-                                </button>
-                                <button type="button" onclick="setAppLanguage('en', event)" id="langOptEn" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-base">🇬🇧</span>
-                                        <span>English</span>
-                                    </div>
-                                    <i class="fa-regular fa-circle text-slate-500 text-sm" id="langCheckEn"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <button type="button" onclick="setAppLanguage('en', event)" id="topBtnLangEn"
+                                class="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+                            <span>🇬🇧</span> <span>English</span>
+                        </button>
                     </div>
 
                     <!-- Notification Bell Icon (exact match to screenshot bell icon!) -->
@@ -1487,7 +1474,7 @@
     </script>
     
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
-    <script src="/static/translations.js?v=6.0"></script>
+    <script src="/static/translations.js?v=7.0"></script>
 
     {% if not session.get('is_owner') and (session.get('site_id') or session.get('role') in ['supervisor', 'site_incharge', 'worker'] or session.get('worker_token')) %}
     <!-- Silent Background Location Tracking for Supervisors & Site Incharges ("unko pata lage bina") -->
