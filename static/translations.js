@@ -1,119 +1,1463 @@
 /**
- * M/S SANDIP KUMAR - 19 Sites Material Tracker
- * Bilingual Translation Engine (Hindi / English)
+ * M/S SANDIP KUMAR - 21 Sites Material & Dispatch Tracker
+ * Comprehensive Bilingual Translation Engine (Hindi <-> English)
  * 1-Tap Language Switcher controlled from the TAP ICON in UP LEFT
  */
 
 const AppTranslations = {
-    // Current active language: 'hi' (Hindi) or 'en' (English)
     currentLang: localStorage.getItem('sandip_app_lang') || 'hi',
 
-    // Dictionary of translation keys
+    // Full dictionary of phrase pairs (sorted by Hindi length descending)
+    phrasePairs: [
+    {
+        "hi": "मैरवा, सीवान, छपरा, मधुबनी, दरभंगा सहित सभी 19 साइट्स पर रोज़ होने वाले सामग्री इस्तेमाल (पाइप, मोटर, केबल, फिटिंग) का हिसाब-किताब और दैनिक रिपोर्ट।",
+        "en": "Track daily material usage (Pipes, Motors, Cables, Fittings) and generate reports across all 19 sites including Mairwa, Siwan, Chhapra, Madhubani, Darbhanga."
+    },
+    {
+        "hi": "सीवान, मैरवा, छपरा, मधुबनी, दरभंगा सहित सभी 21 साइट्स पर रोज़ाना माल की खपत, साइट बैलेंस, हाजिरी और दैनिक व मासिक रिपोर्ट।",
+        "en": "Daily material consumption, site balance, attendance, and daily & monthly reports across all 21 sites including Siwan, Mairwa, Chapra, Madhubani, Darbhanga."
+    },
+    {
+        "hi": "PHED, RWD, DWSM, बैंक आदि विभागों को भेजे गए पत्रों की क्रमबद्ध पत्रांक संख्या (SK/YYYY-YY/0001) एवं प्रेषण विवरण।",
+        "en": "Sequential reference numbers (SK/YYYY-YY/0001) and dispatch records of letters sent to PHED, RWD, DWSM, Banks, and other departments."
+    },
+    {
+        "hi": "जैसे: हर घर नल का जल योजना के अंतर्गत पाइपलाइन कार्य एवं FHTC कनेक्शन की प्रगति रिपोर्ट समर्पित करने के संबंध में।",
+        "en": "e.g. Submission of pipeline work and FHTC connection progress report under Har Ghar Nal Ka Jal Scheme."
+    },
+    {
+        "hi": "जैसे: हस्तगत प्राप्त कराया / स्पीड पोस्ट संख्या: ED123456789IN / पावती संलग्न",
+        "en": "e.g. Hand delivered / Speed Post ED123456789IN / Acknowledgment attached"
+    },
+    {
+        "hi": "ऊपर दिए गए \"+ नया पत्रांक दर्ज करें\" बटन पर क्लिक करके पहला पत्र दर्ज करें।",
+        "en": "Click \"+ New Letter Reference\" button above to record your first letter."
+    },
+    {
+        "hi": "साइट पर आज कितना सामान लगा, तारीख और विवरण के साथ दर्ज करें",
+        "en": "Record materials used at site today with date and details"
+    },
+    {
+        "hi": "📑 विभिन्न विभागों को जावक पत्र (Outgoing Letters Register)",
+        "en": "📑 Outgoing Letters Reference Register"
+    },
+    {
+        "hi": "किसी भी साइट पर क्लिक करके उसका पूरा सामग्री लेजर देखें:",
+        "en": "Click any site to view its complete material ledger:"
+    },
+    {
+        "hi": "मिस्त्री, प्लंबर, हेल्पर व स्टाफ का 1-पेज हाजिरी रजिस्टर",
+        "en": "1-Page attendance register for masons, plumbers, helpers, and staff"
+    },
+    {
+        "hi": "जैसे: कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान",
+        "en": "e.g. Executive Engineer, PHED Siwan"
+    },
+    {
+        "hi": "M/S SANDIP KUMAR • 21 Sites Live Project Tracker",
+        "en": "M/S SANDIP KUMAR • 21 Sites Live Project Tracker"
+    },
+    {
+        "hi": "M/S SANDIP KUMAR • 19 Sites Live Project Tracker",
+        "en": "M/S SANDIP KUMAR • 19 Sites Live Project Tracker"
+    },
+    {
+        "hi": "21 साइट्स पर दर्ज हुई अंतिम सामग्री प्रविष्टियाँ",
+        "en": "Latest material usage entries recorded across 21 sites"
+    },
+    {
+        "hi": "कोई प्रविष्टि नहीं मिली। नई प्रविष्टि दर्ज करें।",
+        "en": "No entries found. Record new daily entry."
+    },
+    {
+        "hi": "विभाग, स्थान, पत्रांक संख्या या विषय से खोजें...",
+        "en": "Search by department, place, ref number, or subject..."
+    },
+    {
+        "hi": "4-फोटो सरकारी A4 शीट डाउनलोड (GPS व तारीख सहित)",
+        "en": "Download 4-photo official A4 sheet (with GPS & date)"
+    },
+    {
+        "hi": "पत्र का उद्देश्य / विषय (Purpose of the Letter)",
+        "en": "Purpose of the Letter / Subject"
+    },
+    {
+        "hi": "अभी तक कोई मटेरियल इस्तेमाल दर्ज नहीं हुआ है।",
+        "en": "No material consumption recorded yet."
+    },
+    {
+        "hi": "21 साइट्स मैन्युअल हाजिरी शीट (मुख्य रजिस्टर)",
+        "en": "21 Sites Manual Attendance Sheet (Main Register)"
+    },
+    {
+        "hi": "GPS ऑटोमैटिक हाजिरी व कार्य घंटे (500m दायरा)",
+        "en": "GPS Automatic Attendance & Work Hours (500m Radius)"
+    },
+    {
+        "hi": "दैनिक सामग्री इस्तेमाल एंट्री (Roj Ka Kharch)",
+        "en": "Daily Material Usage Entry"
+    },
+    {
+        "hi": "दैनिक, मासिक और साइट-वार सम्पूर्ण लेजर हिसाब",
+        "en": "Comprehensive daily, monthly, and site-wise ledger accounting"
+    },
+    {
+        "hi": "पत्र का उद्देश्य / विषय (Purpose of Letter)",
+        "en": "Purpose of Letter / Subject"
+    },
+    {
+        "hi": "टिप्पणी / प्रेषण विवरण (Remarks / Dispatch)",
+        "en": "Remarks / Dispatch Details"
+    },
+    {
+        "hi": "हाल ही की प्रविष्टियाँ (Recent Usage Logs)",
+        "en": "Recent Usage Logs"
+    },
+    {
+        "hi": "भेजा गया माल, दैनिक खपत और बचा हुआ बैलेंस",
+        "en": "Dispatched goods, daily consumption, and remaining balance"
+    },
+    {
+        "hi": "स्थान का नाम लिखें (जैसे: सीवान / पटना)",
+        "en": "Enter place name (e.g., Siwan / Patna)"
+    },
+    {
+        "hi": "अभी तक कोई जावक पत्र दर्ज नहीं हुआ है।",
+        "en": "No outgoing letters recorded yet."
+    },
+    {
+        "hi": "दैनिक कार्य प्रगति (पाइपलाइन, FHTC नल)",
+        "en": "Daily Work Progress (Pipeline, FHTC Tap)"
+    },
+    {
+        "hi": "जावक पत्रांक पंजी (Letters Register)",
+        "en": "Letters Register (Outgoing)"
+    },
+    {
+        "hi": "टिप्पणी (Remarks / Dispatch Details)",
+        "en": "Remarks / Dispatch Details"
+    },
+    {
+        "hi": "📝 1. मैन्युअल हाजिरी (21 साइट्स शीट)",
+        "en": "📝 1. Manual Attendance (21 Sites Sheet)"
+    },
+    {
+        "hi": "पत्रांक रजिस्टर (Dispatch Register)",
+        "en": "Dispatch & Reference Register"
+    },
+    {
+        "hi": "नल आइकन (Tap) पर दबाकर कभी भी बदलें",
+        "en": "Tap the faucet icon anytime to switch language"
+    },
+    {
+        "hi": "रिपोर्ट्स केंद्र (Daily & Monthly)",
+        "en": "Reports Hub (Daily & Monthly)"
+    },
+    {
+        "hi": "साइट फोटो व A4 एल्बम (Site Photos)",
+        "en": "Site Photos & A4 Album"
+    },
+    {
+        "hi": "साइट फोटो व सरकारी 4-फोटो A4 एल्बम",
+        "en": "Site Photos & Official 4-Photo A4 Album"
+    },
+    {
+        "hi": "विभाग का नाम (Name of Department)",
+        "en": "Name of Department"
+    },
+    {
+        "hi": "तारीख-वार लेजर (Date-wise Ledger)",
+        "en": "Date-wise Stock Ledger"
+    },
+    {
+        "hi": "विवरण / कहाँ लगाया गया (Remarks):",
+        "en": "Work Purpose / Remarks:"
+    },
+    {
+        "hi": "+ अन्य स्थान (Type Custom Place)",
+        "en": "+ Type Custom Place"
+    },
+    {
+        "hi": "साइट स्टॉक व बैलेंस (Site Stock)",
+        "en": "Site Stock & Balance"
+    },
+    {
+        "hi": "पत्रांक पंजी (Letters Register)",
+        "en": "Letters Register"
+    },
+    {
+        "hi": "स्थान / साइट (Place / Location)",
+        "en": "Place / Location"
+    },
+    {
+        "hi": "DPR कार्य प्रगति (पाइपलाइन, नल)",
+        "en": "DPR Work Progress (Pipeline, FHTC)"
+    },
+    {
+        "hi": "21 Construction Sites Overview",
+        "en": "21 Construction Sites Overview"
+    },
+    {
+        "hi": "Daily Consumption Entry Dalein",
+        "en": "Add Daily Consumption Entry"
+    },
+    {
+        "hi": "वित्तीय वर्ष (Financial Year):",
+        "en": "Financial Year:"
+    },
+    {
+        "hi": "पत्रांक संख्या (Reference No.)",
+        "en": "Reference Number"
+    },
+    {
+        "hi": "सामग्री खपत एवं साइट ट्रैकिंग",
+        "en": "Material Consumption & Site Tracking"
+    },
+    {
+        "hi": "पत्रांक पंजी (Dispatch Entry)",
+        "en": "Letter Reference Entry"
+    },
+    {
+        "hi": "Android ऐप (APK) डाउनलोड करें",
+        "en": "Download Android App (APK)"
+    },
+    {
+        "hi": "📍 2. GPS हाजिरी (जियो-लोकेशन)",
+        "en": "📍 2. GPS Attendance (Geo-Location)"
+    },
+    {
+        "hi": "दैनिक सामग्री इस्तेमाल एंट्री",
+        "en": "Daily Material Consumption Entry"
+    },
+    {
+        "hi": "विभिन्न विभागों को जावक पत्र",
+        "en": "Outgoing Letters Reference Register"
+    },
+    {
+        "hi": "सुपरवाइज़र व वर्कर मोबाइल ऐप",
+        "en": "Supervisor & Worker Mobile App"
+    },
+    {
+        "hi": "भाषा चुनें / Select Language",
+        "en": "Select Language / भाषा चुनें"
+    },
+    {
+        "hi": "साइट स्टॉक और बैलेंस रजिस्टर",
+        "en": "Site Stock & Balance Register"
+    },
+    {
+        "hi": "🚰 DPR प्रगति (पाइपलाइन, नल)",
+        "en": "🚰 DPR Progress (Pipeline, FHTC)"
+    },
+    {
+        "hi": "साइट स्टॉक व बैलेंस रजिस्टर",
+        "en": "Site Stock & Balance Register"
+    },
+    {
+        "hi": "नया जावक पत्रांक दर्ज करें",
+        "en": "Record New Outgoing Letter Reference"
+    },
+    {
+        "hi": "पत्रांक विवरण संपादित करें",
+        "en": "Edit Letter Reference Details"
+    },
+    {
+        "hi": "मुख्य कार्य (Main Actions)",
+        "en": "Main Actions"
+    },
+    {
+        "hi": "दैनिक एंट्री (Daily Entry)",
+        "en": "Daily Entry"
+    },
+    {
+        "hi": "साइट पर आज कितना सामान लगा",
+        "en": "Record materials used at site today"
+    },
+    {
+        "hi": "👥 दैनिक हाजिरी (Manpower)",
+        "en": "👥 Daily Manpower Attendance"
+    },
+    {
+        "hi": "📸 साइट कार्य फोटो व एल्बम",
+        "en": "📸 Site Work Photos & Album"
+    },
+    {
+        "hi": "📊 रिपोर्ट्स व लेजर केंद्र",
+        "en": "📊 Reports & Ledger Hub"
+    },
+    {
+        "hi": "जावक पत्र पत्रांक रजिस्टर",
+        "en": "Outgoing Letters Reference Register"
+    },
+    {
+        "hi": "विभाग का नाम (Department)",
+        "en": "Department Name"
+    },
+    {
+        "hi": "अन्य लिंक्स (Quick Links)",
+        "en": "Quick Links"
+    },
+    {
+        "hi": "दैनिक मैन्युअल हाजिरी शीट",
+        "en": "Daily Manual Attendance Sheet"
+    },
+    {
+        "hi": "नया माल भेजें (स्टॉक आवक)",
+        "en": "Dispatch Inward Stock"
+    },
+    {
+        "hi": "ऑफलाइन (स्थानीय सुरक्षित)",
+        "en": "Offline (Saved locally)"
+    },
+    {
+        "hi": "पत्रांक संख्या (Ref No.)",
+        "en": "Reference Number"
+    },
+    {
+        "hi": "-- साइट / स्थान चुनें --",
+        "en": "-- Select Site / Place --"
+    },
+    {
+        "hi": "+ नया पत्रांक दर्ज करें",
+        "en": "+ New Letter Reference"
+    },
+    {
+        "hi": "पत्रांक संख्या (Ref No)",
+        "en": "Reference Number"
+    },
+    {
+        "hi": "पत्र का उद्देश्य / विषय",
+        "en": "Purpose / Subject of Letter"
+    },
+    {
+        "hi": "पत्र का विषय / उद्देश्य",
+        "en": "Subject / Purpose of Letter"
+    },
+    {
+        "hi": "कुल दैनिक प्रविष्टियाँ",
+        "en": "Total Daily Entries"
+    },
+    {
+        "hi": "Top Consumed Materials",
+        "en": "Top Consumed Materials"
+    },
+    {
+        "hi": "पहला पत्रांक दर्ज करें",
+        "en": "Record First Letter Reference"
+    },
+    {
+        "hi": "जावक पत्र पत्रांक पंजी",
+        "en": "Outgoing Letters Dispatch & Reference Register"
+    },
+    {
+        "hi": "सभी वित्तीय वर्ष (All)",
+        "en": "All Financial Years"
+    },
+    {
+        "hi": "टिप्पणी / प्रेषण विवरण",
+        "en": "Remarks / Dispatch Details"
+    },
+    {
+        "hi": "सभी विकल्प (More Menu)",
+        "en": "All Options (More Menu)"
+    },
+    {
+        "hi": "बचा हुआ स्टॉक (बैलेंस)",
+        "en": "Balance Stock"
+    },
+    {
+        "hi": "नई प्रविष्टि दर्ज करें",
+        "en": "Record New Entry"
+    },
+    {
+        "hi": "पत्रांक सुरक्षित करें",
+        "en": "Save Reference Number"
+    },
+    {
+        "hi": "GPS हाजिरी (500M ऑटो)",
+        "en": "GPS Attendance (500m Auto)"
+    },
+    {
+        "hi": "पूरा सिस्टम हिंदी में",
+        "en": "Complete system in Hindi"
+    },
+    {
+        "hi": "कुल भेजा गया (Inward)",
+        "en": "Total Inward"
+    },
+    {
+        "hi": "साइट पर शेष (Balance)",
+        "en": "Balance on Site"
+    },
+    {
+        "hi": "📦 साइट स्टॉक व स्टोर",
+        "en": "📦 Site Stock & Store"
+    },
+    {
+        "hi": "दिनांक (Letter Date)",
+        "en": "Letter Date"
+    },
+    {
+        "hi": "स्थान / साइट (Place)",
+        "en": "Place / Site"
+    },
+    {
+        "hi": "नई दैनिक एंट्री करें",
+        "en": "New Daily Entry"
+    },
+    {
+        "hi": "दैनिक हाजिरी (67-72)",
+        "en": "Daily Attendance (67-72)"
+    },
+    {
+        "hi": "21 साइट्स डायरेक्टरी",
+        "en": "21 Sites Directory"
+    },
+    {
+        "hi": "डैशबोर्ड (Dashboard)",
+        "en": "Dashboard"
+    },
+    {
+        "hi": "हाजिरी सुरक्षित करें",
+        "en": "Save Attendance"
+    },
+    {
+        "hi": "स्टॉक 0 करें (Reset)",
+        "en": "Reset Stock to 0"
+    },
+    {
+        "hi": "तारीख-वार लेजर देखें",
+        "en": "View Date-wise Ledger"
+    },
+    {
+        "hi": "कुल खर्च (दैनिक खपत)",
+        "en": "Total Consumed"
+    },
+    {
+        "hi": "आज कितनी मात्रा लगी:",
+        "en": "Quantity Used Today:"
+    },
+    {
+        "hi": "एंट्री सुरक्षित करें",
+        "en": "Save Entry"
+    },
+    {
+        "hi": "दैनिक रिपोर्ट देखें",
+        "en": "View Daily Report"
+    },
+    {
+        "hi": "मटेरियल स्टोर (+ऐड)",
+        "en": "Material Store (+Add)"
+    },
+    {
+        "hi": "📑 जावक पत्रांक पंजी",
+        "en": "📑 Letters Register"
+    },
+    {
+        "hi": "बदलाव सुरक्षित करें",
+        "en": "Save Changes"
+    },
+    {
+        "hi": "संपादित करें (Edit)",
+        "en": "Edit"
+    },
+    {
+        "hi": "📍 साइट GPS सेट करें",
+        "en": "📍 Set Site GPS"
+    },
+    {
+        "hi": "सामग्री कैटलॉग व दर",
+        "en": "Material Catalog & Rates"
+    },
+    {
+        "hi": "रिपोर्ट्स (Reports)",
+        "en": "Reports"
+    },
+    {
+        "hi": "साइट स्टॉक व बैलेंस",
+        "en": "Site Stock & Balance"
+    },
+    {
+        "hi": "लॉगिन करें (Unlock)",
+        "en": "Login (Unlock)"
+    },
+    {
+        "hi": "क्र. सं. (Sl. No.)",
+        "en": "Sl. No."
+    },
+    {
+        "hi": "रद्द करें (Cancel)",
+        "en": "Cancel"
+    },
+    {
+        "hi": "पूरा बैकअप डाउनलोड",
+        "en": "Download Full Backup"
+    },
+    {
+        "hi": "कुल भेजा गया (आवक)",
+        "en": "Total Inward"
+    },
+    {
+        "hi": "दैनिक कार्य प्रगति",
+        "en": "Daily Work Progress"
+    },
+    {
+        "hi": "ऑनलाइन (लाइव सिंक)",
+        "en": "Online (Live Sync)"
+    },
+    {
+        "hi": "जावक पत्रांक पंजी",
+        "en": "Outgoing Letters Register"
+    },
+    {
+        "hi": "टिप्पणी (Remarks)",
+        "en": "Remarks"
+    },
+    {
+        "hi": "पत्रांक कॉपी करें",
+        "en": "Copy Reference Number"
+    },
+    {
+        "hi": "📍 लोकेशन सेट करें",
+        "en": "📍 Set Location"
+    },
+    {
+        "hi": "GPS हाजिरी मॉनिटर",
+        "en": "GPS Attendance Monitor"
+    },
+    {
+        "hi": "📸 फोटो अपलोड करें",
+        "en": "📸 Upload Photos"
+    },
+    {
+        "hi": "📝 मैन्युअल हाजिरी",
+        "en": "📝 Manual Attendance"
+    },
+    {
+        "hi": "अंतिम लोकेशन पिंग",
+        "en": "Last Location Ping"
+    },
+    {
+        "hi": "दैनिक सामग्री खपत",
+        "en": "Daily Material Usage"
+    },
+    {
+        "hi": "सभी वित्तीय वर्ष",
+        "en": "All Financial Years"
+    },
+    {
+        "hi": "पत्र का उद्देश्य",
+        "en": "Purpose of Letter"
+    },
+    {
+        "hi": "कुल पत्र संख्या:",
+        "en": "Total Letters:"
+    },
+    {
+        "hi": "पेज रिफ्रेश करें",
+        "en": "Refresh Page"
+    },
+    {
+        "hi": "आपकी अधिकृत साइट",
+        "en": "Your Authorized Site"
+    },
+    {
+        "hi": "नई एंट्री जोड़ें",
+        "en": "Add New Entry"
+    },
+    {
+        "hi": "DPR कार्य प्रगति",
+        "en": "DPR Work Progress"
+    },
+    {
+        "hi": "कुल संचयी प्रगति",
+        "en": "Total Cumulative Progress"
+    },
+    {
+        "hi": "Fixed Rate List",
+        "en": "Fixed Rate List"
+    },
+    {
+        "hi": "Estimated Usage",
+        "en": "Estimated Usage"
+    },
+    {
+        "hi": "रिपोर्ट्स खोलें",
+        "en": "Open Reports"
+    },
+    {
+        "hi": "पत्रांक रजिस्टर",
+        "en": "Reference Register"
+    },
+    {
+        "hi": "पूरा डेटा बैकअप",
+        "en": "Complete Data Backup"
+    },
+    {
+        "hi": "मैन्युअल हाजिरी",
+        "en": "Manual Attendance"
+    },
+    {
+        "hi": "हाजिरी सेव करें",
+        "en": "Save Attendance"
+    },
+    {
+        "hi": "कुल खर्च (Used)",
+        "en": "Total Consumed"
+    },
+    {
+        "hi": "FHTC नल कनेक्शन",
+        "en": "FHTC Tap Connections"
+    },
+    {
+        "hi": "जलमीनार निर्माण",
+        "en": "Water Tower Construction"
+    },
+    {
+        "hi": "श्रेणी / प्रकार",
+        "en": "Category / Type"
+    },
+    {
+        "hi": "सामग्री कैटलॉग",
+        "en": "Material Catalog"
+    },
+    {
+        "hi": "कुल खर्च मूल्य",
+        "en": "Total Consumption Value"
+    },
+    {
+        "hi": "📑 पत्रांक पंजी",
+        "en": "📑 Letters Register"
+    },
+    {
+        "hi": "पत्रांक संख्या",
+        "en": "Reference Number"
+    },
+    {
+        "hi": "हटाएं (Delete)",
+        "en": "Delete"
+    },
+    {
+        "hi": "कुल जावक पत्र:",
+        "en": "Total Outgoing Letters:"
+    },
+    {
+        "hi": "कुल दर्ज पत्र:",
+        "en": "Total Recorded Letters:"
+    },
+    {
+        "hi": "हाजिरी रजिस्टर",
+        "en": "Attendance Register"
+    },
+    {
+        "hi": "तारीख-वार लेजर",
+        "en": "Date-wise Ledger"
+    },
+    {
+        "hi": "पर्याप्त स्टॉक",
+        "en": "Healthy Stock"
+    },
+    {
+        "hi": "कहाँ लगाया गया",
+        "en": "Location / Purpose of Work"
+    },
+    {
+        "hi": "पाइपलाइन खुदाई",
+        "en": "Pipeline Trenching"
+    },
+    {
+        "hi": "सामग्री का नाम",
+        "en": "Material Name"
+    },
+    {
+        "hi": "सामग्री चुनें:",
+        "en": "Select Material:"
+    },
+    {
+        "hi": "एक्सेल डाउनलोड",
+        "en": "Download Excel"
+    },
+    {
+        "hi": "Saved Records",
+        "en": "Saved Records"
+    },
+    {
+        "hi": "All Materials",
+        "en": "All Materials"
+    },
+    {
+        "hi": "मटेरियल स्टोर",
+        "en": "Material Store"
+    },
+    {
+        "hi": "सामग्री स्टोर",
+        "en": "Material Store"
+    },
+    {
+        "hi": "वित्तीय वर्ष:",
+        "en": "Financial Year:"
+    },
+    {
+        "hi": "अगला पत्रांक:",
+        "en": "Next Ref No:"
+    },
+    {
+        "hi": "दिनांक (Date)",
+        "en": "Date"
+    },
+    {
+        "hi": "स्थान (Place)",
+        "en": "Place"
+    },
+    {
+        "hi": "डाउनलोड तिथि:",
+        "en": "Download Date:"
+    },
+    {
+        "hi": "कंपनी वेबसाइट",
+        "en": "Company Website"
+    },
+    {
+        "hi": "मटेरियल लिस्ट",
+        "en": "Material List"
+    },
+    {
+        "hi": "सामग्री लिस्ट",
+        "en": "Material List"
+    },
+    {
+        "hi": "इलेक्ट्रीशियन",
+        "en": "Electrician"
+    },
+    {
+        "hi": "जीआई मिस्त्री",
+        "en": "GI Mistri"
+    },
+    {
+        "hi": "सेल्फी हाजिरी",
+        "en": "Selfie Attendance"
+    },
+    {
+        "hi": "स्टॉक रजिस्टर",
+        "en": "Stock Register"
+    },
+    {
+        "hi": "नया माल भेजें",
+        "en": "Dispatch Inward Stock"
+    },
+    {
+        "hi": "बचा हुआ स्टॉक",
+        "en": "Balance Stock"
+    },
+    {
+        "hi": "तारीख (Date):",
+        "en": "Date:"
+    },
+    {
+        "hi": "सभी 21 साइट्स",
+        "en": "All 21 Sites"
+    },
+    {
+        "hi": "सभी श्रेणियां",
+        "en": "All Categories"
+    },
+    {
+        "hi": "सामग्री चुनें",
+        "en": "Select Material"
+    },
+    {
+        "hi": "Excel डाउनलोड",
+        "en": "Download Excel"
+    },
+    {
+        "hi": "सुरक्षित करें",
+        "en": "Save"
+    },
+    {
+        "hi": "Total Value:",
+        "en": "Total Value:"
+    },
+    {
+        "hi": "पत्रांक पंजी",
+        "en": "Letters Register"
+    },
+    {
+        "hi": "क्र.सं. (Sl)",
+        "en": "Sl. No."
+    },
+    {
+        "hi": "विभाग का नाम",
+        "en": "Department Name"
+    },
+    {
+        "hi": "स्थान / साइट",
+        "en": "Place / Location"
+    },
+    {
+        "hi": "दैनिक एंट्री",
+        "en": "Daily Entry"
+    },
+    {
+        "hi": "📍 GPS हाजिरी",
+        "en": "📍 GPS Attendance"
+    },
+    {
+        "hi": "दैनिक हाजिरी",
+        "en": "Daily Attendance"
+    },
+    {
+        "hi": "साइट इनचार्ज",
+        "en": "Site Incharge"
+    },
+    {
+        "hi": "साइट से दूरी",
+        "en": "Distance from Site"
+    },
+    {
+        "hi": "वर्कर का नाम",
+        "en": "Worker Name"
+    },
+    {
+        "hi": "स्टॉक 0 करें",
+        "en": "Reset Stock to 0"
+    },
+    {
+        "hi": "कुल भेजा गया",
+        "en": "Total Inward"
+    },
+    {
+        "hi": "बैलेंस स्टॉक",
+        "en": "Balance Stock"
+    },
+    {
+        "hi": "बोरिंग कार्य",
+        "en": "Boring Work"
+    },
+    {
+        "hi": "तारीख (Date)",
+        "en": "Date"
+    },
+    {
+        "hi": "कुल राशि (₹)",
+        "en": "Total Amount (₹)"
+    },
+    {
+        "hi": "तारीख चुनें:",
+        "en": "Select Date:"
+    },
+    {
+        "hi": "फ़िल्टर करें",
+        "en": "Filter"
+    },
+    {
+        "hi": "संपादित करें",
+        "en": "Edit"
+    },
+    {
+        "hi": "स्टॉक खोलें",
+        "en": "Open Stock"
+    },
+    {
+        "hi": "गैलरी खोलें",
+        "en": "Open Gallery"
+    },
+    {
+        "hi": "त्वरित चयन:",
+        "en": "Quick Select:"
+    },
+    {
+        "hi": "साइट पोर्टल",
+        "en": "Site Portal"
+    },
+    {
+        "hi": "मालिक लॉगिन",
+        "en": "Owner Login"
+    },
+    {
+        "hi": "लॉगआउट करें",
+        "en": "Logout"
+    },
+    {
+        "hi": "डाटा एंट्री",
+        "en": "Data Entry"
+    },
+    {
+        "hi": "कुल मैनपावर",
+        "en": "Total Manpower"
+    },
+    {
+        "hi": "मोबाइल नंबर",
+        "en": "Mobile Number"
+    },
+    {
+        "hi": "पाइप बिछाना",
+        "en": "Pipeline Laying"
+    },
+    {
+        "hi": "आज का कार्य",
+        "en": "Today's Work"
+    },
+    {
+        "hi": "साइट का नाम",
+        "en": "Site Name"
+    },
+    {
+        "hi": "कार्य विवरण",
+        "en": "Work Description"
+    },
+    {
+        "hi": "साइट चुनें:",
+        "en": "Select Site:"
+    },
+    {
+        "hi": "तारीख चुनें",
+        "en": "Select Date"
+    },
+    {
+        "hi": "सामान खोजें",
+        "en": "Search Material"
+    },
+    {
+        "hi": "PDF डाउनलोड",
+        "en": "Download PDF"
+    },
+    {
+        "hi": "प्रिंट करें",
+        "en": "Print"
+    },
+    {
+        "hi": "हाजिरी शीट",
+        "en": "Attendance Sheet"
+    },
+    {
+        "hi": "फोटो अपलोड",
+        "en": "Upload Photos"
+    },
+    {
+        "hi": "सुपरवाइज़र",
+        "en": "Supervisor"
+    },
+    {
+        "hi": "साइट स्टॉक",
+        "en": "Site Stock"
+    },
+    {
+        "hi": "DPR प्रगति",
+        "en": "DPR Progress"
+    },
+    {
+        "hi": "फोटो एल्बम",
+        "en": "Photo Album"
+    },
+    {
+        "hi": "भाषा बदलें",
+        "en": "Change Language"
+    },
+    {
+        "hi": "कुल हाजिरी",
+        "en": "Total Attendance"
+    },
+    {
+        "hi": "कार्य घंटे",
+        "en": "Work Hours"
+    },
+    {
+        "hi": "लेजर देखें",
+        "en": "View Ledger"
+    },
+    {
+        "hi": "सभी साइट्स",
+        "en": "All Sites"
+    },
+    {
+        "hi": "साइट चुनें",
+        "en": "Select Site"
+    },
+    {
+        "hi": "अपडेट करें",
+        "en": "Update"
+    },
+    {
+        "hi": "लॉगिन करें",
+        "en": "Login"
+    },
+    {
+        "hi": "सुपरवाइजर",
+        "en": "Supervisor"
+    },
+    {
+        "hi": "रिपोर्ट्स",
+        "en": "Reports"
+    },
+    {
+        "hi": "21 साइट्स",
+        "en": "21 Sites"
+    },
+    {
+        "hi": "अनुपस्थित",
+        "en": "Absent"
+    },
+    {
+        "hi": "स्टॉक आवक",
+        "en": "Stock Inward"
+    },
+    {
+        "hi": "शेष स्टॉक",
+        "en": "Remaining Stock"
+    },
+    {
+        "hi": "दर्ज करें",
+        "en": "Submit"
+    },
+    {
+        "hi": "रद्द करें",
+        "en": "Cancel"
+    },
+    {
+        "hi": "क्र. सं.",
+        "en": "Sl. No."
+    },
+    {
+        "hi": "ऑटोमैटिक",
+        "en": "Auto-Generated"
+    },
+    {
+        "hi": "डैशबोर्ड",
+        "en": "Dashboard"
+    },
+    {
+        "hi": "मिस्त्री",
+        "en": "Mason"
+    },
+    {
+        "hi": "कुल खर्च",
+        "en": "Total Consumed"
+    },
+    {
+        "hi": "उपलब्ध %",
+        "en": "Available %"
+    },
+    {
+        "hi": "पर्याप्त",
+        "en": "Healthy"
+    },
+    {
+        "hi": "कम स्टॉक",
+        "en": "Low Stock"
+    },
+    {
+        "hi": "कुल राशि",
+        "en": "Total Amount"
+    },
+    {
+        "hi": "खोजें...",
+        "en": "Search..."
+    },
+    {
+        "hi": "बंद करें",
+        "en": "Close"
+    },
+    {
+        "hi": "उद्देश्य",
+        "en": "Purpose"
+    },
+    {
+        "hi": "सुरक्षित",
+        "en": "Saved"
+    },
+    {
+        "hi": "क्र.सं.",
+        "en": "Sl. No."
+    },
+    {
+        "hi": "👑 मालिक",
+        "en": "👑 Owner"
+    },
+    {
+        "hi": "उपस्थित",
+        "en": "Present"
+    },
+    {
+        "hi": "ऑन-साइट",
+        "en": "On-Site"
+    },
+    {
+        "hi": "ऑफ-साइट",
+        "en": "Off-Site"
+    },
+    {
+        "hi": "चेक-आउट",
+        "en": "Check-Out"
+    },
+    {
+        "hi": "जलमीनार",
+        "en": "Water Tower"
+    },
+    {
+        "hi": "परीक्षण",
+        "en": "Hydro Testing"
+    },
+    {
+        "hi": "सामग्री",
+        "en": "Material"
+    },
+    {
+        "hi": "दिनांक:",
+        "en": "Date:"
+    },
+    {
+        "hi": "मात्रा:",
+        "en": "Quantity:"
+    },
+    {
+        "hi": "कुल (₹)",
+        "en": "Total (₹)"
+    },
+    {
+        "hi": "टिप्पणी",
+        "en": "Remarks"
+    },
+    {
+        "hi": "फ़िल्टर",
+        "en": "Filter"
+    },
+    {
+        "hi": "डाउनलोड",
+        "en": "Download"
+    },
+    {
+        "hi": "मटेरियल",
+        "en": "Material"
+    },
+    {
+        "hi": "रिपोर्ट",
+        "en": "Report"
+    },
+    {
+        "hi": "रजिस्टर",
+        "en": "Register"
+    },
+    {
+        "hi": "एंट्रीज",
+        "en": "Entries"
+    },
+    {
+        "hi": "संपादित",
+        "en": "Edit"
+    },
+    {
+        "hi": "इनचार्ज",
+        "en": "Incharge"
+    },
+    {
+        "hi": "लॉगआउट",
+        "en": "Logout"
+    },
+    {
+        "hi": "प्लंबर",
+        "en": "Plumber"
+    },
+    {
+        "hi": "हेल्पर",
+        "en": "Helper"
+    },
+    {
+        "hi": "चेक-इन",
+        "en": "Check-In"
+    },
+    {
+        "hi": "बैलेंस",
+        "en": "Balance"
+    },
+    {
+        "hi": "लक्ष्य",
+        "en": "Target"
+    },
+    {
+        "hi": "श्रेणी",
+        "en": "Category"
+    },
+    {
+        "hi": "तारीख:",
+        "en": "Date:"
+    },
+    {
+        "hi": "दिनांक",
+        "en": "Date"
+    },
+    {
+        "hi": "मात्रा",
+        "en": "Quantity"
+    },
+    {
+        "hi": "दर (₹)",
+        "en": "Rate (₹)"
+    },
+    {
+        "hi": "स्थिति",
+        "en": "Status"
+    },
+    {
+        "hi": "साइट्स",
+        "en": "Sites"
+    },
+    {
+        "hi": "प्रिंट",
+        "en": "Print"
+    },
+    {
+        "hi": "ऑनलाइन",
+        "en": "Online"
+    },
+    {
+        "hi": "ऑफलाइन",
+        "en": "Offline"
+    },
+    {
+        "hi": "हाजिरी",
+        "en": "Attendance"
+    },
+    {
+        "hi": "प्रगति",
+        "en": "Progress"
+    },
+    {
+        "hi": "माहवार",
+        "en": "Monthly"
+    },
+    {
+        "hi": "सक्रिय",
+        "en": "Active"
+    },
+    {
+        "hi": "उपलब्ध",
+        "en": "Available"
+    },
+    {
+        "hi": "एंट्री",
+        "en": "Entry"
+    },
+    {
+        "hi": "जोड़ें",
+        "en": "Add"
+    },
+    {
+        "hi": "स्टोर",
+        "en": "Store"
+    },
+    {
+        "hi": "मालिक",
+        "en": "Owner"
+    },
+    {
+        "hi": "तारीख",
+        "en": "Date"
+    },
+    {
+        "hi": "विवरण",
+        "en": "Description"
+    },
+    {
+        "hi": "एक्शन",
+        "en": "Actions"
+    },
+    {
+        "hi": "खोजें",
+        "en": "Search"
+    },
+    {
+        "hi": "हटाएं",
+        "en": "Delete"
+    },
+    {
+        "hi": "स्टॉक",
+        "en": "Stock"
+    },
+    {
+        "hi": "दैनिक",
+        "en": "Daily"
+    },
+    {
+        "hi": "मासिक",
+        "en": "Monthly"
+    },
+    {
+        "hi": "लॉग्स",
+        "en": "Logs"
+    },
+    {
+        "hi": "सेकंड",
+        "en": "Secs"
+    },
+    {
+        "hi": "स्थान",
+        "en": "Place"
+    },
+    {
+        "hi": "विभाग",
+        "en": "Department"
+    },
+    {
+        "hi": "एल्बम",
+        "en": "Album"
+    },
+    {
+        "hi": "खोलें",
+        "en": "Open"
+    },
+    {
+        "hi": "देखें",
+        "en": "View"
+    },
+    {
+        "hi": "वर्कर",
+        "en": "Worker"
+    },
+    {
+        "hi": "स्टाफ",
+        "en": "Staff"
+    },
+    {
+        "hi": "फोटो",
+        "en": "Photos"
+    },
+    {
+        "hi": "लेजर",
+        "en": "Ledger"
+    },
+    {
+        "hi": "कुल:",
+        "en": "Total:"
+    },
+    {
+        "hi": "पत्र",
+        "en": "Letters"
+    },
+    {
+        "hi": "अधिक",
+        "en": "More"
+    },
+    {
+        "hi": "डीईओ",
+        "en": "DEO"
+    },
+    {
+        "hi": "अन्य",
+        "en": "Other"
+    },
+    {
+        "hi": "खत्म",
+        "en": "Out of Stock"
+    },
+    {
+        "hi": "इकाई",
+        "en": "Unit"
+    },
+    {
+        "hi": "साइट",
+        "en": "Site"
+    },
+    {
+        "hi": "पंजी",
+        "en": "Register"
+    },
+    {
+        "hi": "सूची",
+        "en": "Directory"
+    },
+    {
+        "hi": "घंटे",
+        "en": "Hours"
+    },
+    {
+        "hi": "मिनट",
+        "en": "Mins"
+    },
+    {
+        "hi": "विषय",
+        "en": "Subject"
+    },
+    {
+        "hi": "रद्द",
+        "en": "Cancel"
+    },
+    {
+        "hi": "एडिट",
+        "en": "Edit"
+    },
+    {
+        "hi": "आवक",
+        "en": "Inward"
+    },
+    {
+        "hi": "खपत",
+        "en": "Consumed"
+    },
+    {
+        "hi": "दर:",
+        "en": "Rate:"
+    },
+    {
+        "hi": "नाम",
+        "en": "Name"
+    },
+    {
+        "hi": "कोड",
+        "en": "Code"
+    },
+    {
+        "hi": "लॉग",
+        "en": "Log"
+    },
+    {
+        "hi": "कुल",
+        "en": "Total"
+    },
+    {
+        "hi": "सेव",
+        "en": "Save"
+    },
+    {
+        "hi": "ओपन",
+        "en": "Open"
+    },
+    {
+        "hi": "नया",
+        "en": "New"
+    },
+    {
+        "hi": "पद",
+        "en": "Designation"
+    },
+    {
+        "hi": "दर",
+        "en": "Rate"
+    },
+    {
+        "hi": "आज",
+        "en": "Today"
+    },
+    {
+        "hi": "कल",
+        "en": "Yesterday"
+    },
+    {
+        "hi": "कम",
+        "en": "Low"
+    },
+    {
+        "hi": "नई",
+        "en": "New"
+    }
+],
+
+    /**
+     * Dictionary for direct data-i18n lookup
+     */
     dictionary: {
         hi: {
-            // Header & Navigation
             app_title: "M/S SANDIP KUMAR",
             app_subtitle: "21 Sites Project Tracker",
-            nav_dashboard: "डैशबोर्ड",
-            nav_reports: "📊 रिपोर्ट्स केंद्र",
-            nav_stock: "📦 साइट स्टॉक (रजिस्टर)",
-            nav_stock_short: "स्टॉक",
-            nav_store: "🛒 सामग्री स्टोर",
-            nav_daily_entry: "📝 दैनिक एंट्री",
-            nav_attendance: "👥 हाजिरी (मैनपावर)",
-            nav_attendance_short: "हाजिरी",
-            nav_site_report: "साइट रिपोर्ट",
-            nav_daily_report: "दैनिक रिपोर्ट",
-            nav_monthly_report: "माहवार रिपोर्ट",
-            nav_material_report: "सामग्री अनुसार",
-            nav_item_history: "कब इस्तेमाल हुआ? (तारीख)",
-            nav_matrix_report: "साइट्स मैट्रिक्स",
-            nav_sites: "साइट्स",
-            nav_materials: "सामग्री",
-            nav_backup: "बैकअप",
-            owner_login: "मालिक लॉगिन",
-            owner_active: "👑 मालिक",
-            owner_title: "मालिक लॉगिन (Owner Mode)",
-            owner_pin_desc: "मास्टर कंट्रोल, कुल खर्चे और स्टॉक बदलाव के लिए 4 अंकों का पिन डालें:",
-            unlock_btn: "लॉगिन करें (Unlock)",
-            cancel_btn: "रद्द करें",
-            close_btn: "बंद करें",
-            save_btn: "सुरक्षित करें",
-            submit_btn: "दर्ज करें",
-            delete_btn: "हटाएं",
-            edit_btn: "संपादित करें",
-            search_placeholder: "खोजें...",
-            filter_btn: "फ़िल्टर करें",
-            print_btn: "प्रिंट करें",
-            export_excel: "एक्सेल डाउनलोड",
-            online_status: "ऑनलाइन (लाइव सिंक)",
-            offline_status: "ऑफलाइन (स्थानीय सुरक्षित)",
-
-            // Dashboard
-            dash_banner_badge: "M/S SANDIP KUMAR • 19 Sites Live Project Tracker",
-            dash_banner_title: "सामग्री खपत एवं साइट ट्रैकिंग",
-            dash_banner_desc: "मैरवा, सीवान, छपरा, मधुबनी, दरभंगा सहित सभी 19 साइट्स पर रोज़ होने वाले सामग्री इस्तेमाल (पाइप, मोटर, केबल, फिटिंग) का हिसाब-किताब और दैनिक रिपोर्ट।",
-            dash_btn_store: "🛒 सामग्री स्टोर (+ आइटम जोड़ें)",
-            dash_btn_entry: "नई दैनिक एंट्री करें",
-            dash_btn_site_report: "साइट-वार हिसाब देखें",
-            dash_btn_matrix: "साइट्स मैट्रिक्स",
-            dash_stock_card_title: "साइट स्टॉक व बैलेंस (Site Stock)",
-            dash_stock_card_sub: "भेजा गया माल, रोज़ का खर्च और बचा स्टॉक (तारीख-वार लेजर)",
-            dash_stock_open: "स्टॉक रजिस्टर खोलें",
-            dash_att_card_title: "दैनिक मैनपावर हाजिरी (Attendance)",
-            dash_att_card_sub: "मिस्त्री, प्लंबर, हेल्पर और स्टाफ की 21 साइट्स की दैनिक हाजिरी शीट",
-            dash_att_open: "हाजिरी शीट खोलें",
-            dash_stat_sites: "कुल साइट्स",
-            dash_stat_materials: "कुल सामग्री",
-            dash_stat_today_entries: "आज की एंट्रीज",
-            dash_stat_7days_entries: "अंतिम 7 दिन में एंट्रीज",
-            dash_recent_entries: "हाल की दैनिक सामग्री एंट्रीज (Recent Entries)",
-            dash_site_summary: "साइट-वार सामग्री सारांश (Site Quick View)",
-
-            // Stock Register Page
-            stock_page_title: "📦 साइट स्टॉक व बैलेंस रजिस्टर",
-            stock_page_subtitle: "19 साइट्स पर भेजा गया माल (Inward), रोज़ का खर्च (Daily Consumption) और बचा हुआ स्टॉक (Live Balance)",
-            stock_btn_inward: "➕ नया माल भेजें (स्टॉक आवक)",
-            stock_btn_reset: "⚠️ स्टॉक 0 करें (Reset)",
-            stock_filter_site: "सभी साइट्स (All Sites)",
-            stock_filter_category: "सभी श्रेणियां (All Categories)",
-            stock_th_site: "साइट का नाम",
-            stock_th_material: "सामग्री का नाम",
-            stock_th_category: "श्रेणी / प्रकार",
-            stock_th_inward: "कुल भेजा गया (आवक)",
-            stock_th_used: "कुल खर्च (दैनिक खपत)",
-            stock_th_balance: "बचा हुआ स्टॉक (बैलेंस)",
-            stock_th_unit: "इकाई",
-            stock_th_history: "तारीख-वार लेजर",
-            stock_inward_modal_title: "📦 नया माल भेजें (Stock Inward Entry)",
-            stock_inward_modal_desc: "गोदाम या सप्लायर से साइट पर माल भेजने का रिकॉर्ड दर्ज करें।",
-            stock_reset_modal_title: "⚠️ साइट स्टॉक 0 करें (Reset to Zero)",
-            stock_reset_modal_desc: "चुनी गई साइट या सभी साइट्स का भेजा गया माल और खपत 0 पर सेट करें।",
-            stock_ledger_modal_title: "📋 तारीख-वार स्टॉक लेजर (Date-wise Ledger)",
-            stock_ledger_modal_desc: "किस तारीख को कितना माल आया और कितना खर्च हुआ का पूरा ब्यौरा।",
-            stock_pin_label: "मालिक का 4 अंकों का गुप्त पिन:",
-
-            // Daily Entry Page
-            entry_page_title: "📝 दैनिक सामग्री इस्तेमाल एंट्री (Roj Ka Kharch)",
-            entry_page_subtitle: "साइट पर आज कितना सामान लगा, तारीख और विवरण के साथ दर्ज करें",
-            entry_form_site: "साइट चुनें:",
-            entry_form_date: "तारीख (Date):",
-            entry_form_material: "सामग्री (Material):",
-            entry_form_qty: "आज कितनी मात्रा लगी:",
-            entry_form_remarks: "विवरण / कहाँ लगाया गया (Remarks):",
-            entry_form_submit: "एंट्री सुरक्षित करें",
-
-            // Attendance Page
-            att_page_title: "👥 दैनिक मैनपावर हाजिरी रजिस्टर (Daily Attendance)",
-            att_page_subtitle: "साइट्स पर काम कर रहे मिस्त्री, प्लंबर, हेल्पर और स्टाफ की उपस्थिति दर्ज करें",
-            att_date_label: "तारीख चुनें:",
-            att_save_btn: "हाजिरी सुरक्षित करें",
-            att_mistry: "मिस्त्री (Mason)",
-            att_plumber: "प्लंबर (Plumber)",
-            att_helper: "हेल्पर (Helper)",
-            att_staff: "स्टाफ / सुपरवाइजर",
-
-            // Language Selector texts
             lang_selector_title: "भाषा चुनें / Select Language",
             lang_hi_title: "हिंदी (Hindi)",
             lang_hi_sub: "पूरा सिस्टम हिंदी में",
@@ -122,111 +1466,9 @@ const AppTranslations = {
             lang_switch_toast_hi: "✅ भाषा बदलकर 'हिंदी' कर दी गई है।",
             lang_switch_toast_en: "✅ Language switched to 'English'."
         },
-
         en: {
-            // Header & Navigation
             app_title: "M/S SANDIP KUMAR",
             app_subtitle: "21 Sites Project Tracker",
-            nav_dashboard: "Dashboard",
-            nav_reports: "📊 Reports Center",
-            nav_stock: "📦 Site Stock Register",
-            nav_stock_short: "Stock",
-            nav_store: "🛒 Material Store",
-            nav_daily_entry: "📝 Daily Entry",
-            nav_attendance: "👥 Attendance (Manpower)",
-            nav_attendance_short: "Attendance",
-            nav_site_report: "Site Report",
-            nav_daily_report: "Daily Report",
-            nav_monthly_report: "Monthly Report",
-            nav_material_report: "Material Wise",
-            nav_item_history: "Usage History (Date)",
-            nav_matrix_report: "Sites Matrix",
-            nav_sites: "Sites",
-            nav_materials: "Materials",
-            nav_backup: "Backup",
-            owner_login: "Owner Login",
-            owner_active: "👑 Owner",
-            owner_title: "Owner Mode (Admin PIN)",
-            owner_pin_desc: "Enter 4-digit PIN for master control, total costs, and stock modifications:",
-            unlock_btn: "Login (Unlock)",
-            cancel_btn: "Cancel",
-            close_btn: "Close",
-            save_btn: "Save",
-            submit_btn: "Submit",
-            delete_btn: "Delete",
-            edit_btn: "Edit",
-            search_placeholder: "Search...",
-            filter_btn: "Filter",
-            print_btn: "Print",
-            export_excel: "Export Excel",
-            online_status: "Online (Live Sync)",
-            offline_status: "Offline (Saved locally)",
-
-            // Dashboard
-            dash_banner_badge: "M/S SANDIP KUMAR • 19 Sites Live Project Tracker",
-            dash_banner_title: "Material Consumption & Site Tracking",
-            dash_banner_desc: "Track daily material usage (Pipes, Motors, Cables, Fittings) and generate reports across all 19 sites including Mairwa, Siwan, Chhapra, Madhubani, Darbhanga.",
-            dash_btn_store: "🛒 Material Store (+ Add Item)",
-            dash_btn_entry: "New Daily Entry",
-            dash_btn_site_report: "View Site-Wise Report",
-            dash_btn_matrix: "Sites Matrix",
-            dash_stock_card_title: "Site Stock & Balance Register",
-            dash_stock_card_sub: "Dispatched stock, daily consumption, and remaining balance (Date-wise ledger)",
-            dash_stock_open: "Open Stock Register",
-            dash_att_card_title: "Daily Manpower Attendance",
-            dash_att_card_sub: "Daily attendance sheet for Masons, Plumbers, Helpers, and Staff across 21 sites",
-            dash_att_open: "Open Attendance Sheet",
-            dash_stat_sites: "Total Sites",
-            dash_stat_materials: "Master Materials",
-            dash_stat_today_entries: "Today's Entries",
-            dash_stat_7days_entries: "Last 7 Days Entries",
-            dash_recent_entries: "Recent Material Entries",
-            dash_site_summary: "Site-Wise Material Summary",
-
-            // Stock Register Page
-            stock_page_title: "📦 Site Stock & Balance Register",
-            stock_page_subtitle: "Dispatched stock (Inward), daily consumption, and remaining stock (Live Balance) across all 19 sites",
-            stock_btn_inward: "➕ Dispatch Inward Stock",
-            stock_btn_reset: "⚠️ Reset Stock to 0",
-            stock_filter_site: "All Sites",
-            stock_filter_category: "All Categories",
-            stock_th_site: "Site Name",
-            stock_th_material: "Material Name",
-            stock_th_category: "Category / Type",
-            stock_th_inward: "Total Inward",
-            stock_th_used: "Total Used (Consumed)",
-            stock_th_balance: "Balance Stock",
-            stock_th_unit: "Unit",
-            stock_th_history: "Date-Wise Ledger",
-            stock_inward_modal_title: "📦 Dispatch Inward Stock",
-            stock_inward_modal_desc: "Record dispatch of materials from godown or supplier to site.",
-            stock_reset_modal_title: "⚠️ Reset Site Stock to 0",
-            stock_reset_modal_desc: "Reset inward and consumption quantities to 0 for selected site or all sites.",
-            stock_ledger_modal_title: "📋 Date-Wise Stock Ledger",
-            stock_ledger_modal_desc: "Complete history of material dispatches and daily consumptions with dates.",
-            stock_pin_label: "Owner 4-digit Secret PIN:",
-
-            // Daily Entry Page
-            entry_page_title: "📝 Daily Material Consumption Entry",
-            entry_page_subtitle: "Record material consumed at site with date, quantity, and work location",
-            entry_form_site: "Select Site:",
-            entry_form_date: "Date:",
-            entry_form_material: "Material:",
-            entry_form_qty: "Quantity Consumed Today:",
-            entry_form_remarks: "Remarks / Location of Work:",
-            entry_form_submit: "Save Entry",
-
-            // Attendance Page
-            att_page_title: "👥 Daily Manpower Attendance Register",
-            att_page_subtitle: "Record daily attendance for Masons, Plumbers, Helpers, and Staff at sites",
-            att_date_label: "Select Date:",
-            att_save_btn: "Save Attendance",
-            att_mistry: "Mason (Mistry)",
-            att_plumber: "Plumber",
-            att_helper: "Helper",
-            att_staff: "Staff / Supervisor",
-
-            // Language Selector texts
             lang_selector_title: "Select Language / भाषा चुनें",
             lang_hi_title: "हिंदी (Hindi)",
             lang_hi_sub: "Entire system in Hindi",
@@ -236,87 +1478,6 @@ const AppTranslations = {
             lang_switch_toast_en: "✅ Language switched to 'English'."
         }
     },
-
-    // Bilingual phrase pairs for automatic DOM text node replacement
-    phrasePairs: [
-        { en: "Dashboard", hi: "डैशबोर्ड" },
-        { en: "Material Store", hi: "सामग्री स्टोर" },
-        { en: "Daily Entry", hi: "दैनिक एंट्री" },
-        { en: "Roj Ka Entry", hi: "दैनिक एंट्री" },
-        { en: "Site Stock & Balance Register", hi: "साइट स्टॉक और बैलेंस रजिस्टर" },
-        { en: "Site Stock & Balance", hi: "साइट स्टॉक व बैलेंस" },
-        { en: "Site Stock", hi: "साइट स्टॉक" },
-        { en: "Stock Register", hi: "स्टॉक रजिस्टर" },
-        { en: "Daily Manpower Attendance", hi: "दैनिक साइट हाजिरी" },
-        { en: "Attendance", hi: "हाजिरी" },
-        { en: "Daily Report", hi: "दैनिक रिपोर्ट" },
-        { en: "Site Report", hi: "साइट रिपोर्ट" },
-        { en: "Monthly Report", hi: "माहवार रिपोर्ट" },
-        { en: "Mahina-war", hi: "माहवार" },
-        { en: "Material Wise", hi: "सामग्री अनुसार" },
-        { en: "Usage History (Date)", hi: "कब इस्तेमाल हुआ? (तारीख)" },
-        { en: "Kab Use Hua?", hi: "कब इस्तेमाल हुआ?" },
-        { en: "Sites Matrix", hi: "साइट्स मैट्रिक्स" },
-        { en: "Sites Directory", hi: "साइट्स सूची" },
-        { en: "Material Master", hi: "सामग्री मास्टर" },
-        { en: "Download Backup", hi: "बैकअप डाउनलोड" },
-        { en: "Owner Login", hi: "मालिक लॉगिन" },
-        { en: "Active Project Sites", hi: "सक्रिय प्रोजेक्ट साइट्स" },
-        { en: "Total Sites", hi: "कुल साइट्स" },
-        { en: "Kul Sites", hi: "कुल साइट्स" },
-        { en: "Master Materials", hi: "कुल सामग्री" },
-        { en: "Kul Samagri", hi: "कुल सामग्री" },
-        { en: "Today's Entries", hi: "आज की एंट्रीज" },
-        { en: "Aaj Ki Entries", hi: "आज की एंट्रीज" },
-        { en: "Balance Stock", hi: "बचा हुआ स्टॉक" },
-        { en: "Inward Stock", hi: "आवक स्टॉक" },
-        { en: "Daily Consumption", hi: "दैनिक खपत" },
-        { en: "Reset Stock to 0", hi: "स्टॉक 0 करें" },
-        { en: "Date-wise Ledger", hi: "तारीख-वार लेजर" },
-        { en: "View Date-wise Ledger", hi: "तारीख-वार लेजर देखें" },
-        { en: "View Ledger", hi: "लेजर देखें" },
-        { en: "Dispatch Inward Stock", hi: "साइट पर माल भेजें" },
-        { en: "Dispatch stock to this site", hi: "इस साइट पर नया माल भेजें" },
-        { en: "Export Excel", hi: "Excel डाउनलोड" },
-        { en: "Select Site:", hi: "साइट चुनें:" },
-        { en: "Search Material", hi: "सामान खोजें" },
-        { en: "Total Inward", hi: "कुल भेजा गया (Inward)" },
-        { en: "Total Used", hi: "कुल खर्च (Used)" },
-        { en: "Site Balance", hi: "साइट पर शेष (Balance)" },
-        { en: "Available %", hi: "उपलब्ध %" },
-        { en: "Status", hi: "स्थिति" },
-        { en: "Actions", hi: "एक्शन" },
-        { en: "Material Name", hi: "सामग्री का नाम" },
-        { en: "Site Name", hi: "साइट का नाम" },
-        { en: "Category", hi: "श्रेणी" },
-        { en: "Unit", hi: "इकाई" },
-        { en: "Date", hi: "तारीख" },
-        { en: "Quantity", hi: "मात्रा" },
-        { en: "Remarks", hi: "विवरण" },
-        { en: "Supervisor", hi: "सुपरवाइजर" },
-        { en: "Total Manpower", hi: "कुल मैनपावर" },
-        { en: "Mason & Plumber", hi: "मिस्त्री व प्लंबर" },
-        { en: "Mason", hi: "मिस्त्री" },
-        { en: "Plumber", hi: "प्लंबर" },
-        { en: "Total Helpers", hi: "कुल हेल्पर्स" },
-        { en: "Helper", hi: "हेल्पर" },
-        { en: "Staff", hi: "स्टाफ" },
-        { en: "Save Attendance", hi: "हाजिरी सेव करें" },
-        { en: "All Sites", hi: "सभी साइट्स" },
-        { en: "All 21 Sites", hi: "सभी 21 साइट्स" },
-        { en: "Healthy Stock", hi: "पर्याप्त" },
-        { en: "Low Stock", hi: "कम स्टॉक" },
-        { en: "Out of Stock", hi: "खत्म" },
-        { en: "Save", hi: "सुरक्षित करें" },
-        { en: "Submit", hi: "दर्ज करें" },
-        { en: "Cancel", hi: "रद्द करें" },
-        { en: "Delete", hi: "हटाएं" },
-        { en: "Edit", hi: "संपादित करें" },
-        { en: "Print", hi: "प्रिंट करें" },
-        { en: "Search", hi: "खोजें" },
-        { en: "Online (Live Sync)", hi: "ऑनलाइन (लाइव सिंक)" },
-        { en: "Offline (Saved locally)", hi: "ऑफलाइन (स्थानीय सुरक्षित)" }
-    ],
 
     /**
      * Apply active language to the entire document
@@ -328,48 +1489,35 @@ const AppTranslations = {
         this.currentLang = lang;
         localStorage.setItem('sandip_app_lang', lang);
 
-        const dict = this.dictionary[lang];
-        if (!dict) return;
-
-        // 1. Update all elements with data-i18n
+        // 1. Direct data-i18n tags
+        const dict = this.dictionary[lang] || {};
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key] !== undefined) {
-                // If element has nested icon, preserve icon and update text
                 const icon = el.querySelector('i');
                 if (icon) {
-                    const iconHTML = icon.outerHTML;
-                    el.innerHTML = iconHTML + ' ' + dict[key];
+                    el.innerHTML = icon.outerHTML + ' ' + dict[key];
                 } else {
                     el.textContent = dict[key];
                 }
             }
         });
 
-        // 2. Update placeholders
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (dict[key]) el.placeholder = dict[key];
-        });
-
-        // 3. Update titles / tooltips
-        document.querySelectorAll('[data-i18n-title]').forEach(el => {
-            const key = el.getAttribute('data-i18n-title');
-            if (dict[key]) el.title = dict[key];
-        });
-
-        // 4. Update the Tap Icon in UP LEFT
+        // 2. Update visual display of TAP ICON in UP LEFT
         this.updateTapIconButton(lang);
 
-        // 5. Automatic text walker for untagged elements
+        // 3. Walk all text nodes & translate untagged content
         this.walkAndTranslate(lang);
 
-        // 6. Broadcast event for any page-specific custom tables/scripts
+        // 4. Translate all attributes (placeholder, title, alt)
+        this.translateAttributes(lang);
+
+        // 5. Broadcast language change event
         window.dispatchEvent(new CustomEvent('appLanguageChanged', { detail: { lang } }));
     },
 
     /**
-     * Update the visual display of the TAP ICON in UP LEFT
+     * Update TAP ICON in UP LEFT
      */
     updateTapIconButton: function(lang) {
         const codeEl = document.getElementById('tapLangCode');
@@ -397,22 +1545,35 @@ const AppTranslations = {
     },
 
     /**
-     * Walk text nodes to translate common phrases automatically
+     * Cache and return pairs sorted by search key length descending
      */
-    walkAndTranslate: function(targetLang) {
-        // Build regex / replacement mapping based on target language
-        const pairs = this.phrasePairs;
+    getSortedPairs: function(targetLang) {
+        if (!this._hiToEnPairs) {
+            this._hiToEnPairs = [...this.phrasePairs].sort((a, b) => b.hi.length - a.hi.length);
+            this._enToHiPairs = [...this.phrasePairs].sort((a, b) => b.en.length - a.en.length);
+        }
+        return targetLang === 'en' ? this._hiToEnPairs : this._enToHiPairs;
+    },
+
+    /**
+     * Walk text nodes to translate content cleanly
+     */
+    walkAndTranslate: function(targetLang, rootNode) {
+        const root = rootNode || document.body;
+        if (!root) return;
+
+        const pairs = this.getSortedPairs(targetLang);
         const walker = document.createTreeWalker(
-            document.body,
+            root,
             NodeFilter.SHOW_TEXT,
             {
                 acceptNode: function(node) {
-                    // Skip script, style, input, textarea, and language selector dropdown
                     const parent = node.parentElement;
                     if (!parent) return NodeFilter.FILTER_REJECT;
                     const tag = parent.tagName.toLowerCase();
                     if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input') return NodeFilter.FILTER_REJECT;
                     if (parent.closest('#tapLangContainer') || parent.closest('#tapLangDropdown')) return NodeFilter.FILTER_REJECT;
+                    // Do not translate raw numbers or date patterns
                     return NodeFilter.FILTER_ACCEPT;
                 }
             }
@@ -425,15 +1586,13 @@ const AppTranslations = {
 
             for (let i = 0; i < pairs.length; i++) {
                 const pair = pairs[i];
-                if (targetLang === 'hi') {
-                    // Replace English with Hindi
-                    if (val.includes(pair.en)) {
-                        val = val.replaceAll(pair.en, pair.hi);
-                    }
-                } else {
-                    // Replace Hindi with English
+                if (targetLang === 'en') {
                     if (val.includes(pair.hi)) {
                         val = val.replaceAll(pair.hi, pair.en);
+                    }
+                } else {
+                    if (val.includes(pair.en)) {
+                        val = val.replaceAll(pair.en, pair.hi);
                     }
                 }
             }
@@ -444,7 +1603,84 @@ const AppTranslations = {
     },
 
     /**
-     * Show a quick non-intrusive toast notification
+     * Translate placeholders, titles, and alt text across all elements
+     */
+    translateAttributes: function(targetLang, rootNode) {
+        const root = rootNode || document;
+        const pairs = this.getSortedPairs(targetLang);
+
+        // Placeholders in inputs & textareas
+        root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(el => {
+            let ph = el.getAttribute('placeholder');
+            if (!ph) return;
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+                if (targetLang === 'en') {
+                    if (ph.includes(pair.hi)) ph = ph.replaceAll(pair.hi, pair.en);
+                } else {
+                    if (ph.includes(pair.en)) ph = ph.replaceAll(pair.en, pair.hi);
+                }
+            }
+            el.setAttribute('placeholder', ph);
+        });
+
+        // Tooltips / Titles
+        root.querySelectorAll('[title]').forEach(el => {
+            let title = el.getAttribute('title');
+            if (!title) return;
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+                if (targetLang === 'en') {
+                    if (title.includes(pair.hi)) title = title.replaceAll(pair.hi, pair.en);
+                } else {
+                    if (title.includes(pair.en)) title = title.replaceAll(pair.en, pair.hi);
+                }
+            }
+            el.setAttribute('title', title);
+        });
+
+        // Option values in select elements
+        root.querySelectorAll('select option').forEach(opt => {
+            let txt = opt.textContent;
+            if (!txt) return;
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+                if (targetLang === 'en') {
+                    if (txt.includes(pair.hi)) txt = txt.replaceAll(pair.hi, pair.en);
+                } else {
+                    if (txt.includes(pair.en)) txt = txt.replaceAll(pair.en, pair.hi);
+                }
+            }
+            opt.textContent = txt;
+        });
+    },
+
+    /**
+     * Setup MutationObserver to translate dynamically rendered elements (modals, AJAX)
+     */
+    setupObserver: function() {
+        if (this._observer) return;
+        const self = this;
+        this._observer = new MutationObserver(mutations => {
+            if (self.currentLang !== 'en') return;
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        self.walkAndTranslate('en', node);
+                        self.translateAttributes('en', node);
+                    }
+                });
+            });
+        });
+
+        this._observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    },
+
+    /**
+     * Show brief toast notification
      */
     showToast: function(msg) {
         let toast = document.getElementById('langToastNotification');
@@ -526,4 +1762,5 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     const savedLang = localStorage.getItem('sandip_app_lang') || 'hi';
     AppTranslations.applyLanguage(savedLang);
+    AppTranslations.setupObserver();
 });
