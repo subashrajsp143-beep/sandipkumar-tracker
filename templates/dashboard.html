@@ -10,18 +10,13 @@
     <!-- ======================================================== -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
         <div>
-            <div class="text-[11px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>OPERATIONS &bull; WORKFORCE CONSOLE</span>
-            </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-0.5">
-                21 Sites Project Overview
-            </h1>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" data-i18n="dash_title">डैशबोर्ड</h1>
+            <div class="text-xs font-bold text-emerald-800 flex items-center gap-1.5 mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> <span data-i18n="dash_subtitle">२१ साइट्स</span></div>
         </div>
 
         <!-- Date Pill with Calendar Icon (matches Month/Year pill in screenshot) -->
         <div class="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 shadow-2xs self-start sm:self-auto">
-            <span class="text-slate-400 font-semibold">Active Date:</span>
+            <span class="text-slate-400 font-semibold" data-i18n="dash_active_date">दिनांक:</span>
             <span class="font-mono text-emerald-900 font-black">{{ current_date }}</span>
             <i class="fa-regular fa-calendar text-emerald-700 ml-1"></i>
         </div>
@@ -30,21 +25,12 @@
     <!-- ======================================================== -->
     <!-- 2. STATUS CARD (Exact match to STATUS: Payroll published in screenshot) -->
     <!-- ======================================================== -->
-    <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
         <div>
-            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">PROJECT STATUS</div>
-            <div class="text-base sm:text-lg font-black text-slate-900 mt-0.5">
-                21 Water Supply Sites Operational &bull; Bihar JJM
-            </div>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Live attendance, material consumption, DPR pipeline execution, and official dispatch register active.
-            </p>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400" data-i18n="dash_status_title">परियोजना स्थिति</div>
+            <div class="text-base font-bold text-slate-900 mt-0.5" data-i18n="dash_status_body">२१ जलापूर्ति साइट्स चालू</div>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 font-black text-xs uppercase tracking-wider border border-emerald-200 shadow-2xs">
-                ● ACTIVE &amp; PUBLISHED
-            </span>
-        </div>
+        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-xs uppercase tracking-wider border border-emerald-200" data-i18n="dash_status_badge">● सक्रिय</span>
     </div>
 
     <!-- ======================================================== -->
@@ -54,44 +40,44 @@
         
         <!-- Tile 1: Project Sites -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PROJECT SITES</div>
-            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">21 Active Sites</div>
-            <div class="text-[11px] text-emerald-700 font-semibold mt-1">Siwan, Mairwa, Chapra, Madhubani</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_sites">साइट्स</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 साइट्स</div>
+            <div class="text-[11px] text-emerald-700 font-semibold mt-1" data-i18n="tile_sites_sub">चालू</div>
         </div>
 
         <!-- Tile 2: Manpower on Duty -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TODAY'S WORKFORCE</div>
-            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">Daily Manpower</div>
-            <div class="text-[11px] text-indigo-700 font-semibold mt-1">Staff, Masons, Plumbers &amp; Helpers</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_workers">श्रमिक</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">दैनिक हाजिरी</div>
+            <div class="text-[11px] text-indigo-700 font-semibold mt-1" data-i18n="tile_workers_sub">साइट मैनपॉवर</div>
         </div>
 
         <!-- Tile 3: Usage Entries -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL CONSUMPTION ENTRIES</div>
-            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_logs }} Logs</div>
-            <div class="text-[11px] text-teal-700 font-semibold mt-1">Logged Across All 21 Sites</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_logs">खपत</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span data-i18n="tile_logs_sub">एंट्रीज</span></div>
+            <div class="text-[11px] text-teal-700 font-semibold mt-1" data-i18n="tile_logs_sub">कुल प्रविष्टियां</div>
         </div>
 
         <!-- Tile 4: Total Consumption Value -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL VALUE CONSUMED</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_cost">लागत</div>
             <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
-            <div class="text-[11px] text-amber-700 font-semibold mt-1">Calculated from Master Rates</div>
+            <div class="text-[11px] text-amber-700 font-semibold mt-1" data-i18n="tile_cost_sub">कुल सामग्री खर्च</div>
         </div>
 
         <!-- Tile 5: Next Letter Reference Number -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">NEXT DISPATCH REF NO</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_ref">पत्रांक</div>
             <div class="text-lg sm:text-xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
-            <div class="text-[11px] text-blue-700 font-semibold mt-1">Financial Year {{ next_letter_info.fy }}</div>
+            <div class="text-[11px] text-blue-700 font-semibold mt-1"><span data-i18n="tile_ref_sub">वित्तीय वर्ष</span> {{ next_letter_info.fy }}</div>
         </div>
 
         <!-- Tile 6: Material Store Catalog -->
         <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">MATERIALS CATALOG</div>
-            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_materials }} Master Items</div>
-            <div class="text-[11px] text-slate-500 font-semibold mt-1">Pipes, Motors, Cables, Fittings</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="tile_items">सामग्री</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span data-i18n="tile_items_sub">आइटम्स</span></div>
+            <div class="text-[11px] text-slate-500 font-semibold mt-1" data-i18n="tile_items_sub">मास्टर आइटम्स</div>
         </div>
     </div>
 
@@ -106,14 +92,12 @@
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/70 flex items-center justify-center text-lg mb-3">
                     <i class="fa-solid fa-users"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-sm">हाजिरी व मैनपावर (Attendance)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                    21 साइट्स दैनिक हाजिरी शीट (मैन्युअल) एवं 500m GPS जियो-हाजिरी।
-                </p>
+                <h3 class="font-black text-slate-900 text-sm" data-i18n="mod_attendance">उपस्थिति</h3>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="mod_att_desc">मैनुअल व GPS हाजिरी</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('attendance_view') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
-                    हाजिरी शीट &rarr;
+                    <span data-i18n="btn_open">हाजिरी</span> &rarr;
                 </a>
                 <a href="/geo-attendance" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="GPS हाजिरी">
                     GPS
@@ -127,14 +111,12 @@
                 <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/70 flex items-center justify-center text-lg mb-3">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-sm">सामग्री व स्टॉक (Stock)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                    भेजा गया माल (Inward), दैनिक खपत और साइट पर बचा हुआ बैलेंस स्टॉक।
-                </p>
+                <h3 class="font-black text-slate-900 text-sm" data-i18n="mod_material">सामग्री</h3>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="mod_mat_desc">स्टॉक व खपत एंट्री</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('site_stock') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
-                    स्टॉक रजिस्टर &rarr;
+                    <span data-i18n="btn_stock">स्टॉक</span> &rarr;
                 </a>
                 <a href="{{ url_for('daily_entry') }}" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="दैनिक एंट्री">
                     + एंट्री
@@ -148,14 +130,12 @@
                 <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-800 border border-sky-200/70 flex items-center justify-center text-lg mb-3">
                     <i class="fa-solid fa-trowel-bricks"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-sm">कार्य प्रगति व फोटो (DPR)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                    पाइपलाइन खुदाई, बिछाना, FHTC नल कनेक्शन एवं 4-फोटो A4 सरकारी एल्बम।
-                </p>
+                <h3 class="font-black text-slate-900 text-sm" data-i18n="mod_progress">प्रगति</h3>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="mod_prog_desc">DPR व फोटो एल्बम</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="/dpr" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
-                    DPR प्रगति &rarr;
+                    <span data-i18n="btn_dpr">DPR</span> &rarr;
                 </a>
                 <a href="/site-photos" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="फोटो एल्बम">
                     एल्बम
@@ -169,14 +149,12 @@
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 border border-blue-200/70 flex items-center justify-center text-lg mb-3">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-sm">रिपोर्ट्स केंद्र (Reports Hub)</h3>
-                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                    दैनिक, माहवार, साइट-वार सम्पूर्ण लेजर हिसाब एवं 21 साइट्स मैट्रिक्स।
-                </p>
+                <h3 class="font-black text-slate-900 text-sm" data-i18n="mod_reports">रिपोर्ट्स</h3>
+                <p class="text-xs text-slate-500 mt-1" data-i18n="mod_rep_desc">दैनिक व मासिक लेजर</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('reports_hub') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
-                    रिपोर्ट्स खोलें &rarr;
+                    <span data-i18n="btn_reports">रिपोर्ट्स</span> &rarr;
                 </a>
                 <a href="{{ url_for('reports_hub', tab='monthly') }}" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="मासिक">
                     मासिक
@@ -216,7 +194,7 @@
             <!-- Action Buttons: + New Entry, Excel Export, PDF Export -->
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" onclick="openNewLetterModal()" class="px-3.5 py-2 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-amber-300"></i> <span>+ नया पत्रांक दर्ज करें</span>
+                    <i class="fa-solid fa-circle-plus text-amber-300"></i> <span>+ <span data-i18n="btn_new_letter">नया पत्र</span></span>
                 </button>
                 <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5" title="Excel डाउनलोड">
                     <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Excel</span>
@@ -253,14 +231,14 @@
             <table class="w-full text-left text-xs border-collapse" id="lettersTable">
                 <thead>
                     <tr class="bg-slate-900 text-white uppercase text-[10.5px] tracking-wider font-bold">
-                        <th class="py-3 px-3 text-center w-14">क्र.सं. (Sl)</th>
-                        <th class="py-3 px-3 text-center whitespace-nowrap">दिनांक (Date)</th>
-                        <th class="py-3 px-3.5 text-center whitespace-nowrap">पत्रांक संख्या (Ref No)</th>
-                        <th class="py-3 px-3.5 min-w-[200px]">विभाग का नाम (Department)</th>
-                        <th class="py-3 px-3 whitespace-nowrap">स्थान (Place)</th>
-                        <th class="py-3 px-4 min-w-[280px]">पत्र का उद्देश्य / विषय (Purpose of Letter)</th>
-                        <th class="py-3 px-3 min-w-[160px]">टिप्पणी (Remarks)</th>
-                        <th class="py-3 px-3 text-center w-20">एक्शन</th>
+                        <th class="py-3 px-3 text-center w-14" data-i18n="col_sr">क्र.</th>
+                        <th class="py-3 px-3 text-center whitespace-nowrap" data-i18n="col_date">दिनांक</th>
+                        <th class="py-3 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">पत्रांक संख्या</th>
+                        <th class="py-3 px-3.5 min-w-[200px]" data-i18n="col_dept">विभाग</th>
+                        <th class="py-3 px-3 whitespace-nowrap" data-i18n="col_place">स्थान</th>
+                        <th class="py-3 px-4 min-w-[280px]" data-i18n="col_purpose">उद्देश्य</th>
+                        <th class="py-3 px-3 min-w-[160px]" data-i18n="col_remarks">रिमार्क्स</th>
+                        <th class="py-3 px-3 text-center w-20" data-i18n="col_action">कार्रवाई</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700" id="lettersTableBody">
@@ -334,12 +312,12 @@
             <div>
                 <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-emerald-700"></i>
-                    हाल ही की सामग्री खपत (Recent Usage Logs)
+                    <span data-i18n="logs_heading">हाल की खपत</span>
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5">21 साइट्स पर दर्ज हुई अंतिम सामग्री प्रविष्टियाँ</p>
+                <p class="text-xs text-slate-500 mt-0.5"><span data-i18n="logs_sub">अंतिम सामग्री प्रविष्टियां</span></p>
             </div>
             <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1">
-                दैनिक रिपोर्ट देखें <i class="fa-solid fa-arrow-right"></i>
+                <span data-i18n="view_daily">दैनिक रिपोर्ट</span> <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
 
@@ -347,13 +325,13 @@
             <table class="w-full text-left text-xs border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                        <th class="py-2.5 px-3">तारीख</th>
-                        <th class="py-2.5 px-3">साइट</th>
-                        <th class="py-2.5 px-3">सामग्री</th>
-                        <th class="py-2.5 px-3 text-right">मात्रा</th>
-                        <th class="py-2.5 px-3 text-right">दर</th>
-                        <th class="py-2.5 px-3 text-right">कुल (₹)</th>
-                        <th class="py-2.5 px-3">कार्य विवरण</th>
+                        <th class="py-2.5 px-3" data-i18n="col_date">तारीख</th>
+                        <th class="py-2.5 px-3" data-i18n="col_site">साइट</th>
+                        <th class="py-2.5 px-3" data-i18n="col_item">सामग्री</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_qty">मात्रा</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_rate">दर</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_val">लागत (₹)</th>
+                        <th class="py-2.5 px-3" data-i18n="col_desc">विवरण</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700">

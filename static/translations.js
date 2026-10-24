@@ -1454,10 +1454,113 @@ const AppTranslations = {
     /**
      * Dictionary for direct data-i18n lookup
      */
-    dictionary: {
+        dictionary: {
         hi: {
-            app_title: "M/S SANDIP KUMAR",
-            app_subtitle: "21 Sites Project Tracker",
+            app_title: "M/S संदीप कुमार",
+            app_subtitle: "२१ साइट्स",
+            top_status: "२१ साइट्स चालू",
+            top_user: "संदीप कुमार",
+            top_role: "मालिक",
+            sign_out: "लॉगआउट",
+
+            // Sidebar Segments & Sub-items
+            nav_dashboard: "डैशबोर्ड",
+            seg_attendance: "उपस्थिति",
+            sub_manual: "मैनुअल",
+            sub_gps: "GPS",
+            sub_workers: "श्रमिक",
+            seg_material: "सामग्री",
+            sub_stock: "स्टॉक",
+            sub_usage: "खपत",
+            sub_store: "स्टोर",
+            seg_progress: "प्रगति",
+            sub_dpr: "DPR",
+            sub_photos: "फोटो",
+            sub_upload: "अपलोड",
+            seg_letters: "जावक पत्र",
+            sub_letters: "पंजी",
+            sub_excel: "एक्सेल",
+            sub_pdf: "पीडीएफ",
+            seg_reports: "रिपोर्ट्स",
+            sub_daily: "दैनिक",
+            sub_monthly: "मासिक",
+            sub_ledger: "लेजर",
+            sub_matrix: "मैट्रिक्स",
+            seg_admin: "मास्टर",
+            sub_sites: "साइट्स",
+            sub_rates: "दरें",
+            sub_gps_setup: "GPS सेटअप",
+            sub_apk: "ऐप",
+            sub_website: "वेबसाइट",
+            sub_backup: "बैकअप",
+
+            // Dashboard Header & Status
+            dash_title: "डैशबोर्ड",
+            dash_subtitle: "२१ साइट्स",
+            dash_active_date: "दिनांक:",
+            dash_status_title: "परियोजना स्थिति",
+            dash_status_body: "२१ जलापूर्ति साइट्स चालू",
+            dash_status_badge: "● सक्रिय",
+
+            // Dashboard 6 Tiles
+            tile_sites: "साइट्स",
+            tile_sites_val: "21 साइट्स",
+            tile_sites_sub: "चालू",
+            tile_workers: "श्रमिक",
+            tile_workers_val: "दैनिक हाजिरी",
+            tile_workers_sub: "साइट मैनपॉवर",
+            tile_logs: "खपत",
+            tile_logs_sub: "एंट्रीज",
+            tile_cost: "लागत",
+            tile_cost_sub: "कुल सामग्री खर्च",
+            tile_ref: "पत्रांक",
+            tile_ref_sub: "वित्तीय वर्ष",
+            tile_items: "सामग्री",
+            tile_items_sub: "मास्टर आइटम्स",
+
+            // 4 Modules
+            mod_attendance: "उपस्थिति",
+            mod_att_desc: "मैनुअल व GPS हाजिरी",
+            btn_open: "हाजिरी",
+            btn_gps: "GPS",
+            mod_material: "सामग्री",
+            mod_mat_desc: "स्टॉक व खपत एंट्री",
+            btn_stock: "स्टॉक",
+            btn_entry: "+ खपत",
+            mod_progress: "प्रगति",
+            mod_prog_desc: "DPR व फोटो एल्बम",
+            btn_dpr: "DPR",
+            btn_photos: "फोटो",
+            mod_reports: "रिपोर्ट्स",
+            mod_rep_desc: "दैनिक व मासिक लेजर",
+            btn_reports: "रिपोर्ट्स",
+            btn_matrix: "मैट्रिक्स",
+
+            // Letters Section
+            letters_heading: "जावक पत्र पंजी",
+            letters_subheading: "विभिन्न विभागों को भेजे गए पत्रांक",
+            btn_new_letter: "नया पत्र",
+            col_sr: "क्र.",
+            col_date: "दिनांक",
+            col_ref: "पत्रांक संख्या",
+            col_dept: "विभाग",
+            col_place: "स्थान",
+            col_purpose: "उद्देश्य",
+            col_remarks: "रिमार्क्स",
+            col_action: "कार्रवाई",
+
+            // Recent Logs Section
+            logs_heading: "हाल की खपत",
+            logs_sub: "अंतिम सामग्री प्रविष्टियां",
+            view_daily: "दैनिक रिपोर्ट",
+            col_site: "साइट",
+            col_item: "सामग्री",
+            col_qty: "मात्रा",
+            col_rate: "दर",
+            col_val: "लागत (₹)",
+            col_desc: "विवरण",
+
+            // Dropdown & Language
             lang_selector_title: "भाषा चुनें / Select Language",
             lang_hi_title: "हिंदी (Hindi)",
             lang_hi_sub: "पूरा सिस्टम हिंदी में",
@@ -1466,6 +1569,121 @@ const AppTranslations = {
             lang_switch_toast_hi: "✅ भाषा बदलकर 'हिंदी' कर दी गई है।",
             lang_switch_toast_en: "✅ Language switched to 'English'."
         },
+        en: {
+            app_title: "M/S Sandip Kumar",
+            app_subtitle: "21 Sites",
+            top_status: "21 Sites Live",
+            top_user: "Sandip Kumar",
+            top_role: "Owner",
+            sign_out: "Sign out",
+
+            // Sidebar Segments & Sub-items
+            nav_dashboard: "Dashboard",
+            seg_attendance: "Attendance",
+            sub_manual: "Manual",
+            sub_gps: "GPS",
+            sub_workers: "Workers",
+            seg_material: "Material",
+            sub_stock: "Stock",
+            sub_usage: "Usage",
+            sub_store: "Store",
+            seg_progress: "Progress",
+            sub_dpr: "DPR",
+            sub_photos: "Photos",
+            sub_upload: "Upload",
+            seg_letters: "Letters",
+            sub_letters: "Register",
+            sub_excel: "Excel",
+            sub_pdf: "PDF",
+            seg_reports: "Reports",
+            sub_daily: "Daily",
+            sub_monthly: "Monthly",
+            sub_ledger: "Ledger",
+            sub_matrix: "Matrix",
+            seg_admin: "Master",
+            sub_sites: "Sites",
+            sub_rates: "Rates",
+            sub_gps_setup: "GPS Setup",
+            sub_apk: "App",
+            sub_website: "Website",
+            sub_backup: "Backup",
+
+            // Dashboard Header & Status
+            dash_title: "Dashboard",
+            dash_subtitle: "21 Sites",
+            dash_active_date: "Date:",
+            dash_status_title: "Project Status",
+            dash_status_body: "21 Water Supply Sites Live",
+            dash_status_badge: "● Active",
+
+            // Dashboard 6 Tiles
+            tile_sites: "Sites",
+            tile_sites_val: "21 Sites",
+            tile_sites_sub: "Live",
+            tile_workers: "Workers",
+            tile_workers_val: "Daily Attendance",
+            tile_workers_sub: "Site Manpower",
+            tile_logs: "Usage",
+            tile_logs_sub: "Logs",
+            tile_cost: "Cost",
+            tile_cost_sub: "Total Spent",
+            tile_ref: "Ref No",
+            tile_ref_sub: "Financial Year",
+            tile_items: "Items",
+            tile_items_sub: "Master Items",
+
+            // 4 Modules
+            mod_attendance: "Attendance",
+            mod_att_desc: "Manual & GPS Attendance",
+            btn_open: "Attendance",
+            btn_gps: "GPS",
+            mod_material: "Material",
+            mod_mat_desc: "Stock & Usage Logs",
+            btn_stock: "Stock",
+            btn_entry: "+ Usage",
+            mod_progress: "Progress",
+            mod_prog_desc: "DPR & Site Photos",
+            btn_dpr: "DPR",
+            btn_photos: "Photos",
+            mod_reports: "Reports",
+            mod_rep_desc: "Daily & Monthly Ledger",
+            btn_reports: "Reports",
+            btn_matrix: "Matrix",
+
+            // Letters Section
+            letters_heading: "Outgoing Letters",
+            letters_subheading: "Letters dispatched to departments",
+            btn_new_letter: "New Letter",
+            col_sr: "Sr.",
+            col_date: "Date",
+            col_ref: "Ref No",
+            col_dept: "Department",
+            col_place: "Place",
+            col_purpose: "Purpose",
+            col_remarks: "Remarks",
+            col_action: "Action",
+
+            // Recent Logs Section
+            logs_heading: "Recent Usage Logs",
+            logs_sub: "Latest usage entries",
+            view_daily: "Daily Report",
+            col_site: "Site",
+            col_item: "Material",
+            col_qty: "Quantity",
+            col_rate: "Rate",
+            col_val: "Cost (₹)",
+            col_desc: "Details",
+
+            // Dropdown & Language
+            lang_selector_title: "Select Language / भाषा चुनें",
+            lang_hi_title: "हिंदी (Hindi)",
+            lang_hi_sub: "Entire system in Hindi",
+            lang_en_title: "English",
+            lang_en_sub: "Complete system in English",
+            lang_switch_toast_hi: "✅ भाषा बदलकर 'हिंदी' कर दी गई है।",
+            lang_switch_toast_en: "✅ Language switched to 'English'."
+        }
+    },
         en: {
             app_title: "M/S SANDIP KUMAR",
             app_subtitle: "21 Sites Project Tracker",
@@ -1573,6 +1791,7 @@ const AppTranslations = {
                     const tag = parent.tagName.toLowerCase();
                     if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input') return NodeFilter.FILTER_REJECT;
                     if (parent.closest('#tapLangContainer') || parent.closest('#tapLangDropdown')) return NodeFilter.FILTER_REJECT;
+                    if (parent.closest('[data-i18n]')) return NodeFilter.FILTER_REJECT;
                     // Do not translate raw numbers or date patterns
                     return NodeFilter.FILTER_ACCEPT;
                 }
