@@ -60,39 +60,346 @@
     <meta name="apple-mobile-web-app-title" content="Sandip Tracker">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 </head>
-<body class="flex flex-col min-h-screen text-slate-800">
+<body class="bg-[#F4F6F5] text-slate-800 antialiased font-sans min-h-screen overflow-x-hidden">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-brand-900 text-white shadow-md sticky top-0 z-50 no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+    <!-- Custom CSS for HRMS Theme & Layout -->
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #133D31; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #1C5544; }
+
+        /* HRMS Sidebar Collapsed State */
+        #appSidebar.collapsed { width: 4.5rem !important; }
+        #appSidebar.collapsed .sidebar-text,
+        #appSidebar.collapsed .folder-content,
+        #appSidebar.collapsed .fa-chevron-right,
+        #appSidebar.collapsed .fa-chevron-down,
+        #appSidebar.collapsed .brand-subtitle { display: none !important; }
+        #appSidebar.collapsed .brand-container { justify-content: center !important; }
+        #appSidebar.collapsed .sidebar-nav-item,
+        #appSidebar.collapsed .sidebar-sub-item,
+        #appSidebar.collapsed .folder-toggle-btn { justify-content: center !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+        #appSidebar.collapsed .active-indicator { display: none !important; }
+
+        /* Active Sub-item highlight matching HRMS screenshot */
+        .active-sidebar-pill {
+            background-color: #123B2F !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+        }
+        .active-sidebar-pill .active-indicator {
+            display: inline-block !important;
+        }
+        .folder-content.hidden { display: none; }
+    </style>
+
+    <!-- WRAPPER: Full Height Enterprise Flex Layout -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- ======================================================== -->
+        <!-- 1. PERSISTENT LEFT SIDEBAR (HRMS Deep Forest Green #0A261F) -->
+        <!-- ======================================================== -->
+        <aside id="appSidebar" class="w-64 bg-[#0A261F] text-[#9CB7AE] flex-shrink-0 flex flex-col justify-between transition-all duration-300 z-50 fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 border-r border-[#12382E] shadow-2xl md:shadow-none select-none">
+            
+            <!-- Top Brand Box (matches HRMS console in screenshot) -->
+            <div class="p-4 border-b border-[#12382E] flex items-center justify-between relative">
+                <div class="brand-container flex items-center gap-3 overflow-hidden w-full">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg flex-shrink-0">
+                        <i class="fa-solid fa-faucet-drip"></i>
+                    </div>
+                    <div class="sidebar-text truncate">
+                        <div class="font-black text-white text-sm tracking-wide truncate">M/S SANDIP KUMAR</div>
+                        <div class="brand-subtitle text-[10px] text-emerald-300/80 font-bold uppercase tracking-wider truncate">Workforce &bull; 21 Sites</div>
+                    </div>
+                </div>
+
+                <!-- Circular Collapse Button on Edge (exact match to screenshot button on sidebar border!) -->
+                <button type="button" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Sidebar छोटा/बड़ा करें" class="hidden md:flex absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-white border border-slate-300 text-slate-700 items-center justify-center shadow-md hover:bg-slate-100 transition z-50">
+                    <i class="fa-solid fa-chevron-left text-[11px]" id="collapseIcon"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Navigation Segments (Accordion Folders) -->
+            <div class="flex-1 overflow-y-auto py-3 px-2 space-y-1 custom-scrollbar text-xs">
                 
-                <!-- Logo & Brand with TAP ICON Language Selector in UP LEFT -->
-                <div class="flex items-center space-x-2 sm:space-x-3">
-                    <!-- Tap Icon Language Selector (UP LEFT) -->
+                <!-- 1. DASHBOARD OVERVIEW -->
+                <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition text-slate-200 hover:bg-[#12382E] hover:text-white {% if request.path == '/dashboard' or request.path == '/' %}active-sidebar-pill{% endif %}">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-sm text-emerald-400"></i>
+                        <span class="sidebar-text">डैशबोर्ड (Dashboard)</span>
+                    </div>
+                    <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                </a>
+
+                <!-- 2. SEGMENT: ATTENDANCE & HR (हाजिरी व स्टाफ) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderAtt')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-users text-xs"></i> ATTENDANCE &amp; HR
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAtt"></i>
+                    </button>
+                    <div id="folderAtt" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/attendance', '/geo-attendance'] %}hidden{% endif %}">
+                        <a href="{{ url_for('attendance_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/attendance' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-clipboard-list w-4 text-center text-amber-300"></i>
+                                <span class="sidebar-text">1. मैन्युअल हाजिरी (21 Sites)</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="/geo-attendance" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/geo-attendance' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-satellite-dish w-4 text-center text-purple-400"></i>
+                                <span class="sidebar-text">2. GPS हाजिरी (500m Auto)</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="/attendance#workers" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-address-book w-4 text-center text-blue-400"></i>
+                                <span class="sidebar-text">वर्कर डायरेक्टरी व प्रोफाइल</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. SEGMENT: MATERIAL & STOCK (सामग्री व स्टॉक) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderStock')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-xs"></i> MATERIAL &amp; STOCK
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderStock"></i>
+                    </button>
+                    <div id="folderStock" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/stock', '/store', '/entry', '/daily-entry'] %}hidden{% endif %}">
+                        <a href="{{ url_for('site_stock') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/stock' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-cubes-stacked w-4 text-center text-teal-300"></i>
+                                <span class="sidebar-text">साइट स्टॉक व बैलेंस लेजर</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="{{ url_for('daily_entry') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path in ['/entry', '/daily-entry'] %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-circle-plus w-4 text-center text-emerald-400"></i>
+                                <span class="sidebar-text">दैनिक सामग्री खपत एंट्री</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="{{ url_for('material_store') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/store' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-cart-shopping w-4 text-center text-amber-400"></i>
+                                <span class="sidebar-text">मटेरियल स्टोर (+ आइटम जोड़ें)</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4. SEGMENT: WORKS & DPR (कार्य प्रगति) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderDpr')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-trowel-bricks text-xs"></i> DPR &amp; SITE PROGRESS
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderDpr"></i>
+                    </button>
+                    <div id="folderDpr" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/dpr', '/site-photos'] %}hidden{% endif %}">
+                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-faucet-drip w-4 text-center text-sky-400"></i>
+                                <span class="sidebar-text">DPR प्रगति (पाइपलाइन, नल)</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="/site-photos" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/site-photos' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-camera-retro w-4 text-center text-amber-300"></i>
+                                <span class="sidebar-text">साइट फोटो व A4 शीट एल्बम</span>
+                            </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                        </a>
+                        <a href="/site-photos/upload" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-camera w-4 text-center text-teal-400"></i>
+                                <span class="sidebar-text">कैमरा फोटो अपलोड</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 5. SEGMENT: DISPATCH & LETTERS (जावक पत्रांक पंजी) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderLetters')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-stamp text-xs"></i> DISPATCH &amp; LETTERS
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderLetters"></i>
+                    </button>
+                    <div id="folderLetters" class="folder-content space-y-0.5 pl-1.5 mt-1">
+                        <a href="/dashboard#letters" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-envelope-open-text w-4 text-center text-amber-300"></i>
+                                <span class="sidebar-text">पत्रांक पंजी (SK/2026-27/0001)</span>
+                            </div>
+                        </a>
+                        <a href="/export/letters-excel" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-file-excel w-4 text-center text-emerald-400"></i>
+                                <span class="sidebar-text">Excel डाउनलोड</span>
+                            </div>
+                        </a>
+                        <a href="/export/letters-pdf" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-file-pdf w-4 text-center text-rose-400"></i>
+                                <span class="sidebar-text">PDF डाउनलोड</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 6. SEGMENT: REPORTS & LEDGERS (रिपोर्ट्स व लेजर) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderReports')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-xs"></i> REPORTS &amp; LEDGER
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderReports"></i>
+                    </button>
+                    <div id="folderReports" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path == '/reports' %}active-parent{% else %}hidden{% endif %}">
+                        <a href="{{ url_for('reports_hub', tab='daily') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-calendar-day w-4 text-center text-blue-400"></i>
+                                <span class="sidebar-text">दैनिक रिपोर्ट (Daily)</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('reports_hub', tab='monthly') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-calendar-days w-4 text-center text-indigo-400"></i>
+                                <span class="sidebar-text">माहवार रिपोर्ट (Monthly)</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('reports_hub', tab='site') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-city w-4 text-center text-teal-400"></i>
+                                <span class="sidebar-text">साइट-वार लेजर (Site Ledger)</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('reports_hub', tab='matrix') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-table-cells w-4 text-center text-amber-400"></i>
+                                <span class="sidebar-text">21 साइट्स मैट्रिक्स (Matrix)</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 7. SEGMENT: MASTER & ADMIN (मास्टर सेटिंग्स) -->
+                <div class="pt-2">
+                    <button type="button" onclick="toggleFolder('folderAdmin')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                        <span class="sidebar-text flex items-center gap-2">
+                            <i class="fa-solid fa-gear text-xs"></i> MASTER &amp; ADMIN
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAdmin"></i>
+                    </button>
+                    <div id="folderAdmin" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path in ['/sites', '/materials'] %}active-parent{% else %}hidden{% endif %}">
+                        <a href="{{ url_for('sites_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/sites' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-building-circle-check w-4 text-center text-blue-400"></i>
+                                <span class="sidebar-text">21 साइट्स डायरेक्टरी</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('materials_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/materials' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-list-check w-4 text-center text-indigo-400"></i>
+                                <span class="sidebar-text">सामग्री कैटलॉग व दर</span>
+                            </div>
+                        </a>
+                        {% if session.get('is_owner') or user_role == 'owner' %}
+                        <button type="button" onclick="openGlobalSiteGpsModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-map-location-dot w-4 text-center text-amber-300"></i>
+                                <span class="sidebar-text">📍 साइट GPS सेट करें</span>
+                            </div>
+                        </button>
+                        {% endif %}
+                        <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-brands fa-android w-4 text-center text-emerald-400"></i>
+                                <span class="sidebar-text">Android APK ऐप डाउनलोड</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-globe w-4 text-center text-cyan-400"></i>
+                                <span class="sidebar-text">कंपनी वेबसाइट पोर्टल</span>
+                            </div>
+                        </a>
+                        {% if session.get('is_owner') or user_role == 'owner' %}
+                        <a href="/api/backup" download class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-cloud-arrow-down w-4 text-center text-amber-400"></i>
+                                <span class="sidebar-text">पूरा बैकअप डाउनलोड</span>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom: Pinned Sign Out (exact match to HRMS screenshot!) -->
+            <div class="p-3 border-t border-[#12382E]">
+                <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-rose-950/60 hover:text-rose-300 transition text-xs font-bold">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-sm text-rose-400"></i>
+                    <span class="sidebar-text">Sign out (लॉगआउट)</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- BACKDROP for Mobile Drawer -->
+        <div id="sidebarBackdrop" onclick="toggleMobileSidebar()" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden transition-opacity"></div>
+
+        <!-- ======================================================== -->
+        <!-- 2. MAIN VIEWPORT (Clean Off-White #F4F6F5) -->
+        <!-- ======================================================== -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- TOP APP BAR (Clean White Header matching HRMS screenshot) -->
+            <header class="h-16 bg-white border-b border-slate-200/90 flex items-center justify-between px-4 sm:px-6 z-30 shadow-2xs flex-shrink-0 no-print">
+                
+                <!-- Left: Mobile Toggle + Operational Status Pill -->
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition" title="Menu">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+
+                    <!-- Green Pulsating Operational Badge (matches "🟢 HRMS operations" in screenshot) -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="truncate">M/S Sandip Kumar Operations &bull; 21 Sites Live</span>
+                    </div>
+                </div>
+
+                <!-- Right: Language Switcher + Notification Bell + User Profile -->
+                <div class="flex items-center gap-2.5 sm:gap-3.5">
+                    
+                    <!-- Language Selector (Tap Faucet Icon) -->
                     <div class="relative" id="tapLangContainer">
                         <button type="button" 
                                 id="tapLangBtn" 
                                 onclick="toggleLanguageDropdown(event)" 
-                                title="भाषा बदलें / Change Language (हिंदी / English)"
-                                class="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-blue-950/90 hover:bg-blue-800 border-2 border-amber-400 text-white shadow-lg transition-all transform active:scale-95 group focus:outline-none focus:ring-2 focus:ring-amber-300">
-                            <!-- Water Tap Icon (NAL ICON) -->
-                            <div class="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center border border-amber-400/40 group-hover:bg-amber-400/30 group-hover:scale-110 transition">
-                                <i class="fa-solid fa-faucet-drip text-base sm:text-lg animate-pulse"></i>
-                            </div>
-                            <!-- Language Badge -->
-                            <div class="flex flex-col text-left leading-none pr-0.5">
-                                <span class="text-[9px] text-amber-300 font-bold uppercase tracking-wider flex items-center gap-0.5">
-                                    <i class="fa-solid fa-globe text-[8px]"></i> <span id="tapLangCode">HI</span>
-                                </span>
-                                <span id="tapLangName" class="text-[11px] sm:text-xs font-black text-white whitespace-nowrap">🇮🇳 हिंदी</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-amber-300 transition-transform duration-200" id="tapLangChevron"></i>
+                                title="भाषा बदलें / Change Language"
+                                class="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 text-xs font-bold transition">
+                            <i class="fa-solid fa-faucet-drip text-emerald-600 text-sm"></i>
+                            <span id="tapLangName" class="hidden sm:inline">🇮🇳 हिंदी</span>
+                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5" id="tapLangChevron"></i>
                         </button>
 
                         <!-- Language Dropdown Popup Menu -->
                         <div id="tapLangDropdown" 
-                             class="hidden absolute left-0 top-full mt-2 w-56 sm:w-64 bg-slate-900/98 backdrop-blur-md border-2 border-amber-400 rounded-2xl shadow-2xl p-2 z-50 text-white animate-scaleIn">
+                             class="hidden absolute right-0 top-full mt-2 w-56 sm:w-64 bg-slate-900/98 backdrop-blur-md border-2 border-amber-400 rounded-2xl shadow-2xl p-2 z-50 text-white animate-scaleIn">
                             <div class="px-3 py-2 border-b border-slate-700/80 flex items-center justify-between">
                                 <div class="flex items-center gap-2 text-xs font-black text-amber-300">
                                     <i class="fa-solid fa-language text-sm"></i>
@@ -102,315 +409,144 @@
                             </div>
 
                             <div class="p-1 space-y-1.5 mt-1">
-                                <!-- Hindi Option -->
-                                <button type="button" 
-                                        onclick="setAppLanguage('hi', event)" 
-                                        id="langOptHi"
-                                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white hover:bg-blue-800">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="text-xl">🇮🇳</span>
-                                        <div>
-                                            <div class="text-white font-extrabold text-sm" data-i18n="lang_hi_title">हिंदी (Hindi)</div>
-                                            <div class="text-[10px] text-amber-200 font-normal" data-i18n="lang_hi_sub">पूरा सिस्टम हिंदी में</div>
-                                        </div>
+                                <button type="button" onclick="setAppLanguage('hi', event)" id="langOptHi" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition bg-blue-900/80 border border-amber-400/70 text-white">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-base">🇮🇳</span>
+                                        <span>हिंदी (Hindi)</span>
                                     </div>
-                                    <i class="fa-solid fa-circle-check text-emerald-400 text-base" id="langCheckHi"></i>
+                                    <i class="fa-solid fa-circle-check text-emerald-400 text-sm" id="langCheckHi"></i>
                                 </button>
-
-                                <!-- English Option -->
-                                <button type="button" 
-                                        onclick="setAppLanguage('en', event)" 
-                                        id="langOptEn"
-                                        class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent">
-                                    <div class="flex items-center gap-2.5">
-                                        <span class="text-xl">🇬🇧</span>
-                                        <div>
-                                            <div class="text-white font-extrabold text-sm" data-i18n="lang_en_title">English</div>
-                                            <div class="text-[10px] text-slate-400 font-normal" data-i18n="lang_en_sub">Complete system in English</div>
-                                        </div>
+                                <button type="button" onclick="setAppLanguage('en', event)" id="langOptEn" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs font-bold transition hover:bg-slate-800 text-slate-300 border border-transparent">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-base">🇬🇧</span>
+                                        <span>English</span>
                                     </div>
-                                    <i class="fa-regular fa-circle text-slate-500 text-base" id="langCheckEn"></i>
+                                    <i class="fa-regular fa-circle text-slate-500 text-sm" id="langCheckEn"></i>
                                 </button>
-                            </div>
-                            
-                            <div class="mt-2 pt-2 border-t border-slate-800 px-2 py-1 text-center text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-faucet-drip text-amber-400 text-[10px]"></i>
-                                <span>नल आइकन (Tap) पर दबाकर कभी भी बदलें</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Brand / Company Name (links to Dashboard / Site Stock) -->
-                    <a href="{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}{{ url_for('site_stock') }}{% else %}{{ url_for('dashboard') }}{% endif %}" class="flex flex-col group py-1">
-                        <span class="font-extrabold text-sm sm:text-lg tracking-wide text-white group-hover:text-amber-300 transition leading-tight" data-i18n="app_title">M/S SANDIP KUMAR</span>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] sm:text-xs text-blue-200 font-medium">
-                                {% if session.get('role') == 'supervisor' and session.get('site_name') %}
-                                📍 {{ session.get('site_name') }} साइट पोर्टल
-                                {% else %}
-                                21 Sites Project Tracker
-                                {% endif %}
-                            </span>
-                            <span id="networkBadge" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
-                                <span id="networkText" data-i18n="online_status">Online</span>
-                            </span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Desktop Menu: 5 Core Workflows + Clean More Menu -->
-                <nav class="hidden md:flex items-center space-x-1 lg:space-x-1.5">
-                    <!-- 1. Dashboard (Owner Only) -->
-                    {% if session.get('is_owner') or user_role == 'owner' %}
-                    <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-blue-100 hover:bg-brand-800 hover:text-white transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-pie text-xs"></i> <span>डैशबोर्ड</span>
-                    </a>
-                    {% endif %}
-
-                    <!-- 2. Daily Entry -->
-                    <a href="{{ url_for('daily_entry') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle-plus text-xs"></i> <span>दैनिक एंट्री</span>
-                    </a>
-
-                    <!-- 3. Site Stock & Store -->
-                    <a href="{{ url_for('site_stock') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition flex items-center gap-1.5" title="साइट स्टॉक व मटेरियल स्टोर">
-                        <i class="fa-solid fa-boxes-stacked text-xs"></i> <span>साइट स्टॉक</span>
-                    </a>
-
-                    <!-- 4. Manual Attendance -->
-                    <a href="{{ url_for('attendance_view') }}" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition flex items-center gap-1.5" title="21 साइट्स मैन्युअल हाजिरी शीट (मुख्य रजिस्टर)">
-                        <i class="fa-solid fa-clipboard-list text-amber-300 text-xs"></i> <span>📝 मैन्युअल हाजिरी</span>
-                    </a>
-
-                    <!-- 4.1 GPS Attendance -->
-                    <a href="/geo-attendance" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-violet-700 hover:bg-violet-600 text-white shadow-sm transition flex items-center gap-1.5" title="GPS ऑटोमैटिक हाजिरी व कार्य घंटे (500m दायरा)">
-                        <i class="fa-solid fa-satellite-dish text-amber-300 text-xs"></i> <span>📍 GPS हाजिरी</span>
-                    </a>
-
-                    <!-- 4.2 DPR Physical Progress (Pipeline, FHTC) -->
-                    <a href="/dpr" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-black bg-sky-700 hover:bg-sky-600 text-white shadow-sm border border-sky-500/40 transition flex items-center gap-1.5" title="दैनिक कार्य प्रगति (पाइपलाइन, FHTC नल)">
-                        <i class="fa-solid fa-faucet-drip text-amber-300 text-xs"></i> <span>DPR प्रगति</span>
-                    </a>
-
-                    <!-- 5. Site Work Photos & A4 4-Photo Album -->
-                    <a href="/site-photos" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-sm transition flex items-center gap-1.5" title="साइट फोटो व सरकारी 4-फोटो A4 एल्बम">
-                        <i class="fa-solid fa-camera-retro text-xs text-amber-200"></i> <span>फोटो एल्बम</span>
-                    </a>
-
-                    <!-- 6. Unified Reports Hub (Daily, Monthly, Site) -->
-                    <a href="{{ url_for('reports_hub') }}" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black bg-blue-800 hover:bg-blue-700 text-white shadow-sm border border-blue-600/50 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-line text-amber-300 text-xs"></i> <span>रिपोर्ट्स (Reports)</span>
-                    </a>
-
-                    <!-- Android APK Download Button -->
-                    <a href="/download-apk" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md border border-emerald-400/50 transition flex items-center gap-1.5" title="Android ऐप (APK) डाउनलोड करें">
-                        <i class="fa-brands fa-android text-emerald-300 text-sm"></i> <span>Android APK</span>
-                    </a>
-
-                    <!-- 7. More Tools Dropdown -->
-                    <div class="relative group">
-                        <button type="button" class="px-2.5 py-2 rounded-xl text-xs font-bold text-blue-200 hover:bg-brand-800 hover:text-white transition flex items-center gap-1 border border-blue-700/40">
-                            <i class="fa-solid fa-ellipsis-vertical text-xs"></i> <span>अधिक</span> <i class="fa-solid fa-chevron-down text-[9px] opacity-70"></i>
+                    <!-- Notification Bell Icon (exact match to screenshot bell icon!) -->
+                    <div class="relative">
+                        <button type="button" onclick="window.location.reload()" title="रिफ्रेश / सिंक स्टेटस" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center transition shadow-2xs">
+                            <i class="fa-regular fa-bell text-sm"></i>
                         </button>
-                        <div class="hidden group-hover:block absolute right-0 top-full mt-1 w-52 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-50 text-white space-y-1">
-                            <a href="/site-photos/upload" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-900/60 text-amber-300">
-                                <i class="fa-solid fa-camera w-4 text-amber-400"></i> <span>📸 फोटो अपलोड करें</span>
-                            </a>
-                            {% if session.get('is_owner') or user_role == 'owner' %}
-                            <button onclick="openGlobalSiteGpsModal()" class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-violet-900/60 text-amber-300">
-                                <i class="fa-solid fa-map-location-dot w-4 text-amber-400"></i> <span>📍 साइट GPS सेट करें</span>
-                            </button>
-                            {% endif %}
-                            <a href="/geo-attendance" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-violet-900/60 text-purple-300">
-                                <i class="fa-solid fa-satellite-dish w-4 text-purple-400"></i> <span>GPS हाजिरी मॉनिटर</span>
-                            </a>
-                            <a href="/dashboard#letters" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-900/60 text-amber-300">
-                                <i class="fa-solid fa-stamp w-4 text-amber-400"></i> <span>📑 जावक पत्रांक पंजी</span>
-                            </a>
-                            <a href="{{ url_for('company_website') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-blue-900/60 text-cyan-300">
-                                <i class="fa-solid fa-globe w-4 text-cyan-400"></i> <span>कंपनी वेबसाइट</span>
-                            </a>
-                            <a href="{{ url_for('material_store') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-blue-900/60 text-amber-300">
-                                <i class="fa-solid fa-cart-shopping w-4 text-amber-400"></i> <span>मटेरियल स्टोर (+ऐड)</span>
-                            </a>
-                            {% if session.get('is_owner') or user_role == 'owner' %}
-                            <a href="{{ url_for('sites_list') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-blue-900/60 text-slate-200">
-                                <i class="fa-solid fa-building-circle-check w-4 text-blue-400"></i> <span>21 साइट्स डायरेक्टरी</span>
-                            </a>
-                            <a href="{{ url_for('materials_list') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-blue-900/60 text-slate-200">
-                                <i class="fa-solid fa-list-check w-4 text-indigo-400"></i> <span>सामग्री कैटलॉग व दर</span>
-                            </a>
-                            <div class="border-t border-slate-800 my-1"></div>
-                            <a href="/api/backup" download class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-950/60 text-amber-300">
-                                <i class="fa-solid fa-cloud-arrow-down w-4 text-amber-400"></i> <span>पूरा बैकअप डाउनलोड</span>
-                            </a>
-                            {% endif %}
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500"></span>
+                    </div>
+
+                    <!-- User Profile Pill (matches Employee pill in screenshot) -->
+                    <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                        <div class="w-8 h-8 rounded-full bg-emerald-900 text-amber-300 font-black text-xs flex items-center justify-center shadow-xs">
+                            {% if session.get('is_owner') or user_role == 'owner' %}👑{% else %}👤{% endif %}
+                        </div>
+                        <div class="hidden sm:flex flex-col text-left leading-tight">
+                            <span class="text-xs font-bold text-slate-800">
+                                {% if session.get('is_owner') or user_role == 'owner' %}Sandip Kumar{% else %}{{ user_name or 'Staff' }}{% endif %}
+                            </span>
+                            <span class="text-[10px] text-slate-500 capitalize">
+                                {% if session.get('is_owner') or user_role == 'owner' %}Owner / Admin{% else %}{{ user_role or 'Employee' }}{% endif %}
+                            </span>
                         </div>
                     </div>
-                </nav>
+                </div>
+            </header>
 
-                <!-- Owner Mode Button / Crown in Navbar & Mobile Quick Shortcuts -->
-                <div class="flex items-center gap-1.5 sm:gap-2">
-                    <!-- Quick Mobile Shortcuts -->
-                    <a href="/geo-attendance" class="md:hidden px-2 py-1 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-[11px] font-black shadow-md transition flex items-center gap-1 border border-violet-400/40" title="फोटो हाजिरी">
-                        <i class="fa-solid fa-camera text-[10px] text-amber-300"></i> <span>📸 फोटो</span>
-                    </a>
-                    <a href="{{ url_for('attendance_view') }}" class="md:hidden px-2 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow-md transition flex items-center gap-1" title="हाजिरी">
-                        <i class="fa-solid fa-users-gear text-[10px]"></i> <span>हाजिरी</span>
-                    </a>
-
-                    {% if session.get('is_owner') or user_role == 'owner' %}
-                    <div id="navOwnerActiveBadge" class="flex items-center gap-1.5">
-                        <span class="px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-black text-xs shadow-md flex items-center gap-1.5 animate-pulse">
-                            <i class="fa-solid fa-crown text-amber-300"></i> <span class="hidden sm:inline">👑 मालिक</span>
-                        </span>
-                    </div>
-                    {% elif session.get('role') == 'supervisor' or user_role == 'supervisor' %}
-                    <div class="flex items-center gap-1.5">
-                        <span class="px-2.5 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md flex items-center gap-1.5" title="आपकी अधिकृत साइट">
-                            <i class="fa-solid fa-map-pin text-amber-300"></i>
-                            <span class="max-w-[110px] sm:max-w-none truncate">{{ session.get('site_name') or 'सुपरवाइज़र' }}</span>
-                        </span>
-                    </div>
+            <!-- SCROLLABLE CONTENT BODY (Off-White #F4F6F5) -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F4F6F5] space-y-6">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-4 space-y-2 no-print">
+                            {% for category, msg in messages %}
+                                <div class="p-3.5 rounded-xl flex items-center justify-between text-xs shadow-xs {% if category == 'error' %}bg-rose-50 text-rose-800 border border-rose-200{% else %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation text-rose-500{% else %}fa-circle-check text-emerald-500{% endif %}"></i>
+                                        <span>{{ msg }}</span>
+                                    </div>
+                                    <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endif %}
+                {% endwith %}
 
-                    <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" title="लॉगआउट करें" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 border border-slate-700">
-                        <i class="fa-solid fa-right-from-bracket text-rose-400"></i>
-                        <span class="hidden sm:inline">लॉगआउट</span>
-                    </a>
-                </div>
+                {% block content %}{% endblock %}
 
-                <!-- Mobile Action: Quick Refresh & More Menu -->
-                <div class="md:hidden flex items-center gap-1">
-                    <button type="button" onclick="window.location.reload()" class="text-blue-200 hover:text-white focus:outline-none p-2 rounded-xl active:bg-blue-800 transition" title="पेज रिफ्रेश करें">
-                        <i class="fa-solid fa-rotate text-base"></i>
-                    </button>
-                    <button id="mobileMenuBtn" onclick="openMobileMoreDrawer()" class="text-blue-200 hover:text-white focus:outline-none p-2 rounded-xl active:bg-blue-800 transition" title="सभी विकल्प (More Menu)">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Clean Organized Mobile Menu -->
-        <div id="mobileMenu" class="hidden md:hidden bg-slate-950 px-4 pt-3 pb-5 space-y-3 border-t border-blue-900/80">
-            <!-- Android App Download Card -->
-            <a href="/download-apk" class="block p-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg border border-emerald-400/50 flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
-                        <i class="fa-brands fa-android text-white"></i>
-                    </div>
+                <!-- Subtle Clean Footer inside scrollable area -->
+                <div class="pt-6 pb-2 text-center text-xs text-slate-400 border-t border-slate-200/80 no-print flex flex-col sm:flex-row justify-between items-center gap-2">
                     <div>
-                        <div class="text-xs font-black text-white">Android ऐप (APK) डाउनलोड करें</div>
-                        <div class="text-[10px] text-emerald-100">सुपरवाइज़र व वर्कर मोबाइल ऐप</div>
+                        <span class="font-bold text-slate-600">M/S SANDIP KUMAR</span> &bull; 21 Sites Project Tracker &copy; {{ now_year }}
+                    </div>
+                    <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+                        <span><i class="fa-solid fa-shield-halved text-emerald-600"></i> Enterprise Secure</span>
+                        <span><i class="fa-solid fa-server text-blue-600"></i> 24x7 Cloud Synced</span>
                     </div>
                 </div>
-                <span class="px-2 py-1 rounded-lg bg-white text-emerald-900 text-[10px] font-black shadow-xs">
-                    APK v1.5.0 📥
-                </span>
-            </a>
-
-            <!-- Section 1: Main Daily Actions -->
-            <div class="space-y-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">मुख्य कार्य (Main Actions)</span>
-                {% if session.get('is_owner') or user_role == 'owner' %}
-                <a href="{{ url_for('dashboard') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-blue-100 bg-slate-900 hover:bg-blue-900/50 flex items-center gap-2.5">
-                    <i class="fa-solid fa-chart-pie text-blue-400 w-4"></i> <span>डैशबोर्ड (Dashboard)</span>
-                </a>
-                {% endif %}
-                <a href="{{ url_for('daily_entry') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-circle-plus w-4"></i> <span>दैनिक एंट्री (Daily Entry)</span>
-                </a>
-                <a href="{{ url_for('site_stock') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-teal-600 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-boxes-stacked w-4"></i> <span>साइट स्टॉक व बैलेंस (Site Stock)</span>
-                </a>
-                <a href="{{ url_for('attendance_view') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-indigo-600 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-clipboard-list text-amber-300 w-4"></i> <span>📝 1. मैन्युअल हाजिरी (21 साइट्स शीट)</span>
-                </a>
-                <a href="/geo-attendance" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-violet-700 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-satellite-dish text-amber-300 w-4"></i> <span>📍 2. GPS हाजिरी (जियो-लोकेशन)</span>
-                </a>
-                <a href="/dpr" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-sky-700 text-white border border-sky-500/50 shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-faucet-drip text-amber-300 w-4"></i> <span>DPR कार्य प्रगति (पाइपलाइन, नल)</span>
-                </a>
-                <a href="/site-photos" class="block px-3.5 py-2.5 rounded-xl text-sm font-bold bg-amber-600 text-white shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-camera-retro text-amber-200 w-4"></i> <span>साइट फोटो व A4 एल्बम (Site Photos)</span>
-                </a>
-                <a href="{{ url_for('reports_hub') }}" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-blue-800 text-white border border-blue-600/60 shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-chart-line text-amber-300 w-4"></i> <span>रिपोर्ट्स केंद्र (Daily & Monthly)</span>
-                </a>
-                <a href="/dashboard#letters" class="block px-3.5 py-2.5 rounded-xl text-sm font-black bg-gradient-to-r from-amber-700 via-indigo-900 to-slate-900 text-white border border-amber-400/50 shadow flex items-center gap-2.5">
-                    <i class="fa-solid fa-stamp text-amber-300 w-4"></i> <span>📑 जावक पत्रांक पंजी (Letters Register)</span>
-                </a>
-            </div>
-
-            <!-- Section 2: Secondary / Master Data -->
-            <div class="pt-2 border-t border-slate-800 space-y-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">अन्य लिंक्स (Quick Links)</span>
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="/site-photos/upload" class="p-2.5 rounded-xl bg-amber-950/70 text-xs font-bold text-amber-300 text-center flex items-center justify-center gap-1.5 border border-amber-500/40">
-                        <i class="fa-solid fa-camera"></i> <span>फोटो अपलोड</span>
-                    </a>
-                    <a href="{{ url_for('material_store') }}" class="p-2.5 rounded-xl bg-teal-950/80 text-xs font-bold text-teal-300 text-center flex items-center justify-center gap-1.5 border border-teal-500/40">
-                        <i class="fa-solid fa-cart-shopping"></i> <span>मटेरियल स्टोर</span>
-                    </a>
-                    <a href="{{ url_for('company_website') }}" class="p-2.5 rounded-xl bg-blue-950/80 text-xs font-bold text-cyan-300 text-center flex items-center justify-center gap-1.5 border border-cyan-400/30 col-span-2">
-                        <i class="fa-solid fa-globe"></i> <span>कंपनी वेबसाइट</span>
-                    </a>
-                    {% if session.get('is_owner') or user_role == 'owner' %}
-                    <a href="{{ url_for('sites_list') }}" class="p-2.5 rounded-xl bg-slate-900 text-xs font-semibold text-blue-200 text-center flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-building-circle-check text-blue-400"></i> <span>21 साइट्स</span>
-                    </a>
-                    <a href="{{ url_for('materials_list') }}" class="p-2.5 rounded-xl bg-slate-900 text-xs font-semibold text-blue-200 text-center flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-list-check text-indigo-400"></i> <span>मटेरियल लिस्ट</span>
-                    </a>
-                    <a href="/api/backup" download class="p-2.5 rounded-xl bg-amber-950/60 text-xs font-bold text-amber-300 text-center flex items-center justify-center gap-1.5 border border-amber-600/30 col-span-2">
-                        <i class="fa-solid fa-cloud-arrow-down"></i> <span>पूरा डेटा बैकअप</span>
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+            </main>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 md:pb-6">
-        
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mb-6 space-y-2 no-print">
-                    {% for category, msg in messages %}
-                        <div class="p-4 rounded-xl flex items-center justify-between text-sm shadow-sm {% if category == 'error' %}bg-rose-50 text-rose-800 border border-rose-200{% else %}bg-emerald-50 text-emerald-800 border border-emerald-200{% endif %}">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation text-rose-500{% else %}fa-circle-check text-emerald-500{% endif %}"></i>
-                                <span>{{ msg }}</span>
-                            </div>
-                            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+    <!-- JS Helper for Sidebar Collapse, Folders, and Mobile -->
+    <script>
+        function toggleSidebarCollapse() {
+            const sidebar = document.getElementById('appSidebar');
+            const icon = document.getElementById('collapseIcon');
+            if (!sidebar) return;
 
-        {% block content %}{% endblock %}
-    </main>
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sandip_sidebar_collapsed', isCollapsed ? 'true' : 'false');
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-auto py-4 mb-20 md:mb-0 text-center text-xs text-slate-500 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div>
-                <span class="font-semibold text-slate-700">M/S SANDIP KUMAR &bull; 21 Sites Project Material Tracker</span> &copy; {{ now_year }}
-            </div>
-            <div class="flex items-center gap-4 text-slate-400">
-                <span><i class="fa-solid fa-server mr-1"></i> Local Offline SQLite</span>
-                <span><i class="fa-solid fa-file-excel mr-1"></i> Excel (.xlsx) Ready</span>
-            </div>
-        </div>
-    </footer>
+            if (icon) {
+                icon.className = isCollapsed 
+                    ? 'fa-solid fa-chevron-right text-[11px]' 
+                    : 'fa-solid fa-chevron-left text-[11px]';
+            }
+        }
+
+        function toggleFolder(folderId) {
+            const folder = document.getElementById(folderId);
+            const icon = document.getElementById('icon' + folderId.charAt(0).toUpperCase() + folderId.slice(1));
+            if (!folder) return;
+
+            const isHidden = folder.classList.contains('hidden');
+            if (isHidden) {
+                folder.classList.remove('hidden');
+                if (icon) icon.classList.add('rotate-90');
+            } else {
+                folder.classList.add('hidden');
+                if (icon) icon.classList.remove('rotate-90');
+            }
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar) return;
+
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                if (backdrop) backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('sandip_sidebar_collapsed') === 'true' && window.innerWidth >= 768) {
+                const sidebar = document.getElementById('appSidebar');
+                const icon = document.getElementById('collapseIcon');
+                if (sidebar) sidebar.classList.add('collapsed');
+                if (icon) icon.className = 'fa-solid fa-chevron-right text-[11px]';
+            }
+        });
+    </script>
 
     <!-- ========================================================================= -->
     <!-- NATIVE MOBILE STICKY BOTTOM NAVIGATION BAR (Android APK & Mobile Web)    -->

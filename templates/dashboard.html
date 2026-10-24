@@ -1,273 +1,228 @@
 {% extends "base.html" %}
 
-{% block title %}डैशबोर्ड - 21 Sites Project Tracker - M/S SANDIP KUMAR{% endblock %}
+{% block title %}Dashboard - 21 Sites Project Tracker - M/S SANDIP KUMAR{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-5 max-w-7xl mx-auto">
 
-    <!-- Top Banner & Quick Actions -->
-    <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-bold uppercase tracking-wider mb-3">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                M/S SANDIP KUMAR &bull; 21 Sites Live Project Tracker
+    <!-- ======================================================== -->
+    <!-- 1. HEADER SECTION (Matches PAYROLL header in HRMS screenshot) -->
+    <!-- ======================================================== -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80">
+        <div>
+            <div class="text-[11px] font-black uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>OPERATIONS &bull; WORKFORCE CONSOLE</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black tracking-tight" data-i18n="dash_banner_title">सामग्री खपत एवं साइट ट्रैकिंग</h1>
-            <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
-                सीवान, मैरवा, छपरा, मधुबनी, दरभंगा सहित सभी 21 साइट्स पर रोज़ाना माल की खपत, साइट बैलेंस, हाजिरी और दैनिक व मासिक रिपोर्ट।
-            </p>
-            
-            <div class="mt-6 flex flex-wrap gap-2.5">
-                <a href="{{ url_for('daily_entry') }}" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus"></i> <span>नई दैनिक एंट्री करें</span>
-                </a>
-                <a href="{{ url_for('attendance_view') }}" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-users-gear"></i> <span>दैनिक हाजिरी (67-72)</span>
-                </a>
-                <a href="{{ url_for('reports_hub') }}" class="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-blue-500/50">
-                    <i class="fa-solid fa-chart-pie text-amber-300"></i> <span>रिपोर्ट्स केंद्र (Daily & Monthly)</span>
-                </a>
-                <a href="/geo-attendance" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-violet-400/40">
-                    <i class="fa-solid fa-satellite-dish text-amber-300"></i> <span>GPS हाजिरी (500M ऑटो)</span>
-                </a>
-                <a href="/dpr" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-sky-400/40">
-                    <i class="fa-solid fa-faucet-drip text-amber-300"></i> <span>🚰 DPR प्रगति (पाइपलाइन, नल)</span>
-                </a>
-                {% if session.get('is_owner') or user_role == 'owner' %}
-                <button onclick="openGlobalSiteGpsModal()" class="px-4 py-2.5 rounded-xl bg-violet-800/80 hover:bg-violet-700 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-violet-400/40">
-                    <i class="fa-solid fa-map-location-dot text-amber-300"></i> <span>📍 लोकेशन सेट करें</span>
-                </button>
-                {% endif %}
-                <a href="#letters" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-amber-400/40">
-                    <i class="fa-solid fa-stamp text-amber-200"></i> <span>📑 पत्रांक पंजी ({{ next_letter_info.ref_no }})</span>
-                </a>
-                <a href="{{ url_for('site_stock') }}" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm backdrop-blur-sm border border-white/20 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-boxes-stacked text-teal-300"></i> <span>साइट स्टॉक</span>
-                </a>
-            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-0.5">
+                21 Sites Project Overview
+            </h1>
+        </div>
+
+        <!-- Date Pill with Calendar Icon (matches Month/Year pill in screenshot) -->
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200/90 text-xs font-bold text-slate-700 shadow-2xs self-start sm:self-auto">
+            <span class="text-slate-400 font-semibold">Active Date:</span>
+            <span class="font-mono text-emerald-900 font-black">{{ current_date }}</span>
+            <i class="fa-regular fa-calendar text-emerald-700 ml-1"></i>
         </div>
     </div>
 
-    <!-- 4 Essential Operational Cards (Side-by-Side) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- ======================================================== -->
+    <!-- 2. STATUS CARD (Exact match to STATUS: Payroll published in screenshot) -->
+    <!-- ======================================================== -->
+    <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">PROJECT STATUS</div>
+            <div class="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+                21 Water Supply Sites Operational &bull; Bihar JJM
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Live attendance, material consumption, DPR pipeline execution, and official dispatch register active.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 font-black text-xs uppercase tracking-wider border border-emerald-200 shadow-2xs">
+                ● ACTIVE &amp; PUBLISHED
+            </span>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 3. 6 INFORMATION TILES GRID (Exact match to 6 HRMS tiles in screenshot) -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         
-        <!-- Card 1: Site Stock & Store -->
-        <div class="bg-gradient-to-br from-teal-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-teal-700/40 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center text-xl border border-teal-400/30">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-400/30">Live Balance</span>
-                </div>
-                <h3 class="text-base font-bold text-white">📦 साइट स्टॉक व स्टोर</h3>
-                <p class="text-xs text-teal-200 mt-1 leading-relaxed">भेजा गया माल, दैनिक खपत और बचा हुआ बैलेंस</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-teal-800/60 flex items-center gap-2">
-                <a href="{{ url_for('site_stock') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-bold text-xs shadow transition">
-                    स्टॉक खोलें &rarr;
-                </a>
-                <a href="{{ url_for('material_store') }}" class="py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow transition" title="मटेरियल स्टोर (+ ऐड)">
-                    <i class="fa-solid fa-cart-shopping"></i> स्टोर
-                </a>
-            </div>
+        <!-- Tile 1: Project Sites -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PROJECT SITES</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">21 Active Sites</div>
+            <div class="text-[11px] text-emerald-700 font-semibold mt-1">Siwan, Mairwa, Chapra, Madhubani</div>
         </div>
 
-        <!-- Card 2: Daily Manpower Attendance -->
-        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-indigo-700/40 flex flex-col justify-between">
+        <!-- Tile 2: Manpower on Duty -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TODAY'S WORKFORCE</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">Daily Manpower</div>
+            <div class="text-[11px] text-indigo-700 font-semibold mt-1">Staff, Masons, Plumbers &amp; Helpers</div>
+        </div>
+
+        <!-- Tile 3: Usage Entries -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL CONSUMPTION ENTRIES</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_logs }} Logs</div>
+            <div class="text-[11px] text-teal-700 font-semibold mt-1">Logged Across All 21 Sites</div>
+        </div>
+
+        <!-- Tile 4: Total Consumption Value -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TOTAL VALUE CONSUMED</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
+            <div class="text-[11px] text-amber-700 font-semibold mt-1">Calculated from Master Rates</div>
+        </div>
+
+        <!-- Tile 5: Next Letter Reference Number -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">NEXT DISPATCH REF NO</div>
+            <div class="text-lg sm:text-xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
+            <div class="text-[11px] text-blue-700 font-semibold mt-1">Financial Year {{ next_letter_info.fy }}</div>
+        </div>
+
+        <!-- Tile 6: Material Store Catalog -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">MATERIALS CATALOG</div>
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mt-1">{{ stats.total_materials }} Master Items</div>
+            <div class="text-[11px] text-slate-500 font-semibold mt-1">Pipes, Motors, Cables, Fittings</div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 4. SEGREGATED CORE SEGMENTS (Minimal, Uncluttered Cards) -->
+    <!-- ======================================================== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        
+        <!-- Segment 1: Attendance & HR Console -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-emerald-500/50 transition">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl border border-indigo-400/30">
-                        <i class="fa-solid fa-users-gear"></i>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-400/30">21 Sites Sheet</span>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/70 flex items-center justify-center text-lg mb-3">
+                    <i class="fa-solid fa-users"></i>
                 </div>
-                <h3 class="text-base font-bold text-white">👥 दैनिक हाजिरी (Manpower)</h3>
-                <p class="text-xs text-indigo-200 mt-1 leading-relaxed">मिस्त्री, प्लंबर, हेल्पर व स्टाफ का 1-पेज हाजिरी रजिस्टर</p>
+                <h3 class="font-black text-slate-900 text-sm">हाजिरी व मैनपावर (Attendance)</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    21 साइट्स दैनिक हाजिरी शीट (मैन्युअल) एवं 500m GPS जियो-हाजिरी।
+                </p>
             </div>
-            <div class="mt-4 pt-3 border-t border-indigo-800/60 flex items-center gap-2">
-                <a href="{{ url_for('attendance_view') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow transition">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('attendance_view') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
                     हाजिरी शीट &rarr;
                 </a>
-                <a href="{{ url_for('export_manpower_pdf') }}" class="py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow transition flex items-center gap-1" title="1-Page PDF Download">
-                    <i class="fa-solid fa-file-pdf"></i> PDF
+                <a href="/geo-attendance" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="GPS हाजिरी">
+                    GPS
                 </a>
             </div>
         </div>
 
-        <!-- Card 3: Site Photos & A4 4-Photo Album -->
-        <div class="bg-gradient-to-br from-amber-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-amber-700/40 flex flex-col justify-between">
+        <!-- Segment 2: Material & Stock Register -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-teal-500/50 transition">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl border border-amber-400/30">
-                        <i class="fa-solid fa-camera-retro"></i>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-400/30">4 Photos / Sheet</span>
+                <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 border border-teal-200/70 flex items-center justify-center text-lg mb-3">
+                    <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <h3 class="text-base font-bold text-white">📸 साइट फोटो व A4 एल्बम</h3>
-                <p class="text-xs text-amber-200 mt-1 leading-relaxed">काम की फोटो व सरकारी MB हेतु 4-फोटो प्रति पेज A4 PDF</p>
+                <h3 class="font-black text-slate-900 text-sm">सामग्री व स्टॉक (Stock)</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    भेजा गया माल (Inward), दैनिक खपत और साइट पर बचा हुआ बैलेंस स्टॉक।
+                </p>
             </div>
-            <div class="mt-4 pt-3 border-t border-amber-800/60 flex items-center gap-2">
-                <a href="/site-photos" class="flex-1 py-2 px-3 text-center rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow transition">
-                    गैलरी खोलें &rarr;
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('site_stock') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
+                    स्टॉक रजिस्टर &rarr;
                 </a>
-                <a href="/site-photos/upload" class="py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition flex items-center gap-1" title="फोटो अपलोड">
-                    <i class="fa-solid fa-camera"></i> +अपलोड
+                <a href="{{ url_for('daily_entry') }}" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="दैनिक एंट्री">
+                    + एंट्री
                 </a>
             </div>
         </div>
 
-        <!-- Card 4: Unified Reports Hub -->
-        <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-2xl p-5 text-white shadow-md border border-blue-700/40 flex flex-col justify-between">
+        <!-- Segment 3: DPR & Site Photos -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-sky-500/50 transition">
             <div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-amber-300 flex items-center justify-center text-xl border border-blue-400/30">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-400/30">All-in-One</span>
+                <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-800 border border-sky-200/70 flex items-center justify-center text-lg mb-3">
+                    <i class="fa-solid fa-trowel-bricks"></i>
                 </div>
-                <h3 class="text-base font-bold text-white">📊 दैनिक व मासिक रिपोर्ट्स</h3>
-                <p class="text-xs text-blue-200 mt-1 leading-relaxed">आज का खर्च, पूरे महीने का कुल योग व साइट-वार हिसाब</p>
+                <h3 class="font-black text-slate-900 text-sm">कार्य प्रगति व फोटो (DPR)</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    पाइपलाइन खुदाई, बिछाना, FHTC नल कनेक्शन एवं 4-फोटो A4 सरकारी एल्बम।
+                </p>
             </div>
-            <div class="mt-4 pt-3 border-t border-blue-800/60 flex items-center gap-2">
-                <a href="{{ url_for('reports_hub', tab='daily') }}" class="flex-1 py-2 px-2 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition">
-                    📅 आज की
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="/dpr" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
+                    DPR प्रगति &rarr;
                 </a>
-                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="flex-1 py-2 px-2 text-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition">
-                    📆 माहवार
+                <a href="/site-photos" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="फोटो एल्बम">
+                    एल्बम
                 </a>
             </div>
         </div>
 
-    </div>
-
-    <!-- Quick Stat Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Sites -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <!-- Segment 4: Reports & Ledgers -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-blue-500/50 transition">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल साइट्स</span>
-                <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_sites }} Sites</p>
-                <span class="text-xs text-blue-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-circle-check text-xs"></i> 21 Active Projects
-                </span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-map-location-dot"></i>
-            </div>
-        </div>
-
-        <!-- Master Materials -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">सामग्री कैटलॉग</span>
-                <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_materials }} Items</p>
-                <span class="text-xs text-indigo-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-tags text-xs"></i> Fixed Rate List
-                </span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-boxes-stacked"></i>
-            </div>
-        </div>
-
-        <!-- Total Usage Entries -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल दैनिक प्रविष्टियाँ</span>
-                <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">{{ stats.total_logs }} Logs</p>
-                <span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> Saved Records
-                </span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-clipboard-list"></i>
-            </div>
-        </div>
-
-        <!-- Total Cost -->
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
-            <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल खर्च मूल्य</span>
-                <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</p>
-                <span class="text-xs text-amber-600 font-medium flex items-center gap-1 mt-1">
-                    <i class="fa-solid fa-indian-rupee-sign text-xs"></i> Estimated Usage
-                </span>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-                <i class="fa-solid fa-coins"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- 21 Sites Quick Grid Navigation -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-network-wired text-blue-600"></i>
-                    21 Construction Sites Overview
-                </h2>
-                <p class="text-xs text-slate-500">किसी भी साइट पर क्लिक करके उसका पूरा सामग्री लेजर देखें:</p>
-            </div>
-            <a href="{{ url_for('sites_list') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                सभी साइट्स <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {% for site in sites %}
-            <a href="{{ url_for('reports_hub', tab='site', site_id=site.id) }}" class="group p-3 rounded-xl border border-slate-100 hover:border-blue-400 bg-slate-50/50 hover:bg-blue-50/50 transition duration-150 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono font-bold text-slate-400 group-hover:text-blue-600">{{ site.code }}</span>
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 border border-blue-200/70 flex items-center justify-center text-lg mb-3">
+                    <i class="fa-solid fa-chart-line"></i>
                 </div>
-                <div class="mt-2">
-                    <p class="text-sm font-semibold text-slate-800 group-hover:text-blue-700 truncate">{{ site.name }}</p>
-                    <p class="text-[11px] text-slate-400 truncate">{{ site.supervisor or site.location or 'Active' }}</p>
-                </div>
-            </a>
-            {% endfor %}
+                <h3 class="font-black text-slate-900 text-sm">रिपोर्ट्स केंद्र (Reports Hub)</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    दैनिक, माहवार, साइट-वार सम्पूर्ण लेजर हिसाब एवं 21 साइट्स मैट्रिक्स।
+                </p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('reports_hub') }}" class="flex-1 py-2 px-3 text-center rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition">
+                    रिपोर्ट्स खोलें &rarr;
+                </a>
+                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition" title="मासिक">
+                    मासिक
+                </a>
+            </div>
         </div>
+
     </div>
 
     <!-- ======================================================== -->
-    <!-- SEGMENT: OUTGOING LETTERS REFERENCE REGISTER (जावक पत्रांक पंजी) -->
+    <!-- 5. OUTGOING LETTERS REGISTER SEGMENT (Dedicated White Card) -->
     <!-- ======================================================== -->
-    <div id="letters" class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-lg scroll-mt-20">
+    <div id="letters" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs scroll-mt-20">
         
         <!-- Header with Title, FY Badges and Actions -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 border border-blue-200">
-                        <i class="fa-solid fa-stamp text-blue-600"></i> पत्रांक रजिस्टर (Dispatch Register)
+                    <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-200">
+                        <i class="fa-solid fa-stamp text-emerald-700"></i> पत्रांक रजिस्टर
                     </span>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200">
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200">
                         वित्तीय वर्ष: {{ next_letter_info.fy }}
                     </span>
-                    <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 flex items-center gap-1">
+                    <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 text-[11px] font-black border border-amber-300 flex items-center gap-1">
                         <i class="fa-solid fa-hashtag text-amber-600"></i> अगला पत्रांक: <code class="font-mono text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-amber-200" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
                     </span>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-2 flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-black text-slate-900 mt-2 flex items-center gap-2">
                     <span>📑 विभिन्न विभागों को जावक पत्र (Outgoing Letters Register)</span>
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                <p class="text-xs text-slate-500 mt-0.5">
                     PHED, RWD, DWSM, बैंक आदि विभागों को भेजे गए पत्रों की क्रमबद्ध पत्रांक संख्या (SK/YYYY-YY/0001) एवं प्रेषण विवरण।
                 </p>
             </div>
 
             <!-- Action Buttons: + New Entry, Excel Export, PDF Export -->
-            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <button type="button" onclick="openNewLetterModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 border border-blue-500/50">
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="openNewLetterModal()" class="px-3.5 py-2 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-2">
                     <i class="fa-solid fa-circle-plus text-amber-300"></i> <span>+ नया पत्रांक दर्ज करें</span>
                 </button>
-                <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow transition flex items-center gap-2 border border-emerald-500/40" title="Excel शीट डाउनलोड करें">
-                    <i class="fa-solid fa-file-excel text-emerald-200"></i> <span>Excel डाउनलोड</span>
+                <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5" title="Excel डाउनलोड">
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Excel</span>
                 </a>
-                <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="px-3.5 py-2.5 rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm shadow transition flex items-center gap-2 border border-rose-500/40" title="PDF रजिस्टर डाउनलोड करें">
-                    <i class="fa-solid fa-file-pdf text-rose-200"></i> <span>PDF डाउनलोड</span>
+                <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5" title="PDF डाउनलोड">
+                    <i class="fa-solid fa-file-pdf text-rose-600"></i> <span>PDF</span>
                 </a>
             </div>
         </div>
@@ -276,12 +231,12 @@
         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="relative w-full sm:w-96">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="विभाग, स्थान, पत्रांक संख्या या विषय से खोजें..." class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50/50">
+                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="विभाग, स्थान, पत्रांक संख्या या विषय से खोजें..." class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-slate-50">
             </div>
 
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <span class="text-xs text-slate-500 font-semibold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> वित्तीय वर्ष:</span>
-                <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
                     <option value="">सभी वित्तीय वर्ष (All)</option>
                     {% for fy in letter_fys %}
                     <option value="{{ fy }}" {% if fy == next_letter_info.fy %}selected{% endif %}>FY {{ fy }}</option>
@@ -294,7 +249,7 @@
         </div>
 
         <!-- Table View -->
-        <div class="mt-4 overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
+        <div class="mt-4 overflow-x-auto border border-slate-200/90 rounded-xl shadow-2xs">
             <table class="w-full text-left text-xs border-collapse" id="lettersTable">
                 <thead>
                     <tr class="bg-slate-900 text-white uppercase text-[10.5px] tracking-wider font-bold">
@@ -310,7 +265,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-slate-700" id="lettersTableBody">
                     {% for letter in outgoing_letters %}
-                    <tr class="hover:bg-blue-50/40 transition letter-row" data-fy="{{ letter.fy }}" data-search="{{ (letter.ref_no ~ ' ' ~ letter.department ~ ' ' ~ letter.place ~ ' ' ~ letter.purpose ~ ' ' ~ letter.remarks)|lower }}">
+                    <tr class="hover:bg-slate-50 transition letter-row" data-fy="{{ letter.fy }}" data-search="{{ (letter.ref_no ~ ' ' ~ letter.department ~ ' ' ~ letter.place ~ ' ' ~ letter.purpose ~ ' ' ~ letter.remarks)|lower }}">
                         <td class="py-3 px-3 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
                         <td class="py-3 px-3 text-center font-mono text-slate-700 whitespace-nowrap">
                             <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-medium">
@@ -352,14 +307,14 @@
                     </tr>
                     {% else %}
                     <tr id="lettersEmptyRow">
-                        <td colspan="8" class="py-12 text-center text-slate-400">
+                        <td colspan="8" class="py-10 text-center text-slate-400">
                             <div class="max-w-sm mx-auto flex flex-col items-center">
-                                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mb-3 border border-blue-200">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl mb-2.5 border border-emerald-200">
                                     <i class="fa-solid fa-envelope-open-text"></i>
                                 </div>
                                 <p class="text-sm font-bold text-slate-700">अभी तक कोई जावक पत्र दर्ज नहीं हुआ है।</p>
-                                <p class="text-xs text-slate-400 mt-1">ऊपर दिए गए "+ नया पत्रांक दर्ज करें" बटन पर क्लिक करके पहला पत्र दर्ज करें।</p>
-                                <button type="button" onclick="openNewLetterModal()" class="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5">
+                                <p class="text-xs text-slate-400 mt-0.5">पहला आधिकारिक पत्र दर्ज करने के लिए नीचे क्लिक करें।</p>
+                                <button type="button" onclick="openNewLetterModal()" class="mt-3.5 px-4 py-2 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-plus"></i> पहला पत्रांक दर्ज करें ({{ next_letter_info.ref_no }})
                                 </button>
                             </div>
@@ -371,103 +326,60 @@
         </div>
     </div>
 
-    <!-- 2 Columns: Top Materials Consumed & Recent Entries -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Top Materials Consumed (1 Col) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+    <!-- ======================================================== -->
+    <!-- 6. RECENT ENTRIES TABLE (Clean White Card) -->
+    <!-- ======================================================== -->
+    <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
+        <div class="flex items-center justify-between mb-4">
             <div>
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-column text-indigo-600"></i>
-                        Top Consumed Materials
-                    </h2>
-                    <a href="{{ url_for('reports_hub', tab='material') }}" class="text-xs text-blue-600 hover:underline">All Materials</a>
-                </div>
-                
-                <div class="space-y-3">
-                    {% for mat in stats.top_materials %}
-                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-indigo-50/30 transition">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="font-semibold text-slate-800 truncate pr-2">{{ mat.name }}</span>
-                            <span class="font-mono font-bold text-indigo-700 whitespace-nowrap">{{ mat.total_qty }} {{ mat.unit }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-slate-400 mt-1">
-                            <span>Total Value: ₹{{ "{:,.0f}".format(mat.total_val) }}</span>
-                        </div>
-                    </div>
+                <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-700"></i>
+                    हाल ही की सामग्री खपत (Recent Usage Logs)
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">21 साइट्स पर दर्ज हुई अंतिम सामग्री प्रविष्टियाँ</p>
+            </div>
+            <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1">
+                दैनिक रिपोर्ट देखें <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200/90 rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
+                        <th class="py-2.5 px-3">तारीख</th>
+                        <th class="py-2.5 px-3">साइट</th>
+                        <th class="py-2.5 px-3">सामग्री</th>
+                        <th class="py-2.5 px-3 text-right">मात्रा</th>
+                        <th class="py-2.5 px-3 text-right">दर</th>
+                        <th class="py-2.5 px-3 text-right">कुल (₹)</th>
+                        <th class="py-2.5 px-3">कार्य विवरण</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-700">
+                    {% for entry in stats.recent_entries %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">{{ entry.usage_date }}</td>
+                        <td class="py-2.5 px-3 font-bold text-slate-900 whitespace-nowrap">{{ entry.site_name }}</td>
+                        <td class="py-2.5 px-3 font-medium text-slate-800">{{ entry.material_name }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800 whitespace-nowrap">
+                            {{ entry.quantity }} <span class="text-[10px] text-slate-500 font-normal">{{ entry.material_unit }}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-mono text-slate-500 whitespace-nowrap">₹{{ entry.rate }}</td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-800 whitespace-nowrap">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
+                        <td class="py-2.5 px-3 text-slate-500 max-w-xs truncate">{{ entry.purpose or '-' }}</td>
+                    </tr>
                     {% else %}
-                    <p class="text-xs text-slate-400 py-4 text-center">अभी तक कोई मटेरियल इस्तेमाल दर्ज नहीं हुआ है।</p>
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-slate-400">कोई प्रविष्टि नहीं मिली। नई प्रविष्टि दर्ज करें।</td>
+                    </tr>
                     {% endfor %}
-                </div>
-            </div>
-
-            <div class="mt-6 pt-4 border-t border-slate-100">
-                <a href="{{ url_for('daily_entry') }}" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> Daily Consumption Entry Dalein
-                </a>
-            </div>
+                </tbody>
+            </table>
         </div>
-
-        <!-- Recent Entries Table (2 Cols) -->
-        <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
-                        हाल ही की प्रविष्टियाँ (Recent Usage Logs)
-                    </h2>
-                    <p class="text-xs text-slate-500">21 साइट्स पर दर्ज हुई अंतिम सामग्री प्रविष्टियाँ</p>
-                </div>
-                <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800">
-                    दैनिक रिपोर्ट देखें <i class="fa-solid fa-arrow-right"></i>
-                </a>
-            </div>
-
-            <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                            <th class="py-2.5 px-3">तारीख</th>
-                            <th class="py-2.5 px-3">साइट</th>
-                            <th class="py-2.5 px-3">सामग्री</th>
-                            <th class="py-2.5 px-3 text-right">मात्रा</th>
-                            <th class="py-2.5 px-3 text-right">दर</th>
-                            <th class="py-2.5 px-3 text-right">कुल (₹)</th>
-                            <th class="py-2.5 px-3">कार्य विवरण</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-slate-700">
-                        {% for entry in stats.recent_entries %}
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-2.5 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">{{ entry.usage_date }}</td>
-                            <td class="py-2.5 px-3 font-semibold text-blue-700 whitespace-nowrap">
-                                <a href="{{ url_for('reports_hub', tab='site', site_id=entry.site_id) }}" class="hover:underline">
-                                    {{ entry.site_name }}
-                                </a>
-                            </td>
-                            <td class="py-2.5 px-3 font-medium text-slate-800">{{ entry.material_name }}</td>
-                            <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800 whitespace-nowrap">
-                                {{ entry.quantity }} <span class="text-[10px] text-slate-500 font-normal">{{ entry.material_unit }}</span>
-                            </td>
-                            <td class="py-2.5 px-3 text-right font-mono text-slate-500 whitespace-nowrap">₹{{ entry.rate }}</td>
-                            <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-700 whitespace-nowrap">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
-                            <td class="py-2.5 px-3 text-slate-500 max-w-xs truncate">{{ entry.purpose or '-' }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-400">कोई प्रविष्टि नहीं मिली। नई प्रविष्टि दर्ज करें।</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
 </div>
-
 
 <!-- ======================================================== -->
 <!-- MODAL: ADD / EDIT OUTGOING LETTER REFERENCE -->
@@ -476,7 +388,7 @@
     <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-scaleIn">
         
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 p-5 text-white flex items-center justify-between">
+        <div class="bg-[#0A261F] p-5 text-white flex items-center justify-between border-b border-[#12382E]">
             <div>
                 <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
                     <i class="fa-solid fa-stamp"></i> पत्रांक पंजी (Dispatch Entry)
@@ -498,16 +410,16 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">
                         दिनांक (Letter Date) <span class="text-rose-500">*</span>
                     </label>
-                    <input type="date" id="letterDateInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+                    <input type="date" id="letterDateInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50">
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-xs font-bold text-slate-700">
                             पत्रांक संख्या (Ref No.) <span class="text-rose-500">*</span>
                         </label>
-                        <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">ऑटोमैटिक</span>
+                        <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">ऑटोमैटिक</span>
                     </div>
-                    <input type="text" id="letterRefNoInput" required placeholder="SK/2026-27/0001" class="w-full px-3 py-2.5 rounded-xl border border-blue-300 font-mono font-bold text-xs text-blue-900 bg-blue-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="letterRefNoInput" required placeholder="SK/2026-27/0001" class="w-full px-3 py-2.5 rounded-xl border border-blue-300 font-mono font-bold text-xs text-blue-900 bg-blue-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 </div>
             </div>
 
@@ -516,7 +428,7 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">
                     विभाग का नाम (Name of Department) <span class="text-rose-500">*</span>
                 </label>
-                <input type="text" id="letterDeptInput" list="deptSuggestions" required placeholder="जैसे: कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="letterDeptInput" list="deptSuggestions" required placeholder="जैसे: कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 <datalist id="deptSuggestions">
                     <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान (PHED Siwan)">
                     <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल छपरा (PHED Chapra)">
@@ -534,10 +446,10 @@
                 </datalist>
                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
                     <span class="text-[10px] text-slate-400 font-semibold">त्वरित चयन:</span>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition">PHED Siwan</button>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल छपरा')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition">PHED Chapra</button>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल मधुबनी')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition">PHED Madhubani</button>
-                    <button type="button" onclick="setQuickDept('ग्रामीण कार्य विभाग (RWD)')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition">RWD</button>
+                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 transition">PHED Siwan</button>
+                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल छपरा')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 transition">PHED Chapra</button>
+                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल मधुबनी')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 transition">PHED Madhubani</button>
+                    <button type="button" onclick="setQuickDept('ग्रामीण कार्य विभाग (RWD)')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 transition">RWD</button>
                 </div>
             </div>
 
@@ -547,14 +459,14 @@
                     स्थान / साइट (Place / Location) <span class="text-rose-500">*</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <select id="letterPlaceSelect" onchange="handlePlaceSelectChange()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="letterPlaceSelect" onchange="handlePlaceSelectChange()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
                         <option value="">-- साइट / स्थान चुनें --</option>
                         {% for s in sites %}
                         <option value="{{ s.name }}">{{ s.name }} ({{ s.location or 'Site' }})</option>
                         {% endfor %}
                         <option value="__custom__">+ अन्य स्थान (Type Custom Place)</option>
                     </select>
-                    <input type="text" id="letterCustomPlaceInput" placeholder="स्थान का नाम लिखें (जैसे: सीवान / पटना)" class="hidden w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="letterCustomPlaceInput" placeholder="स्थान का नाम लिखें (जैसे: सीवान / पटना)" class="hidden w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 </div>
             </div>
 
@@ -563,7 +475,7 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">
                     पत्र का उद्देश्य / विषय (Purpose of the Letter) <span class="text-rose-500">*</span>
                 </label>
-                <textarea id="letterPurposeInput" rows="3" required placeholder="जैसे: हर घर नल का जल योजना के अंतर्गत पाइपलाइन कार्य एवं FHTC कनेक्शन की प्रगति रिपोर्ट समर्पित करने के संबंध में।" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+                <textarea id="letterPurposeInput" rows="3" required placeholder="जैसे: हर घर नल का जल योजना के अंतर्गत पाइपलाइन कार्य एवं FHTC कनेक्शन की प्रगति रिपोर्ट समर्पित करने के संबंध में।" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 leading-relaxed"></textarea>
             </div>
 
             <!-- Row 5: Remarks / Dispatch mode -->
@@ -571,7 +483,7 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">
                     टिप्पणी (Remarks / Dispatch Details)
                 </label>
-                <input type="text" id="letterRemarksInput" placeholder="जैसे: हस्तगत प्राप्त कराया / स्पीड पोस्ट संख्या: ED123456789IN / पावती संलग्न" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="letterRemarksInput" placeholder="जैसे: हस्तगत प्राप्त कराया / स्पीड पोस्ट संख्या: ED123456789IN / पावती संलग्न" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
             </div>
 
             <!-- Action Buttons -->
@@ -579,7 +491,7 @@
                 <button type="button" onclick="closeLetterModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
                     रद्द करें (Cancel)
                 </button>
-                <button type="submit" id="btnSaveLetter" class="px-5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
+                <button type="submit" id="btnSaveLetter" class="px-5 py-2.5 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white text-xs font-bold shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-check"></i> <span id="btnSaveLetterText">पत्रांक सुरक्षित करें</span>
                 </button>
             </div>
@@ -589,7 +501,6 @@
 
 {% block scripts %}
 <script>
-    // Global Outgoing Letters Controller
     let currentNextRefNo = "{{ next_letter_info.ref_no }}";
     let currentNextSeq = {{ next_letter_info.seq_num }};
     let currentFy = "{{ next_letter_info.fy }}";
@@ -616,7 +527,6 @@
         document.getElementById('btnSaveLetterText').innerText = 'पत्रांक सुरक्षित करें';
         document.getElementById('letterEditId').value = '';
 
-        // Default Date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('letterDateInput').value = today;
         document.getElementById('letterRefNoInput').value = currentNextRefNo;
@@ -639,7 +549,6 @@
         document.getElementById('letterRefNoInput').value = letter.ref_no || '';
         document.getElementById('letterDeptInput').value = letter.department || '';
 
-        // Place matching
         const placeSel = document.getElementById('letterPlaceSelect');
         const customPlace = document.getElementById('letterCustomPlaceInput');
         let matched = false;
@@ -713,7 +622,6 @@
 
             if (data.success) {
                 closeLetterModal();
-                // Reload dashboard to update table & next counter cleanly
                 window.location.hash = 'letters';
                 window.location.reload();
             } else {
