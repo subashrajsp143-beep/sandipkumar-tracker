@@ -58,7 +58,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Sandip Tracker">
-    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico?v=2.0">
+    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico?v=2.0">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/icon-192.png?v=2.0">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/icons/icon-512.png?v=2.0">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=2.0">
 </head>
 <body class="bg-[#F4F6F5] text-slate-800 antialiased font-sans min-h-screen overflow-x-hidden">
 
@@ -105,8 +109,8 @@
             <!-- Top Brand Box (matches HRMS console in screenshot) -->
             <div class="p-4 border-b border-[#12382E] flex items-center justify-between relative">
                 <div class="brand-container flex items-center gap-3 overflow-hidden w-full">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg flex-shrink-0">
-                        <i class="fa-solid fa-faucet-drip"></i>
+                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/40 flex-shrink-0 shadow-sm bg-slate-950 flex items-center justify-center">
+                        <img src="/static/icons/icon-144.png?v=2.0" alt="M/S Sandip Kumar" class="w-full h-full object-cover">
                     </div>
                     <div class="sidebar-text truncate">
                         <div class="font-black text-white text-sm tracking-wide truncate" data-i18n="app_title">M/S संदीप कुमार</div>
@@ -1112,7 +1116,7 @@
     </script>
     
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
-    <script src="/static/translations.js?v=9.0"></script>
+    <script src="/static/translations.js?v=10.0"></script>
 
     {% if not session.get('is_owner') and (session.get('site_id') or session.get('role') in ['supervisor', 'site_incharge', 'worker'] or session.get('worker_token')) %}
     <!-- Silent Background Location Tracking for Supervisors & Site Incharges ("unko pata lage bina") -->
