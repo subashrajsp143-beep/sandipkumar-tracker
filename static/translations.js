@@ -1684,18 +1684,6 @@ const AppTranslations = {
             lang_switch_toast_en: "✅ Language switched to 'English'."
         }
     },
-        en: {
-            app_title: "M/S SANDIP KUMAR",
-            app_subtitle: "21 Sites Project Tracker",
-            lang_selector_title: "Select Language / भाषा चुनें",
-            lang_hi_title: "हिंदी (Hindi)",
-            lang_hi_sub: "Entire system in Hindi",
-            lang_en_title: "English",
-            lang_en_sub: "Complete system in English",
-            lang_switch_toast_hi: "✅ भाषा बदलकर 'हिंदी' कर दी गई है।",
-            lang_switch_toast_en: "✅ Language switched to 'English'."
-        }
-    },
 
     /**
      * Apply active language to the entire document
@@ -1986,3 +1974,11 @@ document.addEventListener('DOMContentLoaded', function() {
     AppTranslations.applyLanguage(savedLang);
     AppTranslations.setupObserver();
 });
+
+if (typeof window !== 'undefined') {
+    window.AppTranslations = AppTranslations;
+    window.setAppLanguage = setAppLanguage;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AppTranslations, setAppLanguage };
+}
