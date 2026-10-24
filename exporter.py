@@ -854,3 +854,276 @@ def generate_photo_album_pdf(site, month_str, photos, from_date=None, to_date=No
     return buf
 
 
+# ==========================================
+# OUTGOING LETTERS EXCEL & PDF EXPORTERS
+# ==========================================
+
+def generate_letters_excel(letters, fy=None):
+    """
+    Generates a professional, print-ready Excel workbook for Outgoing Letters Reference Register.
+    Columns:
+    1. S.No. (क्र. सं.)
+    2. Reference Number (पत्रांक संख्या) - e.g. SK/2026-27/0001
+    3. Letter Date (दिनांक) - DD/MM/YYYY
+    4. Department Name (विभाग का नाम)
+    5. Place / Site (स्थान / साइट)
+    6. Purpose of the Letter (पत्र का उद्देश्य / विषय)
+    7. Remarks / Dispatch Details (टिप्पणी / प्रेषण विवरण)
+    """
+    import datetime as dt
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Letters {fy or ''}".strip()
+
+    # Sheet Title Block
+    ws.append(["M/S SANDIP KUMAR — GOVT. CONTRACTOR & WATER SUPPLY WORKS"])
+    ws.cell(1, 1).font = Font(name="Calibri", size=13, bold=True, color="1E3A8A")
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=7)
+
+    ws.append(["जावक पत्र पत्रांक पंजी (OUTGOING LETTERS DISPATCH & REFERENCE REGISTER)"])
+    ws.cell(2, 1).font = Font(name="Calibri", size=11, bold=True, color="047857")
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=7)
+
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    current_time_str = ist_now.strftime("%d/%m/%Y %I:%M %p")
+    ws.append([f"वित्तीय वर्ष (Financial Year): {fy or 'All (समस्त)'}  |  कुल पत्र संख्या: {len(letters)}  |  डाउनलोड तिथि: {current_time_str}"])
+    ws.cell(3, 1).font = Font(name="Calibri", size=9, italic=True, color="4B5563")
+    ws.merge_cells(start_row=3, start_column=1, end_row=3, end_column=7)
+    ws.append([])  # blank row
+
+    headers = [
+        "क्र. सं. (Sl. No.)",
+        "पत्रांक संख्या (Reference No.)",
+        "दिनांक (Date)",
+        "विभाग का नाम (Name of Department)",
+        "स्थान / साइट (Place)",
+        "पत्र का उद्देश्य / विषय (Purpose of Letter)",
+        "टिप्पणी / प्रेषण विवरण (Remarks / Dispatch)"
+    ]
+    ws.append(headers)
+    ws.row_dimensions[5].height = 28
+
+    header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    header_font = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    for col_idx in range(1, 8):
+        c = ws.cell(row=5, column=col_idx)
+        c.fill = header_fill
+        c.font = header_font
+        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        c.border = THIN_BORDER
+
+    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    ref_font = Font(name="Calibri", size=10, bold=True, color="1E3A8A")
+    dept_font = Font(name="Calibri", size=10, bold=True, color="0F172A")
+    regular_font = Font(name="Calibri", size=10)
+
+    for idx, letter in enumerate(letters, start=1):
+        row_num = 5 + idx
+        raw_date = letter.get("letter_date", "")
+        fmt_date = raw_date
+        try:
+            p = raw_date.split("-")
+            if len(p) == 3:
+                fmt_date = f"{p[2]}/{p[1]}/{p[0]}"
+        except Exception:
+            pass
+
+        ws.append([
+            idx,
+            letter.get("ref_no", ""),
+            fmt_date,
+            letter.get("department", ""),
+            letter.get("place", ""),
+            letter.get("purpose", ""),
+            letter.get("remarks", "")
+        ])
+
+        ws.row_dimensions[row_num].height = 24
+        is_even = (idx % 2 == 0)
+
+        for col_idx in range(1, 8):
+            cell = ws.cell(row=row_num, column=col_idx)
+            cell.border = THIN_BORDER
+            if is_even:
+                cell.fill = zebra_fill
+
+            if col_idx == 1:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.font = regular_font
+            elif col_idx == 2:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.font = ref_font
+            elif col_idx == 3:
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.font = regular_font
+            elif col_idx == 4:
+                cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+                cell.font = dept_font
+            elif col_idx == 5:
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+                cell.font = regular_font
+            elif col_idx == 6:
+                cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+                cell.font = regular_font
+            elif col_idx == 7:
+                cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+                cell.font = regular_font
+
+    # Column widths
+    ws.column_dimensions["A"].width = 12  # Sl. No.
+    ws.column_dimensions["B"].width = 24  # Reference No.
+    ws.column_dimensions["C"].width = 14  # Date
+    ws.column_dimensions["D"].width = 34  # Department
+    ws.column_dimensions["E"].width = 18  # Place
+    ws.column_dimensions["F"].width = 46  # Purpose
+    ws.column_dimensions["G"].width = 28  # Remarks
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
+
+def generate_letters_pdf(letters, fy=None):
+    """
+    Generates a clean, professional landscape A4 PDF for Outgoing Letters Reference Register.
+    """
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.pdfgen import canvas
+    import datetime as dt
+
+    buf = io.BytesIO()
+
+    class NumberedLetterCanvas(canvas.Canvas):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._saved_page_states = []
+
+        def showPage(self):
+            self._saved_page_states.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            num_pages = len(self._saved_page_states)
+            for state in self._saved_page_states:
+                self.__dict__.update(state)
+                self.draw_page_decorations(num_pages)
+                super().showPage()
+            super().save()
+
+        def draw_page_decorations(self, total_pages):
+            self.saveState()
+            self.setFont("Helvetica", 7.5)
+            self.setFillColor(colors.HexColor('#64748B'))
+            self.drawString(20, 12, "M/S SANDIP KUMAR — Jal Jeevan Mission Bihar | Outgoing Letters Dispatch & Reference Register")
+            page_text = f"Page {self._pageNumber} of {total_pages}"
+            self.drawRightString(822, 12, page_text)
+            self.restoreState()
+
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=landscape(A4),
+        leftMargin=20,
+        rightMargin=20,
+        topMargin=15,
+        bottomMargin=22
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('LetterTitle', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=12, leading=14, textColor=colors.HexColor('#0F172A'), alignment=1)
+    sub_style = ParagraphStyle('LetterSub', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=9, leading=11, textColor=colors.HexColor('#047857'), alignment=1)
+    stat_style = ParagraphStyle('LetterStat', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10, textColor=colors.HexColor('#475569'), alignment=1)
+
+    th_style = ParagraphStyle('LetterTH', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8, leading=9.5, textColor=colors.white, alignment=1)
+    cell_center = ParagraphStyle('CellCenter', parent=styles['Normal'], fontName='Helvetica', fontSize=7.5, leading=9, alignment=1)
+    cell_ref = ParagraphStyle('CellRef', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.5, leading=9, textColor=colors.HexColor('#1E3A8A'), alignment=1)
+    cell_dept = ParagraphStyle('CellDept', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.5, leading=9, textColor=colors.HexColor('#0F172A'))
+    cell_text = ParagraphStyle('CellText', parent=styles['Normal'], fontName='Helvetica', fontSize=7.5, leading=9, textColor=colors.HexColor('#1E293B'))
+
+    ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    current_time_str = ist_now.strftime("%d/%m/%Y %I:%M %p")
+
+    elements = [
+        Paragraph('M/S SANDIP KUMAR &mdash; GOVERNMENT CONTRACTOR &amp; WATER SUPPLY WORKS', title_style),
+        Spacer(1, 2),
+        Paragraph('जावक पत्र पत्रांक पंजी (OUTGOING LETTERS DISPATCH &amp; REFERENCE REGISTER)', sub_style),
+        Spacer(1, 2),
+        Paragraph(f'<b>Financial Year (वित्तीय वर्ष):</b> {fy or "All (समस्त)"} &nbsp;|&nbsp; <b>Total Outgoing Letters:</b> {len(letters)} &nbsp;|&nbsp; <b>Generated:</b> {current_time_str}', stat_style),
+        Spacer(1, 6)
+    ]
+
+    col_widths = [26, 96, 52, 148, 70, 260, 150]
+    headers = [
+        Paragraph('SL', th_style),
+        Paragraph('REF NUMBER', th_style),
+        Paragraph('DATE', th_style),
+        Paragraph('DEPARTMENT', th_style),
+        Paragraph('PLACE', th_style),
+        Paragraph('PURPOSE OF LETTER / SUBJECT', th_style),
+        Paragraph('REMARKS / DISPATCH', th_style)
+    ]
+
+    table_data = [headers]
+
+    for idx, ltr in enumerate(letters, 1):
+        raw_date = ltr.get('letter_date', '')
+        fmt_date = raw_date
+        try:
+            p = raw_date.split('-')
+            if len(p) == 3:
+                fmt_date = f"{p[2]}/{p[1]}/{p[0]}"
+        except Exception:
+            pass
+
+        ref_str = ltr.get('ref_no') or ''
+        dept_str = ltr.get('department') or ''
+        place_str = ltr.get('place') or ''
+        purp_str = ltr.get('purpose') or ''
+        rem_str = ltr.get('remarks') or ''
+
+        table_data.append([
+            Paragraph(str(idx), cell_center),
+            Paragraph(ref_str, cell_ref),
+            Paragraph(fmt_date, cell_center),
+            Paragraph(dept_str, cell_dept),
+            Paragraph(place_str, cell_text),
+            Paragraph(purp_str, cell_text),
+            Paragraph(rem_str, cell_text)
+        ])
+
+    if len(letters) == 0:
+        table_data.append([
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('No outgoing letters recorded yet.', cell_dept),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center)
+        ])
+
+    t = Table(table_data, colWidths=col_widths, repeatRows=1)
+    t_style = [
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0F172A')),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('LEFTPADDING', (0,0), (-1,-1), 3),
+        ('RIGHTPADDING', (0,0), (-1,-1), 3),
+    ]
+
+    for i in range(1, len(table_data)):
+        if i % 2 == 0:
+            t_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F8FAFC')))
+
+    t.setStyle(TableStyle(t_style))
+    elements.append(t)
+
+    doc.build(elements, canvasmaker=NumberedLetterCanvas)
+    buf.seek(0)
+    return buf
+

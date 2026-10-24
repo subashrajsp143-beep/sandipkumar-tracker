@@ -292,7 +292,153 @@ def dashboard():
 
     stats = database.get_dashboard_stats()
     sites = database.get_all_sites()
-    return render_template("dashboard.html", stats=stats, sites=sites)
+    outgoing_letters = database.get_outgoing_letters()
+    next_letter_info = database.get_next_letter_ref_no()
+    letter_fys = database.get_distinct_letter_fys()
+    letters_stats = database.get_outgoing_letters_stats()
+
+    return render_template(
+        "dashboard.html",
+        stats=stats,
+        sites=sites,
+        outgoing_letters=outgoing_letters,
+        next_letter_info=next_letter_info,
+        letter_fys=letter_fys,
+        letters_stats=letters_stats
+    )
+
+@app.route("/letters")
+def letters_shortcut():
+    return redirect("/dashboard#letters")
+
+
+# 1.05 Outgoing Letters Reference Register APIs & Exporters
+@app.route("/api/letters", methods=["GET", "POST"])
+def api_letters():
+    if request.method == "GET":
+        fy = request.args.get("fy")
+        search = request.args.get("search")
+        letters = database.get_outgoing_letters(search=search, fy=fy)
+        next_info = database.get_next_letter_ref_no()
+        fys = database.get_distinct_letter_fys()
+        stats = database.get_outgoing_letters_stats()
+        return jsonify({
+            "success": True,
+            "letters": letters,
+            "next_ref_no": next_info["ref_no"],
+            "next_seq": next_info["seq_num"],
+            "current_fy": next_info["fy"],
+            "fys": fys,
+            "stats": stats
+        })
+
+    # POST: create new letter reference
+    try:
+        data = request.get_json(silent=True) or request.form
+        letter_date = data.get("letter_date") or None
+        department = data.get("department") or ""
+        place = data.get("place") or ""
+        purpose = data.get("purpose") or ""
+        remarks = data.get("remarks") or ""
+        custom_ref_no = data.get("ref_no") or None
+
+        if not department.strip():
+            return jsonify({"success": False, "message": "विभाग का नाम (Department Name) भरना अनिवार्य है।"}), 400
+        if not place.strip():
+            return jsonify({"success": False, "message": "स्थान / साइट (Place) भरना अनिवार्य है।"}), 400
+        if not purpose.strip():
+            return jsonify({"success": False, "message": "पत्र का उद्देश्य / विषय (Purpose) भरना अनिवार्य है।"}), 400
+
+        res = database.add_outgoing_letter(
+            letter_date=letter_date,
+            department=department,
+            place=place,
+            purpose=purpose,
+            remarks=remarks,
+            custom_ref_no=custom_ref_no
+        )
+        return jsonify({
+            "success": True,
+            "message": f"पत्रांक संख्या {res['ref_no']} सफलतापूर्वक दर्ज हो गया।",
+            "letter": res
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/letters/<int:letter_id>", methods=["GET", "POST", "PUT", "DELETE"])
+def api_letter_detail(letter_id):
+    if request.method == "GET":
+        letter = database.get_outgoing_letter_by_id(letter_id)
+        if not letter:
+            return jsonify({"success": False, "message": "पत्र रिकॉर्ड नहीं मिला।"}), 404
+        return jsonify({"success": True, "letter": letter})
+
+    if request.method == "DELETE":
+        ok = database.delete_outgoing_letter(letter_id)
+        if ok:
+            return jsonify({"success": True, "message": "पत्रांक रिकॉर्ड सफलतापूर्वक हटा दिया गया।"})
+        return jsonify({"success": False, "message": "हटाने में विफल या रिकॉर्ड मौजूद नहीं है।"}), 400
+
+    # POST or PUT: update letter
+    try:
+        data = request.get_json(silent=True) or request.form
+        letter_date = data.get("letter_date")
+        department = data.get("department")
+        place = data.get("place")
+        purpose = data.get("purpose")
+        remarks = data.get("remarks", "")
+        ref_no = data.get("ref_no")
+
+        if not department or not place or not purpose:
+            return jsonify({"success": False, "message": "विभाग, स्थान और विषय भरना अनिवार्य है।"}), 400
+
+        ok = database.update_outgoing_letter(
+            letter_id=letter_id,
+            letter_date=letter_date,
+            department=department,
+            place=place,
+            purpose=purpose,
+            remarks=remarks,
+            ref_no=ref_no
+        )
+        if ok:
+            return jsonify({"success": True, "message": "पत्रांक रिकॉर्ड सफलतापूर्वक अपडेट हो गया।"})
+        return jsonify({"success": False, "message": "अपडेट विफल रहा।"}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/export/letters-excel")
+def export_letters_excel():
+    fy = request.args.get("fy")
+    search = request.args.get("search")
+    letters = database.get_outgoing_letters(search=search, fy=fy)
+    wb_buf = exporter.generate_letters_excel(letters, fy=fy)
+    clean_fy = (fy or database.compute_financial_year()).replace("/", "_")
+    filename = f"Outgoing_Letters_Register_SK_{clean_fy}.xlsx"
+    return send_file(
+        wb_buf,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name=filename
+    )
+
+
+@app.route("/export/letters-pdf")
+def export_letters_pdf():
+    fy = request.args.get("fy")
+    search = request.args.get("search")
+    letters = database.get_outgoing_letters(search=search, fy=fy)
+    pdf_buf = exporter.generate_letters_pdf(letters, fy=fy)
+    clean_fy = (fy or database.compute_financial_year()).replace("/", "_")
+    filename = f"Outgoing_Letters_Register_SK_{clean_fy}.pdf"
+    return send_file(
+        pdf_buf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename
+    )
 
 # 1.1 Download Windows Desktop Launcher BAT
 @app.route("/download/desktop-launcher")

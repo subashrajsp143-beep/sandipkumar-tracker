@@ -185,6 +185,7 @@ def init_db():
     # Initialize GPS attendance tables (added in v3.0 update)
     init_gps_tables()
     init_photo_tables()
+    init_outgoing_letters_table()
 
 # Helper query functions
 def get_all_sites():
@@ -2620,3 +2621,277 @@ def get_supervisor_route_today(site_id, date_str=None):
 
 
 
+
+
+# ==========================================
+# 8. OUTGOING LETTERS REFERENCE & DISPATCH REGISTER
+# ==========================================
+
+def init_outgoing_letters_table():
+    """
+    Creates outgoing_letters table for maintaining official letter reference / dispatch records.
+    Columns:
+    - id: Primary Key
+    - letter_date: YYYY-MM-DD
+    - department: Name of Department
+    - place: Place / Site
+    - ref_no: Reference Number (e.g. SK/2026-27/0001)
+    - seq_num: Integer sequence number per FY (1, 2, 3...)
+    - fy: Financial Year (e.g. 2026-27)
+    - purpose: Purpose / Subject of letter
+    - remarks: Remarks / Dispatch mode
+    - created_at: Timestamp
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS outgoing_letters (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        letter_date TEXT NOT NULL,
+        department TEXT NOT NULL,
+        place TEXT NOT NULL,
+        ref_no TEXT NOT NULL UNIQUE,
+        seq_num INTEGER NOT NULL,
+        fy TEXT NOT NULL,
+        purpose TEXT NOT NULL,
+        remarks TEXT DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_outgoing_letters_fy ON outgoing_letters(fy);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_outgoing_letters_date ON outgoing_letters(letter_date);")
+    conn.commit()
+    conn.close()
+
+
+def compute_financial_year(dt_obj=None):
+    """
+    Computes Indian Financial Year in format 'YYYY-YY' (e.g. 2026-27).
+    FY begins April 1st and ends March 31st of the following calendar year.
+    """
+    import datetime as dt
+    if dt_obj is None:
+        ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+        dt_obj = ist_now.date()
+    elif isinstance(dt_obj, str):
+        try:
+            dt_obj = dt.datetime.strptime(dt_obj.strip()[:10], "%Y-%m-%d").date()
+        except Exception:
+            ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+            dt_obj = ist_now.date()
+    elif isinstance(dt_obj, dt.datetime):
+        dt_obj = dt_obj.date()
+
+    year = dt_obj.year
+    month = dt_obj.month
+
+    if month >= 4:
+        fy_start = year
+        fy_end = (year + 1) % 100
+    else:
+        fy_start = year - 1
+        fy_end = year % 100
+
+    return f"{fy_start}-{fy_end:02d}"
+
+
+@db_retry()
+def get_next_letter_ref_no(letter_date=None):
+    """
+    Returns the next auto-increment reference number in format SK/YYYY-YY/0001
+    """
+    fy = compute_financial_year(letter_date)
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MAX(seq_num) FROM outgoing_letters WHERE fy = ?", (fy,))
+    row = cursor.fetchone()
+    max_seq = row[0] if (row and row[0] is not None) else 0
+    next_seq = max_seq + 1
+    ref_no = f"SK/{fy}/{next_seq:04d}"
+    conn.close()
+    return {
+        "ref_no": ref_no,
+        "seq_num": next_seq,
+        "fy": fy
+    }
+
+
+@db_retry()
+def add_outgoing_letter(letter_date, department, place, purpose, remarks="", custom_ref_no=None):
+    """
+    Adds a new outgoing letter reference entry.
+    """
+    import re
+    department = (department or "").strip()
+    place = (place or "").strip()
+    purpose = (purpose or "").strip()
+    remarks = (remarks or "").strip()
+
+    if not letter_date:
+        import datetime as dt
+        letter_date = (dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d")
+    else:
+        letter_date = letter_date.strip()[:10]
+
+    fy = compute_financial_year(letter_date)
+
+    if custom_ref_no and custom_ref_no.strip():
+        ref_no = custom_ref_no.strip().upper()
+        # Try to parse seq_num from custom ref_no if ends with digits
+        match = re.search(r'(\d+)$', ref_no)
+        seq_num = int(match.group(1)) if match else 1
+    else:
+        next_info = get_next_letter_ref_no(letter_date)
+        ref_no = next_info["ref_no"]
+        seq_num = next_info["seq_num"]
+        fy = next_info["fy"]
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO outgoing_letters (letter_date, department, place, ref_no, seq_num, fy, purpose, remarks)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (letter_date, department, place, ref_no, seq_num, fy, purpose, remarks))
+    letter_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    _notify_cloud_backup()
+
+    return {
+        "id": letter_id,
+        "letter_date": letter_date,
+        "department": department,
+        "place": place,
+        "ref_no": ref_no,
+        "seq_num": seq_num,
+        "fy": fy,
+        "purpose": purpose,
+        "remarks": remarks
+    }
+
+
+@db_retry()
+def get_outgoing_letters(search=None, fy=None, limit=None):
+    """
+    Fetches outgoing letters with optional search filtering and FY filtering.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM outgoing_letters WHERE 1=1"
+    params = []
+
+    if fy and fy.strip():
+        query += " AND fy = ?"
+        params.append(fy.strip())
+
+    if search and search.strip():
+        s = f"%{search.strip()}%"
+        query += " AND (ref_no LIKE ? OR department LIKE ? OR place LIKE ? OR purpose LIKE ? OR remarks LIKE ?)"
+        params.extend([s, s, s, s, s])
+
+    query += " ORDER BY letter_date DESC, seq_num DESC, id DESC"
+
+    if limit and isinstance(limit, int):
+        query += f" LIMIT {limit}"
+
+    cursor.execute(query, tuple(params))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+@db_retry()
+def get_outgoing_letter_by_id(letter_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM outgoing_letters WHERE id = ?", (letter_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+@db_retry()
+def update_outgoing_letter(letter_id, letter_date, department, place, purpose, remarks="", ref_no=None):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    existing = get_outgoing_letter_by_id(letter_id)
+    if not existing:
+        conn.close()
+        return False
+
+    ref_to_use = (ref_no or "").strip().upper() if ref_no else existing["ref_no"]
+    fy = compute_financial_year(letter_date)
+
+    cursor.execute("""
+        UPDATE outgoing_letters
+        SET letter_date = ?, department = ?, place = ?, ref_no = ?, fy = ?, purpose = ?, remarks = ?
+        WHERE id = ?
+    """, (letter_date, department, place, ref_to_use, fy, purpose, remarks, letter_id))
+    conn.commit()
+    conn.close()
+
+    _notify_cloud_backup()
+    return True
+
+
+@db_retry()
+def delete_outgoing_letter(letter_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM outgoing_letters WHERE id = ?", (letter_id,))
+    deleted = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+
+    if deleted:
+        _notify_cloud_backup()
+    return deleted
+
+
+@db_retry()
+def get_distinct_letter_fys():
+    """
+    Returns list of distinct financial years present in outgoing_letters,
+    always including the current financial year.
+    """
+    curr_fy = compute_financial_year()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT fy FROM outgoing_letters WHERE fy IS NOT NULL AND fy != '' ORDER BY fy DESC")
+    rows = cursor.fetchall()
+    conn.close()
+
+    fys = [r[0] for r in rows if r[0]]
+    if curr_fy not in fys:
+        fys.insert(0, curr_fy)
+    return fys
+
+
+@db_retry()
+def get_outgoing_letters_stats():
+    """
+    Returns summary statistics for outgoing letters.
+    """
+    curr_fy = compute_financial_year()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM outgoing_letters")
+    total_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM outgoing_letters WHERE fy = ?", (curr_fy,))
+    fy_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT ref_no, letter_date FROM outgoing_letters ORDER BY letter_date DESC, seq_num DESC, id DESC LIMIT 1")
+    last_letter = cursor.fetchone()
+    conn.close()
+
+    return {
+        "total_count": total_count,
+        "fy_count": fy_count,
+        "current_fy": curr_fy,
+        "last_ref_no": last_letter[0] if last_letter else None,
+        "last_date": last_letter[1] if last_letter else None
+    }
