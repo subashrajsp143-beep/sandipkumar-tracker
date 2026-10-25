@@ -1,0 +1,360 @@
+/* ==========================================================================
+   GROWTH GREEN DESIGN SYSTEM — M/S SANDIP KUMAR (JAL JEEVAN MISSION)
+   Classy, Minimal, and Calm: Lots of whitespace, thin lines, no heavy shadows,
+   no gradients, strict WCAG AA contrast.
+   ========================================================================== */
+
+:root {
+    /* LIGHT MODE PALETTE */
+    --color-primary: #166534;        /* Header, footer, navigation bar, banners */
+    --color-highlight: #22C55E;      /* Small accents, icons, underlines, active tab line */
+    --color-background: #F0FDF4;     /* All screens */
+    --color-card: #FFFFFF;           /* Card / panel background */
+    --color-text: #052E16;           /* Main text */
+    --color-text-soft: #4B6B57;      /* Descriptions, hints */
+    --color-border: #C7E6D1;         /* Borders and dividers */
+    --color-cta: #F97316;            /* Call-to-action button */
+    --color-cta-text: #1C0A00;       /* Dark text on CTA */
+    --color-primary-text: #FFFFFF;   /* Text on the primary green */
+
+    /* Semantic Alerts */
+    --color-success: #166534;
+    --color-error: #B91C1C;
+    --color-warning: #D97706;
+
+    /* Spacing & Radii Tokens (2 to 8px max corners) */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* DARK MODE PALETTE */
+        --color-background: #052E16;   /* Dark mode background */
+        --color-card: #0A3A1E;         /* Dark mode card / panel */
+        --color-primary: #0B3D20;      /* Dark mode header / footer / sidebar */
+        --color-text: #ECFDF3;         /* Dark mode main text */
+        --color-text-soft: #9CC4AA;    /* Dark mode soft text */
+        --color-highlight: #4ADE80;    /* Dark mode highlight */
+        --color-border: #14532D;       /* Dark mode borders */
+        --color-cta: #F97316;          /* CTA button stays #F97316 */
+        --color-cta-text: #1C0A00;     /* Dark text on CTA */
+        --color-primary-text: #FFFFFF; /* Text on primary */
+
+        /* Semantic Alerts */
+        --color-success: #4ADE80;
+        --color-error: #EF4444;
+        --color-warning: #F59E0B;
+    }
+}
+
+/* ==========================================================================
+   GLOBAL RESET & MINIMALIST RULES
+   Rule: No heavy shadows, no gradients, thin 1px lines.
+   ========================================================================== */
+*, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+html, body {
+    background-color: var(--color-background) !important;
+    color: var(--color-text) !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* RULE 6: Headings — serif font (Georgia or similar), regular weight, NEVER BOLD */
+h1, h2, h3, h4, h5, h6,
+.heading-serif,
+.font-black,
+.font-bold {
+    font-family: Georgia, 'Times New Roman', 'Noto Serif Devanagari', 'Nirmala UI', serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, 'Times New Roman', 'Noto Serif Devanagari', 'Nirmala UI', serif !important;
+    font-weight: 400 !important;
+    color: var(--color-text) !important;
+    letter-spacing: -0.01em;
+}
+
+h1 { font-size: 1.85rem !important; line-height: 1.3 !important; }
+h2 { font-size: 1.45rem !important; line-height: 1.35 !important; }
+h3 { font-size: 1.2rem !important; line-height: 1.4 !important; }
+h4 { font-size: 1.05rem !important; line-height: 1.4 !important; }
+
+/* Subtext & Descriptions */
+p, .text-soft, .text-slate-500, .text-slate-400, .text-slate-600 {
+    color: var(--color-text-soft) !important;
+}
+
+/* ==========================================================================
+   BUTTONS (Rule 1 & Rule 5)
+   Rule 1: Orange (#F97316) ONLY for main action button (Max 1 per screen).
+   Secondary buttons: outlined 1.5px border in main text colour, no fill.
+   Rule 5: 14px vertical, 30px horizontal padding, 14px text, 2 to 8px corners.
+   ========================================================================== */
+
+/* 1. Main Action Button (CTA) */
+.btn-cta,
+.btn-cta-primary {
+    background-color: var(--color-cta) !important;
+    color: var(--color-cta-text) !important;
+    padding: 14px 30px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    border-radius: var(--radius-md) !important;
+    border: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: opacity 0.15s ease !important;
+}
+.btn-cta:hover,
+.btn-cta-primary:hover {
+    opacity: 0.9 !important;
+}
+
+/* 2. Secondary Button */
+.btn-secondary,
+.btn-secondary-outline {
+    background-color: transparent !important;
+    color: var(--color-text) !important;
+    border: 1.5px solid var(--color-text) !important;
+    padding: 14px 30px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    border-radius: var(--radius-md) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: background-color 0.15s ease !important;
+}
+.btn-secondary:hover,
+.btn-secondary-outline:hover {
+    background-color: rgba(34, 197, 94, 0.08) !important;
+}
+
+/* 3. Small Secondary Action (for tables/action cells) */
+.btn-secondary-sm {
+    background-color: transparent !important;
+    color: var(--color-text) !important;
+    border: 1.5px solid var(--color-border) !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    border-radius: var(--radius-sm) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+.btn-secondary-sm:hover {
+    border-color: var(--color-text) !important;
+}
+
+/* ==========================================================================
+   CARDS, PANELS, DIVIDERS (Rule 9 & Rule 5)
+   Rule 9: Thin 1px dividers instead of boxes or shadows, generous spacing.
+   Rule 5: Corners slightly rounded (2 to 8px).
+   ========================================================================== */
+.card-theme,
+.bg-white,
+.rounded-3xl,
+.rounded-2xl,
+.rounded-xl {
+    border-radius: var(--radius-lg) !important;
+}
+
+.bg-white {
+    background-color: var(--color-card) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+.border,
+.border-slate-100,
+.border-slate-200,
+.border-slate-200\/80,
+.border-slate-200\/90,
+.border-slate-300,
+.border-slate-700,
+.border-slate-800 {
+    border-color: var(--color-border) !important;
+}
+
+/* ==========================================================================
+   PRIMARY GREEN SHELL (Header, Sidebar, Navigation Bar, Footer)
+   Rule: Primary is #166534 (light) / #0B3D20 (dark). Text is #FFFFFF.
+   ========================================================================== */
+header,
+#appSidebar,
+nav.fixed.bottom-0 {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-border) !important;
+}
+
+header * {
+    color: var(--color-primary-text) !important;
+}
+
+header .text-slate-800,
+header .text-slate-900,
+header .text-slate-700 {
+    color: var(--color-primary-text) !important;
+}
+
+header .text-slate-400,
+header .text-slate-500 {
+    color: #C7E6D1 !important;
+}
+
+/* Header button/icons on green */
+header button,
+header a {
+    background-color: transparent !important;
+    border-color: var(--color-border) !important;
+}
+
+/* Sidebar navigation */
+#appSidebar {
+    background-color: var(--color-primary) !important;
+    border-right: 1px solid var(--color-border) !important;
+}
+#appSidebar * {
+    color: #E2F3E7 !important;
+}
+#appSidebar .sidebar-text,
+#appSidebar span {
+    color: #E2F3E7 !important;
+}
+#appSidebar i {
+    color: var(--color-highlight) !important;
+}
+
+/* Active navigation item with 2px highlight indicator */
+.active-sidebar-pill {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+    border-left: 3px solid var(--color-highlight) !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+.active-sidebar-pill * {
+    color: #FFFFFF !important;
+}
+.active-sidebar-pill i {
+    color: var(--color-highlight) !important;
+}
+
+/* Mobile Sticky Bottom Nav */
+nav.fixed.bottom-0 {
+    background-color: var(--color-primary) !important;
+    border-top: 1px solid var(--color-border) !important;
+}
+nav.fixed.bottom-0 a,
+nav.fixed.bottom-0 button {
+    color: #C7E6D1 !important;
+}
+nav.fixed.bottom-0 .text-teal-400,
+nav.fixed.bottom-0 .text-emerald-400,
+nav.fixed.bottom-0 .text-amber-300,
+nav.fixed.bottom-0 .text-amber-400 {
+    color: var(--color-highlight) !important;
+}
+
+/* Center button on mobile bottom nav */
+nav.fixed.bottom-0 .w-12.h-12 {
+    background: var(--color-primary) !important;
+    border: 2px solid var(--color-highlight) !important;
+    color: #FFFFFF !important;
+    border-radius: var(--radius-md) !important;
+}
+
+/* ==========================================================================
+   INPUTS, FORMS & TABLES
+   Rule: Thin 1px dividers, classy minimal calm, strict contrast.
+   ========================================================================== */
+input, select, textarea {
+    background-color: var(--color-card) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--color-highlight) !important;
+    outline: none !important;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+table thead th {
+    background-color: var(--color-primary) !important;
+    color: var(--color-primary-text) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    padding: 12px 14px !important;
+}
+table tbody td {
+    border-bottom: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+    padding: 12px 14px !important;
+    font-size: 13.5px !important;
+}
+table tbody tr:hover {
+    background-color: rgba(34, 197, 94, 0.04) !important;
+}
+
+/* ==========================================================================
+   RULE 4: SUCCESS, ERROR, WARNING NOTIFICATIONS
+   Success: Green, Error: #B91C1C, Warning: Amber (#D97706).
+   Never orange for errors.
+   ========================================================================== */
+.alert-success {
+    background-color: transparent !important;
+    color: var(--color-success) !important;
+    border: 1px solid var(--color-success) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 12px 16px !important;
+}
+.alert-error {
+    background-color: transparent !important;
+    color: var(--color-error) !important;
+    border: 1px solid var(--color-error) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 12px 16px !important;
+}
+.alert-warning {
+    background-color: transparent !important;
+    color: var(--color-warning) !important;
+    border: 1px solid var(--color-warning) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 12px 16px !important;
+}
+
+/* Language switchers styling */
+#prominentLangSwitcher,
+#prominentLangSwitcher button {
+    border-radius: var(--radius-sm) !important;
+}

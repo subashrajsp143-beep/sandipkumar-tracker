@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/theme.css?v=1.0">
     <style>
         html {
             overflow-x: hidden;
@@ -53,7 +54,7 @@
     </style>
     <!-- PWA Manifest & App Icons -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#166534">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -64,7 +65,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/static/icons/icon-512.png?v=2.0">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=2.0">
 </head>
-<body class="bg-[#F4F6F5] text-slate-800 antialiased font-sans min-h-screen overflow-x-hidden">
+<body class="bg-[#F0FDF4] text-[#052E16] antialiased min-h-screen overflow-x-hidden">
 
     <!-- Custom CSS for HRMS Theme & Layout -->
     <style>
@@ -104,22 +105,22 @@
         <!-- ======================================================== -->
         <!-- 1. PERSISTENT LEFT SIDEBAR (HRMS Deep Forest Green #0A261F) -->
         <!-- ======================================================== -->
-        <aside id="appSidebar" class="w-64 bg-[#0A261F] text-[#9CB7AE] flex-shrink-0 flex flex-col justify-between transition-all duration-300 z-50 fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 border-r border-[#12382E] shadow-2xl md:shadow-none select-none">
+        <aside id="appSidebar" class="w-64 bg-[#166534] text-[#E2F3E7] flex-shrink-0 flex flex-col justify-between transition-all duration-300 z-50 fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 border-r border-[#C7E6D1]/30 select-none">
             
             <!-- Top Brand Box (matches HRMS console in screenshot) -->
-            <div class="p-4 border-b border-[#12382E] flex items-center justify-between relative">
+            <div class="p-4 border-b border-[#C7E6D1]/30 flex items-center justify-between relative">
                 <div class="brand-container flex items-center gap-3 overflow-hidden w-full">
-                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-amber-400/40 flex-shrink-0 shadow-sm bg-slate-950 flex items-center justify-center">
+                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-[#C7E6D1]/40 flex-shrink-0 bg-white/10 flex items-center justify-center">
                         <img src="/static/icons/icon-144.png?v=2.0" alt="M/S Sandip Kumar" class="w-full h-full object-cover">
                     </div>
                     <div class="sidebar-text truncate">
-                        <div class="font-black text-white text-sm tracking-wide truncate" data-i18n="app_title">M/S संदीप कुमार</div>
-                        <div class="brand-subtitle text-[10px] text-emerald-300/80 font-bold uppercase tracking-wider truncate" data-i18n="app_subtitle">२१ साइट्स</div>
+                        <div class="font-medium text-white text-sm tracking-wide truncate" data-i18n="app_title">M/S संदीप कुमार</div>
+                        <div class="brand-subtitle text-[10px] text-[#C7E6D1] font-normal uppercase tracking-wider truncate" data-i18n="app_subtitle">२१ साइट्स</div>
                     </div>
                 </div>
 
                 <!-- Circular Collapse Button on Edge (exact match to screenshot button on sidebar border!) -->
-                <button type="button" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Sidebar छोटा/बड़ा करें" class="hidden md:flex absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-white border border-slate-300 text-slate-700 items-center justify-center shadow-md hover:bg-slate-100 transition z-50">
+                <button type="button" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Sidebar छोटा/बड़ा करें" class="hidden md:flex absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-[#166534] border border-[#C7E6D1]/40 text-white items-center justify-center hover:bg-white/10 transition z-50">
                     <i class="fa-solid fa-chevron-left text-[11px]" id="collapseIcon"></i>
                 </button>
             </div>
@@ -128,38 +129,38 @@
             <div class="flex-1 overflow-y-auto py-3 px-2 space-y-1 custom-scrollbar text-xs">
                 
                 <!-- 1. DASHBOARD OVERVIEW -->
-                <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition text-slate-200 hover:bg-[#12382E] hover:text-white {% if request.path == '/dashboard' or request.path == '/' %}active-sidebar-pill{% endif %}">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition text-slate-200 hover:bg-white/10 hover:text-white {% if request.path == '/dashboard' or request.path == '/' %}active-sidebar-pill{% endif %}">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-chart-pie w-5 text-center text-sm text-emerald-400"></i>
                         <span class="sidebar-text" data-i18n="nav_dashboard">डैशबोर्ड</span>
                     </div>
-                    <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                    <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                 </a>
 
                 <!-- 2. SEGMENT: ATTENDANCE & HR (हाजिरी व स्टाफ) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderAtt')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderAtt')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-users text-xs"></i> <span data-i18n="seg_attendance">उपस्थिति</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAtt"></i>
                     </button>
                     <div id="folderAtt" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/attendance', '/geo-attendance'] %}hidden{% endif %}">
-                        <a href="{{ url_for('attendance_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/attendance' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('attendance_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/attendance' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-clipboard-list w-4 text-center text-amber-300"></i>
                                 <span class="sidebar-text" data-i18n="sub_manual">मैनुअल</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="/geo-attendance" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/geo-attendance' %}active-sidebar-pill{% endif %}">
+                        <a href="/geo-attendance" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/geo-attendance' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-satellite-dish w-4 text-center text-purple-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_gps">GPS</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="/attendance#workers" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/attendance#workers" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-address-book w-4 text-center text-blue-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_workers">श्रमिक</span>
@@ -170,61 +171,61 @@
 
                 <!-- 3. SEGMENT: MATERIAL & STOCK (सामग्री व स्टॉक) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderStock')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderStock')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-boxes-stacked text-xs"></i> <span data-i18n="seg_material">सामग्री</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderStock"></i>
                     </button>
                     <div id="folderStock" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/stock', '/store', '/entry', '/daily-entry'] %}hidden{% endif %}">
-                        <a href="{{ url_for('site_stock') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/stock' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('site_stock') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/stock' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-cubes-stacked w-4 text-center text-teal-300"></i>
                                 <span class="sidebar-text" data-i18n="sub_stock">स्टॉक</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="{{ url_for('daily_entry') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path in ['/entry', '/daily-entry'] %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('daily_entry') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path in ['/entry', '/daily-entry'] %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-circle-plus w-4 text-center text-emerald-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_usage">खपत</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="{{ url_for('material_store') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/store' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('material_store') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/store' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-cart-shopping w-4 text-center text-amber-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_store">स्टोर</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
                     </div>
                 </div>
 
                 <!-- 4. SEGMENT: WORKS & DPR (कार्य प्रगति) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderDpr')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderDpr')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-trowel-bricks text-xs"></i> <span data-i18n="seg_progress">प्रगति</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderDpr"></i>
                     </button>
                     <div id="folderDpr" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/dpr', '/site-photos'] %}hidden{% endif %}">
-                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
+                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-faucet-drip w-4 text-center text-sky-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_dpr">DPR</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="/site-photos" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/site-photos' %}active-sidebar-pill{% endif %}">
+                        <a href="/site-photos" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/site-photos' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-camera-retro w-4 text-center text-amber-300"></i>
                                 <span class="sidebar-text" data-i18n="sub_photos">फोटो</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-amber-400"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
                         </a>
-                        <a href="/site-photos/upload" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/site-photos/upload" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-camera w-4 text-center text-teal-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_upload">अपलोड</span>
@@ -235,26 +236,26 @@
 
                 <!-- 5. SEGMENT: DISPATCH & LETTERS (जावक पत्रांक पंजी) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderLetters')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderLetters')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-stamp text-xs"></i> <span data-i18n="seg_letters">जावक पत्र</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderLetters"></i>
                     </button>
                     <div id="folderLetters" class="folder-content space-y-0.5 pl-1.5 mt-1">
-                        <a href="/dashboard#letters" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/dashboard#letters" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-envelope-open-text w-4 text-center text-amber-300"></i>
                                 <span class="sidebar-text" data-i18n="sub_letters">पंजी</span>
                             </div>
                         </a>
-                        <a href="/export/letters-excel" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/export/letters-excel" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-file-excel w-4 text-center text-emerald-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_excel">एक्सेल</span>
                             </div>
                         </a>
-                        <a href="/export/letters-pdf" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/export/letters-pdf" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-file-pdf w-4 text-center text-rose-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_pdf">पीडीएफ</span>
@@ -265,32 +266,32 @@
 
                 <!-- 6. SEGMENT: REPORTS & LEDGERS (रिपोर्ट्स व लेजर) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderReports')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderReports')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-chart-line text-xs"></i> <span data-i18n="seg_reports">रिपोर्ट्स</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderReports"></i>
                     </button>
                     <div id="folderReports" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path == '/reports' %}active-parent{% else %}hidden{% endif %}">
-                        <a href="{{ url_for('reports_hub', tab='daily') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='daily') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-calendar-day w-4 text-center text-blue-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_daily">दैनिक</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='monthly') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='monthly') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-calendar-days w-4 text-center text-indigo-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_monthly">मासिक</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='site') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='site') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-city w-4 text-center text-teal-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_ledger">लेजर</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='matrix') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='matrix') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-table-cells w-4 text-center text-amber-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_matrix">मैट्रिक्स</span>
@@ -301,47 +302,47 @@
 
                 <!-- 7. SEGMENT: MASTER & ADMIN (मास्टर सेटिंग्स) -->
                 <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderAdmin')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#6F9588] hover:text-white transition">
+                    <button type="button" onclick="toggleFolder('folderAdmin')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
                         <span class="sidebar-text flex items-center gap-2">
                             <i class="fa-solid fa-gear text-xs"></i> <span data-i18n="seg_admin">मास्टर</span>
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAdmin"></i>
                     </button>
                     <div id="folderAdmin" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path in ['/sites', '/materials'] %}active-parent{% else %}hidden{% endif %}">
-                        <a href="{{ url_for('sites_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/sites' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('sites_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/sites' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-building-circle-check w-4 text-center text-blue-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_sites">साइट्स</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('materials_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition {% if request.path == '/materials' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('materials_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/materials' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-list-check w-4 text-center text-indigo-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_rates">दरें</span>
                             </div>
                         </a>
                         {% if session.get('is_owner') or user_role == 'owner' %}
-                        <button type="button" onclick="openGlobalSiteGpsModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <button type="button" onclick="openGlobalSiteGpsModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-map-location-dot w-4 text-center text-amber-300"></i>
                                 <span class="sidebar-text" data-i18n="sub_gps_setup">GPS सेटअप</span>
                             </div>
                         </button>
                         {% endif %}
-                        <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-brands fa-android w-4 text-center text-emerald-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_apk">ऐप</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-globe w-4 text-center text-cyan-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_website">वेबसाइट</span>
                             </div>
                         </a>
                         {% if session.get('is_owner') or user_role == 'owner' %}
-                        <a href="/api/backup" download class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-slate-300 hover:bg-[#12382E] hover:text-white transition">
+                        <a href="/api/backup" download class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-cloud-arrow-down w-4 text-center text-amber-400"></i>
                                 <span class="sidebar-text" data-i18n="sub_backup">बैकअप</span>
@@ -354,25 +355,25 @@
             </div>
 
             <!-- Bottom: Sidebar Language Switcher + Pinned Sign Out -->
-            <div class="p-3 border-t border-[#12382E] space-y-2">
+            <div class="p-3 border-t border-[#C7E6D1]/30 space-y-2">
                 <!-- Direct Sidebar Language Switcher -->
-                <div class="sidebar-text p-1.5 rounded-xl bg-[#061814] border border-[#12382E] flex items-center justify-between">
+                <div class="sidebar-text p-1.5 rounded-md bg-black/15 border border-[#C7E6D1]/30 flex items-center justify-between">
                     <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
                         <i class="fa-solid fa-language text-xs"></i> <span>Language</span>
                     </span>
-                    <div class="inline-flex items-center p-0.5 bg-[#0A261F] rounded-lg border border-[#164236]">
+                    <div class="inline-flex items-center p-0.5 bg-black/20 rounded-md border border-[#C7E6D1]/20">
                         <button type="button" onclick="setAppLanguage('hi', event)" id="sideBtnLangHi"
-                                class="px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white">
+                                class="px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]">
                             🇮🇳 हिंदी
                         </button>
                         <button type="button" onclick="setAppLanguage('en', event)" id="sideBtnLangEn"
-                                class="px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white">
+                                class="px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white">
                             🇬🇧 Eng
                         </button>
                     </div>
                 </div>
 
-                <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-rose-950/60 hover:text-rose-300 transition text-xs font-bold">
+                <a href="/logout" onclick="return confirm('क्या आप लॉगआउट करना चाहते हैं?')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#C7E6D1] hover:bg-white/10 hover:text-rose-200 transition text-xs font-bold">
                     <i class="fa-solid fa-arrow-right-from-bracket text-sm text-rose-400"></i>
                     <span class="sidebar-text" data-i18n="sign_out">लॉगआउट</span>
                 </a>
@@ -388,7 +389,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
             
             <!-- TOP APP BAR (Clean White Header matching HRMS screenshot) -->
-            <header class="h-16 bg-white border-b border-slate-200/90 flex items-center justify-between px-4 sm:px-6 z-30 shadow-2xs flex-shrink-0 no-print">
+            <header class="h-16 bg-[#166534] border-b border-[#C7E6D1] text-white flex items-center justify-between px-4 sm:px-6 z-30 flex-shrink-0 no-print">
                 
                 <!-- Left: Mobile Toggle + Operational Status Pill -->
                 <div class="flex items-center gap-3">
@@ -397,8 +398,8 @@
                     </button>
 
                     <!-- Green Pulsating Operational Badge (matches "🟢 HRMS operations" in screenshot) -->
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-[#C7E6D1]/40 text-white text-xs font-medium">
+                        <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
                         <span class="truncate" data-i18n="top_status">२१ साइट्स चालू</span>
                     </div>
                 </div>
@@ -407,41 +408,41 @@
                 <div class="flex items-center gap-2 sm:gap-3">
                     
                     <!-- DIRECT PROMINENT BILINGUAL SWITCHER (Instant 1-Click) -->
-                    <div class="inline-flex items-center p-0.5 sm:p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-2xs" id="prominentLangSwitcher">
+                    <div class="inline-flex items-center p-0.5 sm:p-1 bg-black/15 rounded-md border border-[#C7E6D1]/40" id="prominentLangSwitcher">
                         <button type="button" onclick="setAppLanguage('hi', event)" id="topBtnLangHi"
-                                class="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs">
+                                class="px-2 sm:px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1 bg-[#22C55E] text-[#052E16]">
                             <span>🇮🇳</span> <span>हिंदी</span>
                         </button>
                         <button type="button" onclick="setAppLanguage('en', event)" id="topBtnLangEn"
-                                class="px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+                                class="px-2 sm:px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 text-white hover:bg-white/10">
                             <span>🇬🇧</span> <span>English</span>
                         </button>
                     </div>
 
                     <!-- Notification Bell Icon (exact match to screenshot bell icon!) -->
                     <div class="relative">
-                        <button type="button" onclick="window.location.reload()" title="रिफ्रेश / सिंक स्टेटस" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center transition shadow-2xs">
+                        <button type="button" onclick="window.location.reload()" title="रिफ्रेश / सिंक स्टेटस" class="w-9 h-9 rounded-md bg-white/10 hover:bg-white/20 border border-[#C7E6D1]/40 text-white flex items-center justify-center transition">
                             <i class="fa-regular fa-bell text-sm"></i>
                         </button>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22C55E] animate-ping"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22C55E]"></span>
                     </div>
 
                     <!-- User Profile Pill (matches Employee pill in screenshot) -->
-                    <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
-                        <div class="w-8 h-8 rounded-full bg-emerald-900 text-amber-300 font-black text-xs flex items-center justify-center shadow-xs">
+                    <div class="flex items-center gap-2 pl-2 border-l border-[#C7E6D1]/40">
+                        <div class="w-8 h-8 rounded-full bg-white/15 text-white font-medium text-xs flex items-center justify-center border border-[#C7E6D1]/40">
                             {% if session.get('is_owner') or user_role == 'owner' %}👑{% else %}👤{% endif %}
                         </div>
                         <div class="hidden sm:flex flex-col text-left leading-tight">
-                            <span class="text-xs font-bold text-slate-800" data-i18n="top_user">{% if session.get('is_owner') or user_role == 'owner' %}संदीप कुमार{% else %}{{ user_name or 'स्टाफ' }}{% endif %}</span>
-                            <span class="text-[10px] text-slate-500 capitalize" data-i18n="top_role">{% if session.get('is_owner') or user_role == 'owner' %}मालिक{% else %}{{ user_role or 'स्टाफ' }}{% endif %}</span>
+                            <span class="text-xs font-medium text-white" data-i18n="top_user">{% if session.get('is_owner') or user_role == 'owner' %}संदीप कुमार{% else %}{{ user_name or 'स्टाफ' }}{% endif %}</span>
+                            <span class="text-[10px] text-[#C7E6D1] capitalize" data-i18n="top_role">{% if session.get('is_owner') or user_role == 'owner' %}मालिक{% else %}{{ user_role or 'स्टाफ' }}{% endif %}</span>
                         </div>
                     </div>
                 </div>
             </header>
 
             <!-- SCROLLABLE CONTENT BODY (Off-White #F4F6F5) -->
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F4F6F5] space-y-6">
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F0FDF4] space-y-6">
                 <!-- Flash Messages -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -464,9 +465,9 @@
                 {% block content %}{% endblock %}
 
                 <!-- Subtle Clean Footer inside scrollable area -->
-                <div class="pt-6 pb-2 text-center text-xs text-slate-400 border-t border-slate-200/80 no-print flex flex-col sm:flex-row justify-between items-center gap-2">
+                <div class="pt-6 pb-2 text-center text-xs text-[#4B6B57] border-t border-[#C7E6D1] no-print flex flex-col sm:flex-row justify-between items-center gap-2">
                     <div>
-                        <span class="font-bold text-slate-600">M/S SANDIP KUMAR</span> &bull; 21 Sites Project Tracker &copy; {{ now_year }}
+                        <span class="font-normal text-[#052E16]">M/S SANDIP KUMAR</span> &bull; 21 Sites Project Tracker &copy; {{ now_year }}
                     </div>
                     <div class="flex items-center gap-3 text-slate-400 text-[11px]">
                         <span><i class="fa-solid fa-shield-halved text-emerald-600"></i> Enterprise Secure</span>
@@ -538,54 +539,54 @@
     <!-- ========================================================================= -->
     <!-- NATIVE MOBILE STICKY BOTTOM NAVIGATION BAR (Android APK & Mobile Web)    -->
     <!-- ========================================================================= -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/98 backdrop-blur-md border-t border-slate-800 shadow-2xl py-1 px-2 no-print">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#166534] border-t border-[#C7E6D1] py-1.5 px-2 no-print">
         <div class="grid grid-cols-5 gap-1 text-center items-center">
             
             <!-- 1. होम / स्टॉक -->
             <a href="{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}{{ url_for('site_stock') }}{% else %}{{ url_for('dashboard') }}{% endif %}" 
-               class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl {% if request.path in ['/stock', '/dashboard', '/'] %}text-teal-400 font-black bg-slate-800/90 shadow-xs{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %} transition active:scale-95">
-                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-base {% if request.path in ['/stock', '/dashboard', '/'] %}text-teal-400{% else %}text-slate-400{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/stock', '/dashboard', '/'] %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+                <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <span class="text-[10px] font-bold tracking-tight">स्टॉक</span>
+                <span class="text-[10px] tracking-tight">स्टॉक</span>
             </a>
 
             <!-- 2. दैनिक एंट्री -->
             <a href="{{ url_for('daily_entry') }}" 
-               class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl {% if request.path in ['/entry', '/daily-entry'] %}text-emerald-400 font-black bg-slate-800/90 shadow-xs{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %} transition active:scale-95">
-                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-base {% if request.path in ['/entry', '/daily-entry'] %}text-emerald-400{% else %}text-slate-400{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/entry', '/daily-entry'] %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+                <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-circle-plus"></i>
                 </div>
-                <span class="text-[10px] font-bold tracking-tight">एंट्री</span>
+                <span class="text-[10px] tracking-tight">एंट्री</span>
             </a>
 
-            <!-- 3. हाजिरी (Worker Photo Attendance) - Prominent Center Floating Button -->
+            <!-- 3. हाजिरी - Center Floating Button -->
             <a href="{{ url_for('attendance_view') }}" 
-               class="flex flex-col items-center justify-center -mt-4 group active:scale-95 transition">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-indigo-700 text-white flex items-center justify-center text-xl shadow-xl border-2 border-amber-400 group-hover:scale-105 transition">
-                    <i class="fa-solid fa-clipboard-user"></i>
+               class="flex flex-col items-center justify-center -mt-3.5 group transition">
+                <div class="w-11 h-11 rounded-lg bg-[#166534] text-white flex items-center justify-center text-lg border-2 border-[#22C55E]">
+                    <i class="fa-solid fa-clipboard-user text-[#22C55E]"></i>
                 </div>
-                <span class="text-[10px] font-black text-amber-300 mt-0.5">हाजिरी</span>
+                <span class="text-[10px] font-medium text-white mt-0.5">हाजिरी</span>
             </a>
 
             <!-- 4. स्टोर (Material Store) -->
             <a href="{{ url_for('material_store') }}" 
-               class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl {% if request.path == '/store' %}text-amber-400 font-black bg-slate-800/90 shadow-xs{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %} transition active:scale-95">
-                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-base {% if request.path == '/store' %}text-amber-400{% else %}text-slate-400{% endif %}">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path == '/store' %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+                <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </div>
-                <span class="text-[10px] font-bold tracking-tight">स्टोर</span>
+                <span class="text-[10px] tracking-tight">स्टोर</span>
             </a>
 
-            <!-- 5. मेनू / Menu - Opens Clean HRMS Sidebar -->
+            <!-- 5. मेनू / Menu -->
             <button type="button" 
                     onclick="toggleMobileSidebar()" 
                     id="bottomNavSidebarBtn"
-                    class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 transition active:scale-95 focus:outline-none">
-                <div class="w-6 h-6 rounded-lg flex items-center justify-center text-base text-emerald-400">
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-md text-[#C7E6D1] hover:text-white transition focus:outline-none">
+                <div class="w-5 h-5 flex items-center justify-center text-sm text-[#22C55E]">
                     <i class="fa-solid fa-bars"></i>
                 </div>
-                <span class="text-[10px] font-bold text-slate-300 tracking-tight" data-i18n="seg_admin">मेनू</span>
+                <span class="text-[10px] tracking-tight" data-i18n="seg_admin">मेनू</span>
             </button>
 
         </div>
@@ -617,14 +618,14 @@
 
     <!-- Floating Live Alert Toast (When another supervisor adds an entry) -->
     <div id="liveNewEntryToast" class="hidden fixed top-20 right-4 max-w-sm bg-slate-900/95 border border-emerald-400 text-white p-4 rounded-2xl shadow-2xl z-50 flex items-center gap-3 animate-bounce">
-        <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-[#22C55E]/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
             <i class="fa-solid fa-bell text-lg"></i>
         </div>
         <div class="text-xs">
             <div class="font-bold text-emerald-300">Nayi Entry Aayi Hai!</div>
             <div id="liveNewEntryText" class="text-slate-300 text-[11px]">Dusri site se entry darj hui hai.</div>
         </div>
-        <button onclick="window.location.reload()" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold">
+        <button onclick="window.location.reload()" class="px-2 py-1 bg-emerald-600 hover:bg-[#22C55E] text-white rounded-lg text-[10px] font-bold">
             Refresh
         </button>
     </div>
@@ -694,7 +695,7 @@
         if (!badge || !text) return;
 
         if (navigator.onLine) {
-            badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+            badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#22C55E]/20 text-emerald-300 border border-emerald-400/30";
             text.textContent = "Online (Live Sync)";
             syncPendingOfflineQueue();
         } else {

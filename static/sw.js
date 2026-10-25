@@ -1,7 +1,8 @@
 // Service Worker for M/S Sandip Kumar Material Tracker
-const CACHE_NAME = 'sandip-tracker-v10';
+const CACHE_NAME = 'sandip-tracker-v11';
 const STATIC_ASSETS = [
   '/',
+  '/static/css/theme.css',
   '/static/manifest.json',
   '/static/translations.js',
   '/static/icons/icon-192.png',

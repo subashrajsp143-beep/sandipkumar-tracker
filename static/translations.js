@@ -1726,29 +1726,29 @@ const AppTranslations = {
      * Update TAP ICON in UP LEFT
      */
     updateTapIconButton: function(lang) {
-        // 1. Top Bar Prominent Direct Toggle
+        // 1. Top Bar Prominent Direct Toggle (Growth Green)
         const topHi = document.getElementById('topBtnLangHi');
         const topEn = document.getElementById('topBtnLangEn');
         if (topHi && topEn) {
             if (lang === 'hi') {
-                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs';
-                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
+                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1 bg-[#22C55E] text-[#052E16]';
+                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 text-white hover:bg-white/10';
             } else {
-                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
-                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-lg text-xs font-black transition flex items-center gap-1 bg-[#0A261F] text-amber-300 shadow-xs';
+                topHi.className = 'px-2 sm:px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 text-white hover:bg-white/10';
+                topEn.className = 'px-2 sm:px-2.5 py-1 rounded-md text-xs font-semibold transition flex items-center gap-1 bg-[#22C55E] text-[#052E16]';
             }
         }
 
-        // 2. Sidebar Direct Toggle
+        // 2. Sidebar Direct Toggle (Growth Green)
         const sideHi = document.getElementById('sideBtnLangHi');
         const sideEn = document.getElementById('sideBtnLangEn');
         if (sideHi && sideEn) {
             if (lang === 'hi') {
-                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white';
-                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white';
+                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]';
+                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white';
             } else {
-                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-bold transition text-slate-400 hover:text-white';
-                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-black transition bg-emerald-600 text-white';
+                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white';
+                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]';
             }
         }
     },
