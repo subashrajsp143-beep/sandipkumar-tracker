@@ -407,6 +407,11 @@
                 <!-- Right: Prominent Direct Language Switcher + Bell + User -->
                 <div class="flex items-center gap-2 sm:gap-3">
                     
+                    <!-- THEME TOGGLE (☀️ Light / 🌙 Dark) -->
+                    <button type="button" onclick="toggleAppTheme()" id="themeToggleBtn" title="थीम बदलें (Light / Dark)" class="w-9 h-9 rounded-md bg-white/10 hover:bg-white/20 border border-[#C7E6D1]/40 text-white flex items-center justify-center transition">
+                        <i class="fa-regular fa-sun text-sm" id="themeToggleIcon"></i>
+                    </button>
+
                     <!-- DIRECT PROMINENT BILINGUAL SWITCHER (Instant 1-Click) -->
                     <div class="inline-flex items-center p-0.5 sm:p-1 bg-black/15 rounded-md border border-[#C7E6D1]/40" id="prominentLangSwitcher">
                         <button type="button" onclick="setAppLanguage('hi', event)" id="topBtnLangHi"
