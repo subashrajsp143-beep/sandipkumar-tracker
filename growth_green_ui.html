@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="hi" class="bg-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>M/S Sandip Kumar — Growth Green UI Preview</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           GROWTH GREEN PALETTE — CSS VARIABLES DEFINED IN :ROOT
+           ========================================================================== */
+        :root {
+            --primary: #166534;      /* (sidebar, header, normal buttons) */
+            --highlight: #22C55E;    /* (active menu line, small accents) */
+            --bg: #FFFFFF;           /* (page background) */
+            --card: #FFFFFF;         /* (cards and form fields) */
+            --border: #E2E8F0;
+            --text: #0F172A;
+            --text-soft: #475569;    /* (labels, hints, placeholders) */
+            --on-primary: #FFFFFF;   /* (text on green) */
+            --action: #F97316;       /* (the one main action button, with dark text #1C0A00) */
+            --action-text: #1C0A00;
+            --danger: #B91C1C;       /* (delete only) */
+            --on-danger: #FFFFFF;
+
+            /* Status Chips */
+            --status-success-bg: #ECFDF5;
+            --status-success-text: #065F46;
+            --status-success-border: #A7F3D0;
+            --status-warning-bg: #FFFBEB;
+            --status-warning-text: #92400E;
+            --status-warning-border: #FDE68A;
+            --status-danger-bg: #FEF2F2;
+            --status-danger-text: #991B1B;
+            --status-danger-border: #FECACA;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"],
+        .dark {
+            --bg: #052E16;
+            --card: #0A3A1E;
+            --text: #ECFDF3;
+            --text-soft: #9CC4AA;
+            --border: #14532D;
+            --action: #F97316;
+            --action-text: #1C0A00;
+            --primary: #166534;
+            --highlight: #4ADE80;
+            --on-primary: #FFFFFF;
+            --danger: #B91C1C;
+            --on-danger: #FFFFFF;
+
+            --status-success-bg: #064E3B;
+            --status-success-text: #A7F3D0;
+            --status-success-border: #047857;
+            --status-warning-bg: #78350F;
+            --status-warning-text: #FDE68A;
+            --status-warning-border: #B45309;
+            --status-danger-bg: #7F1D1D;
+            --status-danger-text: #FECACA;
+            --status-danger-border: #B91C1C;
+        }
+
+        html, body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Elements mapping to CSS variables */
+        .app-bg { background-color: var(--bg); }
+        .app-card { background-color: var(--card); border: 1px solid var(--border); color: var(--text); }
+        .app-header { background-color: var(--primary); color: var(--on-primary); }
+        .app-sidebar { background-color: var(--primary); color: var(--on-primary); border-right: 1px solid rgba(255, 255, 255, 0.15); }
+        .app-text { color: var(--text); }
+        .app-text-soft { color: var(--text-soft); }
+        .app-border { border-color: var(--border); }
+
+        /* Buttons strictly styled to rules */
+        .btn-action-main {
+            background-color: var(--action) !important;
+            color: var(--action-text) !important;
+            border: 1px solid var(--action) !important;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(249, 115, 22, 0.3);
+        }
+        .btn-action-main * { color: var(--action-text) !important; }
+        .btn-action-main:hover { background-color: #EA580C !important; }
+
+        .btn-primary-normal {
+            background-color: var(--primary) !important;
+            color: var(--on-primary) !important;
+            border: 1px solid var(--primary) !important;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-primary-normal * { color: var(--on-primary) !important; }
+        .btn-primary-normal:hover { background-color: #14532D !important; }
+
+        .btn-light-secondary {
+            background-color: var(--card) !important;
+            color: var(--primary) !important;
+            border: 1.5px solid var(--primary) !important;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-light-secondary * { color: var(--primary) !important; }
+        .btn-light-secondary:hover { background-color: #F8FAFC !important; }
+
+        .btn-danger-delete {
+            background-color: var(--danger) !important;
+            color: var(--on-danger) !important;
+            border: 1px solid var(--danger) !important;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .btn-danger-delete * { color: var(--on-danger) !important; }
+
+        /* Placeholders */
+        ::placeholder { color: var(--text-soft) !important; opacity: 1 !important; }
+        
+        /* Table Headers */
+        table thead th {
+            background-color: var(--primary) !important;
+            color: var(--on-primary) !important;
+            border-color: var(--border) !important;
+        }
+        table thead th * { color: var(--on-primary) !important; }
+        table tbody td {
+            background-color: var(--card) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+
+        /* Active line */
+        .active-pill {
+            background-color: rgba(255, 255, 255, 0.18) !important;
+            border-left: 3px solid var(--highlight) !important;
+            color: #FFFFFF !important;
+        }
+        .active-pill * { color: #FFFFFF !important; }
+        .active-pill i { color: var(--highlight) !important; }
+    </style>
+</head>
+<body class="app-bg app-text flex h-screen overflow-hidden">
+
+    <!-- ========================================================================= -->
+    <!-- 1. SIDEBAR (Growth Green #166534, Highlight #22C55E)                      -->
+    <!-- ========================================================================= -->
+    <aside class="w-64 app-sidebar flex flex-col justify-between shrink-0 hidden md:flex select-none z-30">
+        <div>
+            <!-- Brand Box -->
+            <div class="p-4 border-b border-white/15 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center p-1 border border-white/20 shrink-0">
+                    <img src="static/icons/icon-192.png" alt="Logo" class="w-full h-full object-contain rounded-lg" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SK&background=166534&color=fff&size=128';">
+                </div>
+                <div class="truncate">
+                    <div class="font-extrabold text-sm text-white tracking-wide truncate">M/S संदीप कुमार</div>
+                    <div class="text-[10px] text-emerald-200 uppercase tracking-wider truncate">२१ जलापूर्ति साइट्स</div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-3 space-y-1 text-xs">
+                <button onclick="switchView('dashboard')" id="nav-dash" class="w-full active-pill flex items-center justify-between px-3 py-2.5 rounded-lg font-bold transition text-left cursor-pointer">
+                    <span class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>डैशबोर्ड</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+
+                <button onclick="switchView('attendance')" id="nav-att" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold hover:bg-white/10 text-white/90 transition text-left cursor-pointer">
+                    <span class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-users text-emerald-300"></i>
+                        <span>दैनिक हाजिरी</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+
+                <button onclick="switchView('stock')" id="nav-stock" class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold hover:bg-white/10 text-white/90 transition text-left cursor-pointer">
+                    <span class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-boxes-stacked text-emerald-300"></i>
+                        <span>साइट स्टॉक</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+            </nav>
+        </div>
+
+        <!-- User / Bottom -->
+        <div class="p-3 border-t border-white/15 text-xs">
+            <div class="p-2 rounded-lg bg-black/15 flex items-center justify-between">
+                <span class="text-white font-bold text-[11px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-building-user text-emerald-400"></i>
+                    <span>ऑफिस वर्क</span>
+                </span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono font-bold">PIN: OK</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================================================= -->
+    <!-- 2. MAIN VIEWPORT                                                          -->
+    <!-- ========================================================================= -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- Top Header Bar (Growth Green #166534) -->
+        <header class="h-16 app-header flex items-center justify-between px-4 sm:px-6 shrink-0 border-b border-white/15">
+            <div class="flex items-center gap-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+                    <span>२१ साइट्स चालू</span>
+                </div>
+            </div>
+
+            <!-- Right: Role Pill + Theme Toggle -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Mode Toggle -->
+                <button type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center gap-1.5 border border-white/20" title="Toggle Light / Dark">
+                    <span id="themeIcon">☀️</span> <span id="themeLabel">Light</span>
+                </button>
+
+                <!-- Profile Pill: Office Work -->
+                <div class="flex items-center gap-2 pl-2 border-l border-white/20">
+                    <div class="w-8 h-8 rounded-full bg-white/15 text-white text-sm flex items-center justify-center border border-white/20">
+                        🏢
+                    </div>
+                    <div class="hidden sm:flex flex-col text-left leading-tight">
+                        <span class="text-xs font-bold text-white">संदीप कुमार</span>
+                        <span class="text-[10px] text-emerald-200 capitalize">ऑफिस वर्क</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Body (Background: #FFFFFF, Text: #0F172A) -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 app-bg">
+
+            <!-- ================================================================= -->
+            <!-- VIEW A: DASHBOARD (/portal) — The Reference Model                 -->
+            <!-- ================================================================= -->
+            <section id="view-dashboard" class="space-y-6 max-w-7xl mx-auto">
+                
+                <!-- 1. Header Section -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b app-border">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-black app-text tracking-tight">डैशबोर्ड</h1>
+                        <div class="text-xs font-bold app-text-soft flex items-center gap-1.5 mt-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span>२१ जलापूर्ति साइट्स चालू</span>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg app-card text-xs font-bold shadow-xs">
+                        <span class="app-text-soft">दिनांक:</span>
+                        <span class="font-mono font-black app-text">25/10/2026</span>
+                    </div>
+                </div>
+
+                <!-- 2. Status Card -->
+                <div class="app-card rounded-xl p-4 sm:p-5 flex items-center justify-between shadow-xs">
+                    <div>
+                        <div class="text-[11px] font-bold uppercase tracking-wider app-text-soft">परियोजना स्थिति</div>
+                        <div class="text-base sm:text-lg font-black app-text mt-0.5">२१ जलापूर्ति साइट्स चालू</div>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold" style="background-color: var(--status-success-bg); color: var(--status-success-text); border: 1px solid var(--status-success-border);">
+                        ● सक्रिय
+                    </span>
+                </div>
+
+                <!-- 3. 6 Information Tiles (2x3 on mobile, 3x2 on desktop) -->
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">साइट्स</div>
+                        <div class="text-2xl font-black app-text mt-1">21 साइट्स</div>
+                        <div class="text-xs text-emerald-700 font-bold mt-1">● सभी चालू</div>
+                    </div>
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">श्रमिक</div>
+                        <div class="text-2xl font-black app-text mt-1">दैनिक हाजिरी</div>
+                        <div class="text-xs text-emerald-700 font-bold mt-1">साइट मैनपॉवर</div>
+                    </div>
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">खपत</div>
+                        <div class="text-2xl font-black app-text mt-1">1,248 <span class="text-xs font-normal app-text-soft">एंट्रीज</span></div>
+                        <div class="text-xs text-emerald-700 font-bold mt-1">कुल प्रविष्टियां</div>
+                    </div>
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">लागत</div>
+                        <div class="text-2xl font-black text-emerald-800 mt-1">₹8,45,200</div>
+                        <div class="text-xs app-text-soft font-bold mt-1">कुल सामग्री खर्च</div>
+                    </div>
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">पत्रांक</div>
+                        <div class="text-xl font-black text-emerald-800 mt-1 font-mono">SK/2026-27/0042</div>
+                        <div class="text-xs app-text-soft font-bold mt-1">FY 2026-27</div>
+                    </div>
+                    <div class="app-card rounded-xl p-4 shadow-xs">
+                        <div class="text-[11px] font-bold app-text-soft uppercase">सामग्री</div>
+                        <div class="text-2xl font-black app-text mt-1">24 <span class="text-xs font-normal app-text-soft">आइटम्स</span></div>
+                        <div class="text-xs app-text-soft font-bold mt-1">मास्टर कैटलॉग</div>
+                    </div>
+                </div>
+
+                <!-- 4. Outgoing Letters Register with Main Action Button (+ New Letter) -->
+                <div class="app-card rounded-xl p-5 shadow-xs space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b app-border">
+                        <div>
+                            <h2 class="text-lg font-black app-text flex items-center gap-2">
+                                <span>📑 जावक पत्रांक पंजी (Outgoing Letters Register)</span>
+                            </h2>
+                            <p class="text-xs app-text-soft mt-0.5">विभिन्न विभागों को भेजे गए पत्रों की आधिकारिक सूची</p>
+                        </div>
+                        
+                        <!-- Action Buttons: + New Letter uses --action (#F97316 with text #1C0A00) -->
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" class="btn-action-main">
+                                <i class="fa-solid fa-circle-plus"></i>
+                                <span>+ नया पत्र</span>
+                            </button>
+                            <button type="button" class="btn-light-secondary">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>Excel</span>
+                            </button>
+                            <!-- PDF Button uses --primary fill -->
+                            <button type="button" class="btn-primary-normal">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <span>PDF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto border app-border rounded-lg">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="text-left font-bold">
+                                    <th class="p-3">क्र.</th>
+                                    <th class="p-3">दिनांक</th>
+                                    <th class="p-3">पत्रांक संख्या</th>
+                                    <th class="p-3">विभाग</th>
+                                    <th class="p-3">विषय</th>
+                                    <th class="p-3 text-center">कार्रवाई</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y app-border">
+                                <tr>
+                                    <td class="p-3 font-mono">01</td>
+                                    <td class="p-3">24/10/2026</td>
+                                    <td class="p-3 font-mono font-bold text-emerald-800">SK/2026-27/0041</td>
+                                    <td class="p-3 font-semibold">PHED कार्य प्रमंडल, मधुबनी</td>
+                                    <td class="p-3">पाइपलाइन बिछाने हेतु अनापत्ति प्रमाण पत्र बाबत</td>
+                                    <td class="p-3 text-center">
+                                        <button class="btn-light-secondary py-1 px-2.5 text-[11px]">देखें</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================================================================= -->
+            <!-- VIEW B: ATTENDANCE (/attendance) — Pure Growth Green Light Theme  -->
+            <!-- ================================================================= -->
+            <section id="view-attendance" class="space-y-6 max-w-7xl mx-auto hidden">
+                
+                <!-- Action Controls Bar -->
+                <div class="app-card rounded-xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-black app-text">दैनिक साइट हाजिरी (Daily Manpower)</h1>
+                        <p class="text-xs app-text-soft mt-0.5">२१ साइट्स पर कार्यरत मिस्त्री, प्लंबर व हेल्पर्स का रजिस्टर</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- Save Attendance Button uses --action (#F97316 with text #1C0A00) -->
+                        <button type="button" class="btn-action-main">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>हाजिरी सेव करें</span>
+                        </button>
+                        <!-- PDF button uses --primary like the others -->
+                        <button type="button" class="btn-primary-normal">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span>PDF (1 पेज)</span>
+                        </button>
+                        <!-- Light Secondary buttons -->
+                        <button type="button" class="btn-light-secondary">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Supervisor Attendance Desk (Pure White Card, No Dark Navy Backgrounds) -->
+                <div class="app-card rounded-xl p-5 shadow-xs space-y-4">
+                    <div class="pb-3 border-b app-border">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold inline-block" style="background-color: var(--status-success-bg); color: var(--status-success-text); border: 1px solid var(--status-success-border);">
+                            ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Desk)
+                        </span>
+                        <h3 class="text-base font-black app-text mt-1">वर्कर चुनें व ऑन-साइट हाजिरी दर्ज करें</h3>
+                        <p class="text-xs app-text-soft">सफेद कार्ड, गहरा टेक्स्ट, शून्य डार्क या पर्पल बैकग्राउंड्स।</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold app-text">वर्कर का नाम:</label>
+                            <input type="text" placeholder="नाम दर्ज करें..." class="w-full px-3 py-2 rounded-lg border app-border text-xs">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold app-text">कार्य स्थल / साइट:</label>
+                            <select class="w-full px-3 py-2 rounded-lg border app-border text-xs">
+                                <option>रहिका (RHK-01)</option>
+                                <option>बेनीपट्टी (BNP-02)</option>
+                                <option>खजौली (KHJ-03)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 21 Sites Attendance Table -->
+                <div class="app-card rounded-xl shadow-xs overflow-hidden">
+                    <div class="p-4 border-b app-border flex items-center justify-between">
+                        <h3 class="text-sm font-black app-text">21 Sites Sheet — Date 25/10/2026</h3>
+                        <span class="text-xs app-text-soft font-bold">कुल उपस्थित: 48 कारीगर</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center">
+                            <thead>
+                                <tr>
+                                    <th class="p-3 w-12">क्र.</th>
+                                    <th class="p-3 text-left">साइट का नाम</th>
+                                    <th class="p-3">इंचार्ज</th>
+                                    <th class="p-3">सुपरवाइजर</th>
+                                    <th class="p-3">मिस्त्री</th>
+                                    <th class="p-3">प्लंबर</th>
+                                    <th class="p-3">हेल्पर</th>
+                                    <th class="p-3">कुल</th>
+                                    <th class="p-3 text-left">रिमार्क्स</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y app-border">
+                                <tr>
+                                    <td class="p-2.5 font-mono">01</td>
+                                    <td class="p-2.5 text-left font-bold app-text">रहिका जलापूर्ति</td>
+                                    <td class="p-2.5">1</td>
+                                    <td class="p-2.5">1</td>
+                                    <td class="p-2.5">2</td>
+                                    <td class="p-2.5">2</td>
+                                    <td class="p-2.5">4</td>
+                                    <td class="p-2.5 font-bold text-emerald-800">10</td>
+                                    <td class="p-2.5 text-left app-text-soft">कार्य चालू</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2.5 font-mono">02</td>
+                                    <td class="p-2.5 text-left font-bold app-text">बेनीपट्टी जलापूर्ति</td>
+                                    <td class="p-2.5">1</td>
+                                    <td class="p-2.5">0</td>
+                                    <td class="p-2.5">1</td>
+                                    <td class="p-2.5">2</td>
+                                    <td class="p-2.5">3</td>
+                                    <td class="p-2.5 font-bold text-emerald-800">7</td>
+                                    <td class="p-2.5 text-left app-text-soft">पाइप फिटिंग</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================================================================= -->
+            <!-- VIEW C: SITE STOCK (/stock) — Growth Green Clean Layout           -->
+            <!-- ================================================================= -->
+            <section id="view-stock" class="space-y-6 max-w-7xl mx-auto hidden">
+                <div class="app-card rounded-xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-black app-text">साइट स्टॉक और बैलेंस रजिस्टर</h1>
+                        <p class="text-xs app-text-soft mt-0.5">२१ साइट्स पर उपलब्ध सामग्री, खपत व लाइव बैलेंस</p>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <button type="button" class="btn-primary-normal">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>साइट पर माल भेजें</span>
+                        </button>
+                        <!-- Delete/Reset strictly uses --danger (#B91C1C) -->
+                        <button type="button" class="btn-danger-delete">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>स्टॉक 0 करें</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="app-card rounded-xl p-5 shadow-xs">
+                    <p class="text-xs app-text-soft">सभी बटन्स और लेजर अब स्पष्ट पठनीय गहरे हरे व नारंगी एक्शन कलर्स में सेट हैं।</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Interactive View Switcher & Theme Switcher Script -->
+    <script>
+        function switchView(view) {
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-attendance').classList.add('hidden');
+            document.getElementById('view-stock').classList.add('hidden');
+
+            document.getElementById('nav-dash').className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold hover:bg-white/10 text-white/90 transition text-left cursor-pointer';
+            document.getElementById('nav-att').className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold hover:bg-white/10 text-white/90 transition text-left cursor-pointer';
+            document.getElementById('nav-stock').className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-semibold hover:bg-white/10 text-white/90 transition text-left cursor-pointer';
+
+            if (view === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                document.getElementById('nav-dash').className = 'w-full active-pill flex items-center justify-between px-3 py-2.5 rounded-lg font-bold transition text-left cursor-pointer';
+            } else if (view === 'attendance') {
+                document.getElementById('view-attendance').classList.remove('hidden');
+                document.getElementById('nav-att').className = 'w-full active-pill flex items-center justify-between px-3 py-2.5 rounded-lg font-bold transition text-left cursor-pointer';
+            } else if (view === 'stock') {
+                document.getElementById('view-stock').classList.remove('hidden');
+                document.getElementById('nav-stock').className = 'w-full active-pill flex items-center justify-between px-3 py-2.5 rounded-lg font-bold transition text-left cursor-pointer';
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            const icon = document.getElementById('themeIcon');
+            const label = document.getElementById('themeLabel');
+
+            if (isDark) {
+                html.classList.remove('dark');
+                html.setAttribute('data-theme', 'light');
+                icon.textContent = '☀️';
+                label.textContent = 'Light';
+            } else {
+                html.classList.add('dark');
+                html.setAttribute('data-theme', 'dark');
+                icon.textContent = '🌙';
+                label.textContent = 'Dark';
+            }
+        }
+    </script>
+</body>
+</html>
