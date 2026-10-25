@@ -226,10 +226,15 @@
                     </div>
 
                     <!-- Action Button: + ADD or Stepper -->
-                    <div id="action-container-{{ m.id }}">
-                        <button onclick="addToCart({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', {% if is_owner %}{{ m.rate }}{% else %}0{% endif %}, '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
+                    <div id="action-container-{{ m.id }}" class="flex items-center gap-1.5">
+                        <button onclick="addToCart({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', {% if is_owner %}{{ m.rate }}{% else %}0{% endif %}, '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1 active:scale-95">
                             <i class="fa-solid fa-plus text-[10px]"></i> ADD
                         </button>
+                        {% if is_owner %}
+                        <button onclick="openQuickSendModal({{ m.id }}, '{{ m.name|replace("'", "\\'") }}', '{{ m.unit }}', '{{ m.image_url or '' }}')" class="px-2.5 py-1.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-xs shadow-sm transition flex items-center gap-1 active:scale-95" title="इस सामान को सीधे किसी साइट पर भेजें">
+                            <i class="fa-solid fa-truck-fast text-[11px]"></i> भेजें
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -306,7 +311,8 @@
                 Clear Cart
             </button>
             <button onclick="openCartDrawer()" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs sm:text-sm font-black shadow-lg transition flex items-center gap-2 active:scale-95">
-                <span>Cart Dekhein & Site Par Issue Karein</span>
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                <span>Cart देखें (साइट पर माल भेजें)</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>
@@ -320,12 +326,12 @@
         <!-- Cart Header -->
         <div class="px-6 py-4 bg-[#166534] text-white flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-900 flex items-center justify-center font-black text-lg">
+                <div class="w-10 h-10 rounded-xl bg-[#F97316] text-[#1C0A00] flex items-center justify-center font-black text-lg shadow">
                     <i class="fa-solid fa-boxes-packing"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-black">Site Material Issue / Requisition Cart</h3>
-                    <p class="text-xs text-blue-200">Chune gaye materials ko kisi bhi site par record karein</p>
+                    <h3 class="text-base font-black">साइट सामग्री डिस्पैच व रिक्विजिशन (Material Dispatch Cart)</h3>
+                    <p class="text-xs text-emerald-100" id="cartHeaderSubtitle">स्टोर से सामान चुनकर साइट पर भेजें (Stock Inward)</p>
                 </div>
             </div>
             <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-lg text-white/80 hover:text-white hover:bg-white/10 flex items-center justify-center text-lg">
@@ -333,18 +339,32 @@
             </button>
         </div>
 
+        <!-- Mode Switcher Tabs -->
+        <div class="px-6 pt-4 pb-2 bg-slate-50 border-b border-slate-200">
+            <div class="p-1 bg-slate-200/80 rounded-2xl flex items-center gap-1">
+                <button type="button" onclick="setCartMode('dispatch')" id="modeTabDispatch" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 bg-[#166534] text-white shadow-sm">
+                    <i class="fa-solid fa-truck-ramp-box text-amber-300"></i>
+                    <span>🚚 साइट पर माल भेजें (Stock Inward)</span>
+                </button>
+                <button type="button" onclick="setCartMode('consumption')" id="modeTabConsumption" class="flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-bolt text-amber-500"></i>
+                    <span>⚡ साइट पर खपत दर्ज करें (Consumption)</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Cart Body -->
         <div class="p-6 overflow-y-auto space-y-5 flex-grow">
             
             <!-- Site & Date Selection Section -->
-            <div class="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 space-y-3">
-                <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-location-dot text-rose-500"></i> Step 1: Site aur Tareekh Chunein
+            <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 space-y-3">
+                <h4 class="text-xs font-bold text-[#166534] uppercase tracking-wider flex items-center gap-1.5" id="step1Title">
+                    <i class="fa-solid fa-location-dot text-rose-500"></i> Step 1: किस साइट पर माल भेजना है?
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">
-                            {% if locked_site_id %}आपकी अधिकृत साइट{% else %}Koun Se Site Par?{% endif %} <span class="text-rose-500">*</span>
+                            {% if locked_site_id %}आपकी अधिकृत साइट{% else %}साइट चुनें (1 to 21 Sites){% endif %} <span class="text-rose-500">*</span>
                         </label>
                         {% if locked_site_id and locked_site %}
                         <div class="px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center justify-between shadow-sm">
@@ -356,8 +376,8 @@
                         </div>
                         <input type="hidden" id="checkoutSite" value="{{ locked_site_id }}">
                         {% else %}
-                        <select id="checkoutSite" onchange="onSiteSelect()" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-blue-500 bg-white">
-                            <option value="">-- Site Chunein (1 to 21 Sites) --</option>
+                        <select id="checkoutSite" onchange="onSiteSelect()" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-[#166534] bg-white">
+                            <option value="">-- साइट चुनें (1 to 21 Sites) --</option>
                             {% for s in sites %}
                             <option value="{{ s.id }}" data-supervisor="{{ s.supervisor or '' }}" data-contact="{{ s.contact or '' }}">
                                 {{ s.code }} - {{ s.name }}
@@ -367,22 +387,37 @@
                         {% endif %}
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tareekh (Date) <span class="text-rose-500">*</span></label>
-                        <input type="date" id="checkoutDate" value="{{ today }}" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-blue-500 bg-white">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">तारीख (Date) <span class="text-rose-500">*</span></label>
+                        <input type="date" id="checkoutDate" value="{{ today }}" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs font-semibold text-slate-800 focus:border-[#166534] bg-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Supervisor (Auto)</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">सुपरवाइजर (Auto)</label>
                         <input type="text" id="checkoutSupervisor" readonly placeholder="Auto-populated" class="w-full rounded-xl border border-slate-200 py-2 px-3 text-xs text-slate-600 bg-slate-100">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+
+                <!-- Dispatch Specific Fields (Default) -->
+                <div id="dispatchFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Karye ka Vivaran (Purpose)</label>
-                        <input type="text" id="checkoutPurpose" placeholder="e.g. Main pipeline extension, submersible boring" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500 bg-white">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">चालान / गाड़ी नंबर (वैकल्पिक)</label>
+                        <input type="text" id="checkoutChallan" placeholder="e.g. CH-2026-042 / BR-06-1234" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Entry Karne Wale Ka Naam</label>
-                        <input type="text" id="checkoutEnteredBy" placeholder="Aapka naam ya supervisor" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500 bg-white">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">टिप्पणी / विवरण (वैकल्पिक)</label>
+                        <input type="text" id="checkoutRemarks" placeholder="e.g. Driver Ramesh / बोरिंग कार्य हेतु" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
+                    </div>
+                    <input type="hidden" id="checkoutSupplier" value="मालिक / हेड ऑफिस">
+                </div>
+
+                <!-- Consumption Specific Fields (Hidden when Dispatch) -->
+                <div id="consumptionFields" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">कार्य का विवरण (Purpose)</label>
+                        <input type="text" id="checkoutPurpose" placeholder="e.g. Main pipeline extension, submersible boring" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">एंट्री करने वाले का नाम</label>
+                        <input type="text" id="checkoutEnteredBy" placeholder="आपका नाम या सुपरवाइजर" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
                     </div>
                 </div>
             </div>
@@ -435,12 +470,101 @@
             <button onclick="closeCartDrawer()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition">
                 Aur Items Jodein (Back)
             </button>
-            <button id="submitIssueBtn" onclick="submitRequisition()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-black shadow-md transition flex items-center gap-2 active:scale-95">
-                <i class="fa-solid fa-circle-check"></i>
-                <span>Site Par Material Issue Karein</span>
+            <button id="submitIssueBtn" onclick="submitRequisition()" class="px-6 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] text-xs sm:text-sm font-black shadow-md transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-truck-ramp-box" id="submitBtnIcon"></i>
+                <span id="submitBtnText">साइट पर माल भेजें (Send to Site)</span>
             </button>
         </div>
 
+    </div>
+</div>
+
+<!-- Quick Direct Send to Site Modal -->
+<div id="quickSendModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-150">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-[#166534] text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#F97316] text-[#1C0A00] flex items-center justify-center font-black text-lg shadow">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">साइट पर माल भेजें (Send to Site)</h3>
+                    <p class="text-xs text-emerald-100">स्टोर से तुरंत किसी भी साइट पर माल इनवर्ड दर्ज करें</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeQuickSendModal()" class="w-8 h-8 rounded-lg text-white/80 hover:text-white hover:bg-white/10 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Body Form -->
+        <form id="quickSendForm" onsubmit="submitQuickSend(event)" class="p-6 space-y-4">
+            <input type="hidden" id="quickSendMatId">
+
+            <!-- Selected Material Preview Banner -->
+            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-3">
+                <img id="quickSendMatImg" src="/uploads/materials/fittings.jpg" alt="Material" class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0" onerror="this.src='/uploads/materials/fittings.jpg'">
+                <div class="flex-grow min-w-0">
+                    <span id="quickSendMatCategory" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Material</span>
+                    <h4 id="quickSendMatName" class="text-sm font-black text-slate-800 truncate mt-0.5">Material Name</h4>
+                    <span class="text-xs text-slate-500 font-semibold">इकाई (Unit): <strong id="quickSendMatUnit" class="text-slate-900 font-mono">NOS</strong></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Site Selector -->
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">किस साइट पर भेजना है? <span class="text-rose-500">*</span></label>
+                    <select id="quickSendSite" required class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs sm:text-sm font-bold text-slate-800 focus:border-[#166534] focus:ring-1 focus:ring-[#166534] bg-white">
+                        <option value="">-- साइट चुनें (1 to 21 Sites) --</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}">
+                            {{ s.code }} - {{ s.name }} ({{ s.supervisor or 'No Supervisor' }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Quantity -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">कितना माल भेजा? (मात्रा) <span class="text-rose-500">*</span></label>
+                    <div class="relative">
+                        <input type="number" step="any" min="0.01" id="quickSendQty" required placeholder="0.00" class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm font-black text-slate-800 focus:border-[#166534] focus:ring-1 focus:ring-[#166534] bg-white pr-14">
+                        <span id="quickSendUnitBadge" class="absolute right-3 top-2.5 text-xs font-mono font-bold text-slate-500">NOS</span>
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">भेजने की तारीख <span class="text-rose-500">*</span></label>
+                    <input type="date" id="quickSendDate" value="{{ today }}" required class="w-full rounded-xl border border-slate-300 py-2.5 px-3 text-xs sm:text-sm font-semibold text-slate-800 focus:border-[#166534] bg-white">
+                </div>
+
+                <!-- Challan / Vehicle No -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">चालान / गाड़ी नंबर (वैकल्पिक)</label>
+                    <input type="text" id="quickSendChallan" placeholder="e.g. CH-2026-01 / BR-06-1234" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
+                </div>
+
+                <!-- Remarks -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">विवरण / नोट (वैकल्पिक)</label>
+                    <input type="text" id="quickSendRemarks" placeholder="e.g. Driver Ramesh / बोरिंग हेतु" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-[#166534] bg-white">
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                <button type="button" onclick="closeQuickSendModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                    रद्द करें (Cancel)
+                </button>
+                <button type="submit" id="quickSendSubmitBtn" class="px-6 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>साइट पर माल भेजें (Send Now)</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -626,10 +750,16 @@
         if (cart[id] && cart[id].qty > 0) {
             const item = cart[id];
             container.innerHTML = `
-                <div class="flex items-center rounded-xl border-2 border-blue-600 bg-white shadow-sm overflow-hidden text-xs">
-                    <button onclick="decreaseCart(${id})" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition">-</button>
-                    <input type="number" step="any" min="0" value="${item.qty}" onchange="setCartQty(${id}, this.value)" class="w-12 text-center font-bold text-slate-800 text-xs py-1 focus:outline-none">
-                    <button onclick="addToCart(${id}, '${item.name.replace(/'/g, "\\'")}', ${item.rate}, '${item.unit}', '${item.img}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition">+</button>
+                <div class="flex items-center gap-1.5">
+                    <div class="flex items-center rounded-xl border border-[#166534] bg-white shadow-sm overflow-hidden text-xs">
+                        <button onclick="decreaseCart(${id})" class="px-2 py-1.5 bg-emerald-50 text-emerald-800 font-bold hover:bg-emerald-100 transition">-</button>
+                        <input type="number" step="any" min="0" value="${item.qty}" onchange="setCartQty(${id}, this.value)" class="w-12 text-center font-bold text-slate-800 text-xs py-1 focus:outline-none">
+                        <button onclick="addToCart(${id}, '${item.name.replace(/'/g, "\\'")}', ${item.rate}, '${item.unit}', '${item.img}')" class="px-2 py-1.5 bg-emerald-50 text-emerald-800 font-bold hover:bg-emerald-100 transition">+</button>
+                    </div>
+                    ${isOwner ? `
+                    <button onclick="openQuickSendModal(${id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}', '${item.img}')" class="px-2.5 py-1.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-xs shadow-sm transition flex items-center gap-1 active:scale-95" title="Direct site par bhejein">
+                        <i class="fa-solid fa-truck-fast text-[11px]"></i>
+                    </button>` : ''}
                 </div>
             `;
         } else {
@@ -640,9 +770,15 @@
                 const unit = card.dataset.unit || 'NOS';
                 const img = card.dataset.img || '';
                 container.innerHTML = `
-                    <button onclick="addToCart(${id}, '${name.replace(/'/g, "\\'")}', ${rate}, '${unit}', '${img}')" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1.5 active:scale-95">
-                        <i class="fa-solid fa-plus text-[10px]"></i> ADD
-                    </button>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="addToCart(${id}, '${name.replace(/'/g, "\\'")}', ${rate}, '${unit}', '${img}')" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs shadow-sm hover:shadow transition flex items-center gap-1 active:scale-95">
+                            <i class="fa-solid fa-plus text-[10px]"></i> ADD
+                        </button>
+                        ${isOwner ? `
+                        <button onclick="openQuickSendModal(${id}, '${name.replace(/'/g, "\\'")}', '${unit}', '${img}')" class="px-2.5 py-1.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-xs shadow-sm transition flex items-center gap-1 active:scale-95" title="Direct site par bhejein">
+                            <i class="fa-solid fa-truck-fast text-[11px]"></i> भेजें
+                        </button>` : ''}
+                    </div>
                 `;
             }
         }
@@ -771,28 +907,121 @@
     {% endif %}
 
     // Submit Cart Requisition to Backend
+    async let currentCartMode = 'dispatch'; // 'dispatch' (default for owner) or 'consumption'
+
+    function setCartMode(mode) {
+        currentCartMode = mode;
+        const tabDispatch = document.getElementById('modeTabDispatch');
+        const tabConsumption = document.getElementById('modeTabConsumption');
+        const dispatchFields = document.getElementById('dispatchFields');
+        const consumptionFields = document.getElementById('consumptionFields');
+        const headerSub = document.getElementById('cartHeaderSubtitle');
+        const step1Title = document.getElementById('step1Title');
+
+        if (mode === 'dispatch') {
+            tabDispatch.className = "flex-1 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 bg-[#166534] text-white shadow-sm";
+            tabConsumption.className = "flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+            if (dispatchFields) dispatchFields.classList.remove('hidden');
+            if (consumptionFields) consumptionFields.classList.add('hidden');
+            if (headerSub) headerSub.textContent = "स्टोर से सामान चुनकर साइट पर भेजें (Stock Inward)";
+            if (step1Title) step1Title.innerHTML = `<i class="fa-solid fa-location-dot text-rose-500"></i> Step 1: किस साइट पर माल भेजना है?`;
+        } else {
+            tabConsumption.className = "flex-1 py-2 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 bg-[#166534] text-white shadow-sm";
+            tabDispatch.className = "flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900";
+            if (dispatchFields) dispatchFields.classList.add('hidden');
+            if (consumptionFields) consumptionFields.classList.remove('hidden');
+            if (headerSub) headerSub.textContent = "साइट पर सामान की सीधी खपत / इंस्टॉलेशन दर्ज करें";
+            if (step1Title) step1Title.innerHTML = `<i class="fa-solid fa-location-dot text-rose-500"></i> Step 1: किस साइट पर खपत हुई?`;
+        }
+        updateSubmitButtonText();
+    }
+
+    function updateSubmitButtonText() {
+        const btnText = document.getElementById('submitBtnText');
+        const btnIcon = document.getElementById('submitBtnIcon');
+        const items = Object.values(cart);
+        const count = items.length;
+
+        if (currentCartMode === 'dispatch') {
+            if (btnIcon) btnIcon.className = "fa-solid fa-truck-ramp-box";
+            if (btnText) btnText.textContent = count > 0 ? `साइट पर माल भेजें (${count} सामान)` : "साइट पर माल भेजें (Send to Site)";
+        } else {
+            if (btnIcon) btnIcon.className = "fa-solid fa-bolt";
+            if (btnText) btnText.textContent = count > 0 ? `खपत दर्ज करें (${count} सामान)` : "साइट पर खपत दर्ज करें";
+        }
+    }
+
     async function submitRequisition() {
-        const siteId = document.getElementById('checkoutSite').value;
-        const usageDate = document.getElementById('checkoutDate').value;
-        const purpose = document.getElementById('checkoutPurpose').value.trim();
-        const enteredBy = document.getElementById('checkoutEnteredBy').value.trim();
+        const siteSelect = document.getElementById('checkoutSite');
+        const siteId = siteSelect ? siteSelect.value : '';
         const items = Object.values(cart);
 
         if (!siteId) {
-            alert("Kripya koun se site par saman lag raha hai, pehle Site chunein!");
-            document.getElementById('checkoutSite').focus();
-            return;
-        }
-
-        if (!usageDate) {
-            alert("Kripya tareekh (Date) select karein!");
+            alert("कृपया किस साइट पर माल भेजना है, साइट चुनें!");
+            if (siteSelect) siteSelect.focus();
             return;
         }
 
         if (items.length === 0) {
-            alert("Cart me koi material nahi hai. Kripya pehle '+ ADD' karein!");
+            alert("Cart खाली है। कृपया पहले स्टोर से '+ ADD' करें!");
             return;
         }
+
+        const btn = document.getElementById('submitIssueBtn');
+        btn.disabled = true;
+
+        if (currentCartMode === 'dispatch') {
+            // MODE 1: DISPATCH / STOCK INWARD (Store se Site me Maal Bhejna)
+            const inwardDate = document.getElementById('checkoutDate').value || new Date().toISOString().split('T')[0];
+            const challanNo = document.getElementById('checkoutChallan') ? document.getElementById('checkoutChallan').value.trim() : '';
+            const supplier = document.getElementById('checkoutSupplier') ? document.getElementById('checkoutSupplier').value.trim() : 'मालिक / हेड ऑफिस';
+            const remarks = document.getElementById('checkoutRemarks') ? document.getElementById('checkoutRemarks').value.trim() : '';
+
+            const payload = {
+                site_id: parseInt(siteId),
+                inward_date: inwardDate,
+                challan_no: challanNo,
+                supplier: supplier || "मालिक / हेड ऑफिस",
+                remarks: remarks,
+                pin: sessionStorage.getItem('owner_pin') || "Sandip@@12",
+                items: items.map(it => ({
+                    material_id: it.id,
+                    quantity: it.qty
+                }))
+            };
+
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> भेजा जा रहा है...`;
+
+            try {
+                const res = await fetch('/api/stock/inward', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ सफलता!
+${data.count} सामान साइट पर सफलतापूर्वक भेज दिए गए हैं और साइट स्टॉक में दर्ज हो गए हैं!`);
+                    clearCart();
+                    closeCartDrawer();
+                    window.location.href = `/stock?site_id=${siteId}`;
+                } else {
+                    alert("Error: " + data.message);
+                    btn.disabled = false;
+                    updateSubmitButtonText();
+                }
+            } catch (err) {
+                alert("Network error: " + err);
+                btn.disabled = false;
+                updateSubmitButtonText();
+            }
+            return;
+        }
+
+        // MODE 2: DIRECT SITE CONSUMPTION (Daily Entry / Usage)
+        const usageDate = document.getElementById('checkoutDate').value;
+        const purpose = document.getElementById('checkoutPurpose') ? document.getElementById('checkoutPurpose').value.trim() : '';
+        const enteredBy = document.getElementById('checkoutEnteredBy') ? document.getElementById('checkoutEnteredBy').value.trim() : '';
 
         const payload = {
             site_id: parseInt(siteId),
@@ -807,20 +1036,7 @@
             }))
         };
 
-        const btn = document.getElementById('submitIssueBtn');
-        btn.disabled = true;
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
-
-        if (!navigator.onLine) {
-            const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
-            queue.push(payload);
-            localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
-            alert('🕒 OFFLINE SAVED: Network nahi hai, par materials issue slip aapke phone me surakshit save ho gayi hai! Internet aate hi yeh server par chadh jayegi.');
-            clearCart();
-            closeIssueModal();
-            window.location.href = `/reports/sites?site_id=${siteId}`;
-            return;
-        }
 
         try {
             const res = await fetch('/api/entries', {
@@ -829,22 +1045,114 @@
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
-
             if (data.success) {
-                alert(`✅ Safalta-purvak save ho gaya!\n${data.count} materials chuni hui site par record ho gaye hain.`);
+                alert(`✅ सफलतापूर्वक दर्ज हो गया!
+${data.count} सामान साइट खपत में दर्ज हो गए हैं।`);
                 clearCart();
                 closeCartDrawer();
-                // Redirect to Site Report to view the added issue
                 window.location.href = `/reports/sites?site_id=${siteId}&from_date=${usageDate}&to_date=${usageDate}`;
             } else {
                 alert("Error: " + data.message);
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Site Par Material Issue Karein`;
+                updateSubmitButtonText();
             }
         } catch (err) {
             alert("Network error: " + err);
             btn.disabled = false;
-            btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Site Par Material Issue Karein`;
+            updateSubmitButtonText();
+        }
+    }
+
+    // --- QUICK SEND DIRECT MODAL FUNCTIONS ---
+    function openQuickSendModal(id, name, unit, img) {
+        document.getElementById('quickSendMatId').value = id;
+        document.getElementById('quickSendMatName').textContent = name;
+        document.getElementById('quickSendMatUnit').textContent = unit;
+        document.getElementById('quickSendUnitBadge').textContent = unit;
+        document.getElementById('quickSendMatImg').src = img || '/uploads/materials/fittings.jpg';
+
+        const card = document.querySelector(`.product-card[data-id="${id}"]`);
+        const cat = card ? card.dataset.category : 'General';
+        document.getElementById('quickSendMatCategory').textContent = cat || 'Material';
+
+        document.getElementById('quickSendQty').value = '';
+        document.getElementById('quickSendChallan').value = '';
+        document.getElementById('quickSendRemarks').value = '';
+
+        document.getElementById('quickSendModal').classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('quickSendQty').focus();
+        }, 100);
+    }
+
+    function closeQuickSendModal() {
+        document.getElementById('quickSendModal').classList.add('hidden');
+    }
+
+    async function submitQuickSend(e) {
+        if (e) e.preventDefault();
+        const matId = document.getElementById('quickSendMatId').value;
+        const siteId = document.getElementById('quickSendSite').value;
+        const qty = parseFloat(document.getElementById('quickSendQty').value);
+        const date = document.getElementById('quickSendDate').value;
+        const challan = document.getElementById('quickSendChallan').value.trim();
+        const remarks = document.getElementById('quickSendRemarks').value.trim();
+        const matName = document.getElementById('quickSendMatName').textContent;
+        const matUnit = document.getElementById('quickSendMatUnit').textContent;
+
+        if (!siteId) {
+            alert("कृपया किस साइट पर माल भेजना है, साइट चुनें!");
+            document.getElementById('quickSendSite').focus();
+            return;
+        }
+        if (!qty || qty <= 0) {
+            alert("कृपया सही मात्रा (Quantity) दर्ज करें!");
+            document.getElementById('quickSendQty').focus();
+            return;
+        }
+        if (!date) {
+            alert("कृपया भेजने की तारीख चुनें!");
+            return;
+        }
+
+        const payload = {
+            site_id: parseInt(siteId),
+            inward_date: date,
+            challan_no: challan,
+            supplier: "मालिक / हेड ऑफिस",
+            remarks: remarks,
+            pin: sessionStorage.getItem('owner_pin') || "Sandip@@12",
+            items: [{
+                material_id: parseInt(matId),
+                quantity: qty
+            }]
+        };
+
+        const btn = document.getElementById('quickSendSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> भेजा जा रहा है...`;
+
+        try {
+            const res = await fetch('/api/stock/inward', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`✅ सफलता!
+${qty} ${matUnit} "${matName}" सफलतापूर्वक साइट पर भेज दिया गया और साइट स्टॉक में दर्ज हो गया!`);
+                closeQuickSendModal();
+                window.location.href = `/stock?site_id=${siteId}`;
+            } else {
+                alert("Error: " + data.message);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>साइट पर माल भेजें (Send Now)</span>`;
+            }
+        } catch (err) {
+            alert("Network error: " + err);
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>साइट पर माल भेजें (Send Now)</span>`;
         }
     }
 

@@ -36,9 +36,13 @@
 
             <!-- Quick Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
+                <a href="{{ url_for('material_store') }}" class="px-4 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-sm shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-base"></i>
+                    <span>🛒 स्टोर से सामान चुनकर भेजें</span>
+                </a>
                 <button type="button" onclick="openSendStockModal()" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-sm shadow-sm transition flex items-center gap-2 border border-[#166534]">
                     <i class="fa-solid fa-plus-circle text-base"></i>
-                    <span>साइट पर माल भेजें</span>
+                    <span>त्वरित माल भेजें (Quick Inward)</span>
                 </button>
                 <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5" title="स्टॉक व खर्च को 0 (रीसेट) करें">
                     <i class="fa-solid fa-rotate-left"></i>
