@@ -6,97 +6,102 @@
 <div class="space-y-5 max-w-7xl mx-auto">
 
     <!-- ======================================================== -->
-    <!-- 1. HEADER SECTION (Matches PAYROLL header in HRMS screenshot) -->
+    <!-- 1. HEADER SECTION: High-Contrast & Sharp -->
     <!-- ======================================================== -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#C7E6D1]">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-normal text-[#052E16] tracking-tight" data-i18n="dash_title">डैशबोर्ड</h1>
-            <div class="text-xs font-bold text-[#4B6B57] flex items-center gap-1.5 mt-0.5"><span class="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse"></span> <span data-i18n="dash_subtitle">२१ साइट्स</span></div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" data-i18n="dash_title">डैशबोर्ड</h1>
+            <div class="text-xs font-bold text-slate-600 flex items-center gap-1.5 mt-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span data-i18n="dash_subtitle">२१ जलापूर्ति साइट्स चालू</span>
+            </div>
         </div>
 
-        <!-- Date Pill with Calendar Icon (matches Month/Year pill in screenshot) -->
-        <div class="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-md bg-white border border-[#C7E6D1] text-xs font-medium text-[#052E16] self-start sm:self-auto">
-            <span class="text-[#4B6B57] font-semibold" data-i18n="dash_active_date">दिनांक:</span>
-            <span class="font-mono text-[#052E16] font-normal">{{ current_date }}</span>
-            <i class="fa-regular fa-calendar text-[#166534] ml-1"></i>
+        <!-- Date Pill -->
+        <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-800 shadow-2xs self-start sm:self-auto">
+            <span class="text-slate-500 font-medium" data-i18n="dash_active_date">दिनांक:</span>
+            <span class="font-mono text-slate-900 font-extrabold">{{ current_date }}</span>
+            <i class="fa-regular fa-calendar text-emerald-700 ml-1 text-sm"></i>
         </div>
     </div>
 
     <!-- ======================================================== -->
-    <!-- 2. STATUS CARD (Exact match to STATUS: Payroll published in screenshot) -->
+    <!-- 2. STATUS CARD: Crystal Clear White Card with Green Active Badge -->
     <!-- ======================================================== -->
-    <div class="card-theme p-4 sm:p-5 flex items-center justify-between gap-4">
+    <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex items-center justify-between gap-4">
         <div>
-            <div class="text-[10px] font-medium uppercase tracking-wider text-soft" data-i18n="dash_status_title">परियोजना स्थिति</div>
-            <div class="text-base font-normal text-main mt-0.5" data-i18n="dash_status_body">२१ जलापूर्ति साइट्स चालू</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="dash_status_title">परियोजना स्थिति</div>
+            <div class="text-base sm:text-lg font-bold text-slate-900 mt-0.5" data-i18n="dash_status_body">२१ जलापूर्ति साइट्स चालू</div>
         </div>
-        <span class="status-pill-active" data-i18n="dash_status_badge">● सक्रिय</span>
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 font-bold text-xs uppercase tracking-wider border border-emerald-300 shadow-2xs" data-i18n="dash_status_badge">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> ● सक्रिय
+        </span>
     </div>
 
     <!-- ======================================================== -->
-    <!-- 3. 6 INFORMATION TILES GRID (Exact match to 6 HRMS tiles in screenshot) -->
+    <!-- 3. 6 INFORMATION TILES: Pure White, Big Bold Numbers, High Contrast -->
     <!-- ======================================================== -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         
         <!-- Tile 1: Project Sites -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_sites">साइट्स</div>
-            <div class="text-xl sm:text-2xl font-normal text-main mt-1" data-i18n="tile_sites_val">21 साइट्स</div>
-            <div class="text-[11px] text-soft mt-1" data-i18n="tile_sites_sub">चालू</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_sites">साइट्स</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 साइट्स</div>
+            <div class="text-xs text-emerald-700 font-bold mt-1" data-i18n="tile_sites_sub">● सभी चालू</div>
         </div>
 
         <!-- Tile 2: Manpower on Duty -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_workers">श्रमिक</div>
-            <div class="text-xl sm:text-2xl font-normal text-main mt-1" data-i18n="tile_workers_val">दैनिक हाजिरी</div>
-            <div class="text-[11px] text-soft mt-1" data-i18n="tile_workers_sub">साइट मैनपॉवर</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_workers">श्रमिक</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">दैनिक हाजिरी</div>
+            <div class="text-xs text-indigo-700 font-bold mt-1" data-i18n="tile_workers_sub">साइट मैनपॉवर</div>
         </div>
 
         <!-- Tile 3: Usage Entries -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_logs">खपत</div>
-            <div class="text-xl sm:text-2xl font-normal text-main mt-1">{{ stats.total_logs }} <span data-i18n="tile_logs_sub">एंट्रीज</span></div>
-            <div class="text-[11px] text-soft mt-1" data-i18n="tile_logs_sub">कुल प्रविष्टियां</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_logs">खपत</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">एंट्रीज</span></div>
+            <div class="text-xs text-teal-700 font-bold mt-1" data-i18n="tile_logs_sub">कुल प्रविष्टियां</div>
         </div>
 
         <!-- Tile 4: Total Consumption Value -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_cost">लागत</div>
-            <div class="text-xl sm:text-2xl font-normal text-main mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
-            <div class="text-[11px] text-soft mt-1" data-i18n="tile_cost_sub">कुल सामग्री खर्च</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_cost">लागत</div>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
+            <div class="text-xs text-amber-700 font-bold mt-1" data-i18n="tile_cost_sub">कुल सामग्री खर्च</div>
         </div>
 
         <!-- Tile 5: Next Letter Reference Number -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_ref">पत्रांक</div>
-            <div class="text-lg sm:text-xl font-mono font-normal text-main mt-1 truncate">{{ next_letter_info.ref_no }}</div>
-            <div class="text-[11px] text-soft mt-1"><span data-i18n="tile_ref_sub">वित्तीय वर्ष</span> {{ next_letter_info.fy }}</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_ref">पत्रांक</div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
+            <div class="text-xs text-blue-700 font-bold mt-1"><span data-i18n="tile_ref_sub">वित्तीय वर्ष</span> {{ next_letter_info.fy }}</div>
         </div>
 
         <!-- Tile 6: Material Store Catalog -->
-        <div class="card-theme p-4 sm:p-5 flex flex-col justify-between">
-            <div class="text-[10px] font-medium text-soft uppercase tracking-wider" data-i18n="tile_items">सामग्री</div>
-            <div class="text-xl sm:text-2xl font-normal text-main mt-1">{{ stats.total_materials }} <span data-i18n="tile_items_sub">आइटम्स</span></div>
-            <div class="text-[11px] text-soft mt-1" data-i18n="tile_items_sub">मास्टर आइटम्स</div>
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-slate-400 transition">
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_items">सामग्री</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">आइटम्स</span></div>
+            <div class="text-xs text-slate-500 font-bold mt-1" data-i18n="tile_items_sub">मास्टर कैटलॉग</div>
         </div>
     </div>
 
     <!-- ======================================================== -->
-    <!-- 4. SEGREGATED CORE SEGMENTS (Minimal, Uncluttered Cards) -->
+    <!-- 4. SEGREGATED CORE SEGMENTS: Pure White, Clear Icons, Solid Action Buttons -->
     <!-- ======================================================== -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
         
         <!-- Segment 1: Attendance & HR Console -->
-        <div class="card-theme p-5 flex flex-col justify-between hover:border-[#166534] transition">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
             <div>
-                <div class="w-10 h-10 rounded-md icon-box flex items-center justify-center text-lg mb-3">
+                <div class="w-11 h-11 rounded-lg icon-box-emerald flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-users"></i>
                 </div>
-                <h3 class="font-normal text-base text-main" data-i18n="mod_attendance">उपस्थिति</h3>
-                <p class="text-xs text-soft mt-1" data-i18n="mod_att_desc">मैनुअल व GPS हाजिरी</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_attendance">उपस्थिति</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_att_desc">मैनुअल व GPS हाजिरी</p>
             </div>
-            <div class="mt-4 pt-3 border-t border-[#C7E6D1] flex items-center gap-2">
-                <a href="{{ url_for('attendance_view') }}" class="flex-1 btn-secondary-sm text-center">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('attendance_view') }}" class="flex-1 btn-primary-sm text-center">
                     <span data-i18n="btn_open">हाजिरी</span> &rarr;
                 </a>
                 <a href="/geo-attendance" class="btn-secondary-sm" title="GPS हाजिरी">
@@ -106,16 +111,16 @@
         </div>
 
         <!-- Segment 2: Material & Stock Register -->
-        <div class="card-theme p-5 flex flex-col justify-between hover:border-[#166534] transition">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
             <div>
-                <div class="w-10 h-10 rounded-md icon-box flex items-center justify-center text-lg mb-3">
+                <div class="w-11 h-11 rounded-lg icon-box-teal flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <h3 class="font-normal text-base text-main" data-i18n="mod_material">सामग्री</h3>
-                <p class="text-xs text-soft mt-1" data-i18n="mod_mat_desc">स्टॉक व खपत एंट्री</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_material">सामग्री</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_mat_desc">स्टॉक व खपत एंट्री</p>
             </div>
-            <div class="mt-4 pt-3 border-t border-[#C7E6D1] flex items-center gap-2">
-                <a href="{{ url_for('site_stock') }}" class="flex-1 btn-secondary-sm text-center">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('site_stock') }}" class="flex-1 btn-primary-sm text-center">
                     <span data-i18n="btn_stock">स्टॉक</span> &rarr;
                 </a>
                 <a href="{{ url_for('daily_entry') }}" class="btn-secondary-sm" title="दैनिक एंट्री">
@@ -125,16 +130,16 @@
         </div>
 
         <!-- Segment 3: DPR & Site Photos -->
-        <div class="card-theme p-5 flex flex-col justify-between hover:border-[#166534] transition">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-sky-500 transition">
             <div>
-                <div class="w-10 h-10 rounded-md icon-box flex items-center justify-center text-lg mb-3">
+                <div class="w-11 h-11 rounded-lg icon-box-sky flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-trowel-bricks"></i>
                 </div>
-                <h3 class="font-normal text-base text-main" data-i18n="mod_progress">प्रगति</h3>
-                <p class="text-xs text-soft mt-1" data-i18n="mod_prog_desc">DPR व फोटो एल्बम</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_progress">प्रगति</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_prog_desc">DPR व फोटो एल्बम</p>
             </div>
-            <div class="mt-4 pt-3 border-t border-[#C7E6D1] flex items-center gap-2">
-                <a href="/dpr" class="flex-1 btn-secondary-sm text-center">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="/dpr" class="flex-1 btn-primary-sm text-center">
                     <span data-i18n="btn_dpr">DPR</span> &rarr;
                 </a>
                 <a href="/site-photos" class="btn-secondary-sm" title="फोटो एल्बम">
@@ -144,16 +149,16 @@
         </div>
 
         <!-- Segment 4: Reports & Ledgers -->
-        <div class="card-theme p-5 flex flex-col justify-between hover:border-[#166534] transition">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
             <div>
-                <div class="w-10 h-10 rounded-md icon-box flex items-center justify-center text-lg mb-3">
+                <div class="w-11 h-11 rounded-lg icon-box-indigo flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
-                <h3 class="font-normal text-base text-main" data-i18n="mod_reports">रिपोर्ट्स</h3>
-                <p class="text-xs text-soft mt-1" data-i18n="mod_rep_desc">दैनिक व मासिक लेजर</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_reports">रिपोर्ट्स</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_rep_desc">दैनिक व मासिक लेजर</p>
             </div>
-            <div class="mt-4 pt-3 border-t border-[#C7E6D1] flex items-center gap-2">
-                <a href="{{ url_for('reports_hub') }}" class="flex-1 btn-secondary-sm text-center">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ url_for('reports_hub') }}" class="flex-1 btn-primary-sm text-center">
                     <span data-i18n="btn_reports">रिपोर्ट्स</span> &rarr;
                 </a>
                 <a href="{{ url_for('reports_hub', tab='monthly') }}" class="btn-secondary-sm" title="मासिक">
@@ -165,42 +170,42 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- 5. OUTGOING LETTERS REGISTER SEGMENT (Dedicated White Card) -->
+    <!-- 5. OUTGOING LETTERS REGISTER: Pure White, Sharp Slate Table, Clear Orange CTA -->
     <!-- ======================================================== -->
-    <div id="letters" class="bg-white rounded-lg p-5 sm:p-6 border border-[#C7E6D1] scroll-mt-20">
+    <div id="letters" class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-2xs scroll-mt-20">
         
         <!-- Header with Title, FY Badges and Actions -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#C7E6D1]">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-50/60 text-[#052E16] text-[11px] font-medium uppercase tracking-wider flex items-center gap-1.5 border border-[#C7E6D1]">
-                        <i class="fa-solid fa-stamp text-[#4B6B57]"></i> पत्रांक रजिस्टर
+                    <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-300">
+                        <i class="fa-solid fa-stamp text-emerald-700"></i> पत्रांक पंजी
                     </span>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-[#4B6B57] text-[11px] font-bold border border-emerald-200">
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-300">
                         वित्तीय वर्ष: {{ next_letter_info.fy }}
                     </span>
-                    <span class="px-2.5 py-1 rounded-full bg-white text-[#052E16] text-[11px] font-medium border border-[#C7E6D1] flex items-center gap-1">
-                        <i class="fa-solid fa-hashtag text-amber-600"></i> अगला पत्रांक: <code class="font-mono text-[#4B6B57] bg-white px-1.5 py-0.5 rounded border border-amber-200" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
+                    <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 text-[11px] font-black border border-amber-300 flex items-center gap-1">
+                        <i class="fa-solid fa-hashtag text-amber-600"></i> अगला पत्रांक: <code class="font-mono text-indigo-800 bg-white px-2 py-0.5 rounded border border-amber-300 font-bold" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
                     </span>
                 </div>
-                <h2 class="text-lg sm:text-xl font-black text-[#052E16] mt-2 flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-black text-slate-900 mt-2.5 flex items-center gap-2">
                     <span>📑 विभिन्न विभागों को जावक पत्र (Outgoing Letters Register)</span>
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5">
+                <p class="text-xs text-slate-600 mt-1">
                     PHED, RWD, DWSM, बैंक आदि विभागों को भेजे गए पत्रों की क्रमबद्ध पत्रांक संख्या (SK/YYYY-YY/0001) एवं प्रेषण विवरण।
                 </p>
             </div>
 
-            <!-- Action Buttons: The 1 Orange CTA Button + Secondary Outlined Buttons -->
+            <!-- Action Buttons: High-Visibility Orange CTA Button + Secondary White Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
                 <button type="button" onclick="openNewLetterModal()" class="btn-cta">
-                    <i class="fa-solid fa-circle-plus"></i> <span>+ <span data-i18n="btn_new_letter">नया पत्र</span></span>
+                    <i class="fa-solid fa-circle-plus text-white"></i> <span>+ <span data-i18n="btn_new_letter">नया पत्र</span></span>
                 </button>
                 <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="btn-secondary" title="Excel डाउनलोड">
-                    <i class="fa-solid fa-file-excel"></i> <span>Excel</span>
+                    <i class="fa-solid fa-file-excel text-emerald-700"></i> <span>Excel</span>
                 </a>
                 <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="btn-secondary" title="PDF डाउनलोड">
-                    <i class="fa-solid fa-file-pdf"></i> <span>PDF</span>
+                    <i class="fa-solid fa-file-pdf text-rose-600"></i> <span>PDF</span>
                 </a>
             </div>
         </div>
@@ -208,40 +213,40 @@
         <!-- Filter & Search Bar -->
         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="relative w-full sm:w-96">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4B6B57] text-xs"></i>
-                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="विभाग, स्थान, पत्रांक संख्या या विषय से खोजें..." class="w-full pl-9 pr-3.5 py-2 rounded-md border border-[#C7E6D1] text-xs text-[#052E16] placeholder-[#4B6B57] focus:outline-none focus:border-[#22C55E] bg-white">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="विभाग, स्थान, पत्रांक संख्या या विषय से खोजें..." class="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
             </div>
 
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span class="text-xs text-slate-500 font-semibold whitespace-nowrap"><i class="fa-solid fa-filter text-[#4B6B57]"></i> वित्तीय वर्ष:</span>
-                <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-1.5 rounded-md border border-[#C7E6D1] text-xs font-medium text-[#052E16] bg-white focus:outline-none focus:border-[#22C55E]">
+                <span class="text-xs text-slate-600 font-bold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> वित्तीय वर्ष:</span>
+                <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
                     <option value="">सभी वित्तीय वर्ष (All)</option>
                     {% for fy in letter_fys %}
                     <option value="{{ fy }}" {% if fy == next_letter_info.fy %}selected{% endif %}>FY {{ fy }}</option>
                     {% endfor %}
                 </select>
-                <span id="lettersCountBadge" class="text-xs px-2.5 py-1.5 rounded-md bg-white text-[#4B6B57] font-medium border border-[#C7E6D1] whitespace-nowrap">
+                <span id="lettersCountBadge" class="text-xs px-3 py-2 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-300 whitespace-nowrap">
                     कुल: {{ outgoing_letters|length }} पत्र
                 </span>
             </div>
         </div>
 
-        <!-- Table View -->
-        <div class="mt-4 overflow-x-auto border border-[#C7E6D1] rounded-lg">
+        <!-- Table View: Pure White Background, Sharp Lines, Slate 900 Text -->
+        <div class="mt-4 overflow-x-auto border border-slate-200 rounded-xl shadow-2xs">
             <table class="w-full text-left text-xs border-collapse" id="lettersTable">
                 <thead>
-                    <tr class="bg-[#166534] text-white uppercase text-[11px] tracking-wider font-medium">
-                        <th class="py-3 px-3 text-center w-14" data-i18n="col_sr">क्र.</th>
-                        <th class="py-3 px-3 text-center whitespace-nowrap" data-i18n="col_date">दिनांक</th>
-                        <th class="py-3 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">पत्रांक संख्या</th>
-                        <th class="py-3 px-3.5 min-w-[200px]" data-i18n="col_dept">विभाग</th>
-                        <th class="py-3 px-3 whitespace-nowrap" data-i18n="col_place">स्थान</th>
-                        <th class="py-3 px-4 min-w-[280px]" data-i18n="col_purpose">उद्देश्य</th>
-                        <th class="py-3 px-3 min-w-[160px]" data-i18n="col_remarks">रिमार्क्स</th>
-                        <th class="py-3 px-3 text-center w-20" data-i18n="col_action">कार्रवाई</th>
+                    <tr class="bg-[#166534] text-white uppercase text-[11px] tracking-wider font-bold">
+                        <th class="py-3.5 px-3 text-center w-14" data-i18n="col_sr">क्र.</th>
+                        <th class="py-3.5 px-3 text-center whitespace-nowrap" data-i18n="col_date">दिनांक</th>
+                        <th class="py-3.5 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">पत्रांक संख्या</th>
+                        <th class="py-3.5 px-3.5 min-w-[200px]" data-i18n="col_dept">विभाग</th>
+                        <th class="py-3.5 px-3 whitespace-nowrap" data-i18n="col_place">स्थान</th>
+                        <th class="py-3.5 px-4 min-w-[280px]" data-i18n="col_purpose">उद्देश्य</th>
+                        <th class="py-3.5 px-3 min-w-[160px]" data-i18n="col_remarks">रिमार्क्स</th>
+                        <th class="py-3.5 px-3 text-center w-20" data-i18n="col_action">कार्रवाई</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[#C7E6D1] text-[#052E16]" id="lettersTableBody">
+                <tbody class="divide-y divide-slate-200 text-slate-800 bg-white" id="lettersTableBody">
                     {% for letter in outgoing_letters %}
                     <tr class="hover:bg-slate-50 transition letter-row" data-fy="{{ letter.fy }}" data-search="{{ (letter.ref_no ~ ' ' ~ letter.department ~ ' ' ~ letter.place ~ ' ' ~ letter.purpose ~ ' ' ~ letter.remarks)|lower }}">
                         <td class="py-3 px-3 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
