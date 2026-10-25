@@ -41,45 +41,45 @@
     <!-- ======================================================== -->
     <!-- 3. 6 INFORMATION TILES: Pure White, Big Bold Numbers, High Contrast -->
     <!-- ======================================================== -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3.5">
         
         <!-- Tile 1: Project Sites -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_sites">साइट्स</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 साइट्स</div>
             <div class="text-xs text-emerald-700 font-bold mt-1" data-i18n="tile_sites_sub">● सभी चालू</div>
         </div>
 
         <!-- Tile 2: Manpower on Duty -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_workers">श्रमिक</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">दैनिक हाजिरी</div>
             <div class="text-xs text-indigo-700 font-bold mt-1" data-i18n="tile_workers_sub">साइट मैनपॉवर</div>
         </div>
 
         <!-- Tile 3: Usage Entries -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_logs">खपत</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">एंट्रीज</span></div>
             <div class="text-xs text-teal-700 font-bold mt-1" data-i18n="tile_logs_sub">कुल प्रविष्टियां</div>
         </div>
 
         <!-- Tile 4: Total Consumption Value -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_cost">लागत</div>
             <div class="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
             <div class="text-xs text-amber-700 font-bold mt-1" data-i18n="tile_cost_sub">कुल सामग्री खर्च</div>
         </div>
 
         <!-- Tile 5: Next Letter Reference Number -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_ref">पत्रांक</div>
             <div class="text-xl sm:text-2xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
             <div class="text-xs text-blue-700 font-bold mt-1"><span data-i18n="tile_ref_sub">वित्तीय वर्ष</span> {{ next_letter_info.fy }}</div>
         </div>
 
         <!-- Tile 6: Material Store Catalog -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-slate-400 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-slate-400 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_items">सामग्री</div>
             <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">आइटम्स</span></div>
             <div class="text-xs text-slate-500 font-bold mt-1" data-i18n="tile_items_sub">मास्टर कैटलॉग</div>
@@ -89,10 +89,10 @@
     <!-- ======================================================== -->
     <!-- 4. SEGREGATED CORE SEGMENTS: Pure White, Clear Icons, Solid Action Buttons -->
     <!-- ======================================================== -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-2">
         
         <!-- Segment 1: Attendance & HR Console -->
-        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
             <div>
                 <div class="w-11 h-11 rounded-lg icon-box-emerald flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-users"></i>
@@ -111,7 +111,7 @@
         </div>
 
         <!-- Segment 2: Material & Stock Register -->
-        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
             <div>
                 <div class="w-11 h-11 rounded-lg icon-box-teal flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-boxes-stacked"></i>
@@ -130,7 +130,7 @@
         </div>
 
         <!-- Segment 3: DPR & Site Photos -->
-        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-sky-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-sky-500 transition">
             <div>
                 <div class="w-11 h-11 rounded-lg icon-box-sky flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-trowel-bricks"></i>
@@ -149,7 +149,7 @@
         </div>
 
         <!-- Segment 4: Reports & Ledgers -->
-        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
+        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
             <div>
                 <div class="w-11 h-11 rounded-lg icon-box-indigo flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-chart-line"></i>

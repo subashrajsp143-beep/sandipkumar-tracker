@@ -393,7 +393,7 @@
                 
                 <!-- Left: Mobile Toggle + Operational Status Pill -->
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition" title="Menu">
+                    <button type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl text-white hover:bg-white/10 transition" title="Menu">
                         <i class="fa-solid fa-bars text-lg"></i>
                     </button>
 
@@ -442,7 +442,7 @@
             </header>
 
             <!-- SCROLLABLE CONTENT BODY (Off-White #F4F6F5) -->
-            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#F0FDF4] space-y-6">
+            <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 bg-[#F0FDF4] space-y-4 sm:space-y-6">
                 <!-- Flash Messages -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -539,54 +539,54 @@
     <!-- ========================================================================= -->
     <!-- NATIVE MOBILE STICKY BOTTOM NAVIGATION BAR (Android APK & Mobile Web)    -->
     <!-- ========================================================================= -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#166534] border-t border-[#C7E6D1] py-1.5 px-2 no-print">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#166534] border-t border-[#C7E6D1]/30 py-1.5 px-2 no-print shadow-lg">
         <div class="grid grid-cols-5 gap-1 text-center items-center">
             
             <!-- 1. होम / स्टॉक -->
             <a href="{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}{{ url_for('site_stock') }}{% else %}{{ url_for('dashboard') }}{% endif %}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/stock', '/dashboard', '/'] %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/stock', '/dashboard', '/'] %}text-white font-bold bg-white/15{% else %}text-[#E2F3E7] hover:text-white{% endif %} transition">
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <span class="text-[10px] tracking-tight">स्टॉक</span>
+                <span class="text-[11px] font-semibold tracking-tight">स्टॉक</span>
             </a>
 
             <!-- 2. दैनिक एंट्री -->
             <a href="{{ url_for('daily_entry') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/entry', '/daily-entry'] %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/entry', '/daily-entry'] %}text-white font-bold bg-white/15{% else %}text-[#E2F3E7] hover:text-white{% endif %} transition">
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-circle-plus"></i>
                 </div>
-                <span class="text-[10px] tracking-tight">एंट्री</span>
+                <span class="text-[11px] font-semibold tracking-tight">एंट्री</span>
             </a>
 
             <!-- 3. हाजिरी - Center Floating Button -->
             <a href="{{ url_for('attendance_view') }}" 
                class="flex flex-col items-center justify-center -mt-3.5 group transition">
-                <div class="w-11 h-11 rounded-lg bg-[#166534] text-white flex items-center justify-center text-lg border-2 border-[#22C55E]">
-                    <i class="fa-solid fa-clipboard-user text-[#22C55E]"></i>
+                <div class="w-12 h-12 rounded-xl bg-[#22C55E] text-[#052E16] flex items-center justify-center text-xl shadow-md border-2 border-white">
+                    <i class="fa-solid fa-clipboard-user text-white"></i>
                 </div>
-                <span class="text-[10px] font-medium text-white mt-0.5">हाजिरी</span>
+                <span class="text-[11px] font-bold text-white mt-0.5">हाजिरी</span>
             </a>
 
             <!-- 4. स्टोर (Material Store) -->
             <a href="{{ url_for('material_store') }}" 
-               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path == '/store' %}text-[#22C55E] font-medium bg-white/10{% else %}text-[#C7E6D1] hover:text-white{% endif %} transition">
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path == '/store' %}text-white font-bold bg-white/15{% else %}text-[#E2F3E7] hover:text-white{% endif %} transition">
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </div>
-                <span class="text-[10px] tracking-tight">स्टोर</span>
+                <span class="text-[11px] font-semibold tracking-tight">स्टोर</span>
             </a>
 
             <!-- 5. मेनू / Menu -->
             <button type="button" 
                     onclick="toggleMobileSidebar()" 
                     id="bottomNavSidebarBtn"
-                    class="flex flex-col items-center justify-center py-1 px-1 rounded-md text-[#C7E6D1] hover:text-white transition focus:outline-none">
-                <div class="w-5 h-5 flex items-center justify-center text-sm text-[#22C55E]">
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-md text-[#E2F3E7] hover:text-white transition focus:outline-none">
+                <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-bars"></i>
                 </div>
-                <span class="text-[10px] tracking-tight" data-i18n="seg_admin">मेनू</span>
+                <span class="text-[11px] font-semibold tracking-tight" data-i18n="seg_admin">मेनू</span>
             </button>
 
         </div>

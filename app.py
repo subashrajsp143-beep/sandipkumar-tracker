@@ -1419,11 +1419,11 @@ def app_version():
     """Returns the latest available Android APK version and release metadata."""
     return jsonify({
         "status": "ok",
-        "version_code": 6,
-        "version_name": "1.5.0",
+        "version_code": 7,
+        "version_name": "1.6.0",
         "apk_url": "https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk",
-        "changelog": "सुपरवाइज़र हाजिरी केंद्र: नया वर्कर तुरंत जोड़ें और लाइव फोटो हाजिरी दर्ज करें",
-        "release_date": "2026-10-21"
+        "changelog": "नया लोगो (JJM वाटर शील्ड) + अल्ट्रा-क्लीन सिंपल मोबाइल डैशबोर्ड और हाजिरी",
+        "release_date": "2026-10-25"
     })
 
 

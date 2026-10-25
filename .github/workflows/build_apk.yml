@@ -57,15 +57,18 @@ jobs:
             ### 📱 M/S Sandip Kumar - Jal Jeevan Mission Android App
             
             - **App Name:** M/S Sandip Kumar
-            - **Version:** 1.5.0 (Build 6) - Supervisor Photo Attendance & Quick Worker Hub
+            - **Version:** 1.6.0 (Build 7) - New JJM Official Logo + Ultra-Clean Fast Mobile Layout
             - **Covered Features:**
+              - New Official App Logo (JJM Water Shield + Golden Tap) across all Android launcher densities
+              - Ultra-Clean & Simple Mobile Dashboard with 2x3 compact KPI grid & high-contrast cards
+              - One-Tap Mobile Bottom Navigation Bar with elevated Attendance Punch button
+              - High-Visibility "Growth Green" Theme with 100% visible text & sharp contrast
               - Top-Level Supervisor Attendance Desk: Quick Add Worker + Live Photo Punch
               - 21 Sites Inventory & Live Stock Balance Register
               - 1 KM Ward Geo-Attendance & Real-Time Worker Pings
               - Silent Supervisor Background Location Tracking (Owner Only)
               - Live Photo Attendance with GPS & Timestamp Watermark
               - Offline & Slow Connection Auto-Retry Engine
-              - 100% Mobile Screen Fit & Anti-Zoom Fixes
             
             #### 📥 Download & Install:
             Click below to download `SandipKumarTracker.apk` and install it on any Android mobile phone.
