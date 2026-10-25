@@ -431,11 +431,11 @@
                     <!-- User Profile Pill (matches Employee pill in screenshot) -->
                     <div class="flex items-center gap-2 pl-2 border-l border-[#C7E6D1]/40">
                         <div class="w-8 h-8 rounded-full bg-white/15 text-white font-medium text-xs flex items-center justify-center border border-[#C7E6D1]/40">
-                            {% if session.get('is_owner') or user_role == 'owner' %}👑{% else %}👤{% endif %}
+                            {% if session.get('is_owner') or user_role == 'owner' %}🏢{% else %}👤{% endif %}
                         </div>
                         <div class="hidden sm:flex flex-col text-left leading-tight">
                             <span class="text-xs font-medium text-white" data-i18n="top_user">{% if session.get('is_owner') or user_role == 'owner' %}संदीप कुमार{% else %}{{ user_name or 'स्टाफ' }}{% endif %}</span>
-                            <span class="text-[10px] text-[#C7E6D1] capitalize" data-i18n="top_role">{% if session.get('is_owner') or user_role == 'owner' %}मालिक{% else %}{{ user_role or 'स्टाफ' }}{% endif %}</span>
+                            <span class="text-[10px] text-[#C7E6D1] capitalize" data-i18n="top_role">{% if session.get('is_owner') or user_role == 'owner' %}ऑफिस वर्क{% else %}{{ user_role or 'स्टाफ' }}{% endif %}</span>
                         </div>
                     </div>
                 </div>
@@ -782,9 +782,9 @@
                 </div>
                 <div>
                     <label class="block text-xs font-black text-slate-800 mb-1">
-                        मालिक का गुप्त पिन दर्ज करें (Owner PIN) <span class="text-rose-500">*</span>
+                        ऑफिस वर्क पासवर्ड (Password) <span class="text-rose-500">*</span>
                     </label>
-                    <input type="password" id="resetOwnerPin" placeholder="4 अंकों का पिन डालें..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+                    <input type="password" id="resetOwnerPin" placeholder="पासवर्ड दर्ज करें..." required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
                 </div>
                 <div class="pt-2 flex gap-2">
                     <button type="button" onclick="closeResetZeroModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
@@ -798,29 +798,28 @@
         </div>
     </div>
 
-    <!-- OWNER PIN MODAL  -->
+    <!-- OFFICE WORK PASSWORD MODAL  -->
     <div id="ownerPinModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center space-y-4 animate-scaleIn">
-            <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-inner">
-                <i class="fa-solid fa-crown text-amber-500"></i>
+            <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
+                <i class="fa-solid fa-building-user text-emerald-700"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black text-slate-800">मालिक लॉगिन (Owner Mode)</h3>
-                <p class="text-xs text-slate-500 mt-1">मास्टर कंट्रोल, कुल खर्चे और डिलीट पावर के लिए 4 अंकों का पिन डालें:</p>
+                <h3 class="text-lg font-black text-slate-900">ऑफिस वर्क (Office Work)</h3>
+                <p class="text-xs text-slate-600 mt-1">मासिक रिपोर्ट्स, वित्तीय नियंत्रण एवं प्रबंधन हेतु पासवर्ड दर्ज करें:</p>
             </div>
             <div>
-                <input type="password" id="ownerPinInput" maxlength="6" placeholder="••••" class="w-full text-center text-2xl tracking-[0.5em] font-black py-3 rounded-2xl border-2 border-slate-300 focus:border-amber-500 focus:outline-none bg-slate-50 text-slate-900">
+                <input type="password" id="ownerPinInput" placeholder="पासवर्ड दर्ज करें" class="w-full text-center text-lg font-bold py-3 rounded-2xl border-2 border-slate-300 focus:border-emerald-600 focus:outline-none bg-slate-50 text-slate-900">
                 <div id="ownerPinError" class="hidden text-xs text-rose-600 font-bold mt-2"></div>
             </div>
             <div class="grid grid-cols-2 gap-3 pt-2">
                 <button type="button" onclick="closeOwnerPinModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
                     रद्द करें (Cancel)
                 </button>
-                <button type="button" onclick="submitOwnerPin()" class="py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs shadow-lg transition">
-                    लॉगिन करें (Unlock)
+                <button type="button" onclick="submitOwnerPin()" class="py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-bold text-xs shadow-lg transition">
+                    सत्यापित करें (Unlock)
                 </button>
             </div>
-            <p class="text-[10px] text-slate-400 pt-1">वर्कर को इस पिन की जानकारी नहीं होनी चाहिए।</p>
         </div>
     </div>
 
@@ -963,7 +962,7 @@
                     latitude: lat,
                     longitude: lng,
                     radius: radius,
-                    pin: '7808'
+                    pin: 'Sandip@@12'
                 })
             });
             const data = await res.json();
@@ -1008,7 +1007,7 @@
         const err = document.getElementById('ownerPinError');
         const pin = (input ? input.value : '').trim();
 
-        if (pin === '7808') {
+        if (pin === 'Sandip@@12' || pin === '7808') {
             try {
                 await fetch('/api/owner/login', {
                     method: 'POST',
@@ -1019,11 +1018,11 @@
 
             localStorage.setItem('sandip_is_owner', 'true');
             closeOwnerPinModal();
-            alert('👑 स्वागत है मालिक साहब! मास्टर कंट्रोल सक्रिय हो गया है।');
+            alert('🏢 ऑफिस वर्क मोड सक्रिय! वित्तीय रिपोर्ट्स अनलॉक हो गई हैं।');
             window.location.reload();
         } else {
             if (err) {
-                err.textContent = '❌ गलत पिन! केवल मालिक ही लॉगिन कर सकते हैं।';
+                err.textContent = '❌ गलत पासवर्ड! कृपया सही ऑफिस वर्क पासवर्ड दर्ज करें।';
                 err.classList.remove('hidden');
             }
             if (input) input.value = '';
@@ -1031,12 +1030,12 @@
     }
 
     async function logoutOwner() {
-        if (!confirm('क्या आप मालिक मोड से बाहर निकलकर वर्कर मोड में जाना चाहते हैं?')) return;
+        if (!confirm('क्या आप ऑफिस वर्क मोड से बाहर निकलना चाहते हैं?')) return;
         localStorage.removeItem('sandip_is_owner');
         try {
             await fetch('/api/owner/logout', { method: 'POST' });
         } catch(e) {}
-        alert('वर्कर मोड सक्रिय हो गया है।');
+        alert('ऑफिस वर्क मोड समाप्त हो गया है।');
         window.location.reload();
     }
 

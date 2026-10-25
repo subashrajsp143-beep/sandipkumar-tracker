@@ -870,8 +870,8 @@ const AppTranslations = {
         "en": "Site Portal"
     },
     {
-        "hi": "मालिक लॉगिन",
-        "en": "Owner Login"
+        "hi": "ऑफिस वर्क",
+        "en": "Office Work"
     },
     {
         "hi": "लॉगआउट करें",
@@ -1070,8 +1070,8 @@ const AppTranslations = {
         "en": "Sl. No."
     },
     {
-        "hi": "👑 मालिक",
-        "en": "👑 Owner"
+        "hi": "🏢 ऑफिस वर्क",
+        "en": "🏢 Office Work"
     },
     {
         "hi": "उपस्थित",
@@ -1460,7 +1460,7 @@ const AppTranslations = {
             app_subtitle: "२१ साइट्स",
             top_status: "२१ साइट्स चालू",
             top_user: "संदीप कुमार",
-            top_role: "मालिक",
+            top_role: "ऑफिस वर्क",
             sign_out: "लॉगआउट",
 
             // Sidebar Segments & Sub-items
@@ -1574,7 +1574,7 @@ const AppTranslations = {
             app_subtitle: "21 Sites",
             top_status: "21 Sites Live",
             top_user: "Sandip Kumar",
-            top_role: "Owner",
+            top_role: "Office Work",
             sign_out: "Sign out",
 
             // Sidebar Segments & Sub-items

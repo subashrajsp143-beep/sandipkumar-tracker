@@ -578,7 +578,7 @@ def delete_entry(entry_id):
         # Security: Require Owner PIN (Default: 1234) to delete financial logs
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही एंट्री डिलीट कर सकते हैं।"}), 403
 
@@ -1487,7 +1487,7 @@ def live_status():
 
 
 # ==========================================
-# OWNER PIN (7808) AUTHENTICATION
+# OFFICE WORK (Sandip@@12) AUTHENTICATION
 # ==========================================
 @app.route("/api/owner/login", methods=["POST", "OPTIONS"])
 def owner_login_api():
@@ -1495,18 +1495,21 @@ def owner_login_api():
         return "", 200
     data = request.get_json(silent=True) or {}
     pin = str(data.get("pin", "")).strip()
-    if pin == "7808":
+    if pin in ["Sandip@@12", "7808"]:
         session.permanent = True
         session["is_owner"] = True
         session["role"] = "owner"
-        session["worker_name"] = "मालिक"
-        return jsonify({"success": True, "is_owner": True, "role": "owner", "message": "👑 मालिक मोड सक्रिय (Owner Mode Active)!"})
-    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही लॉगिन कर सकते हैं।"}), 401
+        session["worker_name"] = "संदीप कुमार"
+        return jsonify({"success": True, "is_owner": True, "role": "owner", "message": "🏢 ऑफिस वर्क मोड सक्रिय (Office Work Active)!"})
+    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पासवर्ड! कृपया सही ऑफिस वर्क पासवर्ड दर्ज करें।"}), 401
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
 def owner_logout_api():
     session["is_owner"] = False
-    return jsonify({"success": True, "is_owner": False, "message": "वर्कर मोड में वापस आ गए।"})
+    session.pop("role", None)
+    session.pop("worker_name", None)
+    session.clear()
+    return jsonify({"success": True, "is_owner": False, "message": "ऑफिस वर्क मोड समाप्त हो गया है।"})
 
 @app.route("/api/owner/status", methods=["GET"])
 def owner_status_api():
@@ -2036,7 +2039,7 @@ def save_stock_inward():
         # Require Owner PIN or logged-in Supervisor / Site Incharge
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_authorized = (session.get("is_owner", False) or 
-                         (pin and str(pin).strip() == "7808") or 
+                         (pin and str(pin).strip() in ["Sandip@@12", "7808"]) or 
                          session.get("role") in ["supervisor", "owner"])
         if not is_authorized:
             return jsonify({"success": False, "message": "❌ स्टॉक एंट्री (माल भेजना) केवल अधिकृत सुपरवाइज़र, साइट इनचार्ज या मालिक ही कर सकते हैं।"}), 403
@@ -2089,7 +2092,7 @@ def reset_stock_zero_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही स्टॉक को 0 (रीसेट) कर सकते हैं।"}), 403
 
@@ -2120,7 +2123,7 @@ def delete_stock_inward_api(entry_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() == "7808")
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही इनवर्ड एंट्री हटा सकते हैं।"}), 403
 
@@ -2536,7 +2539,7 @@ def add_worker_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808") or session.get("role") == "owner"
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"]) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
         is_sup = session.get("role") in ["supervisor", "site_incharge"] or (user_site_id and not is_owner)
 
@@ -2575,7 +2578,7 @@ def delete_worker_api(worker_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक ही worker हटा सकते हैं।"}), 403
         database.delete_worker(worker_id)
@@ -2592,7 +2595,7 @@ def reset_today_attendance_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही हाजिरी रीसेट कर सकते हैं।"}), 403
 
@@ -2615,7 +2618,7 @@ def reset_all_workers_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही सभी वर्कर रीसेट कर सकते हैं।"}), 403
 
@@ -2695,7 +2698,7 @@ def set_site_gps(site_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS सेट कर सकते हैं।"}), 403
@@ -2725,7 +2728,7 @@ def site_geo_points_api(site_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल जोड़ सकते हैं।"}), 403
@@ -2760,7 +2763,7 @@ def delete_site_geo_point_api(point_id):
         if not point:
             return jsonify({"success": False, "message": "GPS पॉइंट नहीं मिला।"}), 404
 
-        is_owner = session.get("is_owner", False) or (str(pin).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == int(point["site_id"]))
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल हटा सकते हैं।"}), 403
@@ -2800,7 +2803,7 @@ def site_active_wards_api(site_id):
         active_point_ids = str(data.get("active_point_ids", "")).strip() or "all"
         active_ward_names = str(data.get("active_ward_names", "")).strip()
 
-        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
             return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही सक्रिय वार्ड सेट कर सकते हैं।"}), 403
@@ -2876,7 +2879,7 @@ def dpr_api():
         if not site_id:
             return jsonify({"success": False, "message": "Site ID zaruri hai."}), 400
 
-        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() == "7808")
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
             return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही DPR भर सकते हैं।"}), 403
