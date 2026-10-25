@@ -32,13 +32,13 @@
         <!-- Action Buttons -->
         <div class="flex flex-wrap items-center gap-2.5 no-print">
             <!-- Upload New Photo -->
-            <a href="/site-photos/upload{% if selected_site_id %}?site_id={{ selected_site_id }}{% endif %}" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-md transition flex items-center gap-2">
+            <a href="/site-photos/upload{% if selected_site_id %}?site_id={{ selected_site_id }}{% endif %}" class="px-4 py-2.5 rounded-2xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-sm transition flex items-center gap-2 border border-[#166534]">
                 <i class="fa-solid fa-camera text-sm"></i> <span>+ नई फोटो लें</span>
             </a>
 
             <!-- 1-Click A4 PDF Album (4 Photos Per Sheet) -->
             <a href="/export/site-photos-pdf?site_id={{ selected_site_id or '' }}&month={{ selected_month or '' }}&category={{ selected_category or '' }}&date={{ selected_date or '' }}" 
-               class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-black shadow-md transition flex items-center gap-2"
+               class="px-4 py-2.5 rounded-2xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-sm transition flex items-center gap-2 border border-[#166534]"
                title="सरकारी 4-फोटो प्रति पेज A4 PDF एल्बम डाउनलोड करें">
                 <i class="fa-solid fa-file-pdf text-rose-200 text-sm"></i> 
                 <span>A4 एल्बम PDF (4 फोटो/पेज)</span>

@@ -6,8 +6,8 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <!-- Clean Sub-Navigation Toggle: Stock vs Store -->
-    <div class="flex items-center p-1.5 bg-slate-200/80 rounded-2xl gap-1 w-fit no-print">
-        <a href="{{ url_for('site_stock') }}" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-white text-teal-900 shadow-sm transition flex items-center gap-1.5">
+    <div class="flex items-center p-1.5 bg-white rounded-2xl gap-1 w-fit border border-[#E2E8F0] no-print">
+        <a href="{{ url_for('site_stock') }}" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black bg-[#166534] text-white shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-boxes-stacked text-teal-600"></i> <span>📦 साइट स्टॉक व बैलेंस (Live Stock)</span>
         </a>
         <a href="{{ url_for('material_store') }}" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-slate-900 hover:bg-white/60 transition flex items-center gap-1.5">
@@ -19,32 +19,32 @@
     </div>
 
     <!-- Top Breadcrumb & Header -->
-    <div class="bg-gradient-to-r from-teal-900 via-slate-900 to-blue-950 text-white rounded-2xl shadow-xl p-5 sm:p-6 border border-teal-700/40 relative overflow-hidden">
+    <div class="bg-[#166534] text-white rounded-2xl shadow-sm p-5 sm:p-6 border border-[#166534] relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <div class="flex items-center gap-2 text-teal-300 text-xs font-bold uppercase tracking-wider mb-1">
+                <div class="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-wider mb-1">
                     <i class="fa-solid fa-boxes-stacked"></i>
                     <span>Site Inventory & Stock Balance Register</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
                     📦 साइट स्टॉक और बैलेंस रजिस्टर
                 </h1>
-                <p class="text-teal-100/90 text-sm mt-1">
+                <p class="text-white/90 text-sm mt-1">
                     किस साइट पर कितना माल भेजा गया, रोज़ कितना खर्च हुआ और आज कितना बचा है (Live Balance)
                 </p>
             </div>
 
             <!-- Quick Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="openSendStockModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-sm shadow-lg shadow-emerald-900/40 transition flex items-center gap-2">
+                <button type="button" onclick="openSendStockModal()" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-sm shadow-sm transition flex items-center gap-2 border border-[#166534]">
                     <i class="fa-solid fa-plus-circle text-base"></i>
                     <span>साइट पर माल भेजें</span>
                 </button>
-                <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5" title="स्टॉक व खर्च को 0 (रीसेट) करें">
+                <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5" title="स्टॉक व खर्च को 0 (रीसेट) करें">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span data-i18n="stock_btn_reset">स्टॉक 0 करें</span>
                 </button>
-                <a href="{{ url_for('export_stock_excel', site_id=selected_site_id) }}" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md transition flex items-center gap-2">
+                <a href="{{ url_for('export_stock_excel', site_id=selected_site_id) }}" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-bold text-sm shadow-sm transition flex items-center gap-2 border border-[#166534]">
                     <i class="fa-solid fa-file-excel text-base"></i>
                     <span>Excel डाउनलोड</span>
                 </a>
@@ -277,7 +277,7 @@
                             {% endif %}
                         </td>
                         <td class="py-3.5 px-4 text-center">
-                            <button type="button" onclick="openLedgerModal({{ r.site_id }}, {{ r.material_id }}, '{{ r.site_name }}', '{{ r.material_name }}', '{{ r.material_unit }}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-teal-600 hover:text-white text-teal-800 text-xs font-black shadow-sm transition flex items-center gap-1.5 mx-auto">
+                            <button type="button" onclick="openLedgerModal({{ r.site_id }}, {{ r.material_id }}, '{{ r.site_name }}', '{{ r.material_name }}', '{{ r.material_unit }}')" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 mx-auto">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                 <span>तारीख-वार लेजर</span>
                             </button>

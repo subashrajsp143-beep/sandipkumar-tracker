@@ -1,96 +1,152 @@
 /* ==========================================================================
-   HIGH-VISIBILITY DESIGN SYSTEM — M/S SANDIP KUMAR (JAL JEEVAN MISSION)
-   "Aaisa colour jo dikhe" — 100% Crystal Clear, Ultra-High Contrast,
-   Bright Whitespace, Sharp Slate-900 Text, Crisp Borders, Zero Muddy Colors.
+   GROWTH GREEN PALETTE — M/S SANDIP KUMAR (JAL JEEVAN MISSION)
+   Defined as CSS variables in :root per strict design specification.
    ========================================================================== */
 
 :root {
-    /* ULTRA-HIGH VISIBILITY PALETTE */
-    --color-primary: #166534;        /* Header, sidebar, table headers */
-    --color-highlight: #16A34A;      /* Small accents, active indicators, live pulse */
-    --color-background: #F8FAFC;     /* Clean, bright, spacious screen background */
-    --color-card: #FFFFFF;           /* 100% Pure Crisp White Cards */
-    --color-text: #0F172A;           /* Deep Charcoal / Slate 900 — Maximum 18:1 Contrast */
-    --color-text-soft: #475569;      /* Clear Slate 600 Subtitles & Hints — 7:1 Contrast */
-    --color-border: #E2E8F0;         /* Sharp 1px Crisp Border */
-    --color-cta: #F97316;            /* Vibrant Orange Main CTA Button */
-    --color-cta-text: #FFFFFF;       /* Pure White Text on CTA */
-    --color-primary-text: #FFFFFF;   /* Pure White Text on Primary Green */
+    --primary: #166534;      /* sidebar, header, normal buttons */
+    --highlight: #22C55E;    /* active menu line, small accents */
+    --bg: #FFFFFF;           /* page background */
+    --card: #FFFFFF;         /* cards and form fields */
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-soft: #475569;    /* labels, hints, placeholders */
+    --on-primary: #FFFFFF;   /* text on green */
+    --action: #F97316;       /* the one main action button, with dark text #1C0A00 */
+    --action-text: #1C0A00;
+    --danger: #B91C1C;       /* delete only */
+    --on-danger: #FFFFFF;
 
-    /* Semantic Alerts */
+    /* Semantic status chips */
+    --status-success-bg: #ECFDF5;
+    --status-success-text: #065F46;
+    --status-success-border: #A7F3D0;
+    --status-warning-bg: #FFFBEB;
+    --status-warning-text: #92400E;
+    --status-warning-border: #FDE68A;
+    --status-danger-bg: #FEF2F2;
+    --status-danger-text: #991B1B;
+    --status-danger-border: #FECACA;
+
+    /* Backward compatibility mappings */
+    --color-primary: var(--primary);
+    --color-highlight: var(--highlight);
+    --color-background: var(--bg);
+    --color-card: var(--card);
+    --color-border: var(--border);
+    --color-text: var(--text);
+    --color-text-soft: var(--text-soft);
+    --color-primary-text: var(--on-primary);
+    --color-cta: var(--action);
+    --color-cta-text: var(--action-text);
     --color-success: #16A34A;
-    --color-error: #DC2626;
+    --color-error: var(--danger);
     --color-warning: #D97706;
 
-    /* Corner Radii (2 to 8px) */
     --radius-sm: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #052E16;
+        --card: #0A3A1E;
+        --text: #ECFDF3;
+        --text-soft: #9CC4AA;
+        --border: #14532D;
+        --action: #F97316;
+        --action-text: #1C0A00;
+        --primary: #166534;
+        --highlight: #4ADE80;
+        --on-primary: #FFFFFF;
+        --danger: #B91C1C;
+        --on-danger: #FFFFFF;
+
+        --status-success-bg: #064E3B;
+        --status-success-text: #A7F3D0;
+        --status-success-border: #047857;
+        --status-warning-bg: #78350F;
+        --status-warning-text: #FDE68A;
+        --status-warning-border: #B45309;
+        --status-danger-bg: #7F1D1D;
+        --status-danger-text: #FECACA;
+        --status-danger-border: #B91C1C;
+    }
+}
+
+[data-theme="dark"],
+.dark {
+    --bg: #052E16;
+    --card: #0A3A1E;
+    --text: #ECFDF3;
+    --text-soft: #9CC4AA;
+    --border: #14532D;
+    --action: #F97316;
+    --action-text: #1C0A00;
+    --primary: #166534;
+    --highlight: #4ADE80;
+    --on-primary: #FFFFFF;
+    --danger: #B91C1C;
+    --on-danger: #FFFFFF;
+
+    --status-success-bg: #064E3B;
+    --status-success-text: #A7F3D0;
+    --status-success-border: #047857;
+    --status-warning-bg: #78350F;
+    --status-warning-text: #FDE68A;
+    --status-warning-border: #B45309;
+    --status-danger-bg: #7F1D1D;
+    --status-danger-text: #FECACA;
+    --status-danger-border: #B91C1C;
 }
 
 /* ==========================================================================
    GLOBAL RESET & HIGH-CONTRAST READABILITY
    ========================================================================== */
 html, body {
-    background-color: var(--color-background) !important;
-    color: var(--color-text) !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 15px !important;
     line-height: 1.6 !important;
     -webkit-font-smoothing: antialiased;
 }
 
-/* Screen background overrides for all wrappers */
 main,
 .bg-screen,
 .bg-\[\#F0FDF4\],
 .bg-\[\#F4F6F5\],
 .bg-slate-50 {
-    background-color: var(--color-background) !important;
-    color: var(--color-text) !important;
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
 }
 
 /* ==========================================================================
-   CARDS & PANELS: Pure White, Sharp 1px Border, Subtle Crisp Elevation
+   CARDS & PANELS
    ========================================================================== */
 .card-theme,
-.bg-white,
-.rounded-3xl,
-.rounded-2xl,
-.rounded-xl {
-    border-radius: var(--radius-lg) !important;
-}
-
-.card-theme,
 .bg-white {
-    background-color: #FFFFFF !important;
-    border: 1px solid var(--color-border) !important;
-    color: var(--color-text) !important;
+    background-color: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 
-/* Ensure all headings and text inside cards are 100% visible */
 .card-theme h1, .card-theme h2, .card-theme h3, .card-theme h4,
 .bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4 {
-    color: var(--color-text) !important;
+    color: var(--text) !important;
 }
 
 /* ==========================================================================
-   TYPOGRAPHY: Crisp Slate 900 (#0F172A) & Clear Slate 600 (#475569)
+   TYPOGRAPHY
    ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    font-weight: 700 !important;
-    color: var(--color-text) !important;
+    color: var(--text) !important;
     letter-spacing: -0.015em !important;
 }
 
-h1 { font-size: 1.75rem !important; line-height: 1.3 !important; }
-h2 { font-size: 1.35rem !important; line-height: 1.35 !important; }
-h3 { font-size: 1.15rem !important; line-height: 1.4 !important; }
-h4 { font-size: 1rem !important; line-height: 1.4 !important; }
-
-/* Main text tokens */
 .text-main,
 .text-slate-900,
 .text-slate-800,
@@ -100,24 +156,32 @@ h4 { font-size: 1rem !important; line-height: 1.4 !important; }
 .text-blue-900,
 .text-\[\#052E16\],
 [class*="text-\[\#052E16\]"] {
-    color: var(--color-text) !important;
+    color: var(--text) !important;
 }
 
-/* Subtext & description tokens */
 p,
 .text-soft,
 .text-slate-500,
 .text-slate-400,
 .text-slate-600,
-.text-emerald-700,
-.text-emerald-800,
-.text-indigo-700,
-.text-teal-700,
-.text-amber-700,
-.text-blue-700,
 .text-\[\#4B6B57\],
 [class*="text-\[\#4B6B57\]"] {
-    color: var(--color-text-soft) !important;
+    color: var(--text-soft) !important;
+}
+
+/* Placeholders (at least 4.5:1 contrast, not near-white) */
+::placeholder {
+    color: var(--text-soft) !important;
+    opacity: 1 !important;
+}
+::-webkit-input-placeholder {
+    color: var(--text-soft) !important;
+}
+::-moz-placeholder {
+    color: var(--text-soft) !important;
+}
+:-ms-input-placeholder {
+    color: var(--text-soft) !important;
 }
 
 /* Borders */
@@ -130,173 +194,152 @@ p,
 .border-slate-700,
 .border-slate-800,
 .border-\[\#C7E6D1\] {
-    border-color: var(--color-border) !important;
+    border-color: var(--border) !important;
 }
 
 /* ==========================================================================
-   BUTTONS: High-Visibility Orange CTA & Clean White Secondary
+   BUTTONS
    ========================================================================== */
 
-/* 1. Main Action Button: Bold Orange (#F97316) with Crisp White Text */
+/* 1. Main Action Button: --action (#F97316) with dark text (#1C0A00) */
 .btn-cta,
-.btn-cta-primary {
-    background-color: var(--color-cta) !important;
-    color: var(--color-cta-text) !important;
-    padding: 12px 24px !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    line-height: 1.2 !important;
-    border-radius: var(--radius-md) !important;
-    border: none !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
+.btn-cta-primary,
+.btn-action,
+#saveAllBtn {
+    background-color: var(--action) !important;
+    background-image: none !important;
+    color: var(--action-text) !important;
+    border: 1px solid var(--action) !important;
     box-shadow: 0 1px 2px rgba(249, 115, 22, 0.25) !important;
-    transition: opacity 0.15s ease, transform 0.05s ease !important;
 }
 .btn-cta:hover,
-.btn-cta-primary:hover {
-    opacity: 0.95 !important;
-    transform: translateY(-1px) !important;
+.btn-cta-primary:hover,
+.btn-action:hover,
+#saveAllBtn:hover {
+    background-color: #EA580C !important;
+    color: var(--action-text) !important;
 }
 .btn-cta *,
-.btn-cta-primary * {
-    color: #FFFFFF !important;
+.btn-cta-primary *,
+.btn-action *,
+#saveAllBtn * {
+    color: var(--action-text) !important;
 }
 
-/* 2. Secondary Button: Crisp White Fill, Slate 900 Text, 1px Border */
+/* 2. Primary Button: --primary fill with --on-primary text */
+.btn-primary,
+.btn-primary-sm,
+#exportPdfBtn,
+#btnExportLettersPdf {
+    background-color: var(--primary) !important;
+    background-image: none !important;
+    color: var(--on-primary) !important;
+    border: 1px solid var(--primary) !important;
+    box-shadow: 0 1px 2px rgba(22, 101, 52, 0.2) !important;
+}
+.btn-primary:hover,
+.btn-primary-sm:hover,
+#exportPdfBtn:hover,
+#btnExportLettersPdf:hover {
+    background-color: #14532D !important;
+    color: var(--on-primary) !important;
+}
+.btn-primary *,
+.btn-primary-sm *,
+#exportPdfBtn *,
+#btnExportLettersPdf * {
+    color: var(--on-primary) !important;
+}
+
+/* 3. Secondary Button: White fill with --primary border and --primary text */
 .btn-secondary,
-.btn-secondary-outline {
-    background-color: #FFFFFF !important;
-    color: var(--color-text) !important;
-    border: 1.5px solid #CBD5E1 !important;
-    padding: 12px 24px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    line-height: 1.2 !important;
-    border-radius: var(--radius-md) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
+.btn-secondary-outline,
+.btn-secondary-sm {
+    background-color: var(--card) !important;
+    color: var(--primary) !important;
+    border: 1.5px solid var(--primary) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-    transition: all 0.15s ease !important;
 }
 .btn-secondary:hover,
-.btn-secondary-outline:hover {
+.btn-secondary-outline:hover,
+.btn-secondary-sm:hover {
     background-color: #F8FAFC !important;
-    border-color: #94A3B8 !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
 }
 .btn-secondary *,
-.btn-secondary-outline * {
-    color: var(--color-text) !important;
-}
-
-/* 3. Small Action Button (Cards & Tables) */
-.btn-secondary-sm {
-    background-color: #FFFFFF !important;
-    color: var(--color-text) !important;
-    border: 1px solid #CBD5E1 !important;
-    padding: 7px 14px !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius-sm) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-    transition: all 0.15s ease !important;
-}
-.btn-secondary-sm:hover {
-    border-color: var(--color-primary) !important;
-    background-color: #F1F5F9 !important;
-}
+.btn-secondary-outline *,
 .btn-secondary-sm * {
-    color: var(--color-text) !important;
+    color: var(--primary) !important;
 }
 
-/* Primary Green Small Action Button for Card Core Links */
-.btn-primary-sm {
-    background-color: var(--color-primary) !important;
-    color: #FFFFFF !important;
-    padding: 7px 14px !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius-sm) !important;
-    border: none !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    box-shadow: 0 1px 2px rgba(22, 101, 52, 0.2) !important;
-    transition: opacity 0.15s ease !important;
+/* 4. Danger Button: --danger (#B91C1C) for delete only */
+.btn-danger,
+.btn-delete,
+.owner-delete-btn {
+    background-color: var(--danger) !important;
+    background-image: none !important;
+    color: var(--on-danger) !important;
+    border: 1px solid var(--danger) !important;
 }
-.btn-primary-sm:hover {
-    opacity: 0.92 !important;
+.btn-danger *,
+.btn-delete *,
+.owner-delete-btn * {
+    color: var(--on-danger) !important;
 }
-.btn-primary-sm * {
-    color: #FFFFFF !important;
+.btn-danger:hover,
+.btn-delete:hover,
+.owner-delete-btn:hover {
+    background-color: #991B1B !important;
+    color: var(--on-danger) !important;
 }
 
 /* ==========================================================================
-   ICON BOXES & BADGES: Vibrant & Clearly Visible
+   STATUS CHIPS (keep their meaning, readable text)
    ========================================================================== */
-.icon-box-emerald {
-    background-color: #ECFDF5 !important;
-    border: 1px solid #A7F3D0 !important;
-    color: #047857 !important;
-}
-.icon-box-teal {
-    background-color: #F0FDFA !important;
-    border: 1px solid #99F6E4 !important;
-    color: #0F766E !important;
-}
-.icon-box-sky {
-    background-color: #F0F9FF !important;
-    border: 1px solid #BAE6FD !important;
-    color: #0369A1 !important;
-}
-.icon-box-indigo {
-    background-color: #EEF2FF !important;
-    border: 1px solid #C7D2FE !important;
-    color: #4338CA !important;
+.status-pill-success,
+.status-success,
+.bg-emerald-50,
+.bg-emerald-100 {
+    background-color: var(--status-success-bg) !important;
+    color: var(--status-success-text) !important;
+    border-color: var(--status-success-border) !important;
 }
 
-.status-pill-active {
-    background-color: #ECFDF5 !important;
-    color: #065F46 !important;
-    border: 1px solid #A7F3D0 !important;
-    font-weight: 700 !important;
-    font-size: 11.5px !important;
-    padding: 4px 12px !important;
-    border-radius: 9999px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
+.status-pill-warning,
+.status-warning,
+.bg-amber-50,
+.bg-amber-100 {
+    background-color: var(--status-warning-bg) !important;
+    color: var(--status-warning-text) !important;
+    border-color: var(--status-warning-border) !important;
+}
+
+.status-pill-danger,
+.status-danger,
+.bg-rose-50,
+.bg-rose-100,
+.bg-red-50,
+.bg-red-100 {
+    background-color: var(--status-danger-bg) !important;
+    color: var(--status-danger-text) !important;
+    border-color: var(--status-danger-border) !important;
 }
 
 /* ==========================================================================
-   PRIMARY GREEN SHELL (Header, Sidebar, Navigation Bar, Footer)
+   PRIMARY GREEN SHELL (Header, Sidebar, Navigation Bar)
    ========================================================================== */
 header,
 #appSidebar,
 nav.fixed.bottom-0 {
-    background-color: var(--color-primary) !important;
+    background-color: var(--primary) !important;
     border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-header * {
-    color: var(--color-primary-text) !important;
+header *,
+#appSidebar *,
+nav.fixed.bottom-0 * {
+    color: var(--on-primary) !important;
 }
 
 header button,
@@ -305,38 +348,30 @@ header a {
     border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Sidebar navigation */
 #appSidebar {
-    background-color: var(--color-primary) !important;
+    background-color: var(--primary) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 #appSidebar * {
     color: #F1F5F9 !important;
 }
-#appSidebar .sidebar-text,
-#appSidebar span {
-    color: #F1F5F9 !important;
-}
 #appSidebar i {
-    color: #86EFAC !important;
+    color: var(--highlight) !important;
 }
 
 .active-sidebar-pill {
     background-color: rgba(255, 255, 255, 0.18) !important;
-    color: #FFFFFF !important;
-    border-left: 3px solid #4ADE80 !important;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    border-left: 3px solid var(--highlight) !important;
 }
 .active-sidebar-pill * {
     color: #FFFFFF !important;
 }
 .active-sidebar-pill i {
-    color: #4ADE80 !important;
+    color: var(--highlight) !important;
 }
 
-/* Mobile Sticky Bottom Nav */
 nav.fixed.bottom-0 {
-    background-color: var(--color-primary) !important;
+    background-color: var(--primary) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 nav.fixed.bottom-0 a,
@@ -346,13 +381,12 @@ nav.fixed.bottom-0 button {
 nav.fixed.bottom-0 .w-11.h-11,
 nav.fixed.bottom-0 .w-12.h-12 {
     background: #0F5132 !important;
-    border: 2px solid #4ADE80 !important;
+    border: 2px solid var(--highlight) !important;
     color: #FFFFFF !important;
-    border-radius: var(--radius-md) !important;
 }
 
 /* ==========================================================================
-   TABLES & INPUTS: High-Contrast & Crisp Borders
+   TABLES & INPUTS
    ========================================================================== */
 table {
     border-collapse: collapse !important;
@@ -360,39 +394,31 @@ table {
 }
 table thead tr,
 table thead th {
-    background-color: var(--color-primary) !important;
-    color: #FFFFFF !important;
-    font-family: 'Inter', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 12px !important;
-    letter-spacing: 0.04em !important;
-    border-bottom: 1px solid #E2E8F0 !important;
+    background-color: var(--primary) !important;
+    color: var(--on-primary) !important;
+    border-bottom: 1px solid var(--border) !important;
     padding: 12px 14px !important;
 }
 table thead th * {
-    color: #FFFFFF !important;
+    color: var(--on-primary) !important;
 }
 table tbody td {
-    border-bottom: 1px solid #E2E8F0 !important;
-    color: var(--color-text) !important;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text) !important;
     padding: 12px 14px !important;
-    font-size: 13.5px !important;
-    background-color: #FFFFFF !important;
+    background-color: var(--card) !important;
 }
 table tbody tr:hover td {
     background-color: #F8FAFC !important;
 }
 
 input, select, textarea {
-    background-color: #FFFFFF !important;
-    color: var(--color-text) !important;
-    border: 1.5px solid #CBD5E1 !important;
-    border-radius: var(--radius-md) !important;
-    padding: 10px 14px !important;
-    font-size: 14px !important;
+    background-color: var(--card) !important;
+    color: var(--text) !important;
+    border: 1.5px solid var(--border) !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
 }
 input:focus, select:focus, textarea:focus {
-    border-color: var(--color-primary) !important;
-    outline: none !important;
+    border-color: var(--primary) !important;
+    outline-color: var(--primary) !important;
 }

@@ -6,61 +6,61 @@
 <div class="space-y-6">
 
     <!-- Reports Hub Unified Header -->
-    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-blue-800/40 no-print">
+    <div class="bg-[#166534] rounded-3xl p-6 sm:p-7 text-white shadow-sm border border-[#166534] no-print">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider mb-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/25 text-white text-xs font-bold uppercase tracking-wider mb-2">
                     <i class="fa-solid fa-chart-pie"></i> All-in-One Reports Center
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
                     📊 रिपोर्ट्स केंद्र (Reports Hub)
                 </h1>
-                <p class="text-blue-200/90 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+                <p class="text-white/90 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
                     दैनिक खर्च, पूरे महीने का कुल हिसाब, साइट-वार लेजर और मटेरियल खपत — सब कुछ एक ही जगह देखें।
                 </p>
             </div>
 
             <!-- Fast Action Pills for Quick Switching -->
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ url_for('attendance_view') }}" class="px-3.5 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                <a href="{{ url_for('attendance_view') }}" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 border border-white/20">
                     <i class="fa-solid fa-users-gear text-indigo-200"></i> <span>हाजिरी शीट</span>
                 </a>
-                <a href="{{ url_for('site_stock') }}" class="px-3.5 py-2 rounded-xl bg-teal-600/90 hover:bg-teal-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                <a href="{{ url_for('site_stock') }}" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 border border-white/20">
                     <i class="fa-solid fa-boxes-stacked text-teal-200"></i> <span>साइट स्टॉक</span>
                 </a>
             </div>
         </div>
 
         <!-- Clean Segmented Navigation Tab Bar -->
-        <div class="mt-6 pt-4 border-t border-blue-800/60 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+        <div class="mt-6 pt-4 border-t border-white/20 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
             <!-- 1. Daily Tab -->
-            <a href="{{ url_for('reports_hub', tab='daily') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'daily' %}bg-white text-blue-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
+            <a href="{{ url_for('reports_hub', tab='daily') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'daily' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-calendar-day {% if active_tab == 'daily' %}text-blue-600{% else %}text-blue-300{% endif %}"></i>
                 <span>📅 दैनिक रिपोर्ट (Daily)</span>
             </a>
 
             {% if is_owner %}
             <!-- 2. Monthly Tab -->
-            <a href="{{ url_for('reports_hub', tab='monthly') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'monthly' %}bg-white text-indigo-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
+            <a href="{{ url_for('reports_hub', tab='monthly') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'monthly' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-calendar-days {% if active_tab == 'monthly' %}text-indigo-600{% else %}text-indigo-300{% endif %}"></i>
                 <span>📆 मासिक रिपोर्ट (Monthly)</span>
             </a>
             {% endif %}
 
             <!-- 3. Site Wise Tab -->
-            <a href="{{ url_for('reports_hub', tab='site') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'site' %}bg-white text-teal-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
+            <a href="{{ url_for('reports_hub', tab='site') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'site' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-map-location-dot {% if active_tab == 'site' %}text-teal-600{% else %}text-teal-300{% endif %}"></i>
                 <span>🏗️ साइट-वार (Site Wise)</span>
             </a>
 
             <!-- 4. Material Wise Tab -->
-            <a href="{{ url_for('reports_hub', tab='material') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'material' %}bg-white text-amber-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
+            <a href="{{ url_for('reports_hub', tab='material') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'material' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-boxes-stacked {% if active_tab == 'material' %}text-amber-600{% else %}text-amber-300{% endif %}"></i>
                 <span>📦 मटेरियल-वार (Material)</span>
             </a>
 
             <!-- 5. Sites Matrix Tab -->
-            <a href="{{ url_for('reports_hub', tab='matrix') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'matrix' %}bg-white text-slate-950 shadow-lg font-black scale-105{% else %}bg-blue-950/70 hover:bg-blue-900 text-blue-200 hover:text-white border border-blue-800/40{% endif %}">
+            <a href="{{ url_for('reports_hub', tab='matrix') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'matrix' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-table-cells {% if active_tab == 'matrix' %}text-slate-700{% else %}text-slate-400{% endif %}"></i>
                 <span>📊 साइट्स मैट्रिक्स (Matrix)</span>
             </a>
