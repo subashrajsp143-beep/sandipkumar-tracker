@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=20.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=25.0">
     <style>
         html {
             overflow-x: hidden;
@@ -210,25 +210,11 @@
                         </span>
                         <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderDpr"></i>
                     </button>
-                    <div id="folderDpr" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/dpr', '/site-photos'] %}hidden{% endif %}">
-                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
+                    <div id="folderDpr" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path != '/dpr' %}hidden{% endif %}">
+                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] hover:bg-[#93C572]/20 transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-faucet-drip w-4 text-center text-sky-400"></i>
-                                <span class="sidebar-text" data-i18n="sub_dpr">DPR</span>
-                            </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
-                        </a>
-                        <a href="/site-photos" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/site-photos' %}active-sidebar-pill{% endif %}">
-                            <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-camera-retro w-4 text-center text-amber-300"></i>
-                                <span class="sidebar-text" data-i18n="sub_photos">फोटो</span>
-                            </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
-                        </a>
-                        <a href="/site-photos/upload" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
-                            <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-camera w-4 text-center text-teal-400"></i>
-                                <span class="sidebar-text" data-i18n="sub_upload">अपलोड</span>
+                                <i class="fa-solid fa-faucet-drip w-4 text-center text-[#93C572]"></i>
+                                <span class="sidebar-text">DPR</span>
                             </div>
                         </a>
                     </div>
@@ -552,7 +538,7 @@
                     <i class="fa-solid fa-house"></i>
                     {% endif %}
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight">{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}स्टॉक{% else %}होम{% endif %}</span>
+                <span class="text-[11px] font-semibold tracking-tight">{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}Stock{% else %}Home{% endif %}</span>
             </a>
 
             <!-- 2. दैनिक एंट्री -->
@@ -561,7 +547,7 @@
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-circle-plus"></i>
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight">एंट्री</span>
+                <span class="text-[11px] font-semibold tracking-tight">Entry</span>
             </a>
 
             <!-- 3. हाजिरी - Center Button (Same uniform size as other icons) -->
@@ -570,7 +556,7 @@
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-clipboard-user"></i>
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight">हाजिरी</span>
+                <span class="text-[11px] font-semibold tracking-tight">Attendance</span>
             </a>
 
             <!-- 4. स्टोर (Material Store) -->
@@ -579,7 +565,7 @@
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight">स्टोर</span>
+                <span class="text-[11px] font-semibold tracking-tight">Store</span>
             </a>
 
             <!-- 5. मेनू / Menu -->
@@ -590,7 +576,7 @@
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
                     <i class="fa-solid fa-bars"></i>
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight" data-i18n="seg_admin">मेनू</span>
+                <span class="text-[11px] font-semibold tracking-tight" data-i18n="seg_admin">Menu</span>
             </button>
 
         </div>

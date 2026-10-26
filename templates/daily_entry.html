@@ -11,14 +11,12 @@
             <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                 <i class="fa-solid fa-circle-plus"></i> Daily Consumption Voucher
             </div>
-            <h1 class="text-2xl font-extrabold text-slate-800">Roj Ka Material Use Entry (Daily Log)</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                Koun se site par kis din kya kya use hua, niche form bharein aur ek sath multiple materials save karein.
-            </p>
+            <h1 class="text-2xl font-extrabold text-[#14300A]">Daily Material Usage Entry</h1>
+
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ url_for('geo_attendance_admin') }}" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-violet-50 hover:bg-violet-100 text-violet-800 border border-violet-200 transition flex items-center gap-1.5">
-                <i class="fa-solid fa-map-location-dot text-violet-600"></i> <span>📍 आज का कार्य स्थल (1 KM GPS)</span>
+                <i class="fa-solid fa-map-location-dot text-violet-600"></i> <span>GPS Attendance (1 KM)</span>
             </a>
             <a href="{{ url_for('site_report') }}" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-2">
                 <i class="fa-solid fa-file-lines"></i> View Reports
@@ -26,29 +24,26 @@
         </div>
     </div>
 
-    <!-- AI Photo / Parchi Scanner Banner -->
-    <div class="bg-[#166534] rounded-2xl p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#166534]">
-        <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-xl shrink-0">
-                <i class="fa-solid fa-camera-retro"></i>
+    <!-- Paper Voucher Scanner / Quick Actions -->
+    <div class="bg-white rounded-2xl p-4 text-[#14300A] flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#93C572] shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#93C572] text-[#14300A] flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-camera"></i>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">AI Photo OCR Scanner</span>
-                </div>
-                <h2 class="text-base font-bold text-white mt-0.5">Haath Se Likhi Parchi / Paper Ki Photo Se Direct Entry</h2>
-                <p class="text-xs text-blue-200 mt-0.5">Kagaz par likhe samaan ki photo khinch kar upload karein, software apne aap saara item aur quantity padh kar table me bhar dega!</p>
+                <h2 class="text-sm font-bold text-[#14300A]">Scan Paper Voucher / Receipt</h2>
+                <p class="text-xs text-[#14300A]/70">Auto-detect items from voucher photo</p>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <a href="{{ url_for('material_store') }}" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-cart-shopping"></i> 🛒 Material Store (+ ADD)
+            <a href="{{ url_for('material_store') }}" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[#14300A] text-[#14300A] hover:bg-[#93C572]/20 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-cart-shopping"></i> Material Store
             </a>
-            <button type="button" id="openScannerBtn" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-file-arrow-up"></i> Photo Upload Karein
+            <button type="button" id="openScannerBtn" class="px-3.5 py-2 rounded-xl bg-[#93C572] text-[#14300A] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-file-arrow-up"></i> Upload Photo
             </button>
-            <button type="button" id="openTextPasteBtn" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm border border-white/20 transition flex items-center gap-1.5 cursor-pointer">
-                <i class="fa-brands fa-whatsapp text-emerald-400"></i> WhatsApp Text
+            <button type="button" id="openTextPasteBtn" class="px-3.5 py-2 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp Import
             </button>
         </div>
     </div>
@@ -67,12 +62,12 @@
                 {% if locked_site_id %}
                 <div class="w-full rounded-xl border border-teal-300 bg-teal-50 py-2.5 px-3 text-sm font-bold text-teal-900 shadow-sm flex items-center justify-between">
                     <span>{{ locked_site.code }} - {{ locked_site.name }}</span>
-                    <span class="text-[10px] text-teal-700 font-black">🔒 आपकी अधिकृत साइट</span>
+                    <span class="text-[10px] text-[#14300A]/70 font-bold">Assigned Site</span>
                 </div>
                 <input type="hidden" id="siteSelect" value="{{ locked_site_id }}" data-supervisor="{{ locked_site.supervisor or '' }}">
                 {% else %}
                 <select id="siteSelect" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
-                    <option value="">-- 21 Sites Me Se Chunein --</option>
+                    <option value="">-- Select Site --</option>
                     {% for site in sites %}
                     <option value="{{ site.id }}" data-supervisor="{{ site.supervisor or '' }}">
                         {{ site.code }} - {{ site.name }} {% if site.location %}({{ site.location }}){% endif %}
@@ -85,7 +80,7 @@
             <!-- Date Picker -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Tareekh (Date) <span class="text-rose-500">*</span>
+                    Date <span class="text-rose-500">*</span>
                 </label>
                 <input type="date" id="entryDate" value="{{ today }}" required class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
             </div>
@@ -101,61 +96,58 @@
             <!-- General Purpose / Work Detail -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Kaam Ka Vivaran (Work Task)
+                    Work Description
                 </label>
-                <input type="text" id="workPurpose" placeholder="e.g. Pipeline Laying, Motor Fit" class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
+                <input type="text" id="workPurpose" placeholder="e.g. Pipeline Laying, Motor Fitting" class="w-full rounded-xl border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 focus:border-blue-500 focus:ring-blue-500 shadow-sm border">
             </div>
 
         </div>
 
-        <!-- DPR Section: Jal Jeevan Mission Physical Progress -->
-        <div class="bg-gradient-to-r from-sky-50 via-indigo-50/50 to-slate-50 p-5 rounded-2xl border border-sky-200/80 shadow-xs space-y-3">
+        <!-- DPR Section: Daily Progress -->
+        <div class="p-4 rounded-xl border border-[#93C572] bg-white space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                    <span class="w-7 h-7 rounded-lg bg-[#93C572] text-[#14300A] flex items-center justify-center text-xs font-bold">
                         <i class="fa-solid fa-faucet-drip"></i>
                     </span>
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-black text-sky-950 uppercase tracking-wide">
-                            DPR (दैनिक कार्य प्रगति - Daily Progress)
-                        </h3>
-                        <p class="text-[11px] text-slate-500">आज कितनी पाइपलाइन बिछी और कितने घरों में नल लगा (वैकल्पिक / Optional)</p>
-                    </div>
+                    <h3 class="text-xs sm:text-sm font-bold text-[#14300A] uppercase tracking-wide">
+                        Daily Work Progress (DPR)
+                    </h3>
                 </div>
-                <a href="/dpr" target="_blank" class="text-xs font-bold text-sky-700 hover:text-sky-900 transition flex items-center gap-1">
-                    <span>पूरा DPR देखें</span> &rarr;
+                <a href="/dpr" target="_blank" class="text-xs font-bold text-[#14300A] hover:underline transition flex items-center gap-1">
+                    <span>View DPR</span> &rarr;
                 </a>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">वार्ड (Ward No.)</label>
-                    <input type="text" id="dprWardNo" placeholder="वार्ड 2" class="w-full py-2 px-3 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Ward No.</label>
+                    <input type="text" id="dprWardNo" placeholder="Ward 2" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-sky-900 uppercase mb-1">पाइपलाइन (मीटर)</label>
-                    <input type="number" step="0.1" id="dprPipeMeters" placeholder="0 m" class="w-full py-2 px-3 rounded-xl border border-sky-300 bg-white text-xs font-black text-sky-800 focus:ring-2 focus:ring-sky-500">
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Pipeline (Meters)</label>
+                    <input type="number" step="0.1" id="dprPipeMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-emerald-900 uppercase mb-1">नल कनेक्शन (FHTC)</label>
-                    <input type="number" id="dprFhtcCount" placeholder="0 घर" class="w-full py-2 px-3 rounded-xl border border-emerald-300 bg-white text-xs font-black text-emerald-800 focus:ring-2 focus:ring-emerald-500">
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Tap Connection (FHTC)</label>
+                    <input type="number" id="dprFhtcCount" placeholder="0 taps" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-amber-900 uppercase mb-1">बोरिंग (फीट)</label>
-                    <input type="number" step="0.1" id="dprBoringFeet" placeholder="0 ft" class="w-full py-2 px-3 rounded-xl border border-amber-300 bg-white text-xs font-black text-amber-800 focus:ring-2 focus:ring-amber-500">
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Boring (Feet)</label>
+                    <input type="number" step="0.1" id="dprBoringFeet" placeholder="0 ft" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-violet-900 uppercase mb-1">सड़क रिस्टोर (मीटर)</label>
-                    <input type="number" step="0.1" id="dprRoadMeters" placeholder="0 m" class="w-full py-2 px-3 rounded-xl border border-violet-300 bg-white text-xs font-black text-violet-800 focus:ring-2 focus:ring-violet-500">
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Road Restoration (M)</label>
+                    <input type="number" step="0.1" id="dprRoadMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">सिविल / पंप हाउस</label>
-                    <select id="dprCivilStage" class="w-full py-2 px-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
-                        <option value="पाइपलाइन कार्य">पाइपलाइन कार्य</option>
-                        <option value="बाउंड्री / प्लिंथ">बाउंड्री स्तर</option>
-                        <option value="स्लैब ढलाई">स्लैब ढलाई</option>
-                        <option value="मोटर फिटिंग">मोटर फिटिंग</option>
-                        <option value="सफल टेस्टिंग">सफल टेस्टिंग</option>
+                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Civil / Pump House</label>
+                    <select id="dprCivilStage" class="w-full py-1.5 px-2 rounded-lg border border-[#93C572] bg-white text-xs font-semibold text-[#14300A]">
+                        <option value="Pipeline Work">Pipeline Work</option>
+                        <option value="Boundary / Plinth">Boundary / Plinth</option>
+                        <option value="Slab Casting">Slab Casting</option>
+                        <option value="Motor Fitting">Motor Fitting</option>
+                        <option value="Testing & Commissioning">Testing & Commissioning</option>
                     </select>
                 </div>
             </div>
@@ -165,14 +157,13 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-packing text-blue-600"></i>
-                        Materials List (Koun sa saman kitna use hua)
+                    <h3 class="text-sm font-bold text-[#14300A] uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-[#93C572]"></i>
+                        Materials Used
                     </h3>
-                    <p class="text-xs text-slate-500">Ek hi voucher me jitne chahein utne materials add kar sakte hain</p>
                 </div>
-                <button type="button" id="addRowBtn" class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition flex items-center gap-1.5 border border-blue-200 cursor-pointer">
-                    <i class="fa-solid fa-plus"></i> + Naya Item Jodein
+                <button type="button" id="addRowBtn" class="px-3.5 py-2 rounded-xl bg-[#93C572] text-[#14300A] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plus"></i> + Add Item
                 </button>
             </div>
 
@@ -183,7 +174,7 @@
                         <tr>
                             <th class="py-3 px-2 w-10 text-center">#</th>
                             <th class="py-3 px-2 w-14 text-center">Photo</th>
-                            <th class="py-3 px-3 min-w-[260px]">Material Name (Chunein ya Type karein)</th>
+                            <th class="py-3 px-3 min-w-[260px]">Material Name</th>
                             <th class="py-3 px-3 w-24 text-center">Unit</th>
                             <th class="py-3 px-3 w-28 text-right">Quantity</th>
                             {% if is_owner %}
@@ -205,12 +196,12 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200">
             <div class="p-4 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center gap-6">
                 <div>
-                    <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Kul Items Count</span>
+                    <span class="text-[11px] font-semibold text-[#14300A]/70 uppercase tracking-wider block">Total Items</span>
                     <span id="totalItemsCount" class="text-lg font-bold text-blue-900">0</span>
                 </div>
                 {% if is_owner %}
                 <div class="border-l border-blue-200 pl-6">
-                    <span class="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">Grand Total Value</span>
+                    <span class="text-[11px] font-semibold text-[#14300A]/70 uppercase tracking-wider block">Grand Total</span>
                     <span id="grandTotalDisplay" class="text-xl font-extrabold text-blue-900">₹0.00</span>
                 </div>
                 {% endif %}
@@ -221,7 +212,7 @@
                     Reset
                 </button>
                 <button type="submit" id="saveBtn" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-floppy-disk"></i> Entry Save Karein
+                    <i class="fa-solid fa-floppy-disk"></i> Save Entry
                 </button>
             </div>
         </div>
@@ -230,7 +221,7 @@
 
 </div>
 
-<!-- MODAL 1: AI Photo / Parchi Scanner Modal -->
+<!-- MODAL 1: Paper Voucher Scanner Modal -->
 <div id="slipScannerModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 my-8 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -239,8 +230,8 @@
                     <i class="fa-solid fa-camera"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-slate-900">AI Parchi / Slip Scanner</h3>
-                    <p class="text-[11px] text-slate-500">Haath se likhe notebook / paper ki photo se automatic entry</p>
+                    <h3 class="text-base font-bold text-slate-900">Voucher OCR Scanner</h3>
+                    <p class="text-[11px] text-slate-500">Upload paper voucher photo to auto-detect items</p>
                 </div>
             </div>
             <button type="button" id="closeScannerBtn" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
@@ -252,7 +243,7 @@
         <div class="p-6 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 text-center space-y-3">
             <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500"></i>
             <div>
-                <p class="text-xs font-bold text-slate-700">Mobile se khinchi photo ya paper slip upload karein</p>
+                <p class="text-xs font-bold text-slate-700">Upload paper voucher or receipt photo</p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Supports: JPG, PNG, Mobile Camera Snapshots</p>
             </div>
             <input type="file" id="slipFileInput" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
@@ -264,7 +255,7 @@
                 <img id="imagePreview" src="" alt="Slip Preview" class="max-h-48 object-contain">
             </div>
             <button type="button" id="scanSlipActionBtn" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> Photo Scan Karein Aur Samaan Padhien
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Scan Photo & Extract Items
             </button>
         </div>
 
@@ -276,9 +267,9 @@
             <div class="flex items-center justify-between">
                 <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                    Parchi Me Se Yeh Materials Mile Hain:
+                    Extracted Materials:
                 </h4>
-                <span class="text-[10px] text-slate-400">Checkbox uncheck karke hata bhi sakte hain</span>
+                <span class="text-[10px] text-slate-400">Uncheck to exclude items</span>
             </div>
 
             <div id="scannedItemsList" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
@@ -288,7 +279,7 @@
                     Cancel
                 </button>
                 <button type="button" id="applyScannedBtn" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-check-double"></i> Table Me Add Karein (Apply)
+                    <i class="fa-solid fa-check-double"></i> Add to Table
                 </button>
             </div>
         </div>
@@ -301,7 +292,7 @@
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <div class="flex items-center gap-2">
                 <i class="fa-brands fa-whatsapp text-emerald-500 text-xl"></i>
-                <h3 class="text-base font-bold text-slate-900">WhatsApp Text Paste Karein</h3>
+                <h3 class="text-base font-bold text-slate-900">Import from WhatsApp Text</h3>
             </div>
             <button type="button" id="closeTextPasteBtn" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -309,14 +300,14 @@
         </div>
 
         <p class="text-xs text-slate-500">
-            Agar supervisor ne WhatsApp par samaan ki list likh kar bheji hai, to use yahan paste karein:
+            Paste the text list received from site supervisor:
         </p>
 
-        <textarea id="whatsappText" rows="6" placeholder="Jaise:&#10;HDPE PIPE 63MM 50 MTR&#10;SUBMERSIBLE MOTOR 5 HP 1 NOS&#10;TEFLON TAPE 5 PCS" class="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800 focus:border-blue-500"></textarea>
+        <textarea id="whatsappText" rows="6" placeholder="e.g.:&#10;HDPE PIPE 63MM 50 MTR&#10;SUBMERSIBLE MOTOR 5 HP 1 NOS&#10;TEFLON TAPE 5 PCS" class="w-full rounded-xl border border-slate-300 p-3 text-xs text-slate-800 focus:border-blue-500"></textarea>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
             <button type="button" id="cancelTextPasteBtn" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Cancel</button>
-            <button type="button" id="parseTextActionBtn" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold cursor-pointer">Items Detect Karein</button>
+            <button type="button" id="parseTextActionBtn" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold cursor-pointer">Extract Items</button>
         </div>
     </div>
 </div>
@@ -423,12 +414,12 @@ document.addEventListener('DOMContentLoaded', function() {
     scanSlipActionBtn.addEventListener('click', async function() {
         const file = slipFileInput.files[0];
         if (!file) {
-            alert("Kripya pehle parchi ya bill ki photo select karein!");
+            alert("Please select a voucher or bill photo first!");
             return;
         }
 
         scanStatus.classList.remove('hidden');
-        scanStatus.innerHTML = '<div class="flex items-center justify-center gap-2 text-blue-600 font-bold py-2"><i class="fa-solid fa-spinner fa-spin"></i> Native AI OCR se photo scan ho rahi hai... Kripya 2 second rukein...</div>';
+        scanStatus.innerHTML = '<div class="flex items-center justify-center gap-2 text-blue-600 font-bold py-2"><i class="fa-solid fa-spinner fa-spin"></i> Scanning photo with AI OCR... Please wait a moment...</div>';
         scanResultsContainer.classList.add('hidden');
 
         const formData = new FormData();
@@ -447,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderScannedItems(currentScannedItems);
                 scanResultsContainer.classList.remove('hidden');
             } else {
-                alert(data.message || "Photo se text detect nahi ho paya. Kripya saaf photo upload karein ya WhatsApp Text option use karein.");
+                alert(data.message || "Could not detect text from photo. Please upload a clearer photo or use WhatsApp Import.");
             }
         } catch (err) {
             scanStatus.classList.add('hidden');
@@ -497,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (toAdd.length === 0) {
-            alert("Kam se kam ek item select karein!");
+            alert("Please select at least one item!");
             return;
         }
 
@@ -547,11 +538,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="hidden" class="rate-input" value="0">
                 `}
                 <td class="py-2.5 px-3">
-                    <input type="text" placeholder="Remarks" value="Auto-scanned from parchi"
+                    <input type="text" placeholder="Remarks" value="Auto-scanned from voucher"
                         class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
                 </td>
                 <td class="py-2.5 px-2 text-center">
-                    <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Hatao">
+                    <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Delete">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </td>
@@ -585,14 +576,14 @@ document.addEventListener('DOMContentLoaded', function() {
         recalcRowNumbers();
         recalcGrandTotal();
         closeSlipScanner();
-        alert(`${toAdd.length} items photo se padhkar table me bhar diye gaye hain!`);
+        alert(`${toAdd.length} items extracted and added to table!`);
     });
 
     // WhatsApp Text Parse Handler
     parseTextActionBtn.addEventListener('click', async function() {
         const text = whatsappText.value.trim();
         if (!text) {
-            alert("Kripya text dalein!");
+            alert("Please enter text first!");
             return;
         }
 
@@ -610,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderScannedItems(currentScannedItems);
                 scanResultsContainer.classList.remove('hidden');
             } else {
-                alert("Text se koi matching material nahi mila. Kripya check karein.");
+                alert("No matching materials found in the text. Please check.");
             }
         } catch (e) {
             alert("Error: " + e);
@@ -638,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <img src="/uploads/materials/fittings.jpg" class="w-9 h-9 rounded-lg object-cover mx-auto border border-slate-200 row-mat-img shadow-xs" onerror="this.src='/uploads/materials/fittings.jpg'">
             </td>
             <td class="py-2.5 px-3">
-                <input type="text" list="materialsDataList" required placeholder="Material search karein..." 
+                <input type="text" list="materialsDataList" required placeholder="Search material..." 
                     class="w-full rounded-lg border-slate-300 py-1.5 px-2.5 text-xs text-slate-800 border focus:border-blue-500 focus:ring-blue-500 mat-input">
                 <input type="hidden" class="mat-id-input" value="">
             </td>
@@ -665,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     class="w-full rounded-lg border-slate-200 py-1.5 px-2 text-xs text-slate-600 border focus:border-blue-500 remarks-input">
             </td>
             <td class="py-2.5 px-2 text-center">
-                <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Hatao">
+                <button type="button" class="text-rose-400 hover:text-rose-600 p-1 delete-row-btn cursor-pointer" title="Delete">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </td>
@@ -757,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const purpose = document.getElementById('workPurpose').value.trim();
 
         if (!siteId) {
-            alert("Kripya Site select karein!");
+            alert("Please select a site!");
             siteSelect.focus();
             return;
         }
@@ -781,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (!actualMatId) {
-                alert(`"${matName}" material list me nahi mila. Kripya list se select karein.`);
+                alert(`"${matName}" not found in materials list. Please select from the dropdown.`);
                 return;
             }
 
@@ -794,7 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (items.length === 0) {
-            alert("Kam se kam ek valid material aur quantity add karein!");
+            alert("Please add at least one valid material with quantity!");
             return;
         }
 
@@ -825,10 +816,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
             queue.push(payload);
             localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
-            alert("🕒 OFFLINE SAVED (नेटवर्क नहीं है):
+            alert("OFFLINE SAVED:\n\nEntry saved locally on your device!\nIt will sync automatically to the server once connection is restored.");
 
-Entry आपके फोन में सुरक्षित सेव हो गई है!
-जैसे ही थोड़ा सा भी इंटरनेट मिलेगा, यह अपने आप मुख्य सर्वर पर सिंक हो जाएगी और बाकी 20-30 सुपरवाइजर्स को दिखने लगेगी।");
             window.location.href = `/reports/sites?site_id=${siteId}`;
             return;
         }
@@ -842,22 +831,20 @@ Entry आपके फोन में सुरक्षित सेव हो
 
             const result = await res.json();
             if (result.success) {
-                alert("Shaandaar! " + result.message);
+                alert("Success! " + result.message);
                 window.location.href = `/reports/sites?site_id=${siteId}`;
             } else {
                 alert("Error: " + result.message);
                 saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Entry Save Karein';
+                saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Entry';
             }
         } catch (err) {
             console.warn("Network fetch failed, saving to offline queue:", err);
             const queue = JSON.parse(localStorage.getItem('sandip_offline_queue') || '[]');
             queue.push(payload);
             localStorage.setItem('sandip_offline_queue', JSON.stringify(queue));
-            alert("🕒 OFFLINE SAVED (नेटवर्क कमजोर है):
+            alert("OFFLINE SAVED:\n\nEntry saved locally on your device!\nIt will sync automatically to the server once connection is restored.");
 
-Entry आपके फोन में सुरक्षित सेव हो गई है!
-इंटरनेट कनेक्ट होते ही यह अपने आप सर्वर पर सिंक हो जाएगी।");
             window.location.href = `/reports/sites?site_id=${siteId}`;
         }
     });
