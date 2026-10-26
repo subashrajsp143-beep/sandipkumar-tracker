@@ -216,25 +216,147 @@ aside * {
     color: var(--dark) !important;
 }
 
-/* Selected menu item: --pista */
-.active-sidebar-pill,
-.active-pill,
-#appSidebar a.active,
-#appSidebar .bg-white\/15,
-#appSidebar .bg-white\/10 {
-    background-color: var(--pista) !important;
-    color: var(--dark) !important;
-    border-left: 3px solid var(--dark) !important;
+/* ==========================================================================
+   LEFT SIDEBAR (STRICT 3-COLOUR SPECIFICATION)
+   1. Group buttons ATTENDANCE, MATERIAL, PROGRESS, LETTERS, REPORTS, MASTER:
+      Solid pista #93C572 background, same border, text & icon & arrow #14300A.
+   2. Hover & pressed state:
+      Background #7DB35A, text stays #14300A.
+   3. Dashboard item & sub-items:
+      White with #14300A text. Currently opened page's item gets pista #93C572 with #14300A text.
+   4. Language box at bottom:
+      Pista background #93C572, text #14300A. Sign out stays white with #14300A text.
+   5. Only 3 colours used: pista #93C572, dark green #14300A, and white (exception: #7DB35A).
+   6. Text on pista green must always be #14300A, never white.
+   ========================================================================== */
+
+#appSidebar,
+aside#appSidebar {
+    background-color: #FFFFFF !important;
+    border-right: 1px solid #93C572 !important;
 }
 
-.active-sidebar-pill *,
-.active-pill * {
-    color: var(--dark) !important;
+#appSidebar,
+#appSidebar * {
+    color: #14300A !important;
 }
 
-.active-sidebar-pill i,
-.active-pill i {
-    color: var(--dark) !important;
+/* 1. Group buttons ATTENDANCE, MATERIAL, PROGRESS, LETTERS, REPORTS, MASTER */
+#appSidebar .folder-toggle-btn,
+#appSidebar button.folder-toggle-btn {
+    background-color: #93C572 !important;
+    border: 1px solid #93C572 !important;
+    color: #14300A !important;
+}
+
+#appSidebar .folder-toggle-btn *,
+#appSidebar .folder-toggle-btn i,
+#appSidebar .folder-toggle-btn span,
+#appSidebar .folder-toggle-btn .fa-chevron-right,
+#appSidebar .folder-toggle-btn .fa-chevron-down {
+    color: #14300A !important;
+}
+
+/* 2. Hover and pressed state for group buttons */
+#appSidebar .folder-toggle-btn:hover,
+#appSidebar .folder-toggle-btn:active,
+#appSidebar .folder-toggle-btn:focus,
+#appSidebar button.folder-toggle-btn:hover,
+#appSidebar button.folder-toggle-btn:active,
+#appSidebar button.folder-toggle-btn:focus {
+    background-color: #7DB35A !important;
+    border-color: #7DB35A !important;
+    color: #14300A !important;
+}
+
+#appSidebar .folder-toggle-btn:hover *,
+#appSidebar .folder-toggle-btn:active *,
+#appSidebar .folder-toggle-btn:focus * {
+    color: #14300A !important;
+}
+
+/* 3. Dashboard item (top) and sub-items (Register, Excel, PDF) */
+#appSidebar .sidebar-nav-item,
+#appSidebar .sidebar-sub-item {
+    background-color: #FFFFFF !important;
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-nav-item *,
+#appSidebar .sidebar-sub-item * {
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-nav-item:hover,
+#appSidebar .sidebar-sub-item:hover {
+    background-color: rgba(147, 197, 114, 0.25) !important;
+    color: #14300A !important;
+}
+
+/* Currently opened page's item gets the pista background #93C572 */
+#appSidebar .active-sidebar-pill,
+#appSidebar .sidebar-nav-item.active-sidebar-pill,
+#appSidebar .sidebar-sub-item.active-sidebar-pill,
+#appSidebar a.active-sidebar-pill,
+#appSidebar .active-pill,
+#appSidebar a.active {
+    background-color: #93C572 !important;
+    color: #14300A !important;
+    border-left: 3px solid #14300A !important;
+    font-weight: 700 !important;
+}
+
+#appSidebar .active-sidebar-pill *,
+#appSidebar .sidebar-nav-item.active-sidebar-pill *,
+#appSidebar .sidebar-sub-item.active-sidebar-pill * {
+    color: #14300A !important;
+}
+
+#appSidebar .active-indicator {
+    background-color: #14300A !important;
+}
+
+/* 4. Language box at bottom: pista background #93C572, text #14300A */
+#appSidebar .sidebar-lang-box {
+    background-color: #93C572 !important;
+    border: 1px solid #93C572 !important;
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-lang-box * {
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-lang-pill-container {
+    background-color: rgba(20, 48, 10, 0.12) !important;
+    border: 1px solid rgba(20, 48, 10, 0.25) !important;
+}
+
+#appSidebar .sidebar-lang-btn.active,
+#appSidebar .sidebar-lang-btn-active {
+    background-color: #FFFFFF !important;
+    color: #14300A !important;
+    font-weight: 700 !important;
+}
+
+#appSidebar .sidebar-lang-btn {
+    color: #14300A !important;
+}
+
+/* Sign out stays white with #14300A text */
+#appSidebar .sidebar-signout-btn {
+    background-color: #FFFFFF !important;
+    border: 1px solid #93C572 !important;
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-signout-btn * {
+    color: #14300A !important;
+}
+
+#appSidebar .sidebar-signout-btn:hover {
+    background-color: rgba(147, 197, 114, 0.25) !important;
+    color: #14300A !important;
 }
 
 /* Mobile Sticky Bottom Navigation Bar */

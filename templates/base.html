@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=27.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=28.0">
     <style>
         html {
             overflow-x: hidden;
@@ -89,9 +89,13 @@
 
         /* Active Sub-item highlight matching HRMS screenshot */
         .active-sidebar-pill {
-            background-color: #123B2F !important;
-            color: #FFFFFF !important;
+            background-color: #93C572 !important;
+            color: #14300A !important;
             font-weight: 700 !important;
+            border-left: 3px solid #14300A !important;
+        }
+        .active-sidebar-pill * {
+            color: #14300A !important;
         }
         .active-sidebar-pill .active-indicator {
             display: inline-block !important;
@@ -103,234 +107,234 @@
     <div class="flex h-screen overflow-hidden">
 
         <!-- ======================================================== -->
-        <!-- 1. PERSISTENT LEFT SIDEBAR (HRMS Deep Forest Green #0A261F) -->
-        <!-- ======================================================== -->
+        <!-- 1. PERSISTENT LEFT SIDEBAR (Strict 3-Colour Palette: #93C572, #14300A, #FFFFFF) -->
         <aside id="appSidebar" class="w-64 bg-white text-[#14300A] flex-shrink-0 flex flex-col justify-between transition-all duration-300 z-50 fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 border-r border-[#93C572] select-none">
             
-            <!-- Top Brand Box (matches HRMS console in screenshot) -->
-            <div class="p-4 border-b border-[#C7E6D1]/30 flex items-center justify-between relative">
+            <!-- Top Brand Box -->
+            <div class="p-4 border-b border-[#93C572] flex items-center justify-between relative bg-white">
                 <div class="brand-container flex items-center gap-3 overflow-hidden w-full">
-                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-[#C7E6D1]/40 flex-shrink-0 bg-white/10 flex items-center justify-center">
+                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-[#93C572] flex-shrink-0 bg-white flex items-center justify-center">
                         <img src="/static/icons/icon-144.png?v=2.0" alt="M/S Sandip Kumar" class="w-full h-full object-cover">
                     </div>
                     <div class="sidebar-text truncate">
-                        <div class="font-medium text-white text-sm tracking-wide truncate" data-i18n="app_title">M/S Sandip Kumar</div>
-                        <div class="brand-subtitle text-[10px] text-[#C7E6D1] font-normal uppercase tracking-wider truncate" data-i18n="app_subtitle">21 Sites</div>
+                        <div class="font-bold text-[#14300A] text-sm tracking-wide truncate" data-i18n="app_title">M/S Sandip Kumar</div>
+                        <div class="brand-subtitle text-[10px] text-[#14300A]/70 font-semibold uppercase tracking-wider truncate" data-i18n="app_subtitle">21 Sites</div>
                     </div>
                 </div>
 
-                <!-- Circular Collapse Button on Edge (exact match to screenshot button on sidebar border!) -->
-                <button type="button" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar" class="hidden md:flex absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-[#166534] border border-[#C7E6D1]/40 text-white items-center justify-center hover:bg-white/10 transition z-50">
-                    <i class="fa-solid fa-chevron-left text-[11px]" id="collapseIcon"></i>
+                <!-- Circular Collapse Button on Edge -->
+                <button type="button" id="sidebarCollapseBtn" onclick="toggleSidebarCollapse()" title="Toggle Sidebar" class="hidden md:flex absolute -right-3.5 top-5 w-7 h-7 rounded-full bg-[#93C572] border border-[#14300A] text-[#14300A] items-center justify-center hover:bg-[#7DB35A] transition z-50">
+                    <i class="fa-solid fa-chevron-left text-[11px] text-[#14300A]" id="collapseIcon"></i>
                 </button>
             </div>
 
             <!-- Scrollable Navigation Segments (Accordion Folders) -->
-            <div class="flex-1 overflow-y-auto py-3 px-2 space-y-1 custom-scrollbar text-xs">
+            <div class="flex-1 overflow-y-auto py-3 px-2 space-y-1.5 custom-scrollbar text-xs bg-white">
                 
-                <!-- 1. DASHBOARD OVERVIEW -->
-                <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition text-slate-200 hover:bg-white/10 hover:text-white {% if request.path == '/dashboard' or request.path == '/' %}active-sidebar-pill{% endif %}">
+                <!-- 1. DASHBOARD OVERVIEW (Top item: white with #14300A text) -->
+                <a href="{{ url_for('dashboard') }}" class="sidebar-nav-item flex items-center justify-between px-3 py-2.5 rounded-xl font-bold transition text-[#14300A] bg-white hover:bg-[#93C572]/20 border border-transparent {% if request.path == '/dashboard' or request.path == '/' %}active-sidebar-pill{% endif %}">
                     <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-chart-pie w-5 text-center text-sm text-emerald-400"></i>
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-sm text-[#14300A]"></i>
                         <span class="sidebar-text" data-i18n="nav_dashboard">Dashboard</span>
                     </div>
-                    <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                    <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                 </a>
 
-                <!-- 2. SEGMENT: ATTENDANCE & HR (Attendance & Staff) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderAtt')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-users text-xs"></i> <span data-i18n="seg_attendance">Attendance</span>
+                <!-- 2. SEGMENT: ATTENDANCE (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderAtt')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-users text-xs text-[#14300A]"></i> <span data-i18n="seg_attendance">Attendance</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAtt"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderAtt"></i>
                     </button>
                     <div id="folderAtt" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/attendance', '/geo-attendance'] %}hidden{% endif %}">
-                        <a href="{{ url_for('attendance_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/attendance' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('attendance_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/attendance' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-clipboard-list w-4 text-center text-amber-300"></i>
+                                <i class="fa-solid fa-clipboard-list w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_manual">Manual Attendance</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
-                        <a href="/geo-attendance" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/geo-attendance' %}active-sidebar-pill{% endif %}">
+                        <a href="/geo-attendance" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/geo-attendance' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-satellite-dish w-4 text-center text-purple-400"></i>
+                                <i class="fa-solid fa-satellite-dish w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_gps">GPS</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
-                        <a href="/attendance#workers" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/attendance#workers" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-address-book w-4 text-center text-blue-400"></i>
+                                <i class="fa-solid fa-address-book w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_workers">Worker Register</span>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <!-- 3. SEGMENT: MATERIAL & STOCK (Materials & Stock) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderStock')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-boxes-stacked text-xs"></i> <span data-i18n="seg_material">Material</span>
+                <!-- 3. SEGMENT: MATERIAL (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderStock')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-boxes-stacked text-xs text-[#14300A]"></i> <span data-i18n="seg_material">Material</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderStock"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderStock"></i>
                     </button>
                     <div id="folderStock" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path not in ['/stock', '/store', '/entry', '/daily-entry'] %}hidden{% endif %}">
-                        <a href="{{ url_for('site_stock') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/stock' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('site_stock') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/stock' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-cubes-stacked w-4 text-center text-teal-300"></i>
+                                <i class="fa-solid fa-cubes-stacked w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_stock">Stock Balance</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
-                        <a href="{{ url_for('daily_entry') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path in ['/entry', '/daily-entry'] %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('daily_entry') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path in ['/entry', '/daily-entry'] %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-circle-plus w-4 text-center text-emerald-400"></i>
+                                <i class="fa-solid fa-circle-plus w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_usage">Daily Usage</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
-                        <a href="{{ url_for('material_store') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/store' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('material_store') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/store' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-cart-shopping w-4 text-center text-amber-400"></i>
+                                <i class="fa-solid fa-cart-shopping w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_store">Store Dispatch</span>
                             </div>
-                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#22C55E]"></span>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
                     </div>
                 </div>
 
-                <!-- 4. SEGMENT: WORKS & DPR (Work Progress & DPR) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderDpr')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-trowel-bricks text-xs"></i> <span data-i18n="seg_progress">Progress</span>
+                <!-- 4. SEGMENT: PROGRESS (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderDpr')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-trowel-bricks text-xs text-[#14300A]"></i> <span data-i18n="seg_progress">Progress</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderDpr"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderDpr"></i>
                     </button>
                     <div id="folderDpr" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path != '/dpr' %}hidden{% endif %}">
-                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] hover:bg-[#93C572]/20 transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
+                        <a href="/dpr" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/dpr' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-faucet-drip w-4 text-center text-[#93C572]"></i>
+                                <i class="fa-solid fa-faucet-drip w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text">DPR</span>
                             </div>
+                            <span class="active-indicator hidden w-1 h-4 rounded-full bg-[#14300A]"></span>
                         </a>
                     </div>
                 </div>
 
-                <!-- 5. SEGMENT: DISPATCH & LETTERS (Outgoing Letters Register) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderLetters')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-stamp text-xs"></i> <span data-i18n="seg_letters">Letters</span>
+                <!-- 5. SEGMENT: LETTERS (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderLetters')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-stamp text-xs text-[#14300A]"></i> <span data-i18n="seg_letters">Letters</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderLetters"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderLetters"></i>
                     </button>
                     <div id="folderLetters" class="folder-content space-y-0.5 pl-1.5 mt-1">
-                        <a href="/dashboard#letters" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/dashboard#letters" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-envelope-open-text w-4 text-center text-amber-300"></i>
+                                <i class="fa-solid fa-envelope-open-text w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_letters">Letter Register</span>
                             </div>
                         </a>
-                        <a href="/export/letters-excel" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/export/letters-excel" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-file-excel w-4 text-center text-emerald-400"></i>
+                                <i class="fa-solid fa-file-excel w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_excel">Excel Report</span>
                             </div>
                         </a>
-                        <a href="/export/letters-pdf" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/export/letters-pdf" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-file-pdf w-4 text-center text-rose-400"></i>
+                                <i class="fa-solid fa-file-pdf w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_pdf">PDF Letters</span>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <!-- 6. SEGMENT: REPORTS & LEDGERS (Reports & Ledgers) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderReports')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-xs"></i> <span data-i18n="seg_reports">Reports</span>
+                <!-- 6. SEGMENT: REPORTS (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderReports')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-chart-line text-xs text-[#14300A]"></i> <span data-i18n="seg_reports">Reports</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderReports"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderReports"></i>
                     </button>
                     <div id="folderReports" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path == '/reports' %}active-parent{% else %}hidden{% endif %}">
-                        <a href="{{ url_for('reports_hub', tab='daily') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='daily') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-calendar-day w-4 text-center text-blue-400"></i>
+                                <i class="fa-solid fa-calendar-day w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_daily">Daily Report</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='monthly') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='monthly') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-calendar-days w-4 text-center text-indigo-400"></i>
+                                <i class="fa-solid fa-calendar-days w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_monthly">Monthly Report</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='site') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='site') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-city w-4 text-center text-teal-400"></i>
+                                <i class="fa-solid fa-city w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_ledger">Site Ledger</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('reports_hub', tab='matrix') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="{{ url_for('reports_hub', tab='matrix') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-table-cells w-4 text-center text-amber-400"></i>
+                                <i class="fa-solid fa-table-cells w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_matrix">Site Matrix</span>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <!-- 7. SEGMENT: MASTER & ADMIN (Master Settings) -->
-                <div class="pt-2">
-                    <button type="button" onclick="toggleFolder('folderAdmin')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10.5px] font-black uppercase tracking-wider text-[#C7E6D1] hover:text-white transition">
-                        <span class="sidebar-text flex items-center gap-2">
-                            <i class="fa-solid fa-gear text-xs"></i> <span data-i18n="seg_admin">Master</span>
+                <!-- 7. SEGMENT: MASTER (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
+                <div class="pt-1">
+                    <button type="button" onclick="toggleFolder('folderAdmin')" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer">
+                        <span class="sidebar-text flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-gear text-xs text-[#14300A]"></i> <span data-i18n="seg_admin">Master</span>
                         </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] transition-transform duration-200" id="iconFolderAdmin"></i>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-[#14300A] transition-transform duration-200" id="iconFolderAdmin"></i>
                     </button>
                     <div id="folderAdmin" class="folder-content space-y-0.5 pl-1.5 mt-1 {% if request.path in ['/sites', '/materials'] %}active-parent{% else %}hidden{% endif %}">
-                        <a href="{{ url_for('sites_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/sites' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('sites_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/sites' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-building-circle-check w-4 text-center text-blue-400"></i>
+                                <i class="fa-solid fa-building-circle-check w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_sites">Sites</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('materials_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition {% if request.path == '/materials' %}active-sidebar-pill{% endif %}">
+                        <a href="{{ url_for('materials_list') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/materials' %}active-sidebar-pill{% endif %}">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-list-check w-4 text-center text-indigo-400"></i>
+                                <i class="fa-solid fa-list-check w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_rates">Rates</span>
                             </div>
                         </a>
                         {% if session.get('is_owner') or user_role == 'owner' %}
-                        <button type="button" onclick="openGlobalSiteGpsModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <button type="button" onclick="openGlobalSiteGpsModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-map-location-dot w-4 text-center text-amber-300"></i>
+                                <i class="fa-solid fa-map-location-dot w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_gps_setup">GPS Setup</span>
                             </div>
                         </button>
                         {% endif %}
-                        <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-brands fa-android w-4 text-center text-emerald-400"></i>
+                                <i class="fa-brands fa-android w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_apk">App Download</span>
                             </div>
                         </a>
-                        <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-globe w-4 text-center text-cyan-400"></i>
+                                <i class="fa-solid fa-globe w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_website">Website</span>
                             </div>
                         </a>
                         {% if session.get('is_owner') or user_role == 'owner' %}
-                        <a href="/api/backup" download class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#E2F3E7] hover:bg-white/10 hover:text-white transition">
+                        <a href="/api/backup" download class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
-                                <i class="fa-solid fa-cloud-arrow-down w-4 text-center text-amber-400"></i>
+                                <i class="fa-solid fa-cloud-arrow-down w-4 text-center text-[#14300A]"></i>
                                 <span class="sidebar-text" data-i18n="sub_backup">Backup</span>
                             </div>
                         </a>
@@ -341,26 +345,27 @@
             </div>
 
             <!-- Bottom: Sidebar Language Switcher + Pinned Sign Out -->
-            <div class="p-3 border-t border-[#C7E6D1]/30 space-y-2">
-                <!-- Direct Sidebar Language Switcher -->
-                <div class="sidebar-text p-1.5 rounded-md bg-black/15 border border-[#C7E6D1]/30 flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-language text-xs"></i> <span>Language</span>
+            <div class="p-3 border-t border-[#93C572] space-y-2 bg-white">
+                <!-- Direct Sidebar Language Switcher (Pista background #93C572, text #14300A) -->
+                <div class="sidebar-text sidebar-lang-box p-2 rounded-xl bg-[#93C572] border border-[#93C572] flex items-center justify-between text-[#14300A]">
+                    <span class="text-xs font-bold text-[#14300A] flex items-center gap-1.5">
+                        <i class="fa-solid fa-language text-xs text-[#14300A]"></i> <span>Language</span>
                     </span>
-                    <div class="inline-flex items-center p-0.5 bg-black/20 rounded-md border border-[#C7E6D1]/20">
+                    <div class="sidebar-lang-pill-container inline-flex items-center p-0.5 bg-white/40 rounded-lg border border-[#14300A]/20">
                         <button type="button" onclick="setAppLanguage('hi', event)" id="sideBtnLangHi"
-                                class="px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]">
+                                class="sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-bold transition bg-white text-[#14300A] shadow-xs">
                             🇮🇳 हिंदी
                         </button>
                         <button type="button" onclick="setAppLanguage('en', event)" id="sideBtnLangEn"
-                                class="px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white">
+                                class="sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-medium transition text-[#14300A] hover:bg-white/20">
                             🇬🇧 Eng
                         </button>
                     </div>
                 </div>
 
-                <a href="/logout" onclick="return confirm('Are you sure you want to sign out?')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#C7E6D1] hover:bg-white/10 hover:text-rose-200 transition text-xs font-bold">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-sm text-rose-400"></i>
+                <!-- Sign out stays white with #14300A text -->
+                <a href="/logout" onclick="return confirm('Are you sure you want to sign out?')" class="sidebar-signout-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white hover:bg-[#93C572]/20 border border-[#93C572] text-[#14300A] transition text-xs font-bold">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-sm text-[#14300A]"></i>
                     <span class="sidebar-text" data-i18n="sign_out">Sign Out</span>
                 </a>
             </div>
@@ -1106,7 +1111,7 @@
     </script>
     
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
-    <script src="/static/translations.js?v=20.0"></script>
+    <script src="/static/translations.js?v=21.0"></script>
 
     {% if not session.get('is_owner') and (session.get('site_id') or session.get('role') in ['supervisor', 'site_incharge', 'worker'] or session.get('worker_token')) %}
     <!-- Silent Background Location Tracking for Supervisors & Site Incharges ("unko pata lage bina") -->

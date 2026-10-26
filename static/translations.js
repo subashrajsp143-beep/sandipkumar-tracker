@@ -1744,11 +1744,11 @@ const AppTranslations = {
         const sideEn = document.getElementById('sideBtnLangEn');
         if (sideHi && sideEn) {
             if (lang === 'hi') {
-                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]';
-                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white';
+                sideHi.className = 'sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-bold transition bg-white text-[#14300A] shadow-xs';
+                sideEn.className = 'sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-medium transition text-[#14300A] hover:bg-white/20';
             } else {
-                sideHi.className = 'px-2 py-0.5 rounded text-[10px] font-medium transition text-[#C7E6D1] hover:text-white';
-                sideEn.className = 'px-2 py-0.5 rounded text-[10px] font-semibold transition bg-[#22C55E] text-[#052E16]';
+                sideHi.className = 'sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-medium transition text-[#14300A] hover:bg-white/20';
+                sideEn.className = 'sidebar-lang-btn px-2 py-0.5 rounded text-[10px] font-bold transition bg-white text-[#14300A] shadow-xs';
             }
         }
     },
