@@ -4,27 +4,27 @@ Seed data for 19 Sites and all materials extracted from the user's sheets.
 """
 
 INITIAL_SITES = [
-    {"code": "SITE-01", "name": "Mairwa", "location": "Mairwa", "supervisor": "Amresh kumar", "contact": "7006861251"},
-    {"code": "SITE-02", "name": "Hasanpura", "location": "Hasanpura", "supervisor": "Pradeep kumar", "contact": "8235914916"},
-    {"code": "SITE-03", "name": "Madhubani", "location": "Madhubani", "supervisor": "Satyajit jha", "contact": "8789437567"},
-    {"code": "SITE-04", "name": "Siwan", "location": "Siwan", "supervisor": "Azad Hussain", "contact": "6002074305"},
-    {"code": "SITE-05", "name": "Jhanjharpur", "location": "Jhanjharpur", "supervisor": "Pawan kumar", "contact": "6205433166"},
-    {"code": "SITE-06", "name": "Barhariya", "location": "Barhariya", "supervisor": "Aditya kumar", "contact": "8709995412"},
-    {"code": "SITE-07", "name": "Ekma", "location": "Ekma", "supervisor": "Devsaran kumar", "contact": "8882145857"},
-    {"code": "SITE-08", "name": "Singhiya", "location": "Singhiya", "supervisor": "Vikash kumar", "contact": "7979903651"},
-    {"code": "SITE-09", "name": "Andar", "location": "Andar", "supervisor": "Sonu Kumar", "contact": "9123265466"},
-    {"code": "SITE-10", "name": "Sahebganj", "location": "Sahebganj", "supervisor": "Sanjeev kumar", "contact": "8579939794"},
-    {"code": "SITE-11", "name": "Maharajganj", "location": "Maharajganj", "supervisor": "Satyam Kumar", "contact": "6289419893"},
-    {"code": "SITE-12", "name": "Mirganj", "location": "Mirganj", "supervisor": "Chandraprakash pandey", "contact": "7033998700"},
-    {"code": "SITE-13", "name": "Guthani", "location": "Guthani", "supervisor": "Ramchandra ram", "contact": "9608074915"},
-    {"code": "SITE-14", "name": "Sonpur", "location": "Sonpur", "supervisor": "Raju kumar", "contact": "9341881571"},
-    {"code": "SITE-15", "name": "Darbhanga", "location": "Darbhanga", "supervisor": "Taj hussain", "contact": "8539998913"},
-    {"code": "SITE-16", "name": "Naubathpur", "location": "Naubathpur", "supervisor": "Amit kumar", "contact": "7250894194"},
-    {"code": "SITE-17", "name": "Basantpur", "location": "Basantpur", "supervisor": "Abhisekh kumar", "contact": "8002505036"},
-    {"code": "SITE-18", "name": "Chhapra", "location": "Chhapra", "supervisor": "Kundan kumar", "contact": "7371819939"},
-    {"code": "SITE-19", "name": "Sheohar", "location": "Sheohar", "supervisor": "Amit kumar", "contact": "9102853181"},
-    {"code": "SITE-20", "name": "Kati", "location": "Kati", "supervisor": "", "contact": ""},
-    {"code": "SITE-21", "name": "Parsa", "location": "Parsa", "supervisor": "", "contact": ""}
+    {"code": "SITE-01", "name": "Mairwa", "location": "Mairwa", "supervisor": "Amresh kumar", "contact": "7006861251", "latitude": 26.2346, "longitude": 84.1578, "geo_radius": 1000},
+    {"code": "SITE-02", "name": "Hasanpura", "location": "Hasanpura", "supervisor": "Pradeep kumar", "contact": "8235914916", "latitude": 26.0825, "longitude": 84.3468, "geo_radius": 1000},
+    {"code": "SITE-03", "name": "Madhubani", "location": "Madhubani", "supervisor": "Satyajit jha", "contact": "8789437567", "latitude": 26.3547, "longitude": 86.0717, "geo_radius": 1000},
+    {"code": "SITE-04", "name": "Siwan", "location": "Siwan", "supervisor": "Azad Hussain", "contact": "6002074305", "latitude": 26.2196, "longitude": 84.3567, "geo_radius": 1000},
+    {"code": "SITE-05", "name": "Jhanjharpur", "location": "Jhanjharpur", "supervisor": "Pawan kumar", "contact": "6205433166", "latitude": 26.2625, "longitude": 86.2828, "geo_radius": 1000},
+    {"code": "SITE-06", "name": "Barhariya", "location": "Barhariya", "supervisor": "Aditya kumar", "contact": "8709995412", "latitude": 26.2974, "longitude": 84.4533, "geo_radius": 1000},
+    {"code": "SITE-07", "name": "Ekma", "location": "Ekma", "supervisor": "Devsaran kumar", "contact": "8882145857", "latitude": 25.9615, "longitude": 84.5512, "geo_radius": 1000},
+    {"code": "SITE-08", "name": "Singhiya", "location": "Singhiya", "supervisor": "Vikash kumar", "contact": "7979903651", "latitude": 25.8647, "longitude": 85.9863, "geo_radius": 1000},
+    {"code": "SITE-09", "name": "Andar", "location": "Andar", "supervisor": "Sonu Kumar", "contact": "9123265466", "latitude": 26.0717, "longitude": 84.2628, "geo_radius": 1000},
+    {"code": "SITE-10", "name": "Sahebganj", "location": "Sahebganj", "supervisor": "Sanjeev kumar", "contact": "8579939794", "latitude": 26.2628, "longitude": 85.0315, "geo_radius": 1000},
+    {"code": "SITE-11", "name": "Maharajganj", "location": "Maharajganj", "supervisor": "Satyam Kumar", "contact": "6289419893", "latitude": 26.1118, "longitude": 84.5029, "geo_radius": 1000},
+    {"code": "SITE-12", "name": "Mirganj", "location": "Mirganj", "supervisor": "Chandraprakash pandey", "contact": "7033998700", "latitude": 26.4258, "longitude": 84.3382, "geo_radius": 1000},
+    {"code": "SITE-13", "name": "Guthani", "location": "Guthani", "supervisor": "Ramchandra ram", "contact": "9608074915", "latitude": 26.1843, "longitude": 84.0722, "geo_radius": 1000},
+    {"code": "SITE-14", "name": "Sonpur", "location": "Sonpur", "supervisor": "Raju kumar", "contact": "9341881571", "latitude": 25.6989, "longitude": 85.1852, "geo_radius": 1000},
+    {"code": "SITE-15", "name": "Darbhanga", "location": "Darbhanga", "supervisor": "Taj hussain", "contact": "8539998913", "latitude": 26.1542, "longitude": 85.8918, "geo_radius": 1000},
+    {"code": "SITE-16", "name": "Naubathpur", "location": "Naubathpur", "supervisor": "Amit kumar", "contact": "7250894194", "latitude": 25.5417, "longitude": 84.9782, "geo_radius": 1000},
+    {"code": "SITE-17", "name": "Basantpur", "location": "Basantpur", "supervisor": "Abhisekh kumar", "contact": "8002505036", "latitude": 26.2736, "longitude": 84.7012, "geo_radius": 1000},
+    {"code": "SITE-18", "name": "Chhapra", "location": "Chhapra", "supervisor": "Kundan kumar", "contact": "7371819939", "latitude": 25.7811, "longitude": 84.7466, "geo_radius": 1000},
+    {"code": "SITE-19", "name": "Sheohar", "location": "Sheohar", "supervisor": "Amit kumar", "contact": "9102853181", "latitude": 26.5168, "longitude": 85.2973, "geo_radius": 1000},
+    {"code": "SITE-20", "name": "Kati", "location": "Kati", "supervisor": "", "contact": "", "latitude": 26.1972, "longitude": 85.2981, "geo_radius": 1000},
+    {"code": "SITE-21", "name": "Parsa", "location": "Parsa", "supervisor": "", "contact": "", "latitude": 25.8942, "longitude": 85.0381, "geo_radius": 1000}
 ]
 
 # Raw parsed materials from all sheet pages uploaded by the user

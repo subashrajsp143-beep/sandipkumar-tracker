@@ -141,9 +141,9 @@ def init_db():
     if cursor.fetchone()[0] == 0:
         for s in INITIAL_SITES:
             cursor.execute("""
-                INSERT INTO sites (code, name, location, supervisor, contact)
-                VALUES (?, ?, ?, ?, ?)
-            """, (s["code"], s["name"], s["location"], s["supervisor"], s["contact"]))
+                INSERT INTO sites (code, name, location, supervisor, contact, latitude, longitude, geo_radius)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (s["code"], s["name"], s["location"], s["supervisor"], s["contact"], s.get("latitude"), s.get("longitude"), s.get("geo_radius", 1000)))
 
     # Seed Materials if not present
     cursor.execute("SELECT COUNT(*) FROM materials")

@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=28.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=29.0">
     <style>
         html {
             overflow-x: hidden;
@@ -818,80 +818,91 @@
         </div>
     </div>
 
-    <!-- UNIVERSAL SITE GPS MODAL (Owner Mode GPS Setup) -->
-    {% if session.get('is_owner') or user_role == 'owner' %}
-    <div id="globalSiteGpsModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-9 h-9 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-lg font-bold">
+    <!-- UNIVERSAL SITE GPS MODAL (Office Work GPS Setup & Edit) -->
+    <div id="globalSiteGpsModal" class="hidden fixed inset-0 bg-[#14300A]/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 no-print" onclick="if(event.target===this) closeGlobalSiteGpsModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border-2 border-[#93C572] text-[#14300A] animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-3 border-b border-[#93C572]/30 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#93C572] text-[#14300A] flex items-center justify-center text-lg font-bold shadow-xs">
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
                     <div>
-                        <h3 class="font-black text-slate-900 text-base">Set Site GPS Location</h3>
-                        <p class="text-[11px] text-slate-500">500M Automatic Attendance Geofence</p>
+                        <h3 class="font-black text-[#14300A] text-base">Office GPS Setup & Location Edit</h3>
+                        <p class="text-[10px] text-[#14300A]/70 font-semibold uppercase tracking-wider">Set Exact Google Maps Coordinates & Geofence</p>
                     </div>
                 </div>
-                <button onclick="closeGlobalSiteGpsModal()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="closeGlobalSiteGpsModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-[#93C572]/20 text-[#14300A] text-lg font-bold flex items-center justify-center cursor-pointer transition">&times;</button>
             </div>
 
             <form id="globalGpsForm" onsubmit="submitGlobalSiteGps(event)" class="space-y-3.5">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Select Project Site *</label>
-                    <select id="globalGpsSiteSelect" required onchange="populateGlobalGpsFields(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-violet-500">
-                        <option value="">-- Select Site --</option>
+                    <label class="block text-xs font-bold text-[#14300A] mb-1">Select Project Site *</label>
+                    <select id="globalGpsSiteSelect" required onchange="populateGlobalGpsFields(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border border-[#93C572] text-xs sm:text-sm font-semibold bg-white text-[#14300A] focus:outline-none">
+                        <option value="">-- Select Project Site --</option>
                         {% for s in all_sites_list %}
-                        <option value="{{ s.id }}" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}" data-radius="{{ s.geo_radius or 500 }}">
-                            {{ s.name }} ({{ s.code }}) {% if s.latitude %}📍 Set{% endif %}
+                        <option value="{{ s.id }}" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}" data-radius="{{ s.geo_radius or 1000 }}" data-name="{{ s.name }}">
+                            {{ s.code }} — {{ s.name }} {% if s.latitude %}📍 ({{ s.latitude|round(3) }}, {{ s.longitude|round(3) }}){% endif %}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="bg-violet-50 p-3 rounded-2xl border border-violet-200">
-                    <button type="button" onclick="getGlobalDeviceLocation()" class="w-full py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-crosshairs"></i>
-                        <span>📍 Use Current Phone Location (Use My GPS)</span>
-                    </button>
-                    <div class="text-[11px] text-violet-800 text-center mt-1.5">Click this button while on site to automatically populate coordinates.</div>
+                <!-- Google Maps Quick Paste Helper -->
+                <div class="bg-[#93C572]/15 p-3 rounded-2xl border border-[#93C572]/40 space-y-1.5">
+                    <label class="block text-[11px] font-bold text-[#14300A] flex items-center justify-between">
+                        <span><i class="fa-solid fa-paste"></i> Quick Paste from Google Maps</span>
+                        <a id="globalGpsMapLink" href="https://www.google.com/maps" target="_blank" class="text-[11px] font-bold text-[#14300A] underline hover:opacity-80 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Google Maps ↗
+                        </a>
+                    </label>
+                    <input type="text" id="globalGpsQuickPaste" oninput="parseGpsInput(this.value)" 
+                           placeholder="Paste coordinates e.g. 26.2346, 84.1578 or maps link"
+                           class="w-full px-3 py-2 rounded-xl border border-[#93C572] text-xs bg-white text-[#14300A] placeholder-[#14300A]/50">
+                    <div class="text-[10px] text-[#14300A]/70">Tip: Google Maps par kisi bhi jagah right-click karke coordinates copy karein aur yahan paste karein.</div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Latitude *</label>
-                        <input type="number" step="any" id="globalGpsLatitude" required placeholder="e.g. 26.2196" 
-                                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-violet-500">
+                        <label class="block text-xs font-bold text-[#14300A] mb-1">Latitude *</label>
+                        <input type="number" step="any" id="globalGpsLatitude" required placeholder="e.g. 26.2346" oninput="updateGpsMapPreview()"
+                               class="w-full px-3 py-2 rounded-xl border border-[#93C572] text-xs font-semibold bg-white text-[#14300A]">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Longitude *</label>
-                        <input type="number" step="any" id="globalGpsLongitude" required placeholder="e.g. 84.3567" 
-                                class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-violet-500">
+                        <label class="block text-xs font-bold text-[#14300A] mb-1">Longitude *</label>
+                        <input type="number" step="any" id="globalGpsLongitude" required placeholder="e.g. 84.1578" oninput="updateGpsMapPreview()"
+                               class="w-full px-3 py-2 rounded-xl border border-[#93C572] text-xs font-semibold bg-white text-[#14300A]">
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Radius (in Meters)</label>
-                    <input type="number" id="globalGpsRadius" value="500" required min="50" max="5000"
-                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-violet-500">
-                    <span class="text-[10px] text-slate-500">Default: 500 meters (workers within this radius get auto-attendance)</span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-[#14300A] mb-1">Geofence Radius (Meters)</label>
+                        <input type="number" id="globalGpsRadius" value="1000" required min="100" max="10000"
+                               class="w-full px-3 py-2 rounded-xl border border-[#93C572] text-xs font-semibold bg-white text-[#14300A]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#14300A] mb-1">Current Device GPS</label>
+                        <button type="button" onclick="getGlobalDeviceLocation()" class="w-full py-2 px-3 rounded-xl bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#14300A] font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-crosshairs"></i> <span>Use My Phone GPS</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="pt-2 flex items-center justify-end gap-2">
-                    <button type="button" onclick="closeGlobalSiteGpsModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                <div class="pt-3 border-t border-[#93C572]/30 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeGlobalSiteGpsModal()" class="px-4 py-2.5 rounded-xl bg-white border border-[#14300A] text-[#14300A] text-xs font-bold transition cursor-pointer hover:bg-slate-50">
                         Cancel
                     </button>
-                    <button type="submit" id="saveGlobalGpsBtn" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-save"></i>
-                        <span>Save GPS Location</span>
+                    <button type="submit" id="saveGlobalGpsBtn" class="px-5 py-2.5 rounded-xl bg-[#14300A] text-white text-xs font-bold shadow-sm transition hover:opacity-90 flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save Location to Site</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
-    {% endif %}
 
     <script>
-    // --- GLOBAL SITE GPS SETUP LOGIC ---
+    // --- GLOBAL SITE GPS SETUP & EDIT LOGIC ---
     function openGlobalSiteGpsModal(siteId, siteName, lat, lng, radius) {
         const modal = document.getElementById('globalSiteGpsModal');
         if (!modal) return;
@@ -902,8 +913,14 @@
             if (select) select.value = siteId;
             document.getElementById('globalGpsLatitude').value = lat || '';
             document.getElementById('globalGpsLongitude').value = lng || '';
-            document.getElementById('globalGpsRadius').value = radius || 500;
+            document.getElementById('globalGpsRadius').value = radius || 1000;
+        } else {
+            const select = document.getElementById('globalGpsSiteSelect');
+            if (select && select.value) {
+                populateGlobalGpsFields(select.value);
+            }
         }
+        updateGpsMapPreview();
     }
 
     function closeGlobalSiteGpsModal() {
@@ -916,7 +933,39 @@
         if (opt) {
             document.getElementById('globalGpsLatitude').value = opt.getAttribute('data-lat') || '';
             document.getElementById('globalGpsLongitude').value = opt.getAttribute('data-lng') || '';
-            document.getElementById('globalGpsRadius').value = opt.getAttribute('data-radius') || '500';
+            document.getElementById('globalGpsRadius').value = opt.getAttribute('data-radius') || '1000';
+            updateGpsMapPreview();
+        }
+    }
+
+    function parseGpsInput(val) {
+        if (!val) return;
+        val = val.trim();
+        // Match: "26.2346, 84.1578" or "26.2346 84.1578"
+        const matchSimple = val.match(/(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)/);
+        if (matchSimple) {
+            document.getElementById('globalGpsLatitude').value = parseFloat(matchSimple[1]).toFixed(6);
+            document.getElementById('globalGpsLongitude').value = parseFloat(matchSimple[2]).toFixed(6);
+            updateGpsMapPreview();
+            return;
+        }
+        // Match URL like @26.2346,84.1578 or ?q=26.2346,84.1578
+        const matchUrl = val.match(/[@=](-?\d+\.\d+),(-?\d+\.\d+)/);
+        if (matchUrl) {
+            document.getElementById('globalGpsLatitude').value = parseFloat(matchUrl[1]).toFixed(6);
+            document.getElementById('globalGpsLongitude').value = parseFloat(matchUrl[2]).toFixed(6);
+            updateGpsMapPreview();
+            return;
+        }
+    }
+
+    function updateGpsMapPreview() {
+        const lat = document.getElementById('globalGpsLatitude')?.value;
+        const lng = document.getElementById('globalGpsLongitude')?.value;
+        const btn = document.getElementById('globalGpsMapLink');
+        if (lat && lng && btn) {
+            btn.href = `https://www.google.com/maps?q=${lat},${lng}`;
+            btn.innerHTML = `<i class="fa-solid fa-map-location-dot"></i> View (${parseFloat(lat).toFixed(3)}, ${parseFloat(lng).toFixed(3)}) on Maps ↗`;
         }
     }
 
@@ -929,10 +978,11 @@
             (pos) => {
                 document.getElementById('globalGpsLatitude').value = pos.coords.latitude.toFixed(6);
                 document.getElementById('globalGpsLongitude').value = pos.coords.longitude.toFixed(6);
-                alert(`✅ Location obtained: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+                updateGpsMapPreview();
+                alert(`✅ Current location acquired: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
             },
             (err) => {
-                alert('GPS Error: ' + err.message + ' — Please enable Location in your device.');
+                alert('GPS Error: ' + err.message + ' — Please enable GPS / Location in your browser/device.');
             },
             { enableHighAccuracy: true, timeout: 15000 }
         );
@@ -944,6 +994,11 @@
         const lat = document.getElementById('globalGpsLatitude').value;
         const lng = document.getElementById('globalGpsLongitude').value;
         const radius = document.getElementById('globalGpsRadius').value;
+
+        if (!siteId) {
+            alert('Please select a project site!');
+            return;
+        }
 
         const btn = document.getElementById('saveGlobalGpsBtn');
         btn.disabled = true;
@@ -962,20 +1017,19 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(data.message);
+                alert('✅ ' + data.message);
                 closeGlobalSiteGpsModal();
                 window.location.reload();
             } else {
-                alert('❌ ' + data.message);
+                alert('❌ ' + (data.message || 'Error updating GPS location'));
             }
         } catch (err) {
-            alert('❌ ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Save GPS Location</span>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Save Location to Site</span>';
         }
     }
-
     // --- OWNER ROLE  CLIENT LOGIC ---
     function isOwnerLoggedIn() {
         return localStorage.getItem('sandip_is_owner') === 'true';

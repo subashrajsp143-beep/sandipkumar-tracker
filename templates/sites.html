@@ -93,37 +93,41 @@
 
                 </div>
 
-                <!-- GPS Geofence Status & Setup Button -->
-                <div class="mt-3.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                <!-- GPS Geofence Status & Setup Button (Strict 3-Color Palette) -->
+                <div class="mt-3.5 p-2.5 rounded-xl bg-white border border-[#93C572] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                     <div>
-                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">GPS Location Status</span>
-                        {% if points_counts and points_counts.get(s.id) %}
-                        <span class="text-violet-700 font-bold flex items-center gap-1 mt-0.5 text-[11px]">
-                            <i class="fa-solid fa-draw-polygon text-violet-600"></i>
-                            <span>{{ points_counts.get(s.id) }} Multi-Points Set</span>
-                        </span>
-                        {% elif s.latitude and s.longitude %}
-                        <span class="text-emerald-700 font-bold flex items-center gap-1 mt-0.5 text-[11px]">
-                            <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                            <span>{{ s.latitude|round(3) }}, {{ s.longitude|round(3) }}</span>
-                        </span>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-[#14300A]/70 block">Office GPS Location</span>
+                        {% if s.latitude and s.longitude %}
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <span class="text-[#14300A] font-bold text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-[#14300A]"></i>
+                                <span>{{ s.latitude|round(4) }}, {{ s.longitude|round(4) }}</span>
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded bg-[#93C572]/20 text-[#14300A] border border-[#93C572] text-[10px] font-bold">
+                                {{ s.geo_radius or 1000 }}m
+                            </span>
+                        </div>
                         {% else %}
-                        <span class="text-amber-600 font-semibold flex items-center gap-1 mt-0.5 text-[11px]">
-                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-                            <span>GPS Not Set</span>
+                        <span class="text-[#14300A]/70 font-semibold flex items-center gap-1 mt-0.5 text-xs">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Location Not Set</span>
                         </span>
                         {% endif %}
                     </div>
-                    <div class="flex items-center gap-1">
-                        <a href="/geo-attendance" title="Manage 4-5 GPS Points"
-                           class="px-2 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[10px] transition flex items-center gap-1 shadow-xs">
-                            <i class="fa-solid fa-draw-polygon"></i>
-                            <span>4-5 Points</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        {% if s.latitude and s.longitude %}
+                        <a href="https://www.google.com/maps?q={{ s.latitude }},{{ s.longitude }}" target="_blank"
+                           class="px-2 py-1 rounded-lg bg-[#93C572] hover:bg-[#7DB35A] text-[#14300A] font-bold text-[11px] transition flex items-center gap-1 border border-[#93C572] cursor-pointer"
+                           title="Open in Google Maps">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Maps ↗</span>
                         </a>
-                        <button onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 500 }})'
-                                class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition flex items-center gap-1 border border-slate-300">
-                            <i class="fa-solid fa-crosshairs"></i>
-                            <span>Center</span>
+                        {% endif %}
+                        <button type="button" onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 1000 }})'
+                                class="px-2.5 py-1 rounded-lg bg-[#14300A] hover:opacity-90 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
+                                title="Edit GPS Coordinates & Geofence">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Edit GPS</span>
                         </button>
                     </div>
                 </div>
