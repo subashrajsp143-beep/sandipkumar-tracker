@@ -170,6 +170,180 @@
     </div>
 
     <!-- ======================================================== -->
+    <!-- 4.5 SUPERVISOR LIVE GPS LOCATION TRACKER (OFFICE WORK CONSOLE) -->
+    <!-- ======================================================== -->
+    <div id="supervisor-tracking-section" class="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-2xs space-y-4">
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
+                        लाइव GPS ट्रैकिंग
+                    </span>
+                    <span class="text-xs text-slate-500 font-medium">21 साइट्स ऑटो-मॉनिटर</span>
+                </div>
+                <h3 class="text-lg sm:text-xl font-black text-slate-900 mt-1 flex items-center gap-2">
+                    <i class="fa-solid fa-satellite-dish text-[#166534]"></i>
+                    <span>सुपरवाइजर लाइव लोकेशन ट्रैकिंग</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    सुपरवाइजर के लॉगिन करते ही उनकी लाइव लोकेशन और कार्य-स्थल पर मौजूदगी यहाँ दिखेगी
+                </p>
+            </div>
+
+            <!-- Stats Pills & Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span id="supStatOnSite" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                    <span id="txtOnSite">0 साइट पर</span>
+                </span>
+                <span id="supStatOffSite" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span id="txtOffSite">0 साइट से बाहर</span>
+                </span>
+                <span id="supStatOffline" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    <span id="txtOffline">0 ऑफलाइन</span>
+                </span>
+                <button type="button" onclick="refreshSupervisorTracking()" id="btnRefreshTracking" class="px-3 py-1.5 rounded-lg bg-[#166534] hover:bg-[#14532D] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate" id="refreshTrackingIcon"></i>
+                    <span>रिफ्रेश</span>
+                </button>
+                <a href="/geo-attendance" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 border border-slate-300">
+                    <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
+                    <span>GPS मैप</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+                <input type="text" id="supSearchInput" oninput="filterSupervisorList()" placeholder="साइट या सुपरवाइजर का नाम खोजें..." class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-[#166534]">
+            </div>
+            <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                <button type="button" onclick="filterSupStatus('ALL')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-[#166534] text-white font-bold transition cursor-pointer" data-status="ALL">सभी (21)</button>
+                <button type="button" onclick="filterSupStatus('ONLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONLINE">ऑनलाइन</button>
+                <button type="button" onclick="filterSupStatus('ONSITE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONSITE">साइट पर</button>
+                <button type="button" onclick="filterSupStatus('OFFLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="OFFLINE">ऑफलाइन</button>
+            </div>
+        </div>
+
+        <!-- Supervisor Cards Grid -->
+        <div id="supervisorCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for s in supervisors_tracking %}
+            <div class="sup-card bg-white rounded-xl p-3.5 border {% if s.is_on_site %}border-emerald-300 bg-emerald-50/20{% elif s.has_ping %}border-amber-300 bg-amber-50/20{% else %}border-slate-200{% endif %} shadow-2xs hover:shadow-xs transition space-y-2.5"
+                 id="supCard_{{ s.site_id }}"
+                 data-site-id="{{ s.site_id }}"
+                 data-site-name="{{ (s.site_name or '')|lower }}"
+                 data-sup-name="{{ (s.supervisor_name or '')|lower }}"
+                 data-status="{% if s.is_on_site %}ONSITE{% elif s.has_ping %}OFFSITE{% else %}OFFLINE{% endif %}"
+                 data-online="{% if s.has_ping %}1{% else %}0{% endif %}">
+                
+                <!-- Card Header -->
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-mono font-bold text-slate-500 uppercase">{{ s.site_code }}</span>
+                        <h4 class="text-sm font-black text-slate-900 truncate">{{ s.site_name }}</h4>
+                    </div>
+                    <div id="supBadge_{{ s.site_id }}">
+                        {% if s.is_on_site %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                            साइट पर उपस्थित
+                        </span>
+                        {% elif s.has_ping %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                            साइट से बाहर
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                            आज ऑफलाइन
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Supervisor Name & Phone -->
+                <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                    <div class="flex items-center gap-2 truncate">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black shrink-0">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div class="truncate">
+                            <span class="font-bold text-slate-800 block truncate" id="supName_{{ s.site_id }}">{{ s.supervisor_name or 'सुपरवाइजर' }}</span>
+                            <span class="text-[10px] text-slate-500 font-mono" id="supPhone_{{ s.site_id }}">{{ s.supervisor_phone or 'नंबर नहीं' }}</span>
+                        </div>
+                    </div>
+                    {% if s.supervisor_phone %}
+                    <div class="flex items-center gap-1 shrink-0">
+                        <a href="tel:{{ s.supervisor_phone }}" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs border border-emerald-200 transition" title="कॉल करें">
+                            <i class="fa-solid fa-phone"></i>
+                        </a>
+                        <a href="https://wa.me/91{{ s.supervisor_phone }}?text={{ ('नमस्ते ' ~ (s.supervisor_name or '') ~ ', आपकी साइट ' ~ s.site_name ~ ' का क्या स्टेटस है?')|urlencode }}" target="_blank" class="w-7 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center text-xs transition" title="व्हाट्सएप">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Location & Proximity Details -->
+                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 text-[11px] space-y-1" id="supLocDetails_{{ s.site_id }}">
+                    {% if s.has_ping %}
+                    <div class="flex items-center justify-between text-slate-700">
+                        <span class="text-slate-500 font-medium">दूरी:</span>
+                        <span class="font-bold font-mono {% if s.is_on_site %}text-emerald-700{% else %}text-amber-700{% endif %}">
+                            {% if s.last_distance_m is not none %}
+                                {% if s.last_distance_m < 1000 %}
+                                    {{ "%.0f"|format(s.last_distance_m) }} मीटर दूर
+                                {% else %}
+                                    {{ "%.1f"|format(s.last_distance_m / 1000) }} किमी दूर
+                                {% endif %}
+                            {% else %}
+                                दूरी अज्ञात
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-700">
+                        <span class="text-slate-500 font-medium">निकटतम स्थान:</span>
+                        <span class="font-semibold text-slate-800 truncate max-w-[150px]">{{ s.nearest_point or s.site_name }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200/60">
+                        <span>अंतिम सक्रियता:</span>
+                        <span class="font-mono font-bold text-slate-600">{{ s.last_ping_time or 'अभी' }}</span>
+                    </div>
+                    {% else %}
+                    <div class="py-1 text-center text-slate-400">
+                        <span>आज इस साइट से कोई GPS लॉगिन/पिंग दर्ज नहीं हुआ</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Button: Open Google Maps -->
+                <div id="supMapBtn_{{ s.site_id }}">
+                    {% if s.last_lat and s.last_lng %}
+                    <a href="https://www.google.com/maps?q={{ s.last_lat }},{{ s.last_lng }}" target="_blank" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#166534] font-bold text-xs border border-emerald-300 flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
+                        <span>Google Maps पर लाइव लोकेशन देखें</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                    {% else %}
+                    <div class="py-1 text-center text-slate-400 text-[11px]">
+                        <i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> मैप लोकेशन अनुपलब्ध
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
     <!-- 5. OUTGOING LETTERS REGISTER: Pure White, Sharp Slate Table, Clear Orange CTA -->
     <!-- ======================================================== -->
     <div id="letters" class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-2xs scroll-mt-20">
@@ -684,7 +858,159 @@
         filterLettersTable();
     }
 
-    function updateExportLinks(fy, search) {
+    // --- SUPERVISOR LIVE TRACKING OFFICE CONSOLE JS ---
+    let currentSupStatusFilter = 'ALL';
+
+    function updateSupervisorCounts() {
+        const cards = document.querySelectorAll('.sup-card');
+        let onSite = 0, offSite = 0, offline = 0;
+        cards.forEach(card => {
+            const status = card.getAttribute('data-status');
+            if (status === 'ONSITE') onSite++;
+            else if (status === 'OFFSITE') offSite++;
+            else offline++;
+        });
+        const elOnSite = document.getElementById('txtOnSite');
+        const elOffSite = document.getElementById('txtOffSite');
+        const elOffline = document.getElementById('txtOffline');
+        if (elOnSite) elOnSite.innerText = `${onSite} साइट पर`;
+        if (elOffSite) elOffSite.innerText = `${offSite} साइट से बाहर`;
+        if (elOffline) elOffline.innerText = `${offline} ऑफलाइन`;
+    }
+
+    function filterSupervisorList() {
+        const q = (document.getElementById('supSearchInput').value || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.sup-card');
+
+        cards.forEach(card => {
+            const siteName = card.getAttribute('data-site-name') || '';
+            const supName = card.getAttribute('data-sup-name') || '';
+            const status = card.getAttribute('data-status') || '';
+            const isOnline = card.getAttribute('data-online') === '1';
+
+            const matchesQuery = !q || siteName.includes(q) || supName.includes(q);
+            let matchesStatus = true;
+            if (currentSupStatusFilter === 'ONLINE') matchesStatus = isOnline;
+            else if (currentSupStatusFilter === 'ONSITE') matchesStatus = (status === 'ONSITE');
+            else if (currentSupStatusFilter === 'OFFLINE') matchesStatus = (status === 'OFFLINE');
+
+            if (matchesQuery && matchesStatus) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function filterSupStatus(status) {
+        currentSupStatusFilter = status;
+        document.querySelectorAll('.sup-status-filter').forEach(btn => {
+            if (btn.getAttribute('data-status') === status) {
+                btn.className = "sup-status-filter px-3 py-1.5 rounded-lg bg-[#166534] text-white font-bold transition cursor-pointer";
+            } else {
+                btn.className = "sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer";
+            }
+        });
+        filterSupervisorList();
+    }
+
+    async function refreshSupervisorTracking() {
+        const icon = document.getElementById('refreshTrackingIcon');
+        if (icon) icon.classList.add('fa-spin');
+
+        try {
+            const res = await fetch('/api/supervisors/live-tracking');
+            const data = await res.json();
+            if (data.success && data.supervisors) {
+                data.supervisors.forEach(s => {
+                    const card = document.getElementById(`supCard_${s.site_id}`);
+                    if (!card) return;
+
+                    const status = s.is_on_site ? 'ONSITE' : (s.has_ping ? 'OFFSITE' : 'OFFLINE');
+                    card.setAttribute('data-status', status);
+                    card.setAttribute('data-online', s.has_ping ? '1' : '0');
+                    if (s.supervisor_name) card.setAttribute('data-sup-name', s.supervisor_name.toLowerCase());
+
+                    // Border color update
+                    card.className = `sup-card bg-white rounded-xl p-3.5 border ${s.is_on_site ? 'border-emerald-300 bg-emerald-50/20' : (s.has_ping ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200')} shadow-2xs hover:shadow-xs transition space-y-2.5`;
+
+                    // Badge update
+                    const badgeEl = document.getElementById(`supBadge_${s.site_id}`);
+                    if (badgeEl) {
+                        if (s.is_on_site) {
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>साइट पर उपस्थित</span>`;
+                        } else if (s.has_ping) {
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>साइट से बाहर</span>`;
+                        } else {
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>आज ऑफलाइन</span>`;
+                        }
+                    }
+
+                    // Supervisor Name
+                    const nameEl = document.getElementById(`supName_${s.site_id}`);
+                    if (nameEl && s.supervisor_name) nameEl.innerText = s.supervisor_name;
+
+                    // Proximity & Details
+                    const locEl = document.getElementById(`supLocDetails_${s.site_id}`);
+                    if (locEl) {
+                        if (s.has_ping) {
+                            const distStr = (s.last_distance_m !== null && s.last_distance_m !== undefined) 
+                                ? (s.last_distance_m < 1000 ? Math.round(s.last_distance_m) + ' मीटर दूर' : (s.last_distance_m / 1000).toFixed(1) + ' किमी दूर')
+                                : 'दूरी अज्ञात';
+                            const distColor = s.is_on_site ? 'text-emerald-700' : 'text-amber-700';
+                            locEl.innerHTML = `
+                                <div class="flex items-center justify-between text-slate-700">
+                                    <span class="text-slate-500 font-medium">दूरी:</span>
+                                    <span class="font-bold font-mono ${distColor}">${distStr}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-slate-700">
+                                    <span class="text-slate-500 font-medium">निकटतम स्थान:</span>
+                                    <span class="font-semibold text-slate-800 truncate max-w-[150px]">${s.nearest_point || s.site_name}</span>
+                                </div>
+                                <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200/60">
+                                    <span>अंतिम सक्रियता:</span>
+                                    <span class="font-mono font-bold text-slate-600">${s.last_ping_time || 'अभी'}</span>
+                                </div>
+                            `;
+                        } else {
+                            locEl.innerHTML = `<div class="py-1 text-center text-slate-400"><span>आज इस साइट से कोई GPS लॉगिन/पिंग दर्ज नहीं हुआ</span></div>`;
+                        }
+                    }
+
+                    // Map button
+                    const mapBtnEl = document.getElementById(`supMapBtn_${s.site_id}`);
+                    if (mapBtnEl) {
+                        if (s.last_lat && s.last_lng) {
+                            mapBtnEl.innerHTML = `
+                                <a href="https://www.google.com/maps?q=${s.last_lat},${s.last_lng}" target="_blank" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#166534] font-bold text-xs border border-emerald-300 flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
+                                    <span>Google Maps पर लाइव लोकेशन देखें</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                </a>
+                            `;
+                        } else {
+                            mapBtnEl.innerHTML = `<div class="py-1 text-center text-slate-400 text-[11px]"><i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> मैप लोकेशन अनुपलब्ध</div>`;
+                        }
+                    }
+                });
+
+                updateSupervisorCounts();
+                filterSupervisorList();
+            }
+        } catch(e) {
+            console.error('Tracking fetch error:', e);
+        } finally {
+            if (icon) icon.classList.remove('fa-spin');
+        }
+    }
+
+    // Auto-initialize counts and 30s polling
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSupervisorCounts();
+        setInterval(refreshSupervisorTracking, 30000);
+    });
+
+        function updateExportLinks(fy, search) {
         const excelBtn = document.getElementById('btnExportLettersExcel');
         const pdfBtn = document.getElementById('btnExportLettersPdf');
 

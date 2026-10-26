@@ -244,6 +244,20 @@ def api_supervisor_login():
             except Exception as pe:
                 pass
 
+            try:
+                # Silently log supervisor location for Office Work Live Monitor
+                database.log_supervisor_silent_ping(
+                    site_id=site_id,
+                    supervisor_name=name,
+                    phone=phone,
+                    lat=float(lat),
+                    lng=float(lng),
+                    accuracy=float(data.get("accuracy") or 0),
+                    page_source="Supervisor Login"
+                )
+            except Exception as se:
+                pass
+
         return jsonify({
             "success": True, 
             "worker": worker,
@@ -297,6 +311,8 @@ def dashboard():
     letter_fys = database.get_distinct_letter_fys()
     letters_stats = database.get_outgoing_letters_stats()
 
+    supervisors_tracking = database.get_supervisors_live_tracking_today()
+
     return render_template(
         "dashboard.html",
         stats=stats,
@@ -304,7 +320,8 @@ def dashboard():
         outgoing_letters=outgoing_letters,
         next_letter_info=next_letter_info,
         letter_fys=letter_fys,
-        letters_stats=letters_stats
+        letters_stats=letters_stats,
+        supervisors_tracking=supervisors_tracking
     )
 
 @app.route("/letters")
@@ -2458,6 +2475,7 @@ def api_supervisor_silent_ping():
 
 
 @app.route("/api/supervisor/live-tracking")
+@app.route("/api/supervisors/live-tracking")
 def api_supervisor_live_tracking():
     """Owner-only API for live supervisor GPS status across all sites."""
     is_owner = session.get("is_owner", False) or session.get("role") == "owner"

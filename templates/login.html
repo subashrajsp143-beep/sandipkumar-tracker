@@ -229,20 +229,33 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-location-crosshairs animate-pulse"></i> GPS लोकेशन जांच हो रही है...';
 
-            let lat = null, lng = null;
+            let lat = null, lng = null, acc = 0;
             if ("geolocation" in navigator) {
                 try {
                     const pos = await new Promise((resolve, reject) => {
                         navigator.geolocation.getCurrentPosition(resolve, reject, {
                             enableHighAccuracy: true,
-                            timeout: 3000,
+                            timeout: 8000,
                             maximumAge: 0
                         });
                     });
                     lat = pos.coords.latitude;
                     lng = pos.coords.longitude;
+                    acc = pos.coords.accuracy || 0;
                 } catch(ge) {
-                    // Geolocation denied or timed out
+                    // Quick fallback to cached / network location if satellite takes time
+                    try {
+                        const coarsePos = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: false,
+                                timeout: 4000,
+                                maximumAge: 180000
+                            });
+                        });
+                        lat = coarsePos.coords.latitude;
+                        lng = coarsePos.coords.longitude;
+                        acc = coarsePos.coords.accuracy || 0;
+                    } catch(e) {}
                 }
             }
 
@@ -258,7 +271,8 @@
                         name: name, 
                         phone: phone,
                         latitude: lat,
-                        longitude: lng
+                        longitude: lng,
+                        accuracy: acc
                     })
                 });
                 const data = await res.json();
