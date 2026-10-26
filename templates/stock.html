@@ -36,18 +36,22 @@
 
             <!-- Quick Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
+                {% if is_master_owner %}
                 <a href="{{ url_for('material_store') }}" class="px-4 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#ea580c] text-[#1C0A00] font-black text-sm shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-cart-shopping text-base"></i>
                     <span>🛒 Select & Dispatch from Store</span>
                 </a>
+                {% endif %}
                 <button type="button" onclick="openSendStockModal()" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-sm shadow-sm transition flex items-center gap-2 border border-[#166534]">
                     <i class="fa-solid fa-plus-circle text-base"></i>
                     <span>Quick Inward</span>
                 </button>
+                {% if is_master_owner %}
                 <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5" title="Reset Stock & Usage to 0">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span data-i18n="stock_btn_reset">Reset Stock to 0</span>
                 </button>
+                {% endif %}
                 <a href="{{ url_for('export_stock_excel', site_id=selected_site_id) }}" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-bold text-sm shadow-sm transition flex items-center gap-2 border border-[#166534]">
                     <i class="fa-solid fa-file-excel text-base"></i>
                     <span>Download Excel</span>
@@ -477,16 +481,34 @@
             </div>
 
             <!-- Owner PIN Verification -->
+            {% if is_master_owner %}
+            <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                            Authorized as Sandip Kumar (Owner)
+                        </div>
+                        <p class="text-[11px] text-emerald-700">Master login verified — Direct dispatch permitted</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-wider bg-emerald-200 text-emerald-900 px-2.5 py-1 rounded-lg">Verified</span>
+            </div>
+            <input type="hidden" id="inwardOwnerPin" value="Sandip@@12">
+            {% else %}
             <div id="stockPinContainer" class="bg-amber-50 border border-amber-300 rounded-2xl p-3.5 space-y-1.5">
                 <div class="flex items-center justify-between">
                     <label class="text-xs font-black text-amber-900 flex items-center gap-1.5">
                         <i class="fa-solid fa-lock text-emerald-600"></i> Office Work Password <span class="text-rose-500">*</span>
                     </label>
-                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Required for Security</span>
+                    <span class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Security Check</span>
                 </div>
                 <input type="password" id="inwardOwnerPin" placeholder="Enter Office Work Password..." required class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300 text-base font-black tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
-                <p class="text-[11px] text-emerald-800">Valid password required to authorize dispatch to site.</p>
+                <p class="text-[11px] text-amber-800">Only authorized persons with valid Office Work Password can dispatch stock.</p>
             </div>
+            {% endif %}
 
             <!-- Submit Button -->
             <div class="pt-2">

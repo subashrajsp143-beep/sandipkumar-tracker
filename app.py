@@ -34,6 +34,9 @@ database.init_db()
 
 @app.context_processor
 def inject_common():
+    is_master = (session.get("is_owner", False) or 
+                 session.get("role") == "owner" or 
+                 session.get("worker_phone") == "9835180075")
     return {
         "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
         "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year,
@@ -42,7 +45,8 @@ def inject_common():
         "user_site_id": session.get("site_id", None),
         "user_site_name": session.get("site_name", ""),
         "all_sites_list": database.get_all_sites(),
-        "is_owner": session.get("is_owner", False) or session.get("role") == "owner"
+        "is_owner": session.get("is_owner", False) or session.get("role") == "owner",
+        "is_master_owner": is_master
     }
 
 @app.before_request
@@ -657,7 +661,7 @@ def delete_entry(entry_id):
         # Security: Require Owner PIN (Default: 1234) to delete financial logs
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
+        is_owner_auth = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (pin and str(pin).strip() in ["Sandip@@12"]))
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete entries."}), 403
 
@@ -693,7 +697,7 @@ def update_entry(entry_id):
 # Full Database Backup Export API (JSON)
 @app.route("/api/backup", methods=["GET"])
 def export_database_backup():
-    is_owner = session.get("is_owner", False)
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
     if not is_owner:
         return jsonify({"success": False, "message": "❌ Security Restriction: Only authorized owner can download backup."}), 403
     try:
@@ -2064,22 +2068,25 @@ def site_photos_print_album():
 # 9. Site Stock & Inventory Register
 @app.route("/stock")
 def site_stock():
-    is_owner = session.get("is_owner", False)
+    is_master_owner = (session.get("is_owner", False) or 
+                       session.get("role") == "owner" or 
+                       session.get("worker_phone") == "9835180075")
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
 
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
     
-    # SECURITY LOCK: If not owner, lock strictly to supervisor's site!
-    if not is_owner and user_site_id:
+    # SECURITY LOCK: If not master owner, lock strictly to supervisor's site!
+    if not is_master_owner and user_site_id:
         selected_site_id = int(user_site_id)
 
     sites = database.get_all_sites()
-    if not is_owner and user_site_id:
+    if not is_master_owner and user_site_id:
         sites = [s for s in sites if s["id"] == int(user_site_id)]
 
     materials = database.get_all_materials()
-    if not is_owner:
+    if not is_master_owner:
         sanitized_materials = []
         for m in materials:
             mc = dict(m)
@@ -2105,11 +2112,12 @@ def site_stock():
         overview=overview,
         selected_site=selected_site,
         selected_site_id=selected_site_id,
-        locked_site_id=int(user_site_id) if (not is_owner and user_site_id) else None,
+        locked_site_id=int(user_site_id) if (not is_master_owner and user_site_id) else None,
         total_inward_sum=total_inward_sum,
         total_consumed_sum=total_consumed_sum,
         balance_sum=balance_sum,
         low_stock_count=low_stock_count,
+        is_master_owner=is_master_owner,
         today=datetime.date.today().strftime("%Y-%m-%d")
     )
 
@@ -2119,19 +2127,24 @@ def save_stock_inward():
         return "", 200
     try:
         data = request.get_json(silent=True) or {}
-        # Require Owner PIN or logged-in Supervisor / Site Incharge
+        # Require Owner PIN or logged-in Master Owner
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_authorized = (session.get("is_owner", False) or 
-                         (pin and str(pin).strip() in ["Sandip@@12"]) or 
-                         session.get("role") in ["supervisor", "owner"])
-        if not is_authorized:
-            return jsonify({"success": False, "message": "❌ Stock entry (material dispatch) is only allowed for authorized supervisor, site incharge, or owner."}), 403
+        is_master_owner = (session.get("is_owner", False) or 
+                           session.get("role") == "owner" or 
+                           session.get("worker_phone") == "9835180075")
+
+        # STRICT PIN ENFORCEMENT: If not master owner, strictly verify PIN is Sandip@@12
+        if not is_master_owner:
+            if not pin or str(pin).strip() != "Sandip@@12":
+                return jsonify({
+                    "success": False, 
+                    "message": "❌ Incorrect Password! Only authorized owner with valid password can dispatch stock."
+                }), 403
 
         site_id = data.get("site_id")
-        # SECURITY RESTRICTION: Non-owners can only add stock to their own assigned site
-        is_owner = session.get("is_owner", False)
+        # SECURITY RESTRICTION: Non-master supervisors can only add stock to their own assigned site
         user_site_id = session.get("site_id")
-        if not is_owner and user_site_id:
+        if not is_master_owner and user_site_id:
             if int(site_id) != int(user_site_id):
                 return jsonify({"success": False, "message": "❌ Security Restriction: You can only record materials for your authorized site."}), 403
 
@@ -2175,7 +2188,7 @@ def reset_stock_zero_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
+        is_owner_auth = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (pin and str(pin).strip() in ["Sandip@@12"]))
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can reset stock to 0."}), 403
 
@@ -2206,7 +2219,7 @@ def delete_stock_inward_api(entry_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
+        is_owner_auth = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (pin and str(pin).strip() in ["Sandip@@12"]))
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete inward entries."}), 403
 
@@ -2623,7 +2636,7 @@ def add_worker_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"]) or session.get("role") == "owner"
+        is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (str(pin).strip() in ["Sandip@@12"])) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
         is_sup = session.get("role") in ["supervisor", "site_incharge"] or (user_site_id and not is_owner)
 
@@ -2679,7 +2692,7 @@ def reset_today_attendance_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12"])
+        is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (str(pin).strip() in ["Sandip@@12"]))
         if not is_owner:
             return jsonify({"success": False, "message": "❌ Only authorized owner can reset attendance."}), 403
 
@@ -2702,7 +2715,7 @@ def reset_all_workers_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12"])
+        is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075" or (str(pin).strip() in ["Sandip@@12"]))
         if not is_owner:
             return jsonify({"success": False, "message": "❌ Only authorized owner can reset workers."}), 403
 
