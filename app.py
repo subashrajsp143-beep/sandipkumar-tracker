@@ -278,26 +278,10 @@ def api_supervisor_login():
                     }), 401
 
             if not is_authorized:
-                # Cross-site check: find if this phone belongs to ANY other site
-                other_site_name = None
-                all_sites = database.get_all_sites()
-                for os_site in all_sites:
-                    if os_site["id"] == site_id:
-                        continue
-                    if (_clean_ph(os_site.get("contact")) == norm_phone) or (_clean_ph(os_site.get("incharge_phone")) == norm_phone):
-                        other_site_name = os_site.get("name")
-                        break
-
-                if other_site_name:
-                    return jsonify({
-                        "success": False,
-                        "message": f"Access Denied: Mobile number {phone} is registered for '{other_site_name}', NOT for '{site['name']}'. You can only login to your assigned site: '{other_site_name}'."
-                    }), 403
-                else:
-                    return jsonify({
-                        "success": False,
-                        "message": f"Access Denied: Mobile number {phone} is not registered as an authorized supervisor for '{site['name']}'. Contact Office to register."
-                    }), 403
+                return jsonify({
+                    "success": False,
+                    "message": "Not an authorized person"
+                }), 403
 
         # Create or fetch worker record with verified official name and role
         worker = database.get_or_create_worker(site_id, official_name, official_role, norm_phone)
