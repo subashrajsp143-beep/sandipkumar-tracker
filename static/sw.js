@@ -1,5 +1,5 @@
 // Service Worker for M/S Sandip Kumar Material Tracker
-const CACHE_NAME = 'sandip-tracker-v50';
+const CACHE_NAME = 'sandip-tracker-v51';
 const STATIC_ASSETS = [
   '/',
   '/static/css/theme.css',
@@ -34,6 +34,15 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Message Listener: Clear cache on user logout
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'clearCache') {
+    caches.keys().then((keys) => {
+      keys.forEach((key) => caches.delete(key));
+    });
+  }
+});
+
 // Fetch: Network-First with Cache Fallback for dynamic pages; Cache-First for static images
 self.addEventListener('fetch', (event) => {
   const req = event.request;
@@ -41,6 +50,14 @@ self.addEventListener('fetch', (event) => {
 
   // Skip caching non-GET requests (e.g. POST entries handled by client offline queue)
   if (req.method !== 'GET') {
+    return;
+  }
+
+  // BROWSER NATIVE: Never intercept logout, login, or auth requests in Service Worker!
+  if (url.pathname === '/logout' || 
+      url.pathname === '/login' || 
+      url.pathname.startsWith('/api/owner/logout') || 
+      url.pathname.startsWith('/api/auth/')) {
     return;
   }
 

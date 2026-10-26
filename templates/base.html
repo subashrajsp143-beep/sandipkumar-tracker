@@ -384,8 +384,8 @@
                     </div>
                 </div>
 
-                <!-- Sign out stays white with #14300A text -->
-                <a href="/logout" onclick="return confirm('Are you sure you want to sign out?')" class="sidebar-signout-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white hover:bg-[#93C572]/20 border border-[#93C572] text-[#14300A] transition text-xs font-bold">
+                <!-- Sign out stays white with #14300A text - Instant 1-Click Signout -->
+                <a href="/logout" onclick="handleAppSignout(event); return false;" class="sidebar-signout-btn flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white hover:bg-[#93C572]/20 border border-[#93C572] text-[#14300A] transition text-xs font-bold cursor-pointer">
                     <i class="fa-solid fa-arrow-right-from-bracket text-sm text-[#14300A]"></i>
                     <span class="sidebar-text" data-i18n="sign_out">Sign Out</span>
                 </a>
@@ -1097,6 +1097,48 @@
             }
             if (input) input.value = '';
         }
+    }
+
+    // Instant 1-Click Universal Signout (Purges Session, Cookie, LocalStorage & SW Caches)
+    async function handleAppSignout(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 1. Instant visual feedback on button
+        const btns = document.querySelectorAll('.sidebar-signout-btn');
+        btns.forEach(btn => {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-sm text-[#14300A]"></i> <span class="sidebar-text">Signing out...</span>';
+            btn.style.pointerEvents = 'none';
+        });
+
+        // 2. Wipe client-side auth tokens & role storage
+        try {
+            localStorage.removeItem('sandip_user_role');
+            localStorage.removeItem('sandip_worker_token');
+            localStorage.removeItem('sandip_is_owner');
+            sessionStorage.removeItem('owner_pin');
+            sessionStorage.clear();
+        } catch(err) {}
+
+        // 3. Clear Service Worker caches
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k => caches.delete(k)));
+            } catch(err) {}
+        }
+
+        // 4. Message Service Worker to purge cache
+        try {
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ action: 'clearCache' });
+            }
+        } catch(err) {}
+
+        // 5. Direct hard replace navigation to /logout with cache buster
+        window.location.replace('/logout?_t=' + Date.now());
     }
 
     async function logoutOwner() {

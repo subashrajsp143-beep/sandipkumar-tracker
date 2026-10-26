@@ -3,7 +3,7 @@
 Main Flask Web Application for Multi-Site Material Consumption Tracker.
 """
 
-from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, flash, send_from_directory, session
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, flash, send_from_directory, session, make_response
 import datetime
 import os
 import uuid
@@ -160,15 +160,20 @@ def company_website():
 @app.route("/login")
 def login_page():
     role = session.get("role")
+    is_owner = session.get("is_owner", False)
     if role == "worker":
         return redirect(url_for("my_attendance_portal"))
     elif role == "supervisor":
         return redirect(url_for("site_stock"))
-    elif role == "owner" or session.get("is_owner"):
+    elif role == "owner" or is_owner:
         return redirect(url_for("dashboard"))
     
     sites = database.get_all_sites()
-    return render_template("login.html", sites=sites)
+    resp = make_response(render_template("login.html", sites=sites))
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 # 0.3 Worker Login API
 @app.route("/api/auth/worker-login", methods=["POST", "OPTIONS"])
@@ -355,11 +360,25 @@ def my_attendance_portal():
         history=history
     )
 
-# 0.6 Universal Logout
-@app.route("/logout")
+# 0.6 Universal Logout - Instant 1-Click Session & Cookie Annihilation
+@app.route("/logout", methods=["GET", "POST"])
 def logout_user():
     session.clear()
-    return redirect(url_for("login_page"))
+    session.permanent = False
+    
+    resp = redirect(url_for("login_page"))
+    # Explicitly expire session cookies across root path
+    cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
+    resp.delete_cookie(cookie_name, path="/")
+    resp.delete_cookie("session", path="/")
+    resp.delete_cookie("remember_token", path="/")
+    
+    # Strict anti-cache headers so browser never serves stale redirect/page
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    resp.headers["Clear-Site-Data"] = '"cache", "cookies"'
+    return resp
 
 # 1. Internal Contractor Portal & Tracker Dashboard
 @app.route("/dashboard")
@@ -1592,11 +1611,16 @@ def owner_login_api():
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
 def owner_logout_api():
-    session["is_owner"] = False
-    session.pop("role", None)
-    session.pop("worker_name", None)
     session.clear()
-    return jsonify({"success": True, "is_owner": False, "message": "Office Work mode ended."})
+    session.permanent = False
+    resp = jsonify({"success": True, "is_owner": False, "message": "Office Work mode ended."})
+    resp.delete_cookie(app.config.get("SESSION_COOKIE_NAME", "session"), path="/")
+    resp.delete_cookie("session", path="/")
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    resp.headers["Clear-Site-Data"] = '"cache", "cookies"'
+    return resp
 
 @app.route("/api/owner/status", methods=["GET"])
 def owner_status_api():

@@ -25,11 +25,28 @@
             </div>
         </div>
 
-        <a href="/logout" onclick="return confirm('Do you want to log out?')" 
-           class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+        <a href="/logout" onclick="handleWorkerSignout(event); return false;" 
+           class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 cursor-pointer">
             <i class="fa-solid fa-right-from-bracket text-rose-400"></i>
             <span>Logout</span>
         </a>
+        <script>
+        async function handleWorkerSignout(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            try {
+                localStorage.removeItem('sandip_user_role');
+                localStorage.removeItem('sandip_worker_token');
+                sessionStorage.clear();
+            } catch(err) {}
+            if ('caches' in window) {
+                try {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(k => caches.delete(k)));
+                } catch(err) {}
+            }
+            window.location.replace('/logout?_t=' + Date.now());
+        }
+        </script>
     </div>
 
     <!-- Worker Profile Card -->
