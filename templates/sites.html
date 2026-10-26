@@ -27,11 +27,13 @@
                 Total: <span id="siteCount" class="font-bold text-blue-700 font-mono">{{ sites|length }} Sites</span>
             </div>
 
+            {% if not is_supervisor_view %}
             <!-- Add Site Button -->
             <button onclick="openAddSiteModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-2">
                 <i class="fa-solid fa-plus-circle text-sm"></i>
                 <span>+ Nayi Site Jodein</span>
             </button>
+            {% endif %}
         </div>
     </div>
 
@@ -123,12 +125,14 @@
                             <span>Maps ↗</span>
                         </a>
                         {% endif %}
+                        {% if not is_supervisor_view %}
                         <button type="button" onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 1000 }})'
                                 class="px-2.5 py-1 rounded-lg bg-[#14300A] hover:opacity-90 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
                                 title="Edit GPS Coordinates & Geofence">
                             <i class="fa-solid fa-pen-to-square"></i>
                             <span>Edit GPS</span>
                         </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -137,9 +141,11 @@
                 <a href="{{ url_for('site_report', site_id=s.id) }}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
                     <i class="fa-solid fa-file-invoice"></i> Material Hisab Dekhein &rarr;
                 </a>
+                {% if not is_supervisor_view %}
                 <button onclick='openEditSiteModal({{ s|tojson }})' class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
                     <i class="fa-solid fa-pen-to-square"></i> Edit
                 </button>
+                {% endif %}
             </div>
         </div>
         {% endfor %}

@@ -1295,14 +1295,17 @@ def export_monthly_excel():
 # 8. Sites Master Management
 @app.route("/sites")
 def sites_list():
-    is_owner = session.get("is_owner", False)
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
-    if not is_owner and user_site_id:
-        return redirect(url_for("site_stock"))
 
-    sites = database.get_all_sites()
+    all_sites = database.get_all_sites()
+    if not is_owner and user_site_id:
+        sites = [s for s in all_sites if s["id"] == int(user_site_id)]
+    else:
+        sites = all_sites
+
     points_counts = database.get_geo_points_counts_by_site()
-    return render_template("sites.html", sites=sites, points_counts=points_counts)
+    return render_template("sites.html", sites=sites, points_counts=points_counts, is_supervisor_view=(not is_owner))
 
 @app.route("/api/sites/<int:site_id>/edit", methods=["POST"])
 def edit_site(site_id):

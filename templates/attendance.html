@@ -30,7 +30,8 @@
 
 <div class="space-y-6">
 
-    <!-- Dual Attendance Mode Switcher Header (Same Clean Design) -->
+    {% if not is_supervisor_view %}
+    <!-- Dual Attendance Mode Switcher Header (Owner Only) -->
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <span class="px-4 py-2 rounded-xl bg-[#166534] text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
@@ -42,8 +43,8 @@
                 <span>2. 📍 GPS Attendance (Geo-Location) ↗</span>
             </a>
         </div>
-
     </div>
+    {% endif %}
 
     <!-- Top Action Bar -->
     <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -81,12 +82,14 @@
                 <input type="date" id="attDateInput" value="{{ selected_date }}" onchange="changeAttendanceDate(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
             </div>
 
+{% if not is_supervisor_view %}
             <button type="button" onclick="autoFetchFromGps()" id="autoFetchGpsBtn" 
                     class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-md transition flex items-center gap-1.5 border border-[#166534]" 
                     title="Automatically fill 21 sites sheet from GPS attendance">
                 <i class="fa-solid fa-satellite-dish text-amber-300"></i>
                 <span id="autoFetchGpsText">GPS Auto-Sync</span>
             </button>
+            {% endif %}
 
             <button type="button" onclick="saveAllManpower()" id="saveAllBtn" class="px-4 py-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-[#1C0A00] text-xs font-black shadow-md transition flex items-center gap-1.5">
                 <i class="fa-solid fa-floppy-disk"></i> <span>Save Attendance</span>
@@ -99,6 +102,7 @@
                 <span>📋 Fill from Previous Attendance</span>
             </button>
 
+{% if not is_supervisor_view %}
             <!-- 1 PAGE PDF DOWNLOAD BUTTON -->
             <a href="{{ url_for('export_manpower_pdf', date=selected_date) }}" id="exportPdfBtn" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-md transition flex items-center gap-1.5" title="Download 1-page PDF attendance sheet for all 21 sites">
                 <i class="fa-solid fa-file-pdf text-white text-sm"></i> <span>PDF (1 Page)</span>
@@ -107,6 +111,7 @@
             <a href="{{ url_for('export_manpower_excel', date=selected_date) }}" id="exportExcelBtn" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] border border-[#E2E8F0] text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
                 <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i> <span>Excel</span>
             </a>
+            {% endif %}
 
             <button type="button" onclick="shareAttendanceWhatsApp()" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
                 <i class="fa-brands fa-whatsapp text-sm"></i> <span>WhatsApp Share</span>
@@ -118,6 +123,7 @@
         </div>
     </div>
 
+{% if not is_supervisor_view %}
     <!-- Quick Navigation Toggle between Photo GPS Attendance & Manpower Register -->
     <div class="flex items-center gap-2 p-1.5 bg-white rounded-2xl text-xs font-bold text-[#0F172A] shadow-sm border border-[#E2E8F0] no-print">
         <a href="/geo-attendance" class="flex-1 py-2.5 px-3 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-center shadow flex items-center justify-center gap-1.5 transition">
@@ -129,6 +135,7 @@
             <span>📋 Daily Attendance Register</span>
         </a>
     </div>
+    {% endif %}
 
     <!-- ======================================================== -->
     <!-- SUPERVISOR ACTION CENTER: QUICK PHOTO ATTENDANCE & ADD WORKER -->
@@ -150,12 +157,14 @@
                     <span>Live Photo Attendance</span>
                 </h3>
             </div>
+{% if not is_supervisor_view %}
             <div class="flex items-center gap-2">
                 <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-satellite-dish text-[#93C572]"></i>
                     <span>GPS 500M Monitor &rarr;</span>
                 </a>
             </div>
+            {% endif %}
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
@@ -281,10 +290,12 @@
                     </div>
                 </div>
             </div>
+{% if not is_supervisor_view %}
             <a href="/geo-attendance" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
                 <i class="fa-solid fa-map-location-dot text-amber-300"></i>
                 <span>View Full GPS Map & Route ↗</span>
             </a>
+            {% endif %}
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
@@ -320,6 +331,7 @@
     </div>
     {% endif %}
 
+{% if not is_supervisor_view %}
     <!-- 10:30 AM Smart Auto-Analysis Banner -->
     <div class="bg-white border border-[#93C572] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
         <div class="flex items-center gap-3">
@@ -342,6 +354,7 @@
             </button>
         </div>
     </div>
+    {% endif %}
 
     <!-- Summary Metrics Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1195,7 +1208,7 @@ async function submitIndividualPhoto(e) {
                 </div>
 
                 <!-- Location Status Row -->
-                <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
+                <div id="indivLocStatus" class="hidden p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
                     <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
                     <span id="indivLocText">Searching phone GPS location...</span>
                 </div>
