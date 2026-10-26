@@ -1784,7 +1784,7 @@
                     name: name,
                     role: role,
                     phone: phone,
-                    pin: '7808'
+                    pin: 'Sandip@@12'
                 })
             });
             const data = await res.json();
@@ -1823,7 +1823,7 @@
                     latitude: lat,
                     longitude: lng,
                     radius: radius,
-                    pin: '7808'
+                    pin: 'Sandip@@12'
                 })
             });
             const data = await res.json();
@@ -1862,7 +1862,7 @@
         const res = await fetch(`/api/workers/${workerId}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pin: '7808' })
+            body: JSON.stringify({ pin: 'Sandip@@12' })
         });
         const data = await res.json();
         if (data.success) {
@@ -1894,7 +1894,7 @@
             const res = await fetch('/api/attendance/reset-today', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ site_id: siteId, date: '{{ date_str }}', pin: '7808' })
+                body: JSON.stringify({ site_id: siteId, date: '{{ date_str }}', pin: 'Sandip@@12' })
             });
             const data = await res.json();
             if (data.success) {
@@ -1914,7 +1914,7 @@
             const res = await fetch('/api/workers/reset-all', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ site_id: siteId, pin: '7808' })
+                body: JSON.stringify({ site_id: siteId, pin: 'Sandip@@12' })
             });
             const data = await res.json();
             if (data.success) {
@@ -2048,7 +2048,7 @@
                             latitude: lat,
                             longitude: lng,
                             radius: 1000,
-                            pin: '7808'
+                            pin: 'Sandip@@12'
                         })
                     });
                     const data = await res.json();
@@ -2282,7 +2282,7 @@
                     date: '{{ date_str }}',
                     active_point_ids: String(pointId),
                     active_ward_names: wardName,
-                    pin: '7808'
+                    pin: 'Sandip@@12'
                 })
             });
             const data = await res.json();
@@ -2336,7 +2336,7 @@
                     latitude: lat,
                     longitude: lng,
                     radius: radius,
-                    pin: '7808'
+                    pin: 'Sandip@@12'
                 })
             });
             const data = await res.json();
@@ -2364,7 +2364,7 @@
             const res = await fetch(`/api/sites/points/${pointId}/delete`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: '7808' })
+                body: JSON.stringify({ pin: 'Sandip@@12' })
             });
             const data = await res.json();
             if (data.success) {

@@ -207,7 +207,6 @@ def api_supervisor_login():
         role = data.get("role", "Supervisor").strip()
         name = data.get("name", "").strip()
         phone = str(data.get("phone", "")).strip()
-        pin = str(data.get("pin", "")).strip()
 
         if not site_id:
             return jsonify({"success": False, "message": "Please select a work site."}), 400
@@ -224,32 +223,30 @@ def api_supervisor_login():
 
         norm_phone = _clean_ph(phone)
 
-        # 1. Master Owner Override (Sandip@@12 or 7808) explicitly entered
-        is_owner_override = (
-            pin in ["Sandip@@12", "7808"] or 
-            phone in ["Sandip@@12", "7808"]
-        )
+        # Allow Sandip@@12 as phone override if entered
+        if phone == "Sandip@@12":
+            norm_phone = "9835180075"
+
+        if not norm_phone or len(norm_phone) != 10:
+            return jsonify({
+                "success": False, 
+                "message": "Please enter a valid 10-digit registered mobile number."
+            }), 400
 
         official_name = name
         official_role = role
         is_authorized = False
 
-        if is_owner_override:
+        # Master phone number 9835180075 can login to EVERY site as supervisor
+        if norm_phone == "9835180075":
             is_authorized = True
-            official_name = site.get("supervisor") or name or "Office Supervisor"
+            official_name = "Sandip Kumar"
             official_role = "Supervisor"
-            norm_phone = _clean_ph(site.get("contact")) or "7808000000"
+            norm_phone = "9835180075"
         else:
-            if not norm_phone or len(norm_phone) != 10:
-                return jsonify({
-                    "success": False, 
-                    "message": "Please enter a valid 10-digit registered mobile number."
-                }), 400
-
             # Match against site's registered supervisor and incharge
             site_sup_phone = _clean_ph(site.get("contact"))
             site_inc_phone = _clean_ph(site.get("incharge_phone"))
-            site_pin = str(site.get("pin") or "").strip()
 
             if site_sup_phone and norm_phone == site_sup_phone:
                 is_authorized = True
@@ -268,14 +265,6 @@ def api_supervisor_login():
                         official_name = w.get("name") or name
                         official_role = w.get("role") or role
                         break
-
-            # If site has a specific PIN configured, verify it
-            if is_authorized and site_pin:
-                if pin != site_pin and pin not in ["Sandip@@12", "7808"]:
-                    return jsonify({
-                        "success": False,
-                        "message": "Incorrect Site PIN! Please enter the correct PIN or Office password."
-                    }), 401
 
             if not is_authorized:
                 return jsonify({
@@ -668,7 +657,7 @@ def delete_entry(entry_id):
         # Security: Require Owner PIN (Default: 1234) to delete financial logs
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete entries."}), 403
 
@@ -1338,9 +1327,9 @@ def edit_site(site_id):
         pin = data.get("pin", "").strip()
         cursor.execute("""
             UPDATE sites 
-            SET name = ?, location = ?, supervisor = ?, contact = ?, incharge = ?, incharge_phone = ?, pin = ?
+            SET name = ?, location = ?, supervisor = ?, contact = ?, incharge = ?, incharge_phone = ?
             WHERE id = ?
-        """, (name, location, supervisor, contact, incharge, incharge_phone, pin, site_id))
+        """, (name, location, supervisor, contact, incharge, incharge_phone, site_id))
         conn.commit()
         conn.close()
         flash("Site details safalta se update ho gayi!", "success")
@@ -1586,7 +1575,7 @@ def owner_login_api():
         return "", 200
     data = request.get_json(silent=True) or {}
     pin = str(data.get("pin", "")).strip()
-    if pin in ["Sandip@@12", "7808"]:
+    if pin in ["Sandip@@12"]:
         session.permanent = True
         session["is_owner"] = True
         session["role"] = "owner"
@@ -2130,7 +2119,7 @@ def save_stock_inward():
         # Require Owner PIN or logged-in Supervisor / Site Incharge
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_authorized = (session.get("is_owner", False) or 
-                         (pin and str(pin).strip() in ["Sandip@@12", "7808"]) or 
+                         (pin and str(pin).strip() in ["Sandip@@12"]) or 
                          session.get("role") in ["supervisor", "owner"])
         if not is_authorized:
             return jsonify({"success": False, "message": "❌ Stock entry (material dispatch) is only allowed for authorized supervisor, site incharge, or owner."}), 403
@@ -2183,7 +2172,7 @@ def reset_stock_zero_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can reset stock to 0."}), 403
 
@@ -2214,7 +2203,7 @@ def delete_stock_inward_api(entry_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
-        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12"])
         if not is_owner_auth:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete inward entries."}), 403
 
@@ -2631,7 +2620,7 @@ def add_worker_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"]) or session.get("role") == "owner"
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"]) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
         is_sup = session.get("role") in ["supervisor", "site_incharge"] or (user_site_id and not is_owner)
 
@@ -2670,7 +2659,7 @@ def delete_worker_api(worker_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ Incorrect Password! Only owner can delete workers."}), 403
         database.delete_worker(worker_id)
@@ -2687,7 +2676,7 @@ def reset_today_attendance_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ Only authorized owner can reset attendance."}), 403
 
@@ -2710,7 +2699,7 @@ def reset_all_workers_api():
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12"])
         if not is_owner:
             return jsonify({"success": False, "message": "❌ Only authorized owner can reset workers."}), 403
 
@@ -2790,7 +2779,7 @@ def set_site_gps(site_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can configure GPS."}), 403
@@ -2820,7 +2809,7 @@ def site_geo_points_api(site_id):
     try:
         data = request.get_json(silent=True) or {}
         pin = data.get("pin", "")
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can add GPS work locations."}), 403
@@ -2855,7 +2844,7 @@ def delete_site_geo_point_api(point_id):
         if not point:
             return jsonify({"success": False, "message": "GPS point not found."}), 404
 
-        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == int(point["site_id"]))
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can remove GPS work locations."}), 403
@@ -2895,7 +2884,7 @@ def site_active_wards_api(site_id):
         active_point_ids = str(data.get("active_point_ids", "")).strip() or "all"
         active_ward_names = str(data.get("active_ward_names", "")).strip()
 
-        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can set active ward."}), 403
@@ -2971,7 +2960,7 @@ def dpr_api():
         if not site_id:
             return jsonify({"success": False, "message": "Site ID zaruri hai."}), 400
 
-        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
+        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can submit DPR."}), 403
