@@ -1,5 +1,5 @@
 // Service Worker for M/S Sandip Kumar Material Tracker
-const CACHE_NAME = 'sandip-tracker-v30';
+const CACHE_NAME = 'sandip-tracker-v35';
 const STATIC_ASSETS = [
   '/',
   '/static/css/theme.css',
@@ -44,8 +44,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static images/uploads: Cache First, fallback to network
-  if (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/static/')) {
+  // Static images/uploads/icons: Cache First, fallback to network (CSS and JS are Network-First)
+  const isImageOrIcon = url.pathname.startsWith('/uploads/') || 
+                        url.pathname.startsWith('/static/icons/') || 
+                        /\.(png|jpg|jpeg|svg|ico|webp|gif)$/i.test(url.pathname);
+  if (isImageOrIcon) {
     event.respondWith(
       caches.match(req).then((cached) => {
         if (cached) return cached;

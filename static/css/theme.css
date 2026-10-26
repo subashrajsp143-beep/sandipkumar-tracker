@@ -6,7 +6,7 @@
 :root {
     --primary: #166534;      /* sidebar, header, normal buttons */
     --highlight: #22C55E;    /* active menu line, small accents */
-    --bg: #F0FDF4;           /* page background: light green (Growth Green) */
+    --bg: #EAF7EE;           /* page background: visible light green (Growth Green) */
     --card: #FFFFFF;         /* cards and form fields */
     --border: #C7E6D1;       /* borders and dividers */
     --text: #052E16;         /* main text */
@@ -48,33 +48,8 @@
     --radius-lg: 8px;
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #052E16;
-        --card: #0A3A1E;
-        --text: #ECFDF3;
-        --text-soft: #9CC4AA;
-        --border: #14532D;
-        --action: #F97316;
-        --action-text: #1C0A00;
-        --primary: #166534;
-        --highlight: #4ADE80;
-        --on-primary: #FFFFFF;
-        --danger: #B91C1C;
-        --on-danger: #FFFFFF;
-
-        --status-success-bg: #064E3B;
-        --status-success-text: #A7F3D0;
-        --status-success-border: #047857;
-        --status-warning-bg: #78350F;
-        --status-warning-text: #FDE68A;
-        --status-warning-border: #B45309;
-        --status-danger-bg: #7F1D1D;
-        --status-danger-text: #FECACA;
-        --status-danger-border: #B91C1C;
-    }
-}
+/* Dark Mode: Active only when explicitly enabled via class or data-theme */
+/* (Auto-system dark mode disabled to preserve user-requested Light Green theme) */
 
 [data-theme="dark"],
 .dark {
@@ -117,8 +92,10 @@ html, body {
 main,
 .bg-screen,
 .bg-\[\#F0FDF4\],
+.bg-\[\#EAF7EE\],
 .bg-\[\#F4F6F5\],
-.bg-slate-50 {
+.bg-slate-50,
+.bg-slate-100 {
     background-color: var(--bg) !important;
     color: var(--text) !important;
 }
