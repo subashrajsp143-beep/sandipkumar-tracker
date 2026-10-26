@@ -1,88 +1,57 @@
 /* ==========================================================================
-   GROWTH GREEN PALETTE — M/S SANDIP KUMAR (JAL JEEVAN MISSION)
-   Defined as CSS variables in :root per strict design specification.
+   PALETTE — ONLY 3 COLOURS IN THE WHOLE APP (STRICT SPECIFICATION)
+   --pista: #93C572     (header, normal buttons, selected menu item, borders, icon backgrounds)
+   --dark:  #14300A     (all text, main action buttons, secondary button borders)
+   --white: #FFFFFF     (page, cards, sidebar, fields, text on dark buttons)
    ========================================================================== */
 
 :root {
-    --primary: #166534;      /* sidebar, header, normal buttons */
-    --highlight: #22C55E;    /* active menu line, small accents */
-    --bg: #EAF7EE;           /* page background: visible light green (Growth Green) */
-    --card: #FFFFFF;         /* cards and form fields */
-    --border: #C7E6D1;       /* borders and dividers */
-    --text: #052E16;         /* main text */
-    --text-soft: #4B6B57;    /* labels, hints, placeholders */
-    --on-primary: #FFFFFF;   /* text on green */
-    --action: #F97316;       /* the one main action button, with dark text #1C0A00 */
-    --action-text: #1C0A00;
-    --danger: #B91C1C;       /* delete only */
-    --on-danger: #FFFFFF;
+    --pista: #93C572;
+    --dark: #14300A;
+    --white: #FFFFFF;
+    --dark-soft: rgba(20, 48, 10, 0.7);
 
-    /* Semantic status chips */
-    --status-success-bg: #ECFDF5;
-    --status-success-text: #065F46;
-    --status-success-border: #A7F3D0;
-    --status-warning-bg: #FFFBEB;
-    --status-warning-text: #92400E;
-    --status-warning-border: #FDE68A;
-    --status-danger-bg: #FEF2F2;
-    --status-danger-text: #991B1B;
-    --status-danger-border: #FECACA;
+    /* Direct token mappings */
+    --primary: var(--pista);
+    --bg: var(--white);
+    --card: var(--white);
+    --border: var(--pista);
+    --text: var(--dark);
+    --text-soft: var(--dark-soft);
+    --on-primary: var(--dark);     /* Text on pista green must always be --dark, never white */
+    --action: var(--dark);         /* Main action button: --dark fill, --white text */
+    --action-text: var(--white);
+    --highlight: var(--pista);
+    --danger: var(--dark);
+    --on-danger: var(--white);
 
-    /* Backward compatibility mappings */
-    --color-primary: var(--primary);
-    --color-highlight: var(--highlight);
-    --color-background: var(--bg);
-    --color-card: var(--card);
-    --color-border: var(--border);
-    --color-text: var(--text);
-    --color-text-soft: var(--text-soft);
-    --color-primary-text: var(--on-primary);
-    --color-cta: var(--action);
-    --color-cta-text: var(--action-text);
-    --color-success: #16A34A;
-    --color-error: var(--danger);
-    --color-warning: #D97706;
+    /* Backward compatibility tokens mapped strictly to 3 colours */
+    --color-primary: var(--pista);
+    --color-highlight: var(--pista);
+    --color-background: var(--white);
+    --color-card: var(--white);
+    --color-border: var(--pista);
+    --color-text: var(--dark);
+    --color-text-soft: var(--dark-soft);
+    --color-primary-text: var(--dark);
+    --color-cta: var(--dark);
+    --color-cta-text: var(--white);
+    --color-success: var(--pista);
+    --color-error: var(--dark);
+    --color-warning: var(--pista);
 
     --radius-sm: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
 }
 
-/* Dark Mode: Active only when explicitly enabled via class or data-theme */
-/* (Auto-system dark mode disabled to preserve user-requested Light Green theme) */
-
-[data-theme="dark"],
-.dark {
-    --bg: #052E16;
-    --card: #0A3A1E;
-    --text: #ECFDF3;
-    --text-soft: #9CC4AA;
-    --border: #14532D;
-    --action: #F97316;
-    --action-text: #1C0A00;
-    --primary: #166534;
-    --highlight: #4ADE80;
-    --on-primary: #FFFFFF;
-    --danger: #B91C1C;
-    --on-danger: #FFFFFF;
-
-    --status-success-bg: #064E3B;
-    --status-success-text: #A7F3D0;
-    --status-success-border: #047857;
-    --status-warning-bg: #78350F;
-    --status-warning-text: #FDE68A;
-    --status-warning-border: #B45309;
-    --status-danger-bg: #7F1D1D;
-    --status-danger-text: #FECACA;
-    --status-danger-border: #B91C1C;
-}
-
 /* ==========================================================================
-   GLOBAL RESET & HIGH-CONTRAST READABILITY
+   1. GLOBAL RESET & PAGE CANVAS
+   Page background is --white, text is --dark.
    ========================================================================== */
 html, body {
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
+    background-color: var(--white) !important;
+    color: var(--dark) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 15px !important;
     line-height: 1.6 !important;
@@ -91,311 +60,421 @@ html, body {
 
 main,
 .bg-screen,
-.bg-\[\#F0FDF4\],
-.bg-\[\#EAF7EE\],
-.bg-\[\#F4F6F5\],
-.bg-slate-50,
-.bg-slate-100 {
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
+[class*="bg-slate"],
+[class*="bg-gray"],
+[class*="bg-zinc"],
+[class*="bg-neutral"],
+[class*="bg-[#F0FDF4]"],
+[class*="bg-[#EAF7EE]"],
+[class*="bg-[#F4F6F5]"] {
+    background-color: var(--white) !important;
+    color: var(--dark) !important;
 }
 
 /* ==========================================================================
-   CARDS & PANELS
+   2. RULE 4: CARDS AND FIELDS
+   --white with a 1px --pista border.
    ========================================================================== */
 .card-theme,
-.bg-white {
-    background-color: var(--card) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text) !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+.bg-white,
+[class*="bg-white"],
+.rounded-xl,
+.rounded-2xl {
+    background-color: var(--white) !important;
+    border-color: var(--pista) !important;
+    color: var(--dark) !important;
+    box-shadow: none !important;
+}
+
+.card-theme,
+main .bg-white,
+main .rounded-xl,
+main .rounded-2xl {
+    border: 1px solid var(--pista) !important;
 }
 
 .card-theme h1, .card-theme h2, .card-theme h3, .card-theme h4,
 .bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4 {
-    color: var(--text) !important;
+    color: var(--dark) !important;
+}
+
+input, select, textarea {
+    background-color: var(--white) !important;
+    color: var(--dark) !important;
+    border: 1px solid var(--pista) !important;
+    box-shadow: none !important;
+    border-radius: var(--radius-md) !important;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--dark) !important;
+    outline: none !important;
 }
 
 /* ==========================================================================
-   TYPOGRAPHY
+   3. RULE 1 & RULE 6: ALL TEXT (--dark)
+   Text on pista green must always be --dark, never white.
    ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text) !important;
+    color: var(--dark) !important;
     letter-spacing: -0.015em !important;
 }
 
+p, span, div, td, th, li, a, strong, b, em,
 .text-main,
-.text-slate-900,
-.text-slate-800,
-.text-slate-700,
-.text-slate-950,
-.text-emerald-900,
-.text-blue-900,
-.text-\[\#052E16\],
-[class*="text-\[\#052E16\]"] {
-    color: var(--text) !important;
+[class*="text-slate"],
+[class*="text-gray"],
+[class*="text-zinc"],
+[class*="text-neutral"],
+[class*="text-emerald"],
+[class*="text-teal"],
+[class*="text-blue"],
+[class*="text-indigo"],
+[class*="text-violet"],
+[class*="text-amber"],
+[class*="text-rose"],
+[class*="text-red"],
+[class*="text-orange"],
+[class*="text-[#052E16]"],
+[class*="text-[#0F172A]"] {
+    color: var(--dark) !important;
 }
 
-p,
+/* ==========================================================================
+   4. RULE 2: HINTS, PLACEHOLDERS, LABELS AND DISABLED TEXT
+   Use --dark at 70% opacity, not a new grey.
+   ========================================================================== */
 .text-soft,
-.text-slate-500,
+.text-muted,
+label,
 .text-slate-400,
+.text-slate-500,
 .text-slate-600,
-.text-\[\#4B6B57\],
-[class*="text-\[\#4B6B57\]"] {
-    color: var(--text-soft) !important;
+.text-gray-400,
+.text-gray-500,
+.text-zinc-400,
+.text-zinc-500,
+[class*="text-[#4B6B57]"],
+[disabled],
+.disabled {
+    color: var(--dark-soft) !important;
 }
 
-/* Placeholders (at least 4.5:1 contrast, not near-white) */
-::placeholder {
-    color: var(--text-soft) !important;
+::placeholder,
+::-webkit-input-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder {
+    color: var(--dark-soft) !important;
     opacity: 1 !important;
 }
-::-webkit-input-placeholder {
-    color: var(--text-soft) !important;
-}
-::-moz-placeholder {
-    color: var(--text-soft) !important;
-}
-:-ms-input-placeholder {
-    color: var(--text-soft) !important;
-}
-
-/* Borders */
-.border,
-.border-slate-100,
-.border-slate-200,
-.border-slate-200\/80,
-.border-slate-200\/90,
-.border-slate-300,
-.border-slate-700,
-.border-slate-800,
-.border-\[\#C7E6D1\] {
-    border-color: var(--border) !important;
-}
 
 /* ==========================================================================
-   BUTTONS
-   ========================================================================== */
-
-/* 1. Main Action Button: --action (#F97316) with dark text (#1C0A00) */
-.btn-cta,
-.btn-cta-primary,
-.btn-action,
-#saveAllBtn {
-    background-color: var(--action) !important;
-    background-image: none !important;
-    color: var(--action-text) !important;
-    border: 1px solid var(--action) !important;
-    box-shadow: 0 1px 2px rgba(249, 115, 22, 0.25) !important;
-}
-.btn-cta:hover,
-.btn-cta-primary:hover,
-.btn-action:hover,
-#saveAllBtn:hover {
-    background-color: #EA580C !important;
-    color: var(--action-text) !important;
-}
-.btn-cta *,
-.btn-cta-primary *,
-.btn-action *,
-#saveAllBtn * {
-    color: var(--action-text) !important;
-}
-
-/* 2. Primary Button: --primary fill with --on-primary text */
-.btn-primary,
-.btn-primary-sm,
-#exportPdfBtn,
-#btnExportLettersPdf {
-    background-color: var(--primary) !important;
-    background-image: none !important;
-    color: var(--on-primary) !important;
-    border: 1px solid var(--primary) !important;
-    box-shadow: 0 1px 2px rgba(22, 101, 52, 0.2) !important;
-}
-.btn-primary:hover,
-.btn-primary-sm:hover,
-#exportPdfBtn:hover,
-#btnExportLettersPdf:hover {
-    background-color: #14532D !important;
-    color: var(--on-primary) !important;
-}
-.btn-primary *,
-.btn-primary-sm *,
-#exportPdfBtn *,
-#btnExportLettersPdf * {
-    color: var(--on-primary) !important;
-}
-
-/* 3. Secondary Button: White fill with --primary border and --primary text */
-.btn-secondary,
-.btn-secondary-outline,
-.btn-secondary-sm {
-    background-color: var(--card) !important;
-    color: var(--primary) !important;
-    border: 1.5px solid var(--primary) !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-}
-.btn-secondary:hover,
-.btn-secondary-outline:hover,
-.btn-secondary-sm:hover {
-    background-color: #F8FAFC !important;
-    border-color: var(--primary) !important;
-    color: var(--primary) !important;
-}
-.btn-secondary *,
-.btn-secondary-outline *,
-.btn-secondary-sm * {
-    color: var(--primary) !important;
-}
-
-/* 4. Danger Button: --danger (#B91C1C) for delete only */
-.btn-danger,
-.btn-delete,
-.owner-delete-btn {
-    background-color: var(--danger) !important;
-    background-image: none !important;
-    color: var(--on-danger) !important;
-    border: 1px solid var(--danger) !important;
-}
-.btn-danger *,
-.btn-delete *,
-.owner-delete-btn * {
-    color: var(--on-danger) !important;
-}
-.btn-danger:hover,
-.btn-delete:hover,
-.owner-delete-btn:hover {
-    background-color: #991B1B !important;
-    color: var(--on-danger) !important;
-}
-
-/* ==========================================================================
-   STATUS CHIPS (keep their meaning, readable text)
-   ========================================================================== */
-.status-pill-success,
-.status-success,
-.bg-emerald-50,
-.bg-emerald-100 {
-    background-color: var(--status-success-bg) !important;
-    color: var(--status-success-text) !important;
-    border-color: var(--status-success-border) !important;
-}
-
-.status-pill-warning,
-.status-warning,
-.bg-amber-50,
-.bg-amber-100 {
-    background-color: var(--status-warning-bg) !important;
-    color: var(--status-warning-text) !important;
-    border-color: var(--status-warning-border) !important;
-}
-
-.status-pill-danger,
-.status-danger,
-.bg-rose-50,
-.bg-rose-100,
-.bg-red-50,
-.bg-red-100 {
-    background-color: var(--status-danger-bg) !important;
-    color: var(--status-danger-text) !important;
-    border-color: var(--status-danger-border) !important;
-}
-
-/* ==========================================================================
-   PRIMARY GREEN SHELL (Header, Sidebar, Navigation Bar)
+   5. RULE 3: HEADER & SIDEBAR
+   Header: --pista with --dark text.
+   Sidebar: --white with --dark text, selected item --pista.
    ========================================================================== */
 header,
-#appSidebar,
-nav.fixed.bottom-0 {
-    background-color: var(--primary) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
-}
-
-header *,
-#appSidebar *,
-nav.fixed.bottom-0 * {
-    color: var(--on-primary) !important;
+header * {
+    background-color: var(--pista) !important;
+    color: var(--dark) !important;
+    border-color: var(--pista) !important;
 }
 
 header button,
 header a {
     background-color: transparent !important;
-    border-color: rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid var(--dark) !important;
+    color: var(--dark) !important;
 }
 
-#appSidebar {
-    background-color: var(--primary) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-#appSidebar * {
-    color: #F1F5F9 !important;
-}
-#appSidebar i {
-    color: var(--highlight) !important;
+header i,
+header span,
+header h1,
+header h2 {
+    color: var(--dark) !important;
 }
 
-.active-sidebar-pill {
-    background-color: rgba(255, 255, 255, 0.18) !important;
-    border-left: 3px solid var(--highlight) !important;
-}
-.active-sidebar-pill * {
-    color: #FFFFFF !important;
-}
-.active-sidebar-pill i {
-    color: var(--highlight) !important;
+#appSidebar,
+aside {
+    background-color: var(--white) !important;
+    border-right: 1px solid var(--pista) !important;
 }
 
+#appSidebar *,
+aside * {
+    color: var(--dark) !important;
+}
+
+#appSidebar a,
+#appSidebar button {
+    background-color: transparent !important;
+    color: var(--dark) !important;
+}
+
+#appSidebar a:hover,
+#appSidebar button:hover {
+    background-color: rgba(147, 197, 114, 0.25) !important;
+    color: var(--dark) !important;
+}
+
+/* Selected menu item: --pista */
+.active-sidebar-pill,
+.active-pill,
+#appSidebar a.active,
+#appSidebar .bg-white\/15,
+#appSidebar .bg-white\/10 {
+    background-color: var(--pista) !important;
+    color: var(--dark) !important;
+    border-left: 3px solid var(--dark) !important;
+}
+
+.active-sidebar-pill *,
+.active-pill * {
+    color: var(--dark) !important;
+}
+
+.active-sidebar-pill i,
+.active-pill i {
+    color: var(--dark) !important;
+}
+
+/* Mobile Sticky Bottom Navigation Bar */
 nav.fixed.bottom-0 {
-    background-color: var(--primary) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background-color: var(--pista) !important;
+    border-top: 1px solid var(--pista) !important;
+    box-shadow: none !important;
 }
+
+nav.fixed.bottom-0 * {
+    color: var(--dark) !important;
+}
+
 nav.fixed.bottom-0 a,
 nav.fixed.bottom-0 button {
-    color: #E2E8F0 !important;
+    color: var(--dark) !important;
 }
-nav.fixed.bottom-0 .w-11.h-11,
-nav.fixed.bottom-0 .w-12.h-12 {
-    background: #0F5132 !important;
-    border: 2px solid var(--highlight) !important;
-    color: #FFFFFF !important;
+
+nav.fixed.bottom-0 .bg-white\/15 {
+    background-color: var(--white) !important;
+    border: 1px solid var(--dark) !important;
+}
+
+nav.fixed.bottom-0 .bg-white\/15 * {
+    color: var(--dark) !important;
 }
 
 /* ==========================================================================
-   TABLES & INPUTS
+   6. RULE 5: BUTTONS
+   - Normal button: --pista fill, --dark text.
+   - Main action button (one per area): --dark fill, --white text.
+   - Secondary button: --white fill, 1.5px --dark border, --dark text.
+   ========================================================================== */
+
+/* 6A. Normal Buttons: --pista fill, --dark text */
+button,
+a.btn,
+.btn-primary,
+.btn-normal,
+.btn-pista,
+[class*="bg-[#166534]"],
+[class*="bg-teal"],
+[class*="bg-emerald"],
+[class*="bg-green"],
+[class*="bg-blue"],
+[class*="bg-indigo"],
+[class*="bg-sky"] {
+    background-color: var(--pista) !important;
+    color: var(--dark) !important;
+    border: 1px solid var(--pista) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+button *,
+a.btn *,
+.btn-primary *,
+.btn-normal * {
+    color: var(--dark) !important;
+}
+
+button:hover,
+a.btn:hover,
+.btn-primary:hover,
+.btn-normal:hover {
+    background-color: #85B864 !important;
+    color: var(--dark) !important;
+}
+
+/* 6B. Main Action Button: --dark fill, --white text */
+.btn-action,
+.btn-action-main,
+.btn-cta,
+.btn-save-attendance,
+.btn-new-letter,
+#saveAllBtn,
+[class*="bg-[#F97316]"],
+[class*="bg-orange"],
+[class*="bg-amber-500"],
+button[type="submit"]:not(.btn-secondary) {
+    background-color: var(--dark) !important;
+    color: var(--white) !important;
+    border: 1px solid var(--dark) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.btn-action *,
+.btn-action-main *,
+.btn-cta *,
+.btn-save-attendance *,
+.btn-new-letter *,
+#saveAllBtn *,
+[class*="bg-[#F97316]"] *,
+[class*="bg-orange"] *,
+button[type="submit"]:not(.btn-secondary) * {
+    color: var(--white) !important;
+}
+
+.btn-action:hover,
+.btn-action-main:hover,
+.btn-cta:hover,
+#saveAllBtn:hover {
+    background-color: #0c1f06 !important;
+    color: var(--white) !important;
+}
+
+/* 6C. Secondary Button: --white fill, 1.5px --dark border, --dark text */
+.btn-secondary,
+.btn-secondary-outline,
+.btn-secondary-sm,
+.btn-outline,
+.btn-danger,
+.btn-delete,
+.owner-delete-btn,
+[class*="bg-[#B91C1C]"],
+[class*="bg-rose"],
+[class*="bg-red"] {
+    background-color: var(--white) !important;
+    color: var(--dark) !important;
+    border: 1.5px solid var(--dark) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.btn-secondary *,
+.btn-secondary-outline *,
+.btn-secondary-sm *,
+.btn-outline *,
+.btn-danger *,
+.btn-delete *,
+.owner-delete-btn * {
+    color: var(--dark) !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary-outline:hover,
+.btn-secondary-sm:hover,
+.btn-outline:hover {
+    background-color: rgba(147, 197, 114, 0.2) !important;
+    color: var(--dark) !important;
+}
+
+/* ==========================================================================
+   7. ICON BACKGROUNDS & SMALL ACCENTS
+   --pista: icon backgrounds, with --dark icon.
+   ========================================================================== */
+.icon-box,
+[class*="bg-emerald-50"],
+[class*="bg-teal-50"],
+[class*="bg-blue-50"],
+[class*="bg-sky-50"],
+[class*="bg-purple-50"],
+[class*="bg-violet-50"],
+[class*="bg-amber-50"],
+[class*="bg-rose-50"],
+[class*="bg-red-50"] {
+    background-color: var(--pista) !important;
+    border: 1px solid var(--pista) !important;
+    color: var(--dark) !important;
+}
+
+.icon-box i,
+[class*="bg-emerald-50"] i,
+[class*="bg-teal-50"] i,
+[class*="bg-blue-50"] i,
+[class*="bg-sky-50"] i,
+[class*="bg-purple-50"] i,
+[class*="bg-violet-50"] i,
+[class*="bg-amber-50"] i,
+[class*="bg-rose-50"] i,
+[class*="bg-red-50"] i {
+    color: var(--dark) !important;
+}
+
+/* ==========================================================================
+   8. STATUS CHIPS & BADGES
+   Strictly use only the 3 colours.
+   ========================================================================== */
+.status-pill-success,
+.status-success,
+.status-pill-active {
+    background-color: var(--pista) !important;
+    color: var(--dark) !important;
+    border: 1px solid var(--pista) !important;
+}
+
+.status-pill-warning,
+.status-warning,
+.status-pill-danger,
+.status-danger {
+    background-color: var(--white) !important;
+    color: var(--dark) !important;
+    border: 1.5px solid var(--dark) !important;
+}
+
+/* ==========================================================================
+   9. BORDERS & DIVIDERS
+   1px --pista border.
+   ========================================================================== */
+.border,
+[class*="border-slate"],
+[class*="border-gray"],
+[class*="border-zinc"],
+[class*="border-emerald"],
+[class*="border-teal"],
+[class*="border-[#C7E6D1]"],
+hr,
+.divide-y > * {
+    border-color: var(--pista) !important;
+}
+
+/* ==========================================================================
+   10. TABLES
    ========================================================================== */
 table {
     border-collapse: collapse !important;
     width: 100% !important;
-}
-table thead tr,
-table thead th {
-    background-color: var(--primary) !important;
-    color: var(--on-primary) !important;
-    border-bottom: 1px solid var(--border) !important;
-    padding: 12px 14px !important;
-}
-table thead th * {
-    color: var(--on-primary) !important;
-}
-table tbody td {
-    border-bottom: 1px solid var(--border) !important;
-    color: var(--text) !important;
-    padding: 12px 14px !important;
-    background-color: var(--card) !important;
-}
-table tbody tr:hover td {
-    background-color: #F8FAFC !important;
+    border: 1px solid var(--pista) !important;
 }
 
-input, select, textarea {
-    background-color: var(--card) !important;
-    color: var(--text) !important;
-    border: 1.5px solid var(--border) !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+table thead tr,
+table thead th {
+    background-color: var(--pista) !important;
+    color: var(--dark) !important;
+    border-bottom: 1px solid var(--pista) !important;
+    padding: 12px 14px !important;
 }
-input:focus, select:focus, textarea:focus {
-    border-color: var(--primary) !important;
-    outline-color: var(--primary) !important;
+
+table thead th * {
+    color: var(--dark) !important;
+}
+
+table tbody td {
+    border-bottom: 1px solid var(--pista) !important;
+    color: var(--dark) !important;
+    padding: 12px 14px !important;
+    background-color: var(--white) !important;
+}
+
+table tbody tr:hover td {
+    background-color: rgba(147, 197, 114, 0.15) !important;
 }

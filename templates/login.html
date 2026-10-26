@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi" style="background-color: #EAF7EE !important;" class="min-h-full bg-[#EAF7EE]">
+<html lang="hi" style="background-color: #FFFFFF !important;" class="min-h-full bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=12.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=20.0">
     <style>
         html {
             overflow-x: hidden;
@@ -23,7 +23,7 @@
         }
     </style>
 </head>
-<body style="background-color: #EAF7EE !important;" class="min-h-screen bg-[#EAF7EE] text-[#052E16] flex flex-col items-center justify-center p-4 py-8">
+<body style="background-color: #FFFFFF !important;" class="min-h-screen bg-white text-[#14300A] flex flex-col items-center justify-center p-4 py-8">
 
     <!-- Header / Brand with Official Option 2 Logo -->
     <div class="w-full max-w-md text-center mb-6">
@@ -35,10 +35,10 @@
     </div>
 
     <!-- Login Container Card -->
-    <div class="w-full max-w-md bg-white rounded-lg p-6 sm:p-8 border border-[#C7E6D1]">
+    <div class="w-full max-w-md bg-white rounded-lg p-6 sm:p-8 border border-[#93C572]">
         
         <!-- Role Tabs -->
-        <div class="grid grid-cols-3 gap-1 p-1 bg-[#F0FDF4] rounded-md mb-6 border border-[#C7E6D1] text-center text-xs font-medium">
+        <div class="grid grid-cols-3 gap-1 p-1 bg-[#F0FDF4] rounded-md mb-6 border border-[#93C572] text-center text-xs font-medium">
             <button type="button" id="tabWorkerBtn" onclick="switchTab('worker')" 
                     class="py-2.5 rounded-xl bg-indigo-600 text-white shadow-sm transition">
                 👷 वर्कर
@@ -57,7 +57,7 @@
         <form id="workerForm" onsubmit="handleWorkerLogin(event)" class="space-y-4">
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपकी साइट (Work Site) *</label>
-                <select id="wSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+                <select id="wSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
                     <option value="">-- साइट चुनें --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
@@ -67,7 +67,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपका कार्य / पद (Work Role) *</label>
-                <select id="wRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+                <select id="wRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
                     <option value="Data Entry">डाटा एंट्री ऑपरेटर (Data Entry / DEO)</option>
                     <option value="Plumber">प्लंबर (Plumber)</option>
                     <option value="Helper">हेल्पर / मजदूर (Helper)</option>
@@ -81,13 +81,13 @@
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपका पूरा नाम *</label>
                 <input type="text" id="wName" required placeholder="उदा. संतोष कुमार" 
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">मोबाइल नंबर *</label>
                 <input type="tel" id="wPhone" required placeholder="उदा. 9876543210" maxlength="10"
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
                 <span class="text-[10px] text-[#4B6B57] mt-1 block">यह फोन नंबर एक बार सेव रहेगा ताकि आपको बार-बार लॉगिन न करना पड़े।</span>
             </div>
 
@@ -101,7 +101,7 @@
         <form id="supervisorForm" onsubmit="handleSupervisorLogin(event)" class="space-y-4 hidden">
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपकी साइट (Site Incharge / Supervisor) *</label>
-                <select id="supSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                <select id="supSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
                     <option value="">-- साइट चुनें --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
@@ -111,7 +111,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">पद (Role) *</label>
-                <select id="supRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                <select id="supRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
                     <option value="Supervisor">सुपरवाइज़र (Supervisor)</option>
                     <option value="Site Incharge">साइट इनचार्ज (Site Incharge)</option>
                     <option value="Data Entry">डाटा एंट्री ऑपरेटर (DEO)</option>
@@ -121,13 +121,13 @@
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">सुपरवाइज़र का नाम *</label>
                 <input type="text" id="supName" required placeholder="उदा. रमेश सिंह" 
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">मोबाइल नंबर *</label>
                 <input type="tel" id="supPhone" required placeholder="उदा. 9876543210" maxlength="10"
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#C7E6D1] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
             </div>
 
             <button type="submit" id="supLoginBtn" class="w-full btn-cta">
