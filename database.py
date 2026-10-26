@@ -129,6 +129,8 @@ def init_db():
         cursor.execute("ALTER TABLE sites ADD COLUMN incharge TEXT")
     if "incharge_phone" not in existing_cols:
         cursor.execute("ALTER TABLE sites ADD COLUMN incharge_phone TEXT")
+    if "pin" not in existing_cols:
+        cursor.execute("ALTER TABLE sites ADD COLUMN pin TEXT DEFAULT ''")
 
     # Ensure image_url column exists in materials
     cursor.execute("PRAGMA table_info(materials)")

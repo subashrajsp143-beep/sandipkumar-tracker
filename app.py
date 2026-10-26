@@ -196,7 +196,7 @@ def api_worker_login():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-# 0.4 Supervisor Login API
+# 0.4 Supervisor Login API (Strict Authorization & Site Isolation)
 @app.route("/api/auth/supervisor-login", methods=["POST", "OPTIONS"])
 def api_supervisor_login():
     if request.method == "OPTIONS":
@@ -206,20 +206,109 @@ def api_supervisor_login():
         site_id = int(data.get("site_id", 0))
         role = data.get("role", "Supervisor").strip()
         name = data.get("name", "").strip()
-        phone = data.get("phone", "").strip()
+        phone = str(data.get("phone", "")).strip()
+        pin = str(data.get("pin", "")).strip()
 
-        if not site_id or not name:
-            return jsonify({"success": False, "message": "Site and Name are required."}), 400
+        if not site_id:
+            return jsonify({"success": False, "message": "Please select a work site."}), 400
 
-        worker = database.get_or_create_worker(site_id, name, role, phone)
+        site = database.get_site_by_id(site_id)
+        if not site:
+            return jsonify({"success": False, "message": "Selected site does not exist."}), 404
+
+        def _clean_ph(p):
+            if not p:
+                return ""
+            d = re.sub(r"\D", "", str(p))
+            return d[-10:] if len(d) >= 10 else d
+
+        norm_phone = _clean_ph(phone)
+
+        # 1. Master Owner Override (Sandip@@12 or 7808) explicitly entered
+        is_owner_override = (
+            pin in ["Sandip@@12", "7808"] or 
+            phone in ["Sandip@@12", "7808"]
+        )
+
+        official_name = name
+        official_role = role
+        is_authorized = False
+
+        if is_owner_override:
+            is_authorized = True
+            official_name = site.get("supervisor") or name or "Office Supervisor"
+            official_role = "Supervisor"
+            norm_phone = _clean_ph(site.get("contact")) or "7808000000"
+        else:
+            if not norm_phone or len(norm_phone) != 10:
+                return jsonify({
+                    "success": False, 
+                    "message": "Please enter a valid 10-digit registered mobile number."
+                }), 400
+
+            # Match against site's registered supervisor and incharge
+            site_sup_phone = _clean_ph(site.get("contact"))
+            site_inc_phone = _clean_ph(site.get("incharge_phone"))
+            site_pin = str(site.get("pin") or "").strip()
+
+            if site_sup_phone and norm_phone == site_sup_phone:
+                is_authorized = True
+                official_name = site.get("supervisor") or name or "Supervisor"
+                official_role = "Supervisor"
+            elif site_inc_phone and norm_phone == site_inc_phone:
+                is_authorized = True
+                official_name = site.get("incharge") or name or "Site Incharge"
+                official_role = "Site Incharge"
+            else:
+                # Check if registered DEO (Data Entry Operator) in site_workers
+                workers = database.get_all_workers_for_site(site_id)
+                for w in workers:
+                    if w.get("role") in ["DEO", "Data Entry"] and _clean_ph(w.get("phone")) == norm_phone and w.get("is_active", 1):
+                        is_authorized = True
+                        official_name = w.get("name") or name
+                        official_role = w.get("role") or role
+                        break
+
+            # If site has a specific PIN configured, verify it
+            if is_authorized and site_pin:
+                if pin != site_pin and pin not in ["Sandip@@12", "7808"]:
+                    return jsonify({
+                        "success": False,
+                        "message": "Incorrect Site PIN! Please enter the correct PIN or Office password."
+                    }), 401
+
+            if not is_authorized:
+                # Cross-site check: find if this phone belongs to ANY other site
+                other_site_name = None
+                all_sites = database.get_all_sites()
+                for os_site in all_sites:
+                    if os_site["id"] == site_id:
+                        continue
+                    if (_clean_ph(os_site.get("contact")) == norm_phone) or (_clean_ph(os_site.get("incharge_phone")) == norm_phone):
+                        other_site_name = os_site.get("name")
+                        break
+
+                if other_site_name:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Access Denied: Mobile number {phone} is registered for '{other_site_name}', NOT for '{site['name']}'. You can only login to your assigned site: '{other_site_name}'."
+                    }), 403
+                else:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Access Denied: Mobile number {phone} is not registered as an authorized supervisor for '{site['name']}'. Contact Office to register."
+                    }), 403
+
+        # Create or fetch worker record with verified official name and role
+        worker = database.get_or_create_worker(site_id, official_name, official_role, norm_phone)
         session.permanent = True
         session["role"] = "supervisor"
         session["is_owner"] = False
         session["worker_id"] = worker["id"]
         session["worker_token"] = worker["worker_token"]
-        session["worker_name"] = worker["name"]
-        session["worker_role"] = worker["role"]
-        session["worker_phone"] = worker["phone"]
+        session["worker_name"] = official_name
+        session["worker_role"] = official_role
+        session["worker_phone"] = norm_phone
         session["site_id"] = worker["site_id"]
         session["site_name"] = worker["site_name"]
 
@@ -248,8 +337,8 @@ def api_supervisor_login():
                 # Silently log supervisor location for Office Work Live Monitor
                 database.log_supervisor_silent_ping(
                     site_id=site_id,
-                    supervisor_name=name,
-                    phone=phone,
+                    supervisor_name=official_name,
+                    phone=norm_phone,
                     lat=float(lat),
                     lng=float(lng),
                     accuracy=float(data.get("accuracy") or 0),
@@ -1262,11 +1351,12 @@ def edit_site(site_id):
 
         conn = database.get_db()
         cursor = conn.cursor()
+        pin = data.get("pin", "").strip()
         cursor.execute("""
             UPDATE sites 
-            SET name = ?, location = ?, supervisor = ?, contact = ?, incharge = ?, incharge_phone = ?
+            SET name = ?, location = ?, supervisor = ?, contact = ?, incharge = ?, incharge_phone = ?, pin = ?
             WHERE id = ?
-        """, (name, location, supervisor, contact, incharge, incharge_phone, site_id))
+        """, (name, location, supervisor, contact, incharge, incharge_phone, pin, site_id))
         conn.commit()
         conn.close()
         flash("Site details safalta se update ho gayi!", "success")
