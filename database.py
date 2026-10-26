@@ -1004,19 +1004,19 @@ def get_site_stock_inventory(site_id=None):
         cons = r["total_consumed"]
         if inw > 0 and bal <= 0:
             r["status"] = "out_of_stock"
-            r["status_label"] = "खत्म (Out of Stock)"
+            r["status_label"] = "Out of Stock"
             r["status_color"] = "red"
         elif inw == 0 and cons > 0:
             r["status"] = "untracked_inward"
-            r["status_label"] = "बिना इनवर्ड दर्ज खर्च"
+            r["status_label"] = "Usage without Inward"
             r["status_color"] = "yellow"
         elif inw > 0 and bal <= max(5, inw * 0.15):
             r["status"] = "low_stock"
-            r["status_label"] = "कम स्टॉक (Low Stock)"
+            r["status_label"] = "Low Stock"
             r["status_color"] = "amber"
         else:
             r["status"] = "healthy"
-            r["status_label"] = "पर्याप्त स्टॉक (In Stock)"
+            r["status_label"] = "In Stock"
             r["status_color"] = "green"
 
         if inw > 0:
@@ -1067,11 +1067,11 @@ def get_material_stock_ledger(site_id, material_id):
             "id": item["id"],
             "date": item["event_date"],
             "type": "INWARD",
-            "type_label": "🟢 भेजा गया (Inward)",
+            "type_label": "🟢 Inward",
             "qty": item["quantity"],
             "signed_qty": item["quantity"],
-            "ref": item["ref_no"] or "चालान / ऑफिस प्रेषण",
-            "person": item["source_person"] or "मालिक / हेड ऑफिस",
+            "ref": item["ref_no"] or "Challan / Office Dispatch",
+            "person": item["source_person"] or "Owner / Head Office",
             "remarks": item["remarks"] or "",
             "created_at": item["created_at"]
         })
@@ -1081,11 +1081,11 @@ def get_material_stock_ledger(site_id, material_id):
             "id": item["id"],
             "date": item["event_date"],
             "type": "OUTWARD",
-            "type_label": "🔴 खर्च हुआ (Daily Use)",
+            "type_label": "🔴 Daily Use",
             "qty": item["quantity"],
             "signed_qty": -item["quantity"],
-            "ref": item["ref_no"] or "दैनिक उपयोग",
-            "person": item["source_person"] or site_info.get("supervisor", "सुपरवाइजर"),
+            "ref": item["ref_no"] or "Daily Usage",
+            "person": item["source_person"] or site_info.get("supervisor", "Supervisor"),
             "remarks": item["remarks"] or "",
             "created_at": item["created_at"]
         })
@@ -1862,14 +1862,14 @@ def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, de
         if default_site_lat and default_site_lng:
             candidates.append({
                 "id": 0,
-                "name": "मुख्य केंद्र (Main Center)",
+                "name": "Main Center",
                 "lat": float(default_site_lat),
                 "lng": float(default_site_lng),
                 "radius": int(default_radius or 1000)
             })
 
     if not candidates:
-        return 99999.0, False, "GPS सेट नहीं", int(default_radius or 1000), []
+        return 99999.0, False, "GPS Not Set", int(default_radius or 1000), []
 
     evaluated = []
     for c in candidates:
@@ -2141,7 +2141,7 @@ def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_da
 
         distance = 0.0
         is_on_site = True
-        nearest_point = "फोटो हाजिरी"
+        nearest_point = "Photo Attendance"
 
         if lat and lng:
             try:
@@ -2151,12 +2151,12 @@ def save_worker_photo_attendance(worker_id, site_id, lat, lng, photo_url, att_da
             except Exception:
                 distance = 0.0
                 is_on_site = True
-                nearest_point = "फोटो हाजिरी"
+                nearest_point = "Photo Attendance"
 
             cursor.execute("""
                 INSERT INTO worker_location_pings (worker_id, latitude, longitude, distance_meters, is_on_site, nearest_point_name, ping_time)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (worker_id, float(lat), float(lng), round(distance, 1), 1 if is_on_site else 0, f"📸 फोटो हाजिरी ({nearest_point})", now_str))
+            """, (worker_id, float(lat), float(lng), round(distance, 1), 1 if is_on_site else 0, f"📸 Photo Attendance ({nearest_point})", now_str))
 
         cursor.execute("""
             SELECT * FROM geo_attendance WHERE worker_id = ? AND att_date = ?
@@ -2299,7 +2299,7 @@ def init_photo_tables():
         uploaded_at TEXT NOT NULL,
         uploaded_by TEXT DEFAULT '',
         uploader_phone TEXT DEFAULT '',
-        category TEXT NOT NULL DEFAULT 'सामान्य कार्य',
+        category TEXT NOT NULL DEFAULT 'General Work',
         description TEXT DEFAULT '',
         latitude REAL,
         longitude REAL,
@@ -2475,7 +2475,7 @@ def log_supervisor_silent_ping(site_id, supervisor_name="", phone="", lat=0.0, l
         # Calculate proximity
         distance = 0.0
         is_on_site = 0
-        nearest_point = "कार्य स्थल"
+        nearest_point = "Work Location"
         try:
             distance, on_site_bool, nearest_point, eff_radius, _ = calculate_worker_site_proximity(
                 site_id, float(lat), float(lng), default_site_lat=site_lat, default_site_lng=site_lng, default_radius=radius, work_date=today_str
@@ -2566,7 +2566,7 @@ def get_supervisors_live_tracking_today(date_str=None):
 
         last_ping = dict(last_ping_row) if last_ping_row else None
 
-        sup_name = (last_ping.get("supervisor_name") if last_ping else None) or s.get("supervisor") or s.get("incharge") or "सुपरवाइजर"
+        sup_name = (last_ping.get("supervisor_name") if last_ping else None) or s.get("supervisor") or s.get("incharge") or "Supervisor"
         sup_phone = (last_ping.get("supervisor_phone") if last_ping else None) or s.get("contact") or s.get("incharge_phone") or ""
 
         results.append({

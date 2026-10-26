@@ -35,17 +35,17 @@
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <span class="px-4 py-2 rounded-xl bg-[#166534] text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-clipboard-list text-amber-300"></i>
-                <span>1. 📝 मैन्युअल हाजिरी (21 साइट्स शीट)</span>
+                <span>1. 📝 Manual Attendance (21 Sites Sheet)</span>
             </span>
             <a href="/geo-attendance" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] hover:text-[#14532D] font-bold text-xs sm:text-sm flex items-center gap-2 border border-[#E2E8F0] transition">
                 <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
-                <span>2. 📍 GPS हाजिरी (जियो-लोकेशन) ↗</span>
+                <span>2. 📍 GPS Attendance (Geo-Location) ↗</span>
             </a>
         </div>
         <div class="flex items-center gap-2">
             <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center gap-1.5 shadow-xs">
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                <span>मैन्युअल हाजिरी रजिस्टर सक्रिय है</span>
+                <span>Manual Attendance Register is Active</span>
             </span>
         </div>
     </div>
@@ -57,7 +57,7 @@
                 <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase">Manpower Register</span>
                 {% if is_supervisor_view %}
                 <span class="px-2.5 py-0.5 rounded-full bg-teal-100 text-teal-900 text-[11px] font-black border border-teal-300 flex items-center gap-1">
-                    <i class="fa-solid fa-lock text-teal-600"></i> {{ locked_site.name }} ({{ locked_site.code }}) — आपकी अधिकृत साइट
+                    <i class="fa-solid fa-lock text-teal-600"></i> {{ locked_site.name }} ({{ locked_site.code }}) — Your Authorized Site
                 </span>
                 {% else %}
                 <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites Sheet</span>
@@ -66,16 +66,16 @@
             <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
                 <i class="fa-solid fa-users-gear text-indigo-600"></i>
                 {% if is_supervisor_view %}
-                <span>दैनिक हाजिरी — {{ locked_site.name }} साइट</span>
+                <span>Daily Attendance — {{ locked_site.name }} Site</span>
                 {% else %}
-                <span>Daily Manpower Attendance (दैनिक साइट हाजिरी)</span>
+                <span>Daily Manpower Attendance</span>
                 {% endif %}
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">
                 {% if is_supervisor_view %}
-                आपकी साइट पर आज कितने मिस्त्री, प्लंबर, हेल्पर व स्टाफ आए (केवल आपकी साइट का डेटा)
+                Record how many mistri, plumbers, helpers, and staff worked on your site today (your site only)
                 {% else %}
-                हर साइट पर रोज कितने मिस्त्री, प्लंबर, हेल्पर और स्टाफ आए
+                Daily breakdown of mistri, plumbers, helpers, and staff across sites
                 {% endif %}
             </p>
         </div>
@@ -84,31 +84,31 @@
         <div class="flex flex-wrap items-center gap-2.5 no-print">
             <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
                 <i class="fa-solid fa-calendar-days text-slate-400 text-xs"></i>
-                <label for="attDateInput" class="text-xs font-bold text-slate-700">तारीख:</label>
+                <label for="attDateInput" class="text-xs font-bold text-slate-700">Date:</label>
                 <input type="date" id="attDateInput" value="{{ selected_date }}" onchange="changeAttendanceDate(this.value)" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
             </div>
 
             <button type="button" onclick="autoFetchFromGps()" id="autoFetchGpsBtn" 
                     class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-md transition flex items-center gap-1.5 border border-[#166534]" 
-                    title="GPS हाजिरी से 21 साइट्स की शीट तुरंत ऑटोमैटिक भरें">
+                    title="Automatically fill 21 sites sheet from GPS attendance">
                 <i class="fa-solid fa-satellite-dish text-amber-300"></i>
-                <span id="autoFetchGpsText">GPS ऑटो-फेच (Auto Sync)</span>
+                <span id="autoFetchGpsText">GPS Auto-Sync</span>
             </button>
 
             <button type="button" onclick="saveAllManpower()" id="saveAllBtn" class="px-4 py-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-[#1C0A00] text-xs font-black shadow-md transition flex items-center gap-1.5">
-                <i class="fa-solid fa-floppy-disk"></i> <span>हाजिरी सेव करें</span>
+                <i class="fa-solid fa-floppy-disk"></i> <span>Save Attendance</span>
             </button>
 
             <button type="button" onclick="copyFromLatestSavedDate()" id="copyLatestBtn" 
                     class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] border border-[#E2E8F0] text-xs font-black shadow-sm transition flex items-center gap-1.5" 
-                    title="पिछली तारीख (जैसे 11/10/2026) का हाजिरी डेटा आज की शीट में लाएं">
+                    title="Copy attendance data from previous date">
                 <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
-                <span>📋 पिछली हाजिरी से भरें</span>
+                <span>📋 Fill from Previous Attendance</span>
             </button>
 
             <!-- 1 PAGE PDF DOWNLOAD BUTTON -->
-            <a href="{{ url_for('export_manpower_pdf', date=selected_date) }}" id="exportPdfBtn" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-md transition flex items-center gap-1.5" title="पूरे 21 साइट्स का हाजिरी चार्ट ठीक 1 पेज PDF में डाउनलोड करें">
-                <i class="fa-solid fa-file-pdf text-white text-sm"></i> <span>PDF (1 पेज)</span>
+            <a href="{{ url_for('export_manpower_pdf', date=selected_date) }}" id="exportPdfBtn" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-md transition flex items-center gap-1.5" title="Download 1-page PDF attendance sheet for all 21 sites">
+                <i class="fa-solid fa-file-pdf text-white text-sm"></i> <span>PDF (1 Page)</span>
             </a>
 
             <a href="{{ url_for('export_manpower_excel', date=selected_date) }}" id="exportExcelBtn" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] border border-[#E2E8F0] text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
@@ -119,7 +119,7 @@
                 <i class="fa-brands fa-whatsapp text-sm"></i> <span>WhatsApp Share</span>
             </button>
 
-            <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] border border-[#E2E8F0] text-xs font-semibold transition flex items-center gap-1.5" title="प्रिंट या सेव करें">
+            <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#166534] border border-[#E2E8F0] text-xs font-semibold transition flex items-center gap-1.5" title="Print / Save">
                 <i class="fa-solid fa-print"></i>
             </button>
         </div>
@@ -129,11 +129,11 @@
     <div class="flex items-center gap-2 p-1.5 bg-white rounded-2xl text-xs font-bold text-[#0F172A] shadow-sm border border-[#E2E8F0] no-print">
         <a href="/geo-attendance" class="flex-1 py-2.5 px-3 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-center shadow flex items-center justify-center gap-1.5 transition">
             <i class="fa-solid fa-camera text-amber-300"></i>
-            <span>📸 लाइव फोटो व GPS हाजिरी (/geo-attendance)</span>
+            <span>📸 Live Photo & GPS Attendance (/geo-attendance)</span>
         </a>
         <a href="/attendance" class="flex-1 py-2.5 px-3 rounded-xl bg-white text-[#166534] text-center font-black flex items-center justify-center gap-1.5 border border-[#166534] transition">
             <i class="fa-solid fa-users-gear text-amber-300"></i>
-            <span>📋 दैनिक हाजिरी रजिस्टर</span>
+            <span>📋 Daily Attendance Register</span>
         </a>
     </div>
 
@@ -145,20 +145,20 @@
             <div>
                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex border border-emerald-200">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Attendance Desk)
+                    ⚡ Supervisor Attendance Desk
                 </span>
                 <h3 class="text-lg sm:text-xl font-black text-[#0F172A] mt-1 flex items-center gap-2">
                     <i class="fa-solid fa-camera text-emerald-400"></i>
-                    <span>वर्कर का नाम व नंबर लिख कर जोड़ें और लाइव फोटो हाजिरी लें</span>
+                    <span>Add worker name & mobile number to punch live photo attendance</span>
                 </h3>
                 <p class="text-xs text-[#475569] mt-0.5">
-                    नया वर्कर तुरंत जोड़ें या लिस्ट में से वर्कर चुनकर मोबाइल कैमरे से उनकी ऑन-साइट फोटो हाजिरी दर्ज करें।
+                    Add a new worker or select from the list to record on-site photo attendance using mobile camera.
                 </p>
             </div>
             <div class="flex items-center gap-2">
                 <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-satellite-dish text-amber-300"></i>
-                    <span>GPS 500M मॉनिटर खोलें &rarr;</span>
+                    <span>Open GPS 500M Monitor &rarr;</span>
                 </a>
             </div>
         </div>
@@ -170,15 +170,15 @@
                     <div class="flex items-center justify-between mb-3">
                         <label class="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-user-check text-emerald-400"></i>
-                            <span>1. वर्कर चुनें व फोटो हाजिरी लें (Photo Punch)</span>
+                            <span>1. Select Worker & Punch Photo Attendance</span>
                         </label>
-                        <span class="text-[11px] text-[#475569] font-semibold" id="quickWorkerCountBadge">{{ site_workers|length }} वर्कर उपलब्ध</span>
+                        <span class="text-[11px] text-[#475569] font-semibold" id="quickWorkerCountBadge">{{ site_workers|length }} Workers Available</span>
                     </div>
 
                     <div class="space-y-3">
                         <div>
                             <select id="quickPunchWorkerSelect" class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] text-xs sm:text-sm font-bold focus:ring-2 focus:ring-[#166534] focus:outline-none">
-                                <option value="">-- वर्कर का नाम चुनें (Select Worker) --</option>
+                                <option value="">-- Select Worker --</option>
                                 {% for w in site_workers %}
                                 <option value="{{ w.id }}" 
                                         data-name="{{ w.name }}" 
@@ -196,11 +196,11 @@
                         <div class="flex items-center gap-3">
                             <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold text-xs cursor-pointer">
                                 <input type="radio" name="quickPunchCheckType" value="check_in" checked class="text-emerald-500 focus:ring-0">
-                                <span>🟢 चेक-इन (आए)</span>
+                                <span>🟢 Check-In</span>
                             </label>
                             <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[#475569] font-bold text-xs cursor-pointer">
                                 <input type="radio" name="quickPunchCheckType" value="check_out" class="text-amber-500 focus:ring-0">
-                                <span>🔴 चेक-आउट (गए)</span>
+                                <span>🔴 Check-Out</span>
                             </label>
                         </div>
                     </div>
@@ -209,7 +209,7 @@
                 <div class="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-[#E2E8F0]">
                     <button type="button" onclick="launchQuickWorkerPunch()" class="flex-1 py-3 px-4 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
                         <i class="fa-solid fa-camera text-base"></i>
-                        <span>📸 कैमरा खोलें व फोटो हाजिरी दर्ज करें</span>
+                        <span>📸    Record Photo Attendance</span>
                     </button>
                 </div>
             </div>
@@ -219,7 +219,7 @@
                 <div>
                     <label class="block text-xs font-black text-[#0F172A] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                         <i class="fa-solid fa-user-plus text-amber-400"></i>
-                        <span>2. नया वर्कर तुरंत जोड़ें (नाम व नंबर)</span>
+                        <span>2. Quick Add Worker (Name & Mobile)</span>
                     </label>
 
                     <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
@@ -236,33 +236,33 @@
                         {% endif %}
 
                         <div>
-                            <input type="text" id="quickAddWorkerName" required placeholder="वर्कर का पूरा नाम (उदा. मुकेश कुमार) *" 
+                            <input type="text" id="quickAddWorkerName" required placeholder="Full Worker Name (e.g. Mukesh Kumar) *" 
                                    class="w-full px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] text-xs font-semibold placeholder-[#475569] focus:ring-2 focus:ring-[#166534]">
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="tel" id="quickAddWorkerPhone" placeholder="मोबाइल नंबर (10 अंक)" 
+                            <input type="tel" id="quickAddWorkerPhone" placeholder="Mobile Number (10 digits)" 
                                    class="w-full px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] text-xs font-semibold placeholder-[#475569] focus:ring-2 focus:ring-[#166534]">
                             <select id="quickAddWorkerRole" required class="w-full px-2.5 py-2 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] text-xs font-semibold focus:ring-2 focus:ring-[#166534]">
-                                <option value="Plumber">प्लंबर (Plumber)</option>
-                                <option value="Helper" selected>हेल्पर (Helper)</option>
-                                <option value="GI Mistri">जी.आई. मिस्त्री</option>
-                                <option value="Electrician">इलेक्ट्रीशियन</option>
-                                <option value="Fitter">फिटर (Fitter)</option>
-                                <option value="Supervisor">सुपरवाइज़र</option>
-                                <option value="Data Entry">डाटा एंट्री (DEO)</option>
-                                <option value="Other">अन्य (Other)</option>
+                                <option value="Plumber">Plumber</option>
+                                <option value="Helper" selected>Helper</option>
+                                <option value="GI Mistri">GI Mistri</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Fitter">Fitter</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Data Entry">Data Entry (DEO)</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
 
                         <button type="submit" id="quickAddSubmitBtn" class="w-full py-2.5 px-3 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
                             <i class="fa-solid fa-plus-circle"></i>
-                            <span>+ यह वर्कर सुरक्षित करें</span>
+                            <span>+ Save Worker</span>
                         </button>
                     </form>
                 </div>
                 <div class="text-[10px] text-[#475569] mt-2 text-center">
-                    सेव होते ही वर्कर ऊपर फोटो हाजिरी लिस्ट में तुरंत आ जाएगा।
+                    Once saved, the worker will appear in the photo attendance list above.
                 </div>
             </div>
         </div>
@@ -278,15 +278,15 @@
                 </div>
                 <div>
                     <h3 class="text-sm sm:text-base font-black text-[#0F172A] flex items-center gap-2">
-                        <span>📸 आज दर्ज हुई लाइव फोटो हाजिरी (Live Photo Feed)</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-black shadow">{{ today_photos|length }} वर्कर उपस्थित</span>
+                        <span>📸 Today's Live Photo Attendance Feed</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-black shadow">{{ today_photos|length }} Workers Present</span>
                     </h3>
-                    <p class="text-[11px] text-[#475569]">साइट पर कैमरे से लाइव खींची गई फोटो — बड़ी फोटो व GPS देखने के लिए फोटो पर क्लिक करें</p>
+                    <p class="text-[11px] text-[#475569]">Photos captured live on site — Click on photo to view full image and GPS coordinates</p>
                 </div>
             </div>
             <a href="/geo-attendance" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
                 <i class="fa-solid fa-map-location-dot text-amber-300"></i>
-                <span>पूरा GPS मैप व रूट देखें ↗</span>
+                <span>View Full GPS Map & Route ↗</span>
             </a>
         </div>
 
@@ -300,7 +300,7 @@
                          loading="lazy"
                          onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('{{ p.worker_name }}') + '&background=1e293b&color=38bdf8&size=256&bold=true';">
                     <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-full bg-emerald-600/95 backdrop-blur-xs text-white text-[9px] font-black shadow flex items-center gap-1 border border-emerald-400/40">
-                        <i class="fa-solid fa-check"></i> <span>उपस्थित</span>
+                        <i class="fa-solid fa-check"></i> <span>Present</span>
                     </span>
                     <span class="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-xs text-amber-300 text-[10px] font-black border border-amber-400/30">
                         📍 {{ p.site_name }}
@@ -331,17 +331,17 @@
             </div>
             <div>
                 <p class="font-black text-slate-800 text-sm flex items-center gap-2">
-                    <span>GPS ऑटो-हाजिरी इंजन (10:30 AM Auto-Analysis)</span>
+                    <span>GPS Auto-Attendance Engine (10:30 AM Auto-Analysis)</span>
                     <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black tracking-wide uppercase">Active</span>
                 </p>
                 <p class="text-slate-600 mt-0.5">
-                    हर रोज सुबह <strong>10:30 बजे</strong> सिस्टम सभी 21 साइट्स के वर्कर, सुपरवाइजर व इंचार्ज के GPS चेक-इन का विश्लेषण करके यह शीट <strong>ऑटोमैटिक</strong> भर देता है। आप जब चाहें <strong>"GPS ऑटो-फेच"</strong> बटन दबाकर भी तुरंत डेटा अपडेट कर सकते हैं।
+                       <strong>10:30 </strong>   21 Sites  Worker,     GPS Check-In      <strong></strong>       <strong>"GPS -"</strong>         
                 </p>
             </div>
         </div>
         <div class="shrink-0 flex items-center gap-2">
             <button type="button" onclick="autoFetchFromGps()" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs shadow-sm transition flex items-center gap-1.5">
-                <i class="fa-solid fa-rotate"></i> <span>अभी GPS से सिंक करें</span>
+                <i class="fa-solid fa-rotate"></i> <span>Sync with GPS Now</span>
             </button>
         </div>
     </div>
@@ -350,9 +350,9 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल मैनपावर</span>
-                <p id="cardTotalManpower" class="text-2xl font-black text-slate-800 mt-1">{{ totals.total }} लोग</p>
-                <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">21 साइट्स मिलाकर</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Manpower</span>
+                <p id="cardTotalManpower" class="text-2xl font-black text-slate-800 mt-1">{{ totals.total }} Persons</p>
+                <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">21 Sites Combined</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-people-group"></i>
@@ -361,8 +361,8 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">मिस्त्री व प्लंबर</span>
-                <p id="cardMistriPlumber" class="text-2xl font-black text-blue-700 mt-1">{{ totals.gi_mistri + totals.plumber }} कारीगर</p>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Mistri & Plumber</span>
+                <p id="cardMistriPlumber" class="text-2xl font-black text-blue-700 mt-1">{{ totals.gi_mistri + totals.plumber }} Craftsmen</p>
                 <span class="text-[11px] text-blue-600 font-semibold block mt-0.5">GI Mistri + Plumber</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
@@ -372,9 +372,9 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल हेल्पर्स</span>
-                <p id="cardHelpers" class="text-2xl font-black text-amber-600 mt-1">{{ totals.helper }} हेल्पर्स</p>
-                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">सहायक मजदूर</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Helpers</span>
+                <p id="cardHelpers" class="text-2xl font-black text-amber-600 mt-1">{{ totals.helper }} Helpers</p>
+                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">Assistant Labor</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-hand-holding-hand"></i>
@@ -383,8 +383,8 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">स्टाफ / सुपरवाइजर</span>
-                <p id="cardStaff" class="text-2xl font-black text-emerald-700 mt-1">{{ totals.site_incharge + totals.supervisor }} लोग</p>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Staff / Supervisor</span>
+                <p id="cardStaff" class="text-2xl font-black text-emerald-700 mt-1">{{ totals.site_incharge + totals.supervisor }} Persons</p>
                 <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">Incharge + Supervisor</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
@@ -603,16 +603,16 @@ function recalcAllColumnTotals() {
 
     // Update Top Summary Cards
     const cardTotal = document.getElementById('cardTotalManpower');
-    if (cardTotal) cardTotal.textContent = grandSum + " लोग";
+    if (cardTotal) cardTotal.textContent = grandSum + " Persons";
 
     const cardMistri = document.getElementById('cardMistriPlumber');
-    if (cardMistri) cardMistri.textContent = (roleTotals["gi_mistri"] + roleTotals["plumber"]) + " कारीगर";
+    if (cardMistri) cardMistri.textContent = (roleTotals["gi_mistri"] + roleTotals["plumber"]) + " Craftsmen";
 
     const cardHelp = document.getElementById('cardHelpers');
-    if (cardHelp) cardHelp.textContent = roleTotals["helper"] + " हेल्पर्स";
+    if (cardHelp) cardHelp.textContent = roleTotals["helper"] + " Helpers";
 
     const cardStaff = document.getElementById('cardStaff');
-    if (cardStaff) cardStaff.textContent = (roleTotals["site_incharge"] + roleTotals["supervisor"]) + " लोग";
+    if (cardStaff) cardStaff.textContent = (roleTotals["site_incharge"] + roleTotals["supervisor"]) + " Persons";
 }
 
 // Quick remarks injection
@@ -628,22 +628,22 @@ function setQuickRemark(text) {
         lastFocusedRemarkInput.value = text;
         lastFocusedRemarkInput.focus();
     } else {
-        alert("पहले जिस साइट पर रिमार्क लगाना है, उसके Remarks वाले डिब्बे पर क्लिक करें!");
+        alert("  Site    ,  Remarks     !");
     }
 }
 
 // Save all rows to server
 async function copyFromLatestSavedDate() {
     const btn = document.getElementById('copyLatestBtn');
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ला रहे हैं...';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fetching...';
     try {
         const res = await fetch('/api/attendance/latest-data');
         const data = await res.json();
         if (!data.success) {
-            alert(data.message || 'कोई पिछला रिकॉर्ड नहीं मिला');
+            alert(data.message || 'No previous records found');
             return;
         }
-        if (!confirm(`क्या आप पिछली तारीख (${data.latest_date}) का हाजिरी डेटा (कुल ${data.totals.total} वर्कर) आज की शीट में भरना चाहते हैं?`)) {
+        if (!confirm(`Do you want to copy attendance data from ${data.latest_date} (total ${data.totals.total} workers) into today's sheet?`)) {
             return;
         }
         
@@ -665,11 +665,11 @@ async function copyFromLatestSavedDate() {
             }
         });
         recalcAllTotals();
-        alert(`✅ तारीख ${data.latest_date} का डेटा सफलतापूर्वक भर दिया गया है! अब 'हाजिरी सेव करें' बटन दबाएं।`);
+        alert(`✅ Data from ${data.latest_date} copied successfully! Now click 'Save Attendance'.`);
     } catch (e) {
-        alert('डेटा लाने में त्रुटि: ' + e);
+        alert('Error fetching data: ' + e);
     } finally {
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-clock-rotate-left text-amber-600"></i> <span>📋 पिछली हाजिरी से भरें</span>';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-clock-rotate-left text-amber-600"></i> <span>📋 Fill from Previous Attendance</span>';
     }
 }
 
@@ -678,7 +678,7 @@ async function saveAllManpower() {
     const attDate = document.getElementById('attDateInput').value;
 
     if (!attDate) {
-        alert("कृपया तारीख चुनें!");
+        alert("Please select a date!");
         return;
     }
 
@@ -718,7 +718,7 @@ async function saveAllManpower() {
         });
         const result = await res.json();
         if (result.success) {
-            alert("✅ शानदार! " + (result.message || "हाजिरी सफलतापूर्वक सेव हो गई!"));
+            alert("✅ Success! " + (result.message || "Attendance saved successfully!"));
         } else {
             alert("❌ Error: " + result.message);
         }
@@ -727,7 +727,7 @@ async function saveAllManpower() {
     } finally {
         if (saveBtn) {
             saveBtn.disabled = false;
-            saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>हाजिरी सेव करें</span>`;
+            saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Save Attendance</span>`;
         }
     }
 }
@@ -748,13 +748,13 @@ function shareAttendanceWhatsApp() {
     const pdfUrl = `${baseUrl}/export/manpower-pdf?date=${attDate}`;
 
     const text = `📋 *M/S SANDIP KUMAR - DAILY MANPOWER REPORT*\n` +
-                 `📅 *तारीख (DATE):* ${attDate}\n` +
-                 `👥 *कुल मैनपावर (TOTAL):* ${totalAll} लोग (21 साइट्स)\n` +
-                 `👔 *स्टाफ (Incharge + Supervisor):* ${totalStaff} लोग\n` +
-                 `🔧 *मिस्त्री व प्लंबर:* ${totalMistri} लोग\n` +
-                 `👷 *हेल्पर्स:* ${totalHelper} लोग\n\n` +
-                 `📄 *1-पेज PDF डाउनलोड करें:*\n${pdfUrl}\n\n` +
-                 `🔗 *पूरी 21 साइट्स शीट लाइव खोलें:*\n${liveUrl}`;
+                 `📅 *Date:* ${attDate}\n` +
+                 `👥 *Total Manpower (TOTAL):* ${totalAll} Persons (21 Sites)\n` +
+                 `👔 *Staff (Incharge + Supervisor):* ${totalStaff} Persons\n` +
+                 `🔧 *Mistri & Plumber:* ${totalMistri} Persons\n` +
+                 `👷 *Helpers:* ${totalHelper} Persons\n\n` +
+                 `📄 *Download 1-Page PDF:*\n${pdfUrl}\n\n` +
+                 `🔗 * 21 Sites   :*\n${liveUrl}`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -766,7 +766,7 @@ async function autoFetchFromGps() {
     const txt = document.getElementById('autoFetchGpsText');
 
     if (btn) btn.disabled = true;
-    if (txt) txt.textContent = 'GPS जांच हो रही है...';
+    if (txt) txt.textContent = 'Checking GPS...';
 
     try {
         const res = await fetch(`/api/attendance/auto-fetch?date=${encodeURIComponent(attDate)}`, {
@@ -775,16 +775,16 @@ async function autoFetchFromGps() {
         });
         const result = await res.json();
         if (result.success) {
-            alert(`✅ ${result.message}\n\nकुल ${result.total_workers || 0} लोग ${result.updated_sites || 0} साइटों पर फेच हुए। शीट अपडेट हो रही है...`);
+            alert(`✅ ${result.message}\n\nworkers fetched. Updating sheet...`);
             window.location.reload();
         } else {
-            alert('❌ ' + (result.message || 'GPS डेटा फेच नहीं हो सका'));
+            alert('❌ ' + (result.message || 'Could not fetch GPS data'));
         }
     } catch(err) {
-        alert('❌ नेटवर्क एरर: ' + err);
+        alert('❌ Network Error: ' + err);
     } finally {
         if (btn) btn.disabled = false;
-        if (txt) txt.textContent = 'GPS ऑटो-फेच (Auto Sync)';
+        if (txt) txt.textContent = 'GPS Auto-Sync';
     }
 }
 
@@ -794,7 +794,7 @@ async function autoFetchFromGps() {
 function launchQuickWorkerPunch() {
     const sel = document.getElementById('quickPunchWorkerSelect');
     if (!sel || !sel.value) {
-        alert("कृपया पहले वर्कर का नाम चुनें!");
+        alert("Please select a worker name first!");
         if (sel) sel.focus();
         return;
     }
@@ -825,13 +825,13 @@ async function submitQuickInlineWorker(e) {
     const role = document.getElementById('quickAddWorkerRole').value;
 
     if (!name) {
-        alert("कृपया वर्कर का नाम लिखें!");
+        alert("Please enter worker name!");
         return;
     }
 
     const btn = document.getElementById('quickAddSubmitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
     try {
         const res = await fetch('/api/workers/quick-add', {
@@ -841,7 +841,7 @@ async function submitQuickInlineWorker(e) {
         });
         const data = await res.json();
         if (data.success && data.worker) {
-            alert(`✅ वर्कर '${name}' (${role}) सफलतापूर्वक जोड़ा गया! अब आप इनकी फोटो हाजिरी ले सकते हैं।`);
+            alert(`✅ Worker '${name}' (${role}) added successfully! You can now record their photo attendance.`);
             
             // Add to quick select dropdown
             const sel = document.getElementById('quickPunchWorkerSelect');
@@ -863,19 +863,19 @@ async function submitQuickInlineWorker(e) {
             document.getElementById('quickAddWorkerPhone').value = '';
             
             // Prompt supervisor to take photo immediately
-            if (confirm(`क्या आप अभी '${name}' की लाइव फोटो हाजिरी लेना चाहते हैं?`)) {
+            if (confirm(`Do you want to punch '${name}' live photo attendance now?`)) {
                 launchQuickWorkerPunch();
             } else {
                 window.location.reload();
             }
         } else {
-            alert('❌ ' + (data.message || 'वर्कर सेव नहीं हो सका।'));
+            alert('❌ ' + (data.message || 'Could not save worker.'));
         }
     } catch (err) {
-        alert('❌ नेटवर्क एरर: ' + err.message);
+        alert('❌ Network Error: ' + err.message);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> <span>+ यह वर्कर सुरक्षित करें</span>';
+        btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> <span>+ Save Worker</span>';
     }
 }
 
@@ -916,7 +916,7 @@ function fileToBase64Resized(file, maxDim = 1280, quality = 0.85) {
 function getLiveGpsCoords() {
     return new Promise((resolve, reject) => {
         if (!("geolocation" in navigator)) {
-            return reject(new Error("फोन में Geolocation समर्थित नहीं है"));
+            return reject(new Error("Geolocation is not supported on this device"));
         }
         navigator.geolocation.getCurrentPosition(
             (pos) => resolve({
@@ -936,7 +936,7 @@ async function openIndividualPhotoModal(workerId, workerName, workerRole, siteId
     document.getElementById('indivSiteId').value = siteId;
     document.getElementById('indivWorkerName').textContent = workerName;
     document.getElementById('indivWorkerRole').textContent = workerRole;
-    document.getElementById('indivSiteName').textContent = siteName || 'साइट';
+    document.getElementById('indivSiteName').textContent = siteName || 'Site';
     document.getElementById('indivPhotoBase64').value = '';
     document.getElementById('indivLat').value = '';
     document.getElementById('indivLng').value = '';
@@ -957,7 +957,7 @@ async function openIndividualPhotoModal(workerId, workerName, workerRole, siteId
     document.getElementById('indivSubmitBtn').disabled = true;
 
     document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2";
-    document.getElementById('indivLocText').textContent = "फोन की GPS लोकेशन खोजी जा रही है...";
+    document.getElementById('indivLocText').textContent = "Searching phone GPS location...";
 
     document.getElementById('individualPhotoModal').classList.remove('hidden');
 
@@ -967,12 +967,12 @@ async function openIndividualPhotoModal(workerId, workerName, workerRole, siteId
         document.getElementById('indivLng').value = gps.longitude.toFixed(6);
         document.getElementById('indivAccuracy').value = Math.round(gps.accuracy);
         document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
-        document.getElementById('indivLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+        document.getElementById('indivLocText').textContent = `✅ GPS Acquired: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
         document.getElementById('indivGpsCoordsText').textContent = `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`;
         document.getElementById('indivGpsBadge').classList.remove('hidden');
     } catch (e) {
         document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
-        document.getElementById('indivLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+        document.getElementById('indivLocText').textContent = "⚠️ Location permission denied (photo will still record without GPS)";
     }
 }
 
@@ -1018,7 +1018,7 @@ async function handleNativePhotoFile(e) {
     btn.disabled = false;
     btn.classList.remove('opacity-50');
     const btnText = document.getElementById('indivSubmitBtnText');
-    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> उपस्थिति दर्ज की जा रही है...';
+    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Recording attendance...';
 
     // Auto-save automatically in 1.2 seconds!
     indivAutoSubmitTimer = setTimeout(() => {
@@ -1050,14 +1050,14 @@ async function submitIndividualPhoto(e) {
     const checkType = document.querySelector('input[name="indivCheckType"]:checked').value;
 
     if (!b64) {
-        alert("कृपया पहले कैमरे से फोटो खींचें!");
+        alert("Please take a photo first!");
         return;
     }
 
     const btn = document.getElementById('indivSubmitBtn');
     btn.disabled = true;
     const btnText = document.getElementById('indivSubmitBtnText');
-    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सुरक्षित हो रहा है...';
+    if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
     try {
         const res = await fetch('/api/geo-attendance/photo-checkin', {
@@ -1079,10 +1079,10 @@ async function submitIndividualPhoto(e) {
             const banner = document.getElementById('indivAutoSubmitBanner');
             if (banner) {
                 banner.className = 'p-3 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg animate-in fade-in zoom-in-95 duration-150';
-                banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>✅ ${data.message || 'उपस्थिति सफलतापूर्वक दर्ज हो गई!'}</span>`;
+                banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>✅ ${data.message || 'Attendance recorded successfully!'}</span>`;
                 banner.classList.remove('hidden');
             }
-            if (btnText) btnText.innerHTML = '✅ उपस्थिति दर्ज हो गई!';
+            if (btnText) btnText.innerHTML = '✅ Attendance recorded!';
             setTimeout(() => {
                 closeIndividualPhotoModal();
                 window.location.reload();
@@ -1091,24 +1091,24 @@ async function submitIndividualPhoto(e) {
             const banner = document.getElementById('indivAutoSubmitBanner');
             if (banner) {
                 banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
-                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ ${data.message || 'फोटो हाजिरी दर्ज नहीं हो सकी'}</span>`;
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ ${data.message || 'Photo attendance could not be saved'}</span>`;
                 banner.classList.remove('hidden');
             } else {
-                alert("❌ " + (data.message || "फोटो हाजिरी दर्ज नहीं हो सकी"));
+                alert("❌ " + (data.message || "Photo attendance could not be saved"));
             }
         }
     } catch (err) {
         const banner = document.getElementById('indivAutoSubmitBanner');
         if (banner) {
             banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
-            banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ नेटवर्क एरर: ${err.message}</span>`;
+            banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ Network Error: ${err.message}</span>`;
             banner.classList.remove('hidden');
         } else {
-            alert("❌ नेटवर्क एरर: " + err.message);
+            alert("❌ Network Error: " + err.message);
         }
     } finally {
         btn.disabled = false;
-        if (btnText) btnText.innerHTML = '✓ उपस्थिति दर्ज करें (SAVE)';
+        if (btnText) btnText.innerHTML = '✓ Save Attendance (SAVE)';
     }
 }
 </script>
@@ -1123,8 +1123,8 @@ async function submitIndividualPhoto(e) {
                     <i class="fa-solid fa-camera text-base"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black leading-tight" id="indivWorkerName">वर्कर का नाम</h3>
-                    <p class="text-[11px] text-indigo-300 font-medium" id="indivWorkerRole">प्लंबर</p>
+                    <h3 class="text-sm font-black leading-tight" id="indivWorkerName">Worker Name</h3>
+                    <p class="text-[11px] text-indigo-300 font-medium" id="indivWorkerRole">Plumber</p>
                 </div>
             </div>
             <button type="button" onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1">&times;</button>
@@ -1132,11 +1132,11 @@ async function submitIndividualPhoto(e) {
 
         <div class="px-5 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs shrink-0">
             <div>
-                <span class="text-slate-400 text-[10px]">तारीख:</span>
+                <span class="text-slate-400 text-[10px]">Date:</span>
                 <strong class="text-slate-700 font-bold">{{ selected_date }}</strong>
             </div>
             <div>
-                <span class="text-slate-400 text-[10px]">साइट:</span>
+                <span class="text-slate-400 text-[10px]">Site:</span>
                 <strong class="text-teal-700 font-bold" id="indivSiteName">—</strong>
             </div>
         </div>
@@ -1156,12 +1156,12 @@ async function submitIndividualPhoto(e) {
                     <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
                         <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
                         <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
-                        <span>🟢 आए (Check-In)</span>
+                        <span>🟢 In (Check-In)</span>
                     </label>
                     <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
                         <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
                         <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
-                        <span>🔴 गए (Check-Out)</span>
+                        <span>🔴 Out (Check-Out)</span>
                     </label>
                 </div>
 
@@ -1170,7 +1170,7 @@ async function submitIndividualPhoto(e) {
                     <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
                     <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-600 text-white font-black text-sm shadow-md transition flex items-center justify-center gap-2 active:scale-95 border border-indigo-400/40 cursor-pointer">
                         <i class="fa-solid fa-camera text-amber-300 text-lg"></i>
-                        <span>📸 फोन कैमरे से फोटो खींचें (कैमरा खोलें)</span>
+                        <span>📸 Take Photo with Camera (Open Camera)</span>
                     </button>
                 </div>
 
@@ -1179,13 +1179,13 @@ async function submitIndividualPhoto(e) {
                     <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
                     <div id="indivPlaceholder" class="text-center p-4 text-slate-400">
                         <i class="fa-solid fa-camera text-3xl mb-1 text-slate-500 block"></i>
-                        <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
-                        <p class="text-[10px] text-emerald-400 mt-1 font-semibold">फोटो खींचते ही हाजिरी अपने आप दर्ज हो जाएगी!</p>
+                        <p class="text-xs font-bold text-slate-300">Take Photo with Camera</p>
+                        <p class="text-[10px] text-emerald-400 mt-1 font-semibold">Attendance will be recorded automatically as photo is captured!</p>
                     </div>
                     <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
                         <div class="flex items-center gap-1.5 truncate">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+                            <span id="indivGpsCoordsText">GPS: Fetching...</span>
                         </div>
                         <span class="text-emerald-300 font-bold ml-1">On-Site</span>
                     </div>
@@ -1194,24 +1194,24 @@ async function submitIndividualPhoto(e) {
                 <!-- Auto-Submit Status Banner -->
                 <div id="indivAutoSubmitBanner" class="hidden p-3 rounded-xl bg-emerald-100 border-2 border-emerald-400 text-emerald-900 text-xs font-black flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-base animate-bounce"></i>
-                    <span>✅ फोटो प्राप्त हो गई! उपस्थिति अपने आप दर्ज की जा रही है...</span>
+                    <span>✅ Photo captured! Recording attendance automatically...</span>
                 </div>
 
                 <!-- Location Status Row -->
                 <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
                     <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
-                    <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+                    <span id="indivLocText">Searching phone GPS location...</span>
                 </div>
             </div>
 
             <!-- 3. ALWAYS-VISIBLE STICKY BOTTOM ACTION BAR -->
             <div class="p-3 bg-white border-t-2 border-emerald-500 shrink-0 shadow-2xl flex items-center gap-2">
                 <button type="button" onclick="closeIndividualPhotoModal()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="indivSubmitBtn" class="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer border border-emerald-400/50">
                     <i class="fa-solid fa-circle-check text-lg"></i>
-                    <span id="indivSubmitBtnText">✓ उपस्थिति दर्ज करें (SAVE)</span>
+                    <span id="indivSubmitBtnText">✓ Save Attendance (SAVE)</span>
                 </button>
             </div>
         </form>
@@ -1235,8 +1235,8 @@ async function submitIndividualPhoto(e) {
 
         <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-2 text-xs">
             <div class="flex items-center justify-between text-slate-300">
-                <span>साइट: <strong class="text-white" id="attLightboxSite">—</strong></span>
-                <span>समय: <strong class="text-emerald-400" id="attLightboxTime">—</strong></span>
+                <span>Site: <strong class="text-white" id="attLightboxSite">—</strong></span>
+                <span>Time: <strong class="text-emerald-400" id="attLightboxTime">—</strong></span>
             </div>
             <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
                 <span class="font-mono text-slate-400 text-[11px]" id="attLightboxGps">GPS: —</span>
@@ -1260,7 +1260,7 @@ function viewAttendanceLightbox(photoUrl, workerName, role, siteName, checkinTim
         document.getElementById('attLightboxMapLink').href = `https://www.google.com/maps?q=${lat},${lng}`;
         document.getElementById('attLightboxMapLink').classList.remove('hidden');
     } else {
-        document.getElementById('attLightboxGps').textContent = 'GPS: ऑन-साइट रिकॉर्डेड';
+        document.getElementById('attLightboxGps').textContent = 'GPS: On-Site Recorded';
         document.getElementById('attLightboxMapLink').classList.add('hidden');
     }
 

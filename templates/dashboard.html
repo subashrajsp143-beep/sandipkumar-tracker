@@ -10,16 +10,16 @@
     <!-- ======================================================== -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" data-i18n="dash_title">डैशबोर्ड</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" data-i18n="dash_title">Dashboard</h1>
             <div class="text-xs font-bold text-slate-600 flex items-center gap-1.5 mt-1">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span data-i18n="dash_subtitle">२१ जलापूर्ति साइट्स चालू</span>
+                <span data-i18n="dash_subtitle">21 Water Supply Sites Live</span>
             </div>
         </div>
 
         <!-- Date Pill -->
         <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-800 shadow-2xs self-start sm:self-auto">
-            <span class="text-slate-500 font-medium" data-i18n="dash_active_date">दिनांक:</span>
+            <span class="text-slate-500 font-medium" data-i18n="dash_active_date">Date:</span>
             <span class="font-mono text-slate-900 font-extrabold">{{ current_date }}</span>
             <i class="fa-regular fa-calendar text-emerald-700 ml-1 text-sm"></i>
         </div>
@@ -30,11 +30,11 @@
     <!-- ======================================================== -->
     <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex items-center justify-between gap-4">
         <div>
-            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="dash_status_title">परियोजना स्थिति</div>
-            <div class="text-base sm:text-lg font-bold text-slate-900 mt-0.5" data-i18n="dash_status_body">२१ जलापूर्ति साइट्स चालू</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500" data-i18n="dash_status_title">Project Status</div>
+            <div class="text-base sm:text-lg font-bold text-slate-900 mt-0.5" data-i18n="dash_status_body">21 Water Supply Sites Live</div>
         </div>
         <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 font-bold text-xs uppercase tracking-wider border border-emerald-300 shadow-2xs" data-i18n="dash_status_badge">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> ● सक्रिय
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> ● Active
         </span>
     </div>
 
@@ -45,44 +45,44 @@
         
         <!-- Tile 1: Project Sites -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_sites">साइट्स</div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 साइट्स</div>
-            <div class="text-xs text-emerald-700 font-bold mt-1" data-i18n="tile_sites_sub">● सभी चालू</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_sites">Sites</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 Sites</div>
+            <div class="text-xs text-emerald-700 font-bold mt-1" data-i18n="tile_sites_sub">● All Live</div>
         </div>
 
         <!-- Tile 2: Manpower on Duty -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_workers">श्रमिक</div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">दैनिक हाजिरी</div>
-            <div class="text-xs text-indigo-700 font-bold mt-1" data-i18n="tile_workers_sub">साइट मैनपॉवर</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_workers">Workers</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">Daily Attendance</div>
+            <div class="text-xs text-indigo-700 font-bold mt-1" data-i18n="tile_workers_sub">Site Manpower</div>
         </div>
 
         <!-- Tile 3: Usage Entries -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_logs">खपत</div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">एंट्रीज</span></div>
-            <div class="text-xs text-teal-700 font-bold mt-1" data-i18n="tile_logs_sub">कुल प्रविष्टियां</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_logs">Usage</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">Entries</span></div>
+            <div class="text-xs text-teal-700 font-bold mt-1" data-i18n="tile_logs_sub">Total Entries</div>
         </div>
 
         <!-- Tile 4: Total Consumption Value -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_cost">लागत</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_cost">Cost</div>
             <div class="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
-            <div class="text-xs text-amber-700 font-bold mt-1" data-i18n="tile_cost_sub">कुल सामग्री खर्च</div>
+            <div class="text-xs text-amber-700 font-bold mt-1" data-i18n="tile_cost_sub">Total Material Cost</div>
         </div>
 
         <!-- Tile 5: Next Letter Reference Number -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_ref">पत्रांक</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_ref">Ref No</div>
             <div class="text-xl sm:text-2xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
-            <div class="text-xs text-blue-700 font-bold mt-1"><span data-i18n="tile_ref_sub">वित्तीय वर्ष</span> {{ next_letter_info.fy }}</div>
+            <div class="text-xs text-blue-700 font-bold mt-1"><span data-i18n="tile_ref_sub">Financial Year</span> {{ next_letter_info.fy }}</div>
         </div>
 
         <!-- Tile 6: Material Store Catalog -->
         <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-slate-400 transition">
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_items">सामग्री</div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">आइटम्स</span></div>
-            <div class="text-xs text-slate-500 font-bold mt-1" data-i18n="tile_items_sub">मास्टर कैटलॉग</div>
+            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_items">Material</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">Items</span></div>
+            <div class="text-xs text-slate-500 font-bold mt-1" data-i18n="tile_items_sub">Master Catalog</div>
         </div>
     </div>
 
@@ -97,14 +97,14 @@
                 <div class="w-11 h-11 rounded-lg icon-box-emerald flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-users"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_attendance">उपस्थिति</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_att_desc">मैनुअल व GPS हाजिरी</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_attendance">Attendance</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_att_desc">Manual & GPS Attendance</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('attendance_view') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_open">हाजिरी</span> &rarr;
+                    <span data-i18n="btn_open">Attendance</span> &rarr;
                 </a>
-                <a href="/geo-attendance" class="btn-secondary-sm" title="GPS हाजिरी">
+                <a href="/geo-attendance" class="btn-secondary-sm" title="GPS Attendance">
                     GPS
                 </a>
             </div>
@@ -116,15 +116,15 @@
                 <div class="w-11 h-11 rounded-lg icon-box-teal flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_material">सामग्री</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_mat_desc">स्टॉक व खपत एंट्री</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_material">Material</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_mat_desc">Stock & Usage Entry</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('site_stock') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_stock">स्टॉक</span> &rarr;
+                    <span data-i18n="btn_stock">Stock</span> &rarr;
                 </a>
-                <a href="{{ url_for('daily_entry') }}" class="btn-secondary-sm" title="दैनिक एंट्री">
-                    + एंट्री
+                <a href="{{ url_for('daily_entry') }}" class="btn-secondary-sm" title="Daily Entry">
+                    + Entry
                 </a>
             </div>
         </div>
@@ -135,15 +135,15 @@
                 <div class="w-11 h-11 rounded-lg icon-box-sky flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-trowel-bricks"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_progress">प्रगति</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_prog_desc">DPR व फोटो एल्बम</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_progress">Progress</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_prog_desc">DPR & Site Photos</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="/dpr" class="flex-1 btn-primary-sm text-center">
                     <span data-i18n="btn_dpr">DPR</span> &rarr;
                 </a>
-                <a href="/site-photos" class="btn-secondary-sm" title="फोटो एल्बम">
-                    एल्बम
+                <a href="/site-photos" class="btn-secondary-sm" title="Photo Album">
+                    Album
                 </a>
             </div>
         </div>
@@ -154,15 +154,15 @@
                 <div class="w-11 h-11 rounded-lg icon-box-indigo flex items-center justify-center text-xl mb-3 shadow-2xs">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_reports">रिपोर्ट्स</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_rep_desc">दैनिक व मासिक लेजर</p>
+                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_reports">Reports</h3>
+                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_rep_desc">Daily & Monthly Ledger</p>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
                 <a href="{{ url_for('reports_hub') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_reports">रिपोर्ट्स</span> &rarr;
+                    <span data-i18n="btn_reports">Reports</span> &rarr;
                 </a>
-                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="btn-secondary-sm" title="मासिक">
-                    मासिक
+                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="btn-secondary-sm" title="Monthly">
+                    Monthly
                 </a>
             </div>
         </div>
@@ -179,16 +179,16 @@
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
                         <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-                        लाइव GPS ट्रैकिंग
+                        Live GPS Tracking
                     </span>
-                    <span class="text-xs text-slate-500 font-medium">21 साइट्स ऑटो-मॉनिटर</span>
+                    <span class="text-xs text-slate-500 font-medium">21 Sites Auto-Monitored</span>
                 </div>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900 mt-1 flex items-center gap-2">
                     <i class="fa-solid fa-satellite-dish text-[#166534]"></i>
-                    <span>सुपरवाइजर लाइव लोकेशन ट्रैकिंग</span>
+                    <span>Supervisor Live Location Tracking</span>
                 </h3>
                 <p class="text-xs text-slate-500 mt-0.5">
-                    सुपरवाइजर के लॉगिन करते ही उनकी लाइव लोकेशन और कार्य-स्थल पर मौजूदगी यहाँ दिखेगी
+                    Supervisors live location and on-site presence will automatically appear here upon login.
                 </p>
             </div>
 
@@ -196,23 +196,23 @@
             <div class="flex flex-wrap items-center gap-2">
                 <span id="supStatOnSite" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                    <span id="txtOnSite">0 साइट पर</span>
+                    <span id="txtOnSite">0 On Site</span>
                 </span>
                 <span id="supStatOffSite" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    <span id="txtOffSite">0 साइट से बाहर</span>
+                    <span id="txtOffSite">0 Off Site</span>
                 </span>
                 <span id="supStatOffline" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-bold flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                    <span id="txtOffline">0 ऑफलाइन</span>
+                    <span id="txtOffline">0 Offline</span>
                 </span>
                 <button type="button" onclick="refreshSupervisorTracking()" id="btnRefreshTracking" class="px-3 py-1.5 rounded-lg bg-[#166534] hover:bg-[#14532D] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
                     <i class="fa-solid fa-arrows-rotate" id="refreshTrackingIcon"></i>
-                    <span>रिफ्रेश</span>
+                    <span>Refresh</span>
                 </button>
                 <a href="/geo-attendance" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 border border-slate-300">
                     <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
-                    <span>GPS मैप</span>
+                    <span>GPS Map</span>
                 </a>
             </div>
         </div>
@@ -221,13 +221,13 @@
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div class="relative w-full sm:w-80">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
-                <input type="text" id="supSearchInput" oninput="filterSupervisorList()" placeholder="साइट या सुपरवाइजर का नाम खोजें..." class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-[#166534]">
+                <input type="text" id="supSearchInput" oninput="filterSupervisorList()" placeholder="Search site or supervisor name..." class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-800 focus:outline-none focus:border-[#166534]">
             </div>
             <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                <button type="button" onclick="filterSupStatus('ALL')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-[#166534] text-white font-bold transition cursor-pointer" data-status="ALL">सभी (21)</button>
-                <button type="button" onclick="filterSupStatus('ONLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONLINE">ऑनलाइन</button>
-                <button type="button" onclick="filterSupStatus('ONSITE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONSITE">साइट पर</button>
-                <button type="button" onclick="filterSupStatus('OFFLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="OFFLINE">ऑफलाइन</button>
+                <button type="button" onclick="filterSupStatus('ALL')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-[#166534] text-white font-bold transition cursor-pointer" data-status="ALL">All (21)</button>
+                <button type="button" onclick="filterSupStatus('ONLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONLINE">Online</button>
+                <button type="button" onclick="filterSupStatus('ONSITE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="ONSITE">On Site</button>
+                <button type="button" onclick="filterSupStatus('OFFLINE')" class="sup-status-filter px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer" data-status="OFFLINE">Offline</button>
             </div>
         </div>
 
@@ -252,17 +252,17 @@
                         {% if s.is_on_site %}
                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300 shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                            साइट पर उपस्थित
+                            Present On Site
                         </span>
                         {% elif s.has_ping %}
                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
-                            साइट से बाहर
+                            Off Site
                         </span>
                         {% else %}
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                            आज ऑफलाइन
+                            Offline Today
                         </span>
                         {% endif %}
                     </div>
@@ -275,16 +275,16 @@
                             <i class="fa-solid fa-user-tie"></i>
                         </div>
                         <div class="truncate">
-                            <span class="font-bold text-slate-800 block truncate" id="supName_{{ s.site_id }}">{{ s.supervisor_name or 'सुपरवाइजर' }}</span>
-                            <span class="text-[10px] text-slate-500 font-mono" id="supPhone_{{ s.site_id }}">{{ s.supervisor_phone or 'नंबर नहीं' }}</span>
+                            <span class="font-bold text-slate-800 block truncate" id="supName_{{ s.site_id }}">{{ s.supervisor_name or 'Supervisor' }}</span>
+                            <span class="text-[10px] text-slate-500 font-mono" id="supPhone_{{ s.site_id }}">{{ s.supervisor_phone or 'No Phone' }}</span>
                         </div>
                     </div>
                     {% if s.supervisor_phone %}
                     <div class="flex items-center gap-1 shrink-0">
-                        <a href="tel:{{ s.supervisor_phone }}" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs border border-emerald-200 transition" title="कॉल करें">
+                        <a href="tel:{{ s.supervisor_phone }}" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs border border-emerald-200 transition" title="Call">
                             <i class="fa-solid fa-phone"></i>
                         </a>
-                        <a href="https://wa.me/91{{ s.supervisor_phone }}?text={{ ('नमस्ते ' ~ (s.supervisor_name or '') ~ ', आपकी साइट ' ~ s.site_name ~ ' का क्या स्टेटस है?')|urlencode }}" target="_blank" class="w-7 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center text-xs transition" title="व्हाट्सएप">
+                        <a href="https://wa.me/91{{ s.supervisor_phone }}?text={{ ('Hello ' ~ (s.supervisor_name or '') ~ ', What is the status of site ' ~ s.site_name ~ '?')|urlencode }}" target="_blank" class="w-7 h-7 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center text-xs transition" title="WhatsApp">
                             <i class="fa-brands fa-whatsapp"></i>
                         </a>
                     </div>
@@ -295,30 +295,30 @@
                 <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 text-[11px] space-y-1" id="supLocDetails_{{ s.site_id }}">
                     {% if s.has_ping %}
                     <div class="flex items-center justify-between text-slate-700">
-                        <span class="text-slate-500 font-medium">दूरी:</span>
+                        <span class="text-slate-500 font-medium">Distance:</span>
                         <span class="font-bold font-mono {% if s.is_on_site %}text-emerald-700{% else %}text-amber-700{% endif %}">
                             {% if s.last_distance_m is not none %}
                                 {% if s.last_distance_m < 1000 %}
-                                    {{ "%.0f"|format(s.last_distance_m) }} मीटर दूर
+                                    {{ "%.0f"|format(s.last_distance_m) }} m away
                                 {% else %}
-                                    {{ "%.1f"|format(s.last_distance_m / 1000) }} किमी दूर
+                                    {{ "%.1f"|format(s.last_distance_m / 1000) }} km away
                                 {% endif %}
                             {% else %}
-                                दूरी अज्ञात
+                                Distance unknown
                             {% endif %}
                         </span>
                     </div>
                     <div class="flex items-center justify-between text-slate-700">
-                        <span class="text-slate-500 font-medium">निकटतम स्थान:</span>
+                        <span class="text-slate-500 font-medium">Nearest Location:</span>
                         <span class="font-semibold text-slate-800 truncate max-w-[150px]">{{ s.nearest_point or s.site_name }}</span>
                     </div>
                     <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200/60">
-                        <span>अंतिम सक्रियता:</span>
-                        <span class="font-mono font-bold text-slate-600">{{ s.last_ping_time or 'अभी' }}</span>
+                        <span>Last Active:</span>
+                        <span class="font-mono font-bold text-slate-600">{{ s.last_ping_time or 'Just now' }}</span>
                     </div>
                     {% else %}
                     <div class="py-1 text-center text-slate-400">
-                        <span>आज इस साइट से कोई GPS लॉगिन/पिंग दर्ज नहीं हुआ</span>
+                        <span>No GPS login / ping recorded today from this site</span>
                     </div>
                     {% endif %}
                 </div>
@@ -328,12 +328,12 @@
                     {% if s.last_lat and s.last_lng %}
                     <a href="https://www.google.com/maps?q={{ s.last_lat }},{{ s.last_lng }}" target="_blank" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#166534] font-bold text-xs border border-emerald-300 flex items-center justify-center gap-1.5 transition">
                         <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
-                        <span>Google Maps पर लाइव लोकेशन देखें</span>
+                        <span>View Live Location on Google Maps</span>
                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                     </a>
                     {% else %}
                     <div class="py-1 text-center text-slate-400 text-[11px]">
-                        <i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> मैप लोकेशन अनुपलब्ध
+                        <i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> Map location unavailable
                     </div>
                     {% endif %}
                 </div>
@@ -353,32 +353,32 @@
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-300">
-                        <i class="fa-solid fa-stamp text-emerald-700"></i> पत्रांक पंजी
+                        <i class="fa-solid fa-stamp text-emerald-700"></i> Letters Register
                     </span>
                     <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-300">
-                        वित्तीय वर्ष: {{ next_letter_info.fy }}
+                        Financial Year: {{ next_letter_info.fy }}
                     </span>
                     <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 text-[11px] font-black border border-amber-300 flex items-center gap-1">
-                        <i class="fa-solid fa-hashtag text-amber-600"></i> अगला पत्रांक: <code class="font-mono text-indigo-800 bg-white px-2 py-0.5 rounded border border-amber-300 font-bold" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
+                        <i class="fa-solid fa-hashtag text-amber-600"></i> Next Ref No: <code class="font-mono text-indigo-800 bg-white px-2 py-0.5 rounded border border-amber-300 font-bold" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
                     </span>
                 </div>
                 <h2 class="text-lg sm:text-xl font-black text-slate-900 mt-2.5 flex items-center gap-2">
-                    <span>📑 विभिन्न विभागों को जावक पत्र (Outgoing Letters Register)</span>
+                    <span>📑 Outgoing Letters Reference Register</span>
                 </h2>
                 <p class="text-xs text-slate-600 mt-1">
-                    PHED, RWD, DWSM, बैंक आदि विभागों को भेजे गए पत्रों की क्रमबद्ध पत्रांक संख्या (SK/YYYY-YY/0001) एवं प्रेषण विवरण।
+                    Sequential reference numbers (SK/YYYY-YY/0001) and dispatch records of letters sent to PHED, RWD, DWSM, Banks, and other departments.
                 </p>
             </div>
 
             <!-- Action Buttons: High-Visibility Orange CTA Button + Secondary White Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
                 <button type="button" onclick="openNewLetterModal()" class="btn-cta">
-                    <i class="fa-solid fa-circle-plus text-white"></i> <span>+ <span data-i18n="btn_new_letter">नया पत्र</span></span>
+                    <i class="fa-solid fa-circle-plus text-white"></i> <span>+ <span data-i18n="btn_new_letter">New Letter</span></span>
                 </button>
-                <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="btn-secondary" title="Excel डाउनलोड">
+                <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="btn-secondary" title="Download Excel">
                     <i class="fa-solid fa-file-excel text-emerald-700"></i> <span>Excel</span>
                 </a>
-                <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="btn-secondary" title="PDF डाउनलोड">
+                <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="btn-secondary" title="Download PDF">
                     <i class="fa-solid fa-file-pdf text-[#166534]"></i> <span>PDF</span>
                 </a>
             </div>
@@ -388,19 +388,19 @@
         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="relative w-full sm:w-96">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="विभाग, स्थान, पत्रांक संख्या या विषय से खोजें..." class="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
+                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="Search by department, place, reference no, or purpose..." class="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
             </div>
 
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span class="text-xs text-slate-600 font-bold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> वित्तीय वर्ष:</span>
+                <span class="text-xs text-slate-600 font-bold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> Financial Year:</span>
                 <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="">सभी वित्तीय वर्ष (All)</option>
+                    <option value="">All Financial Years (All)</option>
                     {% for fy in letter_fys %}
                     <option value="{{ fy }}" {% if fy == next_letter_info.fy %}selected{% endif %}>FY {{ fy }}</option>
                     {% endfor %}
                 </select>
                 <span id="lettersCountBadge" class="text-xs px-3 py-2 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-300 whitespace-nowrap">
-                    कुल: {{ outgoing_letters|length }} पत्र
+                    Total: {{ outgoing_letters|length }} Letters
                 </span>
             </div>
         </div>
@@ -410,14 +410,14 @@
             <table class="w-full text-left text-xs border-collapse" id="lettersTable">
                 <thead>
                     <tr class="bg-[#166534] text-white uppercase text-[11px] tracking-wider font-bold">
-                        <th class="py-3.5 px-3 text-center w-14" data-i18n="col_sr">क्र.</th>
-                        <th class="py-3.5 px-3 text-center whitespace-nowrap" data-i18n="col_date">दिनांक</th>
-                        <th class="py-3.5 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">पत्रांक संख्या</th>
-                        <th class="py-3.5 px-3.5 min-w-[200px]" data-i18n="col_dept">विभाग</th>
-                        <th class="py-3.5 px-3 whitespace-nowrap" data-i18n="col_place">स्थान</th>
-                        <th class="py-3.5 px-4 min-w-[280px]" data-i18n="col_purpose">उद्देश्य</th>
-                        <th class="py-3.5 px-3 min-w-[160px]" data-i18n="col_remarks">रिमार्क्स</th>
-                        <th class="py-3.5 px-3 text-center w-20" data-i18n="col_action">कार्रवाई</th>
+                        <th class="py-3.5 px-3 text-center w-14" data-i18n="col_sr">Sr.</th>
+                        <th class="py-3.5 px-3 text-center whitespace-nowrap" data-i18n="col_date">Date</th>
+                        <th class="py-3.5 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">Ref No</th>
+                        <th class="py-3.5 px-3.5 min-w-[200px]" data-i18n="col_dept">Department</th>
+                        <th class="py-3.5 px-3 whitespace-nowrap" data-i18n="col_place">Place</th>
+                        <th class="py-3.5 px-4 min-w-[280px]" data-i18n="col_purpose">Purpose</th>
+                        <th class="py-3.5 px-3 min-w-[160px]" data-i18n="col_remarks">Remarks</th>
+                        <th class="py-3.5 px-3 text-center w-20" data-i18n="col_action">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 text-slate-800 bg-white" id="lettersTableBody">
@@ -432,7 +432,7 @@
                         <td class="py-3 px-3.5 text-center whitespace-nowrap">
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#C7E6D1]">
                                 <span class="font-mono font-normal text-[#052E16] text-[12px] tracking-wide">{{ letter.ref_no }}</span>
-                                <button type="button" onclick="copyRefNo('{{ letter.ref_no }}', this)" title="पत्रांक कॉपी करें" class="text-blue-500 hover:text-blue-800 transition p-0.5">
+                                <button type="button" onclick="copyRefNo('{{ letter.ref_no }}', this)" title="Copy Reference No" class="text-blue-500 hover:text-blue-800 transition p-0.5">
                                     <i class="fa-regular fa-copy text-[11px]"></i>
                                 </button>
                             </div>
@@ -453,10 +453,10 @@
                         </td>
                         <td class="py-3 px-3 text-center whitespace-nowrap">
                             <div class="flex items-center justify-center gap-1">
-                                <button type="button" onclick="openEditLetterModal({{ letter|tojson }})" title="संपादित करें (Edit)" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition">
+                                <button type="button" onclick="openEditLetterModal({{ letter|tojson }})" title="Edit Letter" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition">
                                     <i class="fa-solid fa-pen text-[10px]"></i>
                                 </button>
-                                <button type="button" onclick="deleteLetter({{ letter.id }}, '{{ letter.ref_no }}')" title="हटाएं (Delete)" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
+                                <button type="button" onclick="deleteLetter({{ letter.id }}, '{{ letter.ref_no }}')" title="Delete Letter" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
                                     <i class="fa-solid fa-trash text-[10px]"></i>
                                 </button>
                             </div>
@@ -469,10 +469,10 @@
                                 <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#4B6B57] flex items-center justify-center text-xl mb-2.5 border border-emerald-200">
                                     <i class="fa-solid fa-envelope-open-text"></i>
                                 </div>
-                                <p class="text-sm font-bold text-slate-700">अभी तक कोई जावक पत्र दर्ज नहीं हुआ है।</p>
-                                <p class="text-xs text-[#4B6B57] mt-0.5">पहला आधिकारिक पत्र दर्ज करने के लिए नीचे क्लिक करें।</p>
+                                <p class="text-sm font-bold text-slate-700">No outgoing letters recorded yet.</p>
+                                <p class="text-xs text-[#4B6B57] mt-0.5">Click below to register the first official letter reference.</p>
                                 <button type="button" onclick="openNewLetterModal()" class="mt-3.5 px-4 py-2 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-plus"></i> पहला पत्रांक दर्ज करें ({{ next_letter_info.ref_no }})
+                                    <i class="fa-solid fa-plus"></i> Record First Letter ({{ next_letter_info.ref_no }})
                                 </button>
                             </div>
                         </td>
@@ -491,12 +491,12 @@
             <div>
                 <h2 class="text-base font-bold text-[#052E16] flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-[#4B6B57]"></i>
-                    <span data-i18n="logs_heading">हाल की खपत</span>
+                    <span data-i18n="logs_heading">Recent Usage Logs</span>
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5"><span data-i18n="logs_sub">अंतिम सामग्री प्रविष्टियां</span></p>
+                <p class="text-xs text-slate-500 mt-0.5"><span data-i18n="logs_sub">Latest material usage entries</span></p>
             </div>
             <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-bold text-[#4B6B57] hover:text-emerald-950 flex items-center gap-1">
-                <span data-i18n="view_daily">दैनिक रिपोर्ट</span> <i class="fa-solid fa-arrow-right"></i>
+                <span data-i18n="view_daily">Daily Report</span> <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
 
@@ -504,13 +504,13 @@
             <table class="w-full text-left text-xs border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                        <th class="py-2.5 px-3" data-i18n="col_date">तारीख</th>
-                        <th class="py-2.5 px-3" data-i18n="col_site">साइट</th>
-                        <th class="py-2.5 px-3" data-i18n="col_item">सामग्री</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_qty">मात्रा</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_rate">दर</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_val">लागत (₹)</th>
-                        <th class="py-2.5 px-3" data-i18n="col_desc">विवरण</th>
+                        <th class="py-2.5 px-3" data-i18n="col_date">Date</th>
+                        <th class="py-2.5 px-3" data-i18n="col_site">Site</th>
+                        <th class="py-2.5 px-3" data-i18n="col_item">Material</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_qty">Quantity</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_rate">Rate</th>
+                        <th class="py-2.5 px-3 text-right" data-i18n="col_val">Cost (₹)</th>
+                        <th class="py-2.5 px-3" data-i18n="col_desc">Details</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#C7E6D1] text-[#052E16]">
@@ -528,7 +528,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" class="py-8 text-center text-[#4B6B57]">कोई प्रविष्टि नहीं मिली। नई प्रविष्टि दर्ज करें।</td>
+                        <td colspan="7" class="py-8 text-center text-[#4B6B57]">No entries found. Record a new entry.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -548,9 +548,9 @@
         <div class="bg-[#0A261F] p-5 text-white flex items-center justify-between border-b border-[#12382E]">
             <div>
                 <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
-                    <i class="fa-solid fa-stamp"></i> पत्रांक पंजी (Dispatch Entry)
+                    <i class="fa-solid fa-stamp"></i> Letters Register (Dispatch Entry)
                 </span>
-                <h3 id="letterModalTitle" class="text-lg font-black mt-0.5 text-white">नया जावक पत्रांक दर्ज करें</h3>
+                <h3 id="letterModalTitle" class="text-lg font-black mt-0.5 text-white">Record New Outgoing Letter Reference</h3>
             </div>
             <button type="button" onclick="closeLetterModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
@@ -565,16 +565,16 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">
-                        दिनांक (Letter Date) <span class="text-rose-500">*</span>
+                        Letter Date <span class="text-rose-500">*</span>
                     </label>
                     <input type="date" id="letterDateInput" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50">
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-xs font-bold text-slate-700">
-                            पत्रांक संख्या (Ref No.) <span class="text-rose-500">*</span>
+                            Reference No (Ref No.) <span class="text-rose-500">*</span>
                         </label>
-                        <span class="text-[10px] text-[#4B6B57] font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">ऑटोमैटिक</span>
+                        <span class="text-[10px] text-[#4B6B57] font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Automatic</span>
                     </div>
                     <input type="text" id="letterRefNoInput" required placeholder="SK/2026-27/0001" class="w-full px-3 py-2.5 rounded-xl border border-blue-300 font-mono font-bold text-xs text-blue-900 bg-blue-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 </div>
@@ -583,73 +583,73 @@
             <!-- Row 2: Name of the Department with Datalist Suggestions -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">
-                    विभाग का नाम (Name of Department) <span class="text-rose-500">*</span>
+                    Department Name <span class="text-rose-500">*</span>
                 </label>
-                <input type="text" id="letterDeptInput" list="deptSuggestions" required placeholder="जैसे: कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <input type="text" id="letterDeptInput" list="deptSuggestions" required placeholder="e.g. Executive Engineer, PHED Siwan" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 <datalist id="deptSuggestions">
-                    <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान (PHED Siwan)">
-                    <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल छपरा (PHED Chapra)">
-                    <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल मधुबनी (PHED Madhubani)">
-                    <option value="कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल दरभंगा (PHED Darbhanga)">
-                    <option value="सहायक अभियंता (AE), लोक स्वास्थ्य उप-प्रमंडल">
-                    <option value="कनीय अभियंता (JE), लोक स्वास्थ्य उप-प्रमंडल">
-                    <option value="अधीक्षण अभियंता कार्यालय, लोक स्वास्थ्य अभियंत्रण अंचल">
-                    <option value="मुख्य अभियंता कार्यालय, लोक स्वास्थ्य अभियंत्रण विभाग, पटना">
-                    <option value="ग्रामीण कार्य विभाग (RWD)">
-                    <option value="जिला जल एवं स्वच्छता समिति (DWSM)">
-                    <option value="जिला पदाधिकारी कार्यालय (DM Office)">
-                    <option value="प्रखंड विकास पदाधिकारी कार्यालय (BDO Office)">
-                    <option value="भारतीय स्टेट बैंक (State Bank of India)">
+                    <option value="Executive Engineer, PHED Siwan">
+                    <option value="Executive Engineer, PHED Chapra">
+                    <option value="Executive Engineer, PHED Madhubani">
+                    <option value="Executive Engineer, PHED Darbhanga">
+                    <option value="Assistant Engineer (AE), PHED Sub-Division">
+                    <option value="Junior Engineer (JE), PHED Sub-Division">
+                    <option value="Superintending Engineer Office, PHED Circle">
+                    <option value="Chief Engineer Office, PHED Patna">
+                    <option value="Rural Works Department (RWD)">
+                    <option value="District Water & Sanitation Mission (DWSM)">
+                    <option value="District Magistrate Office (DM Office)">
+                    <option value="Block Development Officer Office (BDO Office)">
+                    <option value="State Bank of India (SBI)">
                 </datalist>
                 <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                    <span class="text-[10px] text-[#4B6B57] font-semibold">त्वरित चयन:</span>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल सीवान')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Siwan</button>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल छपरा')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Chapra</button>
-                    <button type="button" onclick="setQuickDept('कार्यपालक अभियंता, लोक स्वास्थ्य प्रमंडल मधुबनी')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Madhubani</button>
-                    <button type="button" onclick="setQuickDept('ग्रामीण कार्य विभाग (RWD)')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">RWD</button>
+                    <span class="text-[10px] text-[#4B6B57] font-semibold">Quick Select:</span>
+                    <button type="button" onclick="setQuickDept('Executive Engineer, PHED Siwan')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Siwan</button>
+                    <button type="button" onclick="setQuickDept('Executive Engineer, PHED Chapra')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Chapra</button>
+                    <button type="button" onclick="setQuickDept('Executive Engineer, PHED Madhubani')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">PHED Madhubani</button>
+                    <button type="button" onclick="setQuickDept('Rural Works Department (RWD)')" class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-[#4B6B57] border border-slate-200 transition">RWD</button>
                 </div>
             </div>
 
             <!-- Row 3: Place / Site -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">
-                    स्थान / साइट (Place / Location) <span class="text-rose-500">*</span>
+                    Place / Location <span class="text-rose-500">*</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <select id="letterPlaceSelect" onchange="handlePlaceSelectChange()" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                        <option value="">-- साइट / स्थान चुनें --</option>
+                        <option value="">-- Select Site / Place --</option>
                         {% for s in sites %}
                         <option value="{{ s.name }}">{{ s.name }} ({{ s.location or 'Site' }})</option>
                         {% endfor %}
-                        <option value="__custom__">+ अन्य स्थान (Type Custom Place)</option>
+                        <option value="__custom__">+ Other Place (Type Custom Place)</option>
                     </select>
-                    <input type="text" id="letterCustomPlaceInput" placeholder="स्थान का नाम लिखें (जैसे: सीवान / पटना)" class="hidden w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <input type="text" id="letterCustomPlaceInput" placeholder="Enter place name (e.g. Siwan / Patna)" class="hidden w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 </div>
             </div>
 
             <!-- Row 4: Purpose of the Letter -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">
-                    पत्र का उद्देश्य / विषय (Purpose of the Letter) <span class="text-rose-500">*</span>
+                    Purpose / Subject of the Letter <span class="text-rose-500">*</span>
                 </label>
-                <textarea id="letterPurposeInput" rows="3" required placeholder="जैसे: हर घर नल का जल योजना के अंतर्गत पाइपलाइन कार्य एवं FHTC कनेक्शन की प्रगति रिपोर्ट समर्पित करने के संबंध में।" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 leading-relaxed"></textarea>
+                <textarea id="letterPurposeInput" rows="3" required placeholder="e.g. Submission of pipeline work and FHTC connection progress report under Har Ghar Nal Ka Jal Scheme." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 leading-relaxed"></textarea>
             </div>
 
             <!-- Row 5: Remarks / Dispatch mode -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">
-                    टिप्पणी (Remarks / Dispatch Details)
+                    Remarks / Dispatch Details
                 </label>
-                <input type="text" id="letterRemarksInput" placeholder="जैसे: हस्तगत प्राप्त कराया / स्पीड पोस्ट संख्या: ED123456789IN / पावती संलग्न" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                <input type="text" id="letterRemarksInput" placeholder="e.g. Hand delivered / Speed Post ED123456789IN / Acknowledgment attached" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
             </div>
 
             <!-- Action Buttons -->
             <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
                 <button type="button" onclick="closeLetterModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें (Cancel)
+                    Cancel
                 </button>
                 <button type="submit" id="btnSaveLetter" class="px-5 py-2.5 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white text-xs font-bold shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-check"></i> <span id="btnSaveLetterText">पत्रांक सुरक्षित करें</span>
+                    <i class="fa-solid fa-check"></i> <span id="btnSaveLetterText">Save Letter Reference</span>
                 </button>
             </div>
         </form>
@@ -680,8 +680,8 @@
     }
 
     function openNewLetterModal() {
-        document.getElementById('letterModalTitle').innerText = 'नया जावक पत्रांक दर्ज करें';
-        document.getElementById('btnSaveLetterText').innerText = 'पत्रांक सुरक्षित करें';
+        document.getElementById('letterModalTitle').innerText = 'Record New Outgoing Letter Reference';
+        document.getElementById('btnSaveLetterText').innerText = 'Save Letter Reference';
         document.getElementById('letterEditId').value = '';
 
         const today = new Date().toISOString().split('T')[0];
@@ -698,8 +698,8 @@
     }
 
     function openEditLetterModal(letter) {
-        document.getElementById('letterModalTitle').innerText = 'पत्रांक विवरण संपादित करें (' + letter.ref_no + ')';
-        document.getElementById('btnSaveLetterText').innerText = 'बदलाव सुरक्षित करें';
+        document.getElementById('letterModalTitle').innerText = 'Edit Letter Reference (' + letter.ref_no + ')';
+        document.getElementById('btnSaveLetterText').innerText = 'Update Letter';
         document.getElementById('letterEditId').value = letter.id;
 
         document.getElementById('letterDateInput').value = letter.letter_date || '';
@@ -750,13 +750,13 @@
         const remarks = document.getElementById('letterRemarksInput').value.trim();
 
         if (!dept || !place || !purpose) {
-            alert('कृपया विभाग, स्थान और पत्र का उद्देश्य भरें।');
+            alert('Please fill in Department, Place, and Letter Purpose.');
             return;
         }
 
         const btn = document.getElementById('btnSaveLetter');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> सुरक्षित हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
         const payload = {
             letter_date: letterDate,
@@ -782,19 +782,19 @@
                 window.location.hash = 'letters';
                 window.location.reload();
             } else {
-                alert(data.message || 'त्रुटि हुई। कृपया पुनः प्रयास करें।');
+                alert(data.message || 'Error occurred. Please try again.');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'बदलाव सुरक्षित करें' : 'पत्रांक सुरक्षित करें');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'Update Letter' : 'Save Letter Reference');
             }
         } catch (err) {
-            alert('सर्वर से संपर्क नहीं हो सका: ' + err.message);
+            alert('Could not connect to server: ' + err.message);
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'बदलाव सुरक्षित करें' : 'पत्रांक सुरक्षित करें');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'Update Letter' : 'Save Letter Reference');
         }
     }
 
     async function deleteLetter(id, refNo) {
-        if (!confirm(`क्या आप पत्रांक ${refNo} का रिकॉर्ड स्थायी रूप से हटाना चाहते हैं?`)) {
+        if (!confirm(Are you sure you want to permanently delete letter reference ?)) {
             return;
         }
 
@@ -805,10 +805,10 @@
                 window.location.hash = 'letters';
                 window.location.reload();
             } else {
-                alert(data.message || 'हटाने में विफल।');
+                alert(data.message || 'Failed to delete.');
             }
         } catch (err) {
-            alert('सर्वर त्रुटि: ' + err.message);
+            alert('Server error: ' + err.message);
         }
     }
 
@@ -823,7 +823,7 @@
                 }, 1500);
             }
         }).catch(() => {
-            prompt('पत्रांक संख्या कॉपी करें:', refNo);
+            prompt('Copy Reference Number:', refNo);
         });
     }
 
@@ -850,7 +850,7 @@
             }
         });
 
-        document.getElementById('lettersCountBadge').innerText = `कुल: ${visibleCount} पत्र`;
+        document.getElementById('lettersCountBadge').innerText = Total:  Letters;
         updateExportLinks(selectedFy, q);
     }
 
@@ -873,9 +873,9 @@
         const elOnSite = document.getElementById('txtOnSite');
         const elOffSite = document.getElementById('txtOffSite');
         const elOffline = document.getElementById('txtOffline');
-        if (elOnSite) elOnSite.innerText = `${onSite} साइट पर`;
-        if (elOffSite) elOffSite.innerText = `${offSite} साइट से बाहर`;
-        if (elOffline) elOffline.innerText = `${offline} ऑफलाइन`;
+        if (elOnSite) elOnSite.innerText = `${onSite} On Site`;
+        if (elOffSite) elOffSite.innerText = `${offSite} Off Site`;
+        if (elOffline) elOffline.innerText = `${offline} Offline`;
     }
 
     function filterSupervisorList() {
@@ -938,11 +938,11 @@
                     const badgeEl = document.getElementById(`supBadge_${s.site_id}`);
                     if (badgeEl) {
                         if (s.is_on_site) {
-                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>साइट पर उपस्थित</span>`;
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[11px] font-black border border-emerald-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>Present On Site</span>`;
                         } else if (s.has_ping) {
-                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>साइट से बाहर</span>`;
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black border border-amber-300 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Off Site</span>`;
                         } else {
-                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>आज ऑफलाइन</span>`;
+                            badgeEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200 shrink-0"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Offline Today</span>`;
                         }
                     }
 
@@ -955,25 +955,25 @@
                     if (locEl) {
                         if (s.has_ping) {
                             const distStr = (s.last_distance_m !== null && s.last_distance_m !== undefined) 
-                                ? (s.last_distance_m < 1000 ? Math.round(s.last_distance_m) + ' मीटर दूर' : (s.last_distance_m / 1000).toFixed(1) + ' किमी दूर')
-                                : 'दूरी अज्ञात';
+                                ? (s.last_distance_m < 1000 ? Math.round(s.last_distance_m) + ' m away' : (s.last_distance_m / 1000).toFixed(1) + ' km away')
+                                : 'Distance unknown';
                             const distColor = s.is_on_site ? 'text-emerald-700' : 'text-amber-700';
                             locEl.innerHTML = `
                                 <div class="flex items-center justify-between text-slate-700">
-                                    <span class="text-slate-500 font-medium">दूरी:</span>
+                                    <span class="text-slate-500 font-medium">Distance:</span>
                                     <span class="font-bold font-mono ${distColor}">${distStr}</span>
                                 </div>
                                 <div class="flex items-center justify-between text-slate-700">
-                                    <span class="text-slate-500 font-medium">निकटतम स्थान:</span>
+                                    <span class="text-slate-500 font-medium">Nearest Location:</span>
                                     <span class="font-semibold text-slate-800 truncate max-w-[150px]">${s.nearest_point || s.site_name}</span>
                                 </div>
                                 <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200/60">
-                                    <span>अंतिम सक्रियता:</span>
-                                    <span class="font-mono font-bold text-slate-600">${s.last_ping_time || 'अभी'}</span>
+                                    <span>Last Active:</span>
+                                    <span class="font-mono font-bold text-slate-600">${s.last_ping_time || 'Just now'}</span>
                                 </div>
                             `;
                         } else {
-                            locEl.innerHTML = `<div class="py-1 text-center text-slate-400"><span>आज इस साइट से कोई GPS लॉगिन/पिंग दर्ज नहीं हुआ</span></div>`;
+                            locEl.innerHTML = `<div class="py-1 text-center text-slate-400"><span>No GPS login / ping recorded today from this site</span></div>`;
                         }
                     }
 
@@ -984,12 +984,12 @@
                             mapBtnEl.innerHTML = `
                                 <a href="https://www.google.com/maps?q=${s.last_lat},${s.last_lng}" target="_blank" class="w-full py-1.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#166534] font-bold text-xs border border-emerald-300 flex items-center justify-center gap-1.5 transition">
                                     <i class="fa-solid fa-map-location-dot text-emerald-700"></i>
-                                    <span>Google Maps पर लाइव लोकेशन देखें</span>
+                                    <span>View Live Location on Google Maps</span>
                                     <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
                                 </a>
                             `;
                         } else {
-                            mapBtnEl.innerHTML = `<div class="py-1 text-center text-slate-400 text-[11px]"><i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> मैप लोकेशन अनुपलब्ध</div>`;
+                            mapBtnEl.innerHTML = `<div class="py-1 text-center text-slate-400 text-[11px]"><i class="fa-solid fa-location-slash text-slate-300 mr-1"></i> Map location unavailable</div>`;
                         }
                     }
                 });

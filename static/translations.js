@@ -1675,7 +1675,7 @@ const AppTranslations = {
             col_desc: "Details",
 
             // Dropdown & Language
-            lang_selector_title: "Select Language / भाषा चुनें",
+            lang_selector_title: "Select Language",
             lang_hi_title: "हिंदी (Hindi)",
             lang_hi_sub: "Entire system in Hindi",
             lang_en_title: "English",
@@ -1781,9 +1781,8 @@ const AppTranslations = {
                     if (!parent) return NodeFilter.FILTER_REJECT;
                     const tag = parent.tagName.toLowerCase();
                     if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input') return NodeFilter.FILTER_REJECT;
-                    if (parent.closest('#tapLangContainer') || parent.closest('#tapLangDropdown')) return NodeFilter.FILTER_REJECT;
-                    if (parent.closest('[data-i18n]')) return NodeFilter.FILTER_REJECT;
-                    // Do not translate raw numbers or date patterns
+                    if (parent.closest('#topBtnLangHi') || parent.closest('#sideBtnLangHi') || parent.closest('#tapLangContainer') || parent.closest('#tapLangDropdown')) return NodeFilter.FILTER_REJECT;
+                    if (parent.hasAttribute('data-i18n')) return NodeFilter.FILTER_REJECT;
                     return NodeFilter.FILTER_ACCEPT;
                 }
             }

@@ -17,17 +17,17 @@
                         Geo-Tagged Camera
                     </span>
                     <h1 class="text-xl sm:text-2xl font-black mt-0.5 text-white">
-                        साइट काम की फोटो अपलोड
+                        Upload Site Work Photo
                     </h1>
                 </div>
             </div>
             <a href="/site-photos" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition flex items-center gap-1.5 border border-white/20">
-                <i class="fa-solid fa-images"></i> <span>गैलरी</span>
+                <i class="fa-solid fa-images"></i> <span>Gallery</span>
             </a>
         </div>
         <p class="text-xs text-slate-300 mt-2.5 leading-relaxed">
-            साइट पर किए गए काम (पाइप बिछाने, टंकी, बोरिंग) की फोटो खींचें। 
-            सिस्टम फोटो पर <strong>GPS लोकेशन, तारीख और समय का वॉटरमार्क</strong> अपने-आप लगा देगा।
+            Capture photos of work carried out on site (pipe laying, tank, boring). 
+            The system automatically stamps <strong>GPS location, date, and time watermark</strong> on the photo.
         </p>
     </div>
 
@@ -41,12 +41,12 @@
                     <i class="fa-solid fa-location-crosshairs animate-pulse" id="gpsIcon"></i>
                 </div>
                 <div>
-                    <div class="text-xs font-bold text-amber-900" id="gpsTitle">GPS लोकेशन खोजी जा रही है...</div>
-                    <div class="text-[11px] text-amber-700" id="gpsDesc">कृपया लोकेशन (GPS) चालू रखें।</div>
+                    <div class="text-xs font-bold text-amber-900" id="gpsTitle">Searching GPS location...</div>
+                    <div class="text-[11px] text-amber-700" id="gpsDesc">Please keep GPS / location enabled.</div>
                 </div>
             </div>
             <button type="button" onclick="detectGPSLocation()" class="px-3 py-1.5 rounded-xl bg-amber-200 hover:bg-amber-300 text-amber-900 text-xs font-bold transition shrink-0">
-                <i class="fa-solid fa-rotate"></i> <span>पुनः जांचें</span>
+                <i class="fa-solid fa-rotate"></i> <span>Retry</span>
             </button>
         </div>
 
@@ -58,7 +58,7 @@
         <!-- Site Selection -->
         <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                <i class="fa-solid fa-building text-indigo-600 mr-1"></i> साइट (Site): <span class="text-rose-500">*</span>
+                <i class="fa-solid fa-building text-indigo-600 mr-1"></i> Site: <span class="text-rose-500">*</span>
             </label>
             {% if locked_site_id %}
             <div class="px-4 py-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-sm font-bold flex items-center justify-between shadow-sm">
@@ -68,12 +68,12 @@
                     <span>{{ s.name }} ({{ s.code }})</span>
                     {% endfor %}
                 </div>
-                <span class="text-[11px] bg-emerald-600 text-white px-2 py-0.5 rounded-lg font-bold">आपकी अधिकृत साइट</span>
+                <span class="text-[11px] bg-emerald-600 text-white px-2 py-0.5 rounded-lg font-bold">Your Authorized Site</span>
             </div>
             <input type="hidden" name="site_id" id="siteSelect" value="{{ locked_site_id }}">
             {% else %}
             <select name="site_id" id="siteSelect" required class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">-- साइट चुनें --</option>
+                <option value="">-- Select Site --</option>
                 {% for s in sites %}
                 <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
                     {{ s.name }} ({{ s.code }}) - {{ s.supervisor or 'No Supervisor' }}
@@ -86,7 +86,7 @@
         <!-- Work Category Selection -->
         <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                <i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> काम का प्रकार / श्रेणी (Work Category): <span class="text-rose-500">*</span>
+                <i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> Work Category: <span class="text-rose-500">*</span>
             </label>
             <select name="category" id="categorySelect" required class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 {% for cat in categories %}
@@ -96,20 +96,20 @@
 
             <!-- Quick Pill Buttons for Category -->
             <div class="flex flex-wrap gap-1.5 mt-2">
-                <button type="button" onclick="setCategory('पाइपलाइन कार्य (Pipe Laying)')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold border border-indigo-200">
-                    🔧 पाइपलाइन
+                <button type="button" onclick="setCategory('Pipe Laying Work')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold border border-indigo-200">
+                    🔧 Pipeline
                 </button>
-                <button type="button" onclick="setCategory('बोरिंग / मोटर पंप (Boring & Pump)')" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200">
-                    ⚡ मोटर/पंप
+                <button type="button" onclick="setCategory('Boring & Pump')" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200">
+                    ⚡ Motor / Pump
                 </button>
-                <button type="button" onclick="setCategory('पानी टंकी / CWR (OHT & Tank)')" class="px-2.5 py-1 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-[11px] font-bold border border-cyan-200">
-                    💧 पानी टंकी
+                <button type="button" onclick="setCategory('Water Tank / CWR')" class="px-2.5 py-1 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-[11px] font-bold border border-cyan-200">
+                    💧 Water Tank
                 </button>
-                <button type="button" onclick="setCategory('हाउस कनेक्शन (FHTC Tap)')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200">
-                    🚰 नल कनेक्शन
+                <button type="button" onclick="setCategory('House Connection (FHTC Tap)')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200">
+                    🚰 Tap Connection
                 </button>
-                <button type="button" onclick="setCategory('चेंबर व वाल्व (Chamber & Valve)')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold border border-amber-200">
-                    ⚙️ चेंबर/वाल्व
+                <button type="button" onclick="setCategory('Chamber & Valve')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-[11px] font-bold border border-amber-200">
+                    ⚙️ Chamber / Valve
                 </button>
             </div>
         </div>
@@ -118,31 +118,31 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                    <i class="fa-solid fa-calendar-day text-indigo-600 mr-1"></i> काम की तारीख:
+                    <i class="fa-solid fa-calendar-day text-indigo-600 mr-1"></i> Work Date:
                 </label>
                 <input type="date" name="photo_date" id="photoDate" value="{{ today }}" required class="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                    <i class="fa-solid fa-user-pen text-indigo-600 mr-1"></i> फोटो भेजने वाले का नाम:
+                    <i class="fa-solid fa-user-pen text-indigo-600 mr-1"></i> Uploaded By:
                 </label>
-                <input type="text" name="uploaded_by" id="uploadedBy" value="{{ uploader_name }}" placeholder="उदा. आजाद हुसैन (सुपरवाइजर)" class="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" name="uploaded_by" id="uploadedBy" value="{{ uploader_name }}" placeholder="e.g. Azad Hussain (Supervisor)" class="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
         </div>
 
         <!-- Description / Ward Details -->
         <div>
             <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                <i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i> काम का विवरण / वार्ड नं (Description):
+                <i class="fa-solid fa-comment-dots text-indigo-600 mr-1"></i> Work Description / Ward No.:
             </label>
-            <input type="text" name="description" id="photoDesc" placeholder="उदा. वार्ड 4, प्राथमिक विद्यालय के पास 63mm पाइप बिछाया गया" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" name="description" id="photoDesc" placeholder="e.g. Ward 4, 63mm pipe laid near primary school" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-300 text-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
 
         <!-- Camera / File Input Area -->
         <div>
             <label class="block text-xs font-bold text-slate-700 mb-2">
-                <i class="fa-solid fa-camera text-indigo-600 mr-1"></i> काम की फोटो लें (Live Camera / Photo): <span class="text-rose-500">*</span>
+                <i class="fa-solid fa-camera text-indigo-600 mr-1"></i> Take Work Photo (Live Camera / Photo): <span class="text-rose-500">*</span>
             </label>
             
             <input type="file" id="cameraFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleFileSelect(event)">
@@ -153,13 +153,13 @@
                     <i class="fa-solid fa-camera"></i>
                 </div>
                 <h3 class="text-base font-black text-slate-800 mt-3.5">
-                    कैमरा खोलें और फोटो लें
+                    Open Camera & Take Photo
                 </h3>
                 <p class="text-xs text-slate-500 mt-1">
-                    क्लिक करके तुरंत कैमरा चालू करें या गैलरी से फोटो चुनें
+                    Click to open camera or choose photo from gallery
                 </p>
                 <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                    <i class="fa-solid fa-bolt text-emerald-600"></i> ऑटो-कम्प्रेस 100 KB (फास्ट अपलोड)
+                    <i class="fa-solid fa-bolt text-emerald-600"></i> Auto-compressed to ~100 KB (Fast Upload)
                 </div>
             </div>
 
@@ -168,11 +168,11 @@
                 <img id="imagePreview" src="" alt="Preview" class="w-full max-h-96 object-cover bg-black">
                 <div class="absolute bottom-0 inset-x-0 bg-black/75 p-3 text-white text-xs backdrop-blur-sm flex items-center justify-between">
                     <div>
-                        <div class="font-bold text-amber-300" id="previewGpsText">📍 GPS स्टैम्प तैयार है</div>
-                        <div class="text-[10px] text-slate-300" id="previewSizeText">साइज: ~110 KB</div>
+                        <div class="font-bold text-amber-300" id="previewGpsText">📍 GPS Stamp Ready</div>
+                        <div class="text-[10px] text-slate-300" id="previewSizeText">Size: ~110 KB</div>
                     </div>
                     <button type="button" onclick="removeSelectedPhoto()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700">
-                        <i class="fa-solid fa-trash-can"></i> बदलें
+                        <i class="fa-solid fa-trash-can"></i> Change
                     </button>
                 </div>
             </div>
@@ -182,7 +182,7 @@
         <div class="pt-2">
             <button type="submit" id="submitBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-base shadow-lg transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                <span id="submitBtnText">फोटो सुरक्षित सेव व अपलोड करें</span>
+                <span id="submitBtnText">Save & Upload Photo Securely</span>
             </button>
         </div>
     </form>
@@ -209,13 +209,13 @@ function detectGPSLocation() {
     const desc = document.getElementById('gpsDesc');
 
     if (!navigator.geolocation) {
-        title.textContent = '❌ आपके ब्राउज़र में GPS सपोर्ट नहीं है';
-        desc.textContent = 'कृपया Chrome या Edge ब्राउज़र में खोलें।';
+        title.textContent = '❌ GPS is not supported in your browser';
+        desc.textContent = 'Please open in Chrome or Edge browser.';
         return;
     }
 
-    title.textContent = 'GPS लोकेशन खोजी जा रही है...';
-    desc.textContent = 'कृपया 3-4 सेकंड रुकें...';
+    title.textContent = 'Searching GPS location...';
+    desc.textContent = 'Please wait 3-4 seconds...';
     card.className = 'p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between transition';
 
     navigator.geolocation.getCurrentPosition(
@@ -230,14 +230,14 @@ function detectGPSLocation() {
 
             card.className = 'p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-center justify-between transition';
             icon.className = 'fa-solid fa-circle-check text-emerald-600';
-            title.innerHTML = `✅ GPS कनेक्टेड: <span class="font-mono">${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E</span>`;
-            desc.textContent = `सटीकता (Accuracy): ±${acc} मीटर | यह लोकेशन फोटो पर छप जाएगी`;
+            title.innerHTML = `✅ GPS Connected: <span class="font-mono">${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E</span>`;
+            desc.textContent = `Accuracy: ±${acc} m | This location will be watermarked on the photo`;
         },
         (err) => {
             card.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between transition';
             icon.className = 'fa-solid fa-triangle-exclamation text-rose-600';
-            title.textContent = '⚠️ GPS लोकेशन अनुमति नहीं मिली';
-            desc.textContent = 'ब्राउज़र में Location Allow करें ताकि सरकारी वॉटरमार्क लग सके।';
+            title.textContent = '⚠️ GPS permission not granted';
+            desc.textContent = 'Please allow location in browser to apply official watermark.';
         },
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
@@ -263,7 +263,7 @@ async function handleFileSelect(e) {
     previewCard.classList.remove('hidden');
 
     const sizeKb = Math.round(selectedCompressedBlob.size / 1024);
-    sizeText.textContent = `कम्प्रेस्ड साइज: ${sizeKb} KB (मूल: ${(file.size / (1024*1024)).toFixed(1)} MB)`;
+    sizeText.textContent = `Compressed Size: ${sizeKb} KB (Original: ${(file.size / (1024*1024)).toFixed(1)} MB)`;
 }
 
 function removeSelectedPhoto() {
@@ -314,20 +314,20 @@ document.getElementById('uploadPhotoForm').addEventListener('submit', async (e) 
     e.preventDefault();
 
     if (!selectedCompressedBlob) {
-        alert('⚠️ कृपया पहले काम की फोटो लें!');
+        alert('⚠️ Please capture work photo first!');
         return;
     }
 
     const siteId = document.getElementById('siteSelect').value;
     if (!siteId) {
-        alert('⚠️ कृपया साइट चुनें!');
+        alert('⚠️ Please select a site!');
         return;
     }
 
     const btn = document.getElementById('submitBtn');
     const btnText = document.getElementById('submitBtnText');
     btn.disabled = true;
-    btnText.textContent = 'वॉटरमार्क और अपलोड हो रहा है...';
+    btnText.textContent = 'Watermarking and uploading...';
 
     const formData = new FormData();
     formData.append('photo', selectedCompressedBlob, 'site_work.jpg');
@@ -347,16 +347,16 @@ document.getElementById('uploadPhotoForm').addEventListener('submit', async (e) 
         });
         const result = await res.json();
         if (result.success) {
-            alert('✅ शानदार! ' + result.message);
+            alert('✅ Success! ' + result.message);
             window.location.href = `/site-photos?site_id=${siteId}`;
         } else {
-            alert('❌ त्रुटि: ' + (result.message || 'फोटो अपलोड नहीं हो सकी'));
+            alert('❌ Error: ' + (result.message || 'Failed to upload photo'));
         }
     } catch (err) {
-        alert('❌ नेटवर्क एरर: ' + err);
+        alert('❌ Network Error: ' + err);
     } finally {
         btn.disabled = false;
-        btnText.textContent = 'फोटो सुरक्षित सेव व अपलोड करें';
+        btnText.textContent = 'Save & Upload Photo Securely';
     }
 });
 </script>

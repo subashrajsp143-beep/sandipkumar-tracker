@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}DPR (दैनिक कार्य प्रगति रिपोर्ट) - Jal Jeevan Mission - M/S SANDIP KUMAR{% endblock %}
+{% block title %}DPR (Daily Progress Report) - Jal Jeevan Mission - M/S SANDIP KUMAR{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
@@ -17,10 +17,10 @@
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
                     <i class="fa-solid fa-faucet-drip text-amber-400"></i>
-                    <span>DPR (दैनिक कार्य प्रगति रिपोर्ट)</span>
+                    <span>DPR (Daily Progress Report)</span>
                 </h1>
                 <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-                    पाइपलाइन बिछाई (Rmt), घरेलू नल कनेक्शन (FHTC), बोरिंग व सिविल कार्य का दैनिक भौतिक प्रगति रिकॉर्ड।
+                    Daily physical progress record of pipeline laying (Rmt), tap connections (FHTC), boring, and civil works.
                 </p>
             </div>
 
@@ -28,15 +28,15 @@
             <div class="flex flex-wrap items-center gap-2.5">
                 <button type="button" onclick="openDprModal()" class="px-4 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs sm:text-sm shadow-sm transition flex items-center gap-2 cursor-pointer border border-[#166534]">
                     <i class="fa-solid fa-circle-plus"></i>
-                    <span>+ आज का DPR भरें</span>
+                    <span>+ Fill Today's DPR</span>
                 </button>
                 <button type="button" onclick="shareDprWhatsApp()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
                     <i class="fa-brands fa-whatsapp text-lg"></i>
-                    <span>WhatsApp रिपोर्ट</span>
+                    <span>WhatsApp Report</span>
                 </button>
                 <a href="{{ url_for('daily_entry') }}" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-boxes-packing text-teal-300"></i>
-                    <span>सामग्री वाउचर</span>
+                    <span>Material Voucher</span>
                 </a>
             </div>
         </div>
@@ -45,42 +45,42 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
             <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
                 <div class="text-[11px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                    <i class="fa-solid fa-arrows-left-right text-sky-400"></i> आज पाइपलाइन
+                    <i class="fa-solid fa-arrows-left-right text-sky-400"></i> Today Pipeline
                 </div>
-                <div class="text-2xl font-black text-sky-400 mt-1">{{ stats.today.pipe }} <span class="text-xs font-semibold text-slate-300">मीटर</span></div>
-                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_pipe }}</strong> m</div>
+                <div class="text-2xl font-black text-sky-400 mt-1">{{ stats.today.pipe }} <span class="text-xs font-semibold text-slate-300">m</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Total: <strong>{{ stats.overall.total_pipe }}</strong> m</div>
             </div>
 
             <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
                 <div class="text-[11px] font-bold uppercase text-emerald-300 flex items-center gap-1">
-                    <i class="fa-solid fa-house-chimney-user text-emerald-400"></i> आज नल कनेक्शन (FHTC)
+                    <i class="fa-solid fa-house-chimney-user text-emerald-400"></i> Today Tap Connections (FHTC)
                 </div>
-                <div class="text-2xl font-black text-emerald-400 mt-1">{{ stats.today.fhtc }} <span class="text-xs font-semibold text-slate-300">घर</span></div>
-                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_fhtc }}</strong> घर</div>
+                <div class="text-2xl font-black text-emerald-400 mt-1">{{ stats.today.fhtc }} <span class="text-xs font-semibold text-slate-300">Units</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Total: <strong>{{ stats.overall.total_fhtc }}</strong> Units</div>
             </div>
 
             <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
                 <div class="text-[11px] font-bold uppercase text-amber-300 flex items-center gap-1">
-                    <i class="fa-solid fa-bore-hole text-amber-400"></i> आज बोरिंग
+                    <i class="fa-solid fa-bore-hole text-amber-400"></i> Today Boring
                 </div>
-                <div class="text-2xl font-black text-amber-400 mt-1">{{ stats.today.boring }} <span class="text-xs font-semibold text-slate-300">फीट</span></div>
-                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_boring }}</strong> ft</div>
+                <div class="text-2xl font-black text-amber-400 mt-1">{{ stats.today.boring }} <span class="text-xs font-semibold text-slate-300">ft</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Total: <strong>{{ stats.overall.total_boring }}</strong> ft</div>
             </div>
 
             <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60">
                 <div class="text-[11px] font-bold uppercase text-violet-300 flex items-center gap-1">
-                    <i class="fa-solid fa-road text-violet-400"></i> सड़क मरम्मत
+                    <i class="fa-solid fa-road text-violet-400"></i> Road Restoration
                 </div>
-                <div class="text-2xl font-black text-violet-400 mt-1">{{ stats.today.road }} <span class="text-xs font-semibold text-slate-300">मीटर</span></div>
-                <div class="text-[10px] text-slate-400 mt-1">कुल: <strong>{{ stats.overall.total_road }}</strong> m</div>
+                <div class="text-2xl font-black text-violet-400 mt-1">{{ stats.today.road }} <span class="text-xs font-semibold text-slate-300">m</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Total: <strong>{{ stats.overall.total_road }}</strong> m</div>
             </div>
 
             <div class="bg-slate-800/70 backdrop-blur rounded-2xl p-4 border border-slate-700/60 col-span-2 sm:col-span-1">
                 <div class="text-[11px] font-bold uppercase text-teal-300 flex items-center gap-1">
-                    <i class="fa-solid fa-clipboard-check text-teal-400"></i> रिपोर्ट प्राप्त
+                    <i class="fa-solid fa-clipboard-check text-teal-400"></i> Reports Received
                 </div>
                 <div class="text-2xl font-black text-teal-400 mt-1">{{ stats.today.sites_reported }} / {{ sites|length }}</div>
-                <div class="text-[10px] text-slate-400 mt-1">कार्यरत साइट्स से</div>
+                <div class="text-[10px] text-slate-400 mt-1">From Active Sites</div>
             </div>
         </div>
     </div>
@@ -89,15 +89,15 @@
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
         <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5">
             <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-600">तारीख:</label>
+                <label class="text-xs font-bold text-slate-600">Date:</label>
                 <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
             </div>
 
             {% if is_owner and sites|length > 1 %}
             <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-600">साइट:</label>
+                <label class="text-xs font-bold text-slate-600">Site:</label>
                 <select name="site_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
-                    <option value="">-- सभी 21 साइट्स --</option>
+                    <option value="">-- All 21 Sites --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }}</option>
                     {% endfor %}
@@ -106,12 +106,12 @@
             {% endif %}
 
             <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                <i class="fa-solid fa-filter"></i> फ़िल्टर
+                <i class="fa-solid fa-filter"></i> Filter
             </button>
         </form>
 
         <div class="text-xs text-slate-500 font-semibold">
-            कुल <strong>{{ dpr_list|length }}</strong> साइट्स की DPR रिपोर्ट
+            Total <strong>{{ dpr_list|length }}</strong> Sites DPR Reports
         </div>
     </div>
 
@@ -121,9 +121,9 @@
             <div>
                 <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-table-list text-sky-600"></i>
-                    <span>दैनिक कार्य प्रगति विवरण ({{ selected_date }})</span>
+                    <span>Daily Progress Summary ({{ selected_date }})</span>
                 </h3>
-                <p class="text-xs text-slate-500 mt-0.5">सभी 21 साइट्स की जल जीवन मिशन पाइपलाइन एवं नल कनेक्शन प्रविष्टि</p>
+                <p class="text-xs text-slate-500 mt-0.5">Jal Jeevan Mission pipeline and tap connection entries for all 21 sites</p>
             </div>
         </div>
 
@@ -132,12 +132,12 @@
             <div class="w-16 h-16 bg-sky-50 text-sky-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
                 <i class="fa-solid fa-clipboard-question"></i>
             </div>
-            <h4 class="text-base font-bold text-slate-800">{{ selected_date }} की कोई DPR प्रविष्टि नहीं मिली</h4>
+            <h4 class="text-base font-bold text-slate-800">No DPR entries found for {{ selected_date }}</h4>
             <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                सुपरवाइज़र या इनचार्ज नीचे बटन दबाकर आज की पाइपलाइन, नल कनेक्शन और प्रगति तुरंत दर्ज करें।
+                Supervisors or site incharge can record today's pipeline, tap connections, and progress below.
             </p>
             <button type="button" onclick="openDprModal()" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition">
-                + आज का DPR भरें
+                + Fill Today's DPR
             </button>
         </div>
         {% else %}
@@ -145,16 +145,16 @@
             <table class="w-full text-left text-xs border-collapse">
                 <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                     <tr>
-                        <th class="py-3 px-3">साइट</th>
-                        <th class="py-3 px-3">वार्ड</th>
-                        <th class="py-3 px-3 text-right">पाइपलाइन (Rmt)</th>
-                        <th class="py-3 px-3 text-right">FHTC नल कनेक्शन</th>
-                        <th class="py-3 px-3 text-right">बोरिंग (Ft)</th>
-                        <th class="py-3 px-3 text-right">सड़क मरम्मत</th>
-                        <th class="py-3 px-3">पंप हाउस / स्टेज</th>
-                        <th class="py-3 px-4 min-w-[200px]">कार्य विवरण / टिप्पणी</th>
-                        <th class="py-3 px-3">सुपरवाइज़र</th>
-                        <th class="py-3 px-2 text-center">एक्शन</th>
+                        <th class="py-3 px-3">Site</th>
+                        <th class="py-3 px-3">Ward</th>
+                        <th class="py-3 px-3 text-right">Pipeline (Rmt)</th>
+                        <th class="py-3 px-3 text-right">FHTC Connections</th>
+                        <th class="py-3 px-3 text-right">Boring (Ft)</th>
+                        <th class="py-3 px-3 text-right">Road Restoration</th>
+                        <th class="py-3 px-3">Pump House / Stage</th>
+                        <th class="py-3 px-4 min-w-[200px]">Work Description / Remarks</th>
+                        <th class="py-3 px-3">Supervisor</th>
+                        <th class="py-3 px-2 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -166,14 +166,14 @@
                         </td>
                         <td class="py-3 px-3">
                             <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold text-[11px] border border-indigo-200">
-                                {{ row.ward_no or 'मुख्य केंद्र' }}
+                                {{ row.ward_no or 'Main Center' }}
                             </span>
                         </td>
                         <td class="py-3 px-3 text-right font-black text-sky-700 text-sm">
                             {{ row.pipe_laying_meters }} <span class="text-[10px] text-slate-400 font-normal">m</span>
                         </td>
                         <td class="py-3 px-3 text-right font-black text-emerald-700 text-sm">
-                            {{ row.fhtc_connections }} <span class="text-[10px] text-slate-400 font-normal">घर</span>
+                            {{ row.fhtc_connections }} <span class="text-[10px] text-slate-400 font-normal">units</span>
                         </td>
                         <td class="py-3 px-3 text-right font-semibold text-amber-700">
                             {{ row.boring_depth_feet }} <span class="text-[10px] text-slate-400 font-normal">ft</span>
@@ -183,20 +183,20 @@
                         </td>
                         <td class="py-3 px-3">
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px]">
-                                {{ row.civil_stage or 'प्रगति पर' }}
+                                {{ row.civil_stage or 'In Progress' }}
                             </span>
                         </td>
                         <td class="py-3 px-4 text-slate-700 leading-relaxed">
                             {{ row.work_description or '—' }}
                         </td>
                         <td class="py-3 px-3 font-medium text-slate-600">
-                            {{ row.supervisor_name or 'स्टाफ' }}
+                            {{ row.supervisor_name or 'Staff' }}
                             {% if row.supervisor_phone %}
                             <span class="block text-[10px] text-slate-400">{{ row.supervisor_phone }}</span>
                             {% endif %}
                         </td>
                         <td class="py-3 px-2 text-center">
-                            <button type="button" onclick="editDprRow({{ row|tojson }})" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition" title="एडिट">
+                            <button type="button" onclick="editDprRow({{ row|tojson }})" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition" title="Edit">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                         </td>
@@ -219,8 +219,8 @@
                     <i class="fa-solid fa-faucet-drip"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-black text-slate-900" id="dprModalTitle">DPR (दैनिक कार्य प्रगति) दर्ज करें</h3>
-                    <p class="text-[11px] text-slate-500">Jal Jeevan Mission - भौतिक कार्य प्रगति</p>
+                    <h3 class="text-base font-black text-slate-900" id="dprModalTitle">Record Daily Progress Report (DPR)</h3>
+                    <p class="text-[11px] text-slate-500">Jal Jeevan Mission - Physical Work Progress</p>
                 </div>
             </div>
             <button type="button" onclick="closeDprModal()" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
@@ -232,15 +232,15 @@
             <!-- Site and Date -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">साइट <span class="text-rose-500">*</span></label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Site <span class="text-rose-500">*</span></label>
                     {% if user_site_id and not is_owner %}
                     <input type="hidden" id="dprSiteId" value="{{ user_site_id }}">
                     <div class="py-2.5 px-3 rounded-xl bg-teal-50 border border-teal-200 text-xs font-bold text-teal-900">
-                        🔒 {{ sites[0].name if sites else 'आपकी अधिकृत साइट' }}
+                        🔒 {{ sites[0].name if sites else 'Your Authorized Site' }}
                     </div>
                     {% else %}
                     <select id="dprSiteId" required class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
-                        <option value="">-- साइट चुनें --</option>
+                        <option value="">-- Select Site --</option>
                         {% for s in sites %}
                         <option value="{{ s.id }}">{{ s.code }} - {{ s.name }}</option>
                         {% endfor %}
@@ -249,7 +249,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">तारीख <span class="text-rose-500">*</span></label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date <span class="text-rose-500">*</span></label>
                     <input type="date" id="dprDate" value="{{ selected_date }}" required class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-sky-500">
                 </div>
             </div>
@@ -257,17 +257,17 @@
             <!-- Ward & Civil Stage -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">कार्यरत वार्ड (Ward No.)</label>
-                    <input type="text" id="dprWardNo" placeholder="e.g. वार्ड 2, वार्ड 3" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Working Ward (Ward No.)</label>
+                    <input type="text" id="dprWardNo" placeholder="e.g. Ward 2, Ward 3" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">पंप हाउस / सिविल स्थिति</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pump House / Civil Stage</label>
                     <select id="dprCivilStage" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500">
-                        <option value="पाइपलाइन कार्य">पाइपलाइन कार्य प्रगति पर</option>
-                        <option value="बाउंड्री / प्लिंथ">बाउंड्री / प्लिंथ स्तर</option>
-                        <option value="स्लैब ढलाई">स्लैब ढलाई पूर्ण</option>
-                        <option value="मोटर / स्टार्टर फिट">मोटर / स्टार्टर फिट</option>
-                        <option value="सफल टेस्टिंग पूर्ण">सफल टेस्टिंग पूर्ण</option>
+                        <option value="Pipeline Work">Pipeline Work in Progress</option>
+                        <option value="Boundary / Plinth">Boundary / Plinth Level</option>
+                        <option value="Slab Casting">Slab Casting Completed</option>
+                        <option value="Motor Fitted">Motor / Starter Fitted</option>
+                        <option value="Testing Complete">Testing Complete</option>
                     </select>
                 </div>
             </div>
@@ -275,42 +275,42 @@
             <!-- Pipeline and Tap connections -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-sky-50/60 p-3.5 rounded-2xl border border-sky-100">
                 <div>
-                    <label class="block text-[11px] font-black text-sky-900 uppercase mb-1">पाइपलाइन (मीटर)</label>
+                    <label class="block text-[11px] font-black text-sky-900 uppercase mb-1">Pipeline (Meters)</label>
                     <input type="number" step="0.1" id="dprPipe" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-sky-300 bg-white text-xs font-black text-sky-800">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-emerald-900 uppercase mb-1">नल कनेक्शन (FHTC)</label>
+                    <label class="block text-[11px] font-black text-emerald-900 uppercase mb-1">Tap Connection (FHTC)</label>
                     <input type="number" id="dprFhtc" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-emerald-300 bg-white text-xs font-black text-emerald-800">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-amber-900 uppercase mb-1">बोरिंग (फीट)</label>
+                    <label class="block text-[11px] font-black text-amber-900 uppercase mb-1">Boring (Feet)</label>
                     <input type="number" step="0.1" id="dprBoring" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-amber-300 bg-white text-xs font-black text-amber-800">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-violet-900 uppercase mb-1">सड़क रिस्टोर (मीटर)</label>
+                    <label class="block text-[11px] font-black text-violet-900 uppercase mb-1">Road Restored (Meters)</label>
                     <input type="number" step="0.1" id="dprRoad" placeholder="0" class="w-full py-1.5 px-2.5 rounded-xl border border-violet-300 bg-white text-xs font-black text-violet-800">
                 </div>
             </div>
 
             <!-- Description -->
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">आज का कार्य विवरण व टिप्पणी</label>
-                <textarea id="dprDescription" rows="2" placeholder="e.g. वार्ड 2 में 63mm HDPE पाइप 150m बिछाया गया एवं 15 घरों में नल कनेक्शन चालू किया गया।" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800 focus:ring-2 focus:ring-sky-500"></textarea>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Today's Work Description & Remarks</label>
+                <textarea id="dprDescription" rows="2" placeholder="e.g. In Ward 2, 150m of 63mm HDPE pipe laid and 15 household tap connections activated." class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800 focus:ring-2 focus:ring-sky-500"></textarea>
             </div>
 
             <!-- Supervisor Name -->
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">सुपरवाइज़र / इनचार्ज का नाम</label>
-                <input type="text" id="dprSupervisor" placeholder="सुपरवाइज़र का नाम" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800">
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Supervisor / Incharge Name</label>
+                <input type="text" id="dprSupervisor" placeholder="Supervisor Name" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs text-slate-800">
             </div>
 
             <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button type="button" onclick="closeDprModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 cursor-pointer">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="saveDprBtn" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-floppy-disk"></i>
-                    <span>DPR सुरक्षित करें</span>
+                    <span>Save DPR</span>
                 </button>
             </div>
         </form>
@@ -329,7 +329,7 @@
         e.preventDefault();
         const btn = document.getElementById('saveDprBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         const payload = {
             site_id: document.getElementById('dprSiteId').value,
@@ -352,16 +352,16 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(data.message || 'DPR सुरक्षित हो गई!');
+                alert(data.message || 'DPR saved successfully!');
                 window.location.reload();
             } else {
-                alert('एरर: ' + data.message);
+                alert('Error: ' + data.message);
             }
         } catch(err) {
-            alert('नेटवर्क एरर: ' + err.message);
+            alert('Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>DPR सुरक्षित करें</span>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Save DPR</span>';
         }
     }
 
@@ -369,7 +369,7 @@
         document.getElementById('dprSiteId').value = row.site_id;
         document.getElementById('dprDate').value = row.report_date;
         document.getElementById('dprWardNo').value = row.ward_no || '';
-        document.getElementById('dprCivilStage').value = row.civil_stage || 'पाइपलाइन कार्य';
+        document.getElementById('dprCivilStage').value = row.civil_stage || 'Pipeline Work';
         document.getElementById('dprPipe').value = row.pipe_laying_meters || '';
         document.getElementById('dprFhtc').value = row.fhtc_connections || '';
         document.getElementById('dprBoring').value = row.boring_depth_feet || '';
@@ -387,13 +387,13 @@
         const reportedSites = "{{ stats.today.sites_reported }}";
         const totalSites = "{{ sites|length }}";
 
-        let text = `📊 *M/S SANDIP KUMAR — DPR दैनिक कार्य प्रगति*\n`;
-        text += `📅 *तारीख:* ${dateStr}\n`;
-        text += `📍 *कार्यरत साइट्स:* ${reportedSites} / ${totalSites}\n`;
+        let text = `📊 *M/S SANDIP KUMAR — Daily Progress Report (DPR)*\n`;
+        text += `📅 *Date:* ${dateStr}\n`;
+        text += `📍 *Active Sites:* ${reportedSites} / ${totalSites}\n`;
         text += `--------------------------------\n`;
-        text += `🚰 *घरेलू नल कनेक्शन (FHTC):* ${totalFhtc} घर\n`;
-        text += `📏 *पाइपलाइन बिछाई:* ${totalPipe} मीटर (Rmt)\n`;
-        text += `⛏️ *बोरिंग कार्य:* ${totalBoring} फीट\n`;
+        text += `🚰 *Household Tap Connection (FHTC):* ${totalFhtc} units\n`;
+        text += `📏 *Pipeline Laid:* ${totalPipe} meters (Rmt)\n`;
+        text += `⛏️ *Boring Work:* ${totalBoring} feet\n`;
         text += `--------------------------------\n`;
         text += `*Jal Jeevan Mission Project Tracker*\n`;
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hi" style="background-color: #FFFFFF !important;" class="min-h-full bg-white">
+<html lang="en" style="background-color: #FFFFFF !important;" class="min-h-full bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>लॉगिन — M/S SANDIP KUMAR पोर्टल</title>
+    <title>Login — M/S SANDIP KUMAR Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,38 +27,38 @@
 
     <!-- Header / Brand with Official Option 2 Logo -->
     <div class="w-full max-w-md text-center mb-6">
-        <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center p-1 mx-auto mb-3 border border-slate-200">
+        <div class="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center p-1 mx-auto mb-3 border border-[#93C572]">
             <img src="/static/icons/icon-192.png?v=2.0" alt="M/S Sandip Kumar" class="w-full h-full object-contain rounded-xl">
         </div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">M/S SANDIP KUMAR</h1>
-        <p class="text-xs font-bold text-slate-600 mt-0.5">२१ जलापूर्ति साइट्स पोर्टल</p>
+        <h1 class="text-2xl font-black text-[#14300A] tracking-tight">M/S SANDIP KUMAR</h1>
+        <p class="text-xs font-bold text-[#14300A]/70 mt-0.5">21 Water Supply Sites Portal</p>
     </div>
 
     <!-- Login Container Card -->
     <div class="w-full max-w-md bg-white rounded-lg p-6 sm:p-8 border border-[#93C572]">
         
         <!-- Role Tabs -->
-        <div class="grid grid-cols-3 gap-1 p-1 bg-[#F0FDF4] rounded-md mb-6 border border-[#93C572] text-center text-xs font-medium">
+        <div class="grid grid-cols-3 gap-1 p-1 bg-white rounded-md mb-6 border border-[#93C572] text-center text-xs font-medium">
             <button type="button" id="tabWorkerBtn" onclick="switchTab('worker')" 
-                    class="py-2.5 rounded-xl bg-indigo-600 text-white shadow-sm transition">
-                👷 वर्कर
+                    class="py-2.5 rounded-xl bg-[#93C572] text-[#14300A] font-bold shadow-sm transition">
+                👷 Worker
             </button>
             <button type="button" id="tabSupervisorBtn" onclick="switchTab('supervisor')" 
-                    class="py-2.5 rounded-xl text-[#4B6B57] hover:text-white transition">
-                📋 सुपरवाइज़र
+                    class="py-2.5 rounded-xl text-[#14300A] hover:bg-[#93C572]/20 transition">
+                📋 Supervisor
             </button>
             <button type="button" id="tabOwnerBtn" onclick="switchTab('owner')" 
-                    class="py-2.5 rounded-xl text-[#4B6B57] hover:text-white transition">
-                🏢 ऑफिस वर्क
+                    class="py-2.5 rounded-xl text-[#14300A] hover:bg-[#93C572]/20 transition">
+                🏢 Office Work
             </button>
         </div>
 
         <!-- 1. WORKER LOGIN FORM -->
         <form id="workerForm" onsubmit="handleWorkerLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपकी साइट (Work Site) *</label>
-                <select id="wSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
-                    <option value="">-- साइट चुनें --</option>
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Work Site *</label>
+                <select id="wSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                    <option value="">-- Select Site --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                     {% endfor %}
@@ -66,43 +66,43 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपका कार्य / पद (Work Role) *</label>
-                <select id="wRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
-                    <option value="Data Entry">डाटा एंट्री ऑपरेटर (Data Entry / DEO)</option>
-                    <option value="Plumber">प्लंबर (Plumber)</option>
-                    <option value="Helper">हेल्पर / मजदूर (Helper)</option>
-                    <option value="GI Mistri">जी.आई. मिस्त्री (GI Mistri)</option>
-                    <option value="Electrician">इलेक्ट्रीशियन (Electrician)</option>
-                    <option value="Fitter">फिटर (Fitter)</option>
-                    <option value="Other">अन्य (Other)</option>
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Work Role *</label>
+                <select id="wRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                    <option value="Data Entry">Data Entry Operator (DEO)</option>
+                    <option value="Plumber">Plumber</option>
+                    <option value="Helper">Helper / Labor</option>
+                    <option value="GI Mistri">GI Mistri</option>
+                    <option value="Electrician">Electrician</option>
+                    <option value="Fitter">Fitter</option>
+                    <option value="Other">Other</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपका पूरा नाम *</label>
-                <input type="text" id="wName" required placeholder="उदा. संतोष कुमार" 
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Your Full Name *</label>
+                <input type="text" id="wName" required placeholder="e.g. Santosh Kumar" 
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">मोबाइल नंबर *</label>
-                <input type="tel" id="wPhone" required placeholder="उदा. 9876543210" maxlength="10"
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-indigo-500">
-                <span class="text-[10px] text-[#4B6B57] mt-1 block">यह फोन नंबर एक बार सेव रहेगा ताकि आपको बार-बार लॉगिन न करना पड़े।</span>
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Mobile Number *</label>
+                <input type="tel" id="wPhone" required placeholder="e.g. 9876543210" maxlength="10"
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                <span class="text-[10px] text-[#14300A]/70 mt-1 block">This phone number will be remembered on this device.</span>
             </div>
 
-            <button type="submit" id="wLoginBtn" class="w-full btn-cta">
+            <button type="submit" id="wLoginBtn" class="w-full py-3 rounded-xl bg-[#14300A] text-white font-bold text-sm shadow transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-right-to-bracket"></i>
-                <span>लॉगिन करें (मेरी हाजिरी)</span>
+                <span>Login (My Attendance)</span>
             </button>
         </form>
 
         <!-- 2. SUPERVISOR / SITE INCHARGE LOGIN FORM -->
         <form id="supervisorForm" onsubmit="handleSupervisorLogin(event)" class="space-y-4 hidden">
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">आपकी साइट (Site Incharge / Supervisor) *</label>
-                <select id="supSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
-                    <option value="">-- साइट चुनें --</option>
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Work Site (Site Incharge / Supervisor) *</label>
+                <select id="supSiteId" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                    <option value="">-- Select Site --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                     {% endfor %}
@@ -110,59 +110,59 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">पद (Role) *</label>
-                <select id="supRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
-                    <option value="Supervisor">सुपरवाइज़र (Supervisor)</option>
-                    <option value="Site Incharge">साइट इनचार्ज (Site Incharge)</option>
-                    <option value="Data Entry">डाटा एंट्री ऑपरेटर (DEO)</option>
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Role *</label>
+                <select id="supRole" required class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                    <option value="Supervisor">Supervisor</option>
+                    <option value="Site Incharge">Site Incharge</option>
+                    <option value="Data Entry">Data Entry Operator (DEO)</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">सुपरवाइज़र का नाम *</label>
-                <input type="text" id="supName" required placeholder="उदा. रमेश सिंह" 
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Supervisor Name *</label>
+                <input type="text" id="supName" required placeholder="e.g. Ramesh Singh" 
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-[#052E16] mb-1 font-medium">मोबाइल नंबर *</label>
-                <input type="tel" id="supPhone" required placeholder="उदा. 9876543210" maxlength="10"
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#052E16] text-sm font-semibold focus:ring-2 focus:ring-teal-500">
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Mobile Number *</label>
+                <input type="tel" id="supPhone" required placeholder="e.g. 9876543210" maxlength="10"
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
             </div>
 
-            <button type="submit" id="supLoginBtn" class="w-full btn-cta">
+            <button type="submit" id="supLoginBtn" class="w-full py-3 rounded-xl bg-[#14300A] text-white font-bold text-sm shadow transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-boxes-stacked"></i>
-                <span>सुपरवाइज़र पोर्टल (स्टॉक व दैनिक एंट्री)</span>
+                <span>Supervisor Portal (Stock & Daily Entry)</span>
             </button>
         </form>
 
-        <!-- 3. OFFICE WORK LOGIN FORM (Sandip@@12) -->
+        <!-- 3. OFFICE WORK LOGIN FORM -->
         <form id="ownerForm" onsubmit="handleOwnerLogin(event)" class="space-y-4 hidden">
             <div class="text-center py-2">
-                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl mx-auto mb-2 border border-emerald-300">
+                <div class="w-12 h-12 rounded-full bg-[#93C572]/20 text-[#14300A] flex items-center justify-center text-xl mx-auto mb-2 border border-[#93C572]">
                     <i class="fa-solid fa-building-user"></i>
                 </div>
-                <h3 class="text-sm font-extrabold text-slate-900">ऑफिस वर्क (Office Work) एक्सेस</h3>
-                <p class="text-xs text-slate-500">सभी 21 साइट्स, पूरे स्टॉक, पत्रांक पंजी और वित्तीय रिपोर्ट्स का नियंत्रण</p>
+                <h3 class="text-sm font-extrabold text-[#14300A]">Office Work Access</h3>
+                <p class="text-xs text-[#14300A]/70">Control all 21 sites, complete stock, letter register, and financial reports</p>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-900 mb-1 font-medium">ऑफिस वर्क पासवर्ड (Password) *</label>
-                <input type="password" id="ownerPinInput" required placeholder="पासवर्ड दर्ज करें"
-                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 text-center text-lg tracking-normal font-bold focus:ring-2 focus:ring-emerald-600">
+                <label class="block text-xs font-bold text-[#14300A] mb-1 font-medium">Office Work Password *</label>
+                <input type="password" id="ownerPinInput" required placeholder="Enter password"
+                       class="w-full px-3.5 py-3 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-center text-lg tracking-normal font-bold focus:outline-none focus:ring-2 focus:ring-[#93C572]">
             </div>
 
-            <button type="submit" id="ownerLoginBtn" class="w-full btn-cta">
+            <button type="submit" id="ownerLoginBtn" class="w-full py-3 rounded-xl bg-[#14300A] text-white font-bold text-sm shadow transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-lock-open"></i>
-                <span>ऑफिस वर्क खोलें &rarr;</span>
+                <span>Open Office Work &rarr;</span>
             </button>
         </form>
 
     </div>
 
     <!-- Security Note -->
-    <div class="text-center mt-6 text-xs text-[#4B6B57] max-w-sm">
-        लॉगिन केवल 1 बार करना है, ब्राउज़र में आपका डेटा सुरक्षित रूप से याद रहेगा।
+    <div class="text-center mt-6 text-xs text-[#14300A]/70 max-w-sm">
+        Login is only required once. Your device will securely remember your session.
     </div>
 
     <script>
@@ -172,12 +172,10 @@
                 const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
                 const form = document.getElementById(`${t}Form`);
                 if (t === tab) {
-                    btn.className = 'py-2.5 rounded-xl bg-indigo-600 text-white shadow-sm transition';
-                    if (t === 'supervisor') btn.className = 'py-2.5 rounded-xl bg-teal-600 text-white shadow-sm transition';
-                    if (t === 'owner') btn.className = 'py-2.5 rounded-xl bg-[#166534] text-white font-bold shadow-sm transition';
+                    btn.className = 'py-2.5 rounded-xl bg-[#93C572] text-[#14300A] font-bold shadow-sm transition';
                     form.classList.remove('hidden');
                 } else {
-                    btn.className = 'py-2.5 rounded-xl text-[#4B6B57] hover:text-white transition';
+                    btn.className = 'py-2.5 rounded-xl text-[#14300A] hover:bg-[#93C572]/20 transition';
                     form.classList.add('hidden');
                 }
             });
@@ -193,7 +191,7 @@
 
             const btn = document.getElementById('wLoginBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> लॉगिन हो रहा है...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Logging in...';
 
             try {
                 const res = await fetch('/api/auth/worker-login', {
@@ -210,10 +208,10 @@
                     alert('❌ ' + data.message);
                 }
             } catch (err) {
-                alert('❌ नेटवर्क एरर: ' + err.message);
+                alert('❌ Network Error: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>लॉगिन करें (मेरी हाजिरी)</span>';
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>Login (My Attendance)</span>';
             }
         }
 
@@ -227,7 +225,7 @@
 
             const btn = document.getElementById('supLoginBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-location-crosshairs animate-pulse"></i> GPS लोकेशन जांच हो रही है...';
+            btn.innerHTML = '<i class="fa-solid fa-location-crosshairs animate-pulse"></i> Checking GPS location...';
 
             let lat = null, lng = null, acc = 0;
             if ("geolocation" in navigator) {
@@ -259,7 +257,7 @@
                 }
             }
 
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> लॉगिन व हाजिरी दर्ज हो रही है...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Logging in & recording attendance...';
 
             try {
                 const res = await fetch('/api/auth/supervisor-login', {
@@ -289,7 +287,7 @@
                 alert('❌ ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> <span>सुपरवाइज़र पोर्टल (स्टॉक व दैनिक एंट्री)</span>';
+                btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> <span>Supervisor Portal (Stock & Daily Entry)</span>';
             }
         }
 
@@ -300,7 +298,7 @@
 
             const btn = document.getElementById('ownerLoginBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> जांच हो रही है...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Verifying...';
 
             try {
                 const res = await fetch('/api/owner/login', {
@@ -313,13 +311,13 @@
                     localStorage.setItem('sandip_user_role', 'owner');
                     window.location.href = '/dashboard';
                 } else {
-                    alert(data.message || '❌ गलत पासवर्ड!');
+                    alert(data.message || '❌ Incorrect password!');
                 }
             } catch (err) {
-                alert('❌ नेटवर्क एरर: ' + err.message);
+                alert('❌ Network Error: ' + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> <span>ऑफिस वर्क खोलें &rarr;</span>';
+                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> <span>Open Office Work &rarr;</span>';
             }
         }
     </script>

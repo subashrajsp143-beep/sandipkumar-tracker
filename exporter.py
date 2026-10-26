@@ -750,7 +750,7 @@ def generate_photo_album_pdf(site, month_str, photos, from_date=None, to_date=No
 
     if not chunks:
         empty_title = Paragraph('<b>M/S SANDIP KUMAR &mdash; JAL JEEVAN MISSION (BIHAR)</b>', styles['Title'])
-        empty_msg = Paragraph(f'<br/><br/><br/><center><font size=12 color="#64748B">इस साइट ({site_name}) या चुने गए महीने ({month_str}) में कोई फोटो उपलब्ध नहीं है।</font></center>', styles['Normal'])
+        empty_msg = Paragraph(f'<br/><br/><br/><center><font size=12 color="#64748B">No photos available for this site ({site_name}) or selected month ({month_str}).</font></center>', styles['Normal'])
         elements.extend([empty_title, empty_msg])
     else:
         for page_idx, chunk in enumerate(chunks):
@@ -811,7 +811,7 @@ def generate_photo_album_pdf(site, month_str, photos, from_date=None, to_date=No
                     lng_val = float(p.get('longitude') or 0.0)
                     gps_text = f"{lat_val:.5f}&deg; N, {lng_val:.5f}&deg; E" if (lat_val and lng_val) else "GPS Verified"
 
-                    cat_text = p.get('category', 'कार्य')
+                    cat_text = p.get('category', 'Work')
                     desc_text = p.get('description', '') or 'Site work execution'
                     by_text = p.get('uploaded_by', '') or p.get('site_supervisor', 'Supervisor')
 
@@ -862,13 +862,13 @@ def generate_letters_excel(letters, fy=None):
     """
     Generates a professional, print-ready Excel workbook for Outgoing Letters Reference Register.
     Columns:
-    1. S.No. (क्र. सं.)
-    2. Reference Number (पत्रांक संख्या) - e.g. SK/2026-27/0001
-    3. Letter Date (दिनांक) - DD/MM/YYYY
-    4. Department Name (विभाग का नाम)
-    5. Place / Site (स्थान / साइट)
-    6. Purpose of the Letter (पत्र का उद्देश्य / विषय)
-    7. Remarks / Dispatch Details (टिप्पणी / प्रेषण विवरण)
+    1. S.No.
+    2. Reference Number - e.g. SK/2026-27/0001
+    3. Letter Date - DD/MM/YYYY
+    4. Department Name
+    5. Place / Site
+    6. Purpose of the Letter
+    7. Remarks / Dispatch Details
     """
     import datetime as dt
     wb = Workbook()
@@ -880,25 +880,25 @@ def generate_letters_excel(letters, fy=None):
     ws.cell(1, 1).font = Font(name="Calibri", size=13, bold=True, color="1E3A8A")
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=7)
 
-    ws.append(["जावक पत्र पत्रांक पंजी (OUTGOING LETTERS DISPATCH & REFERENCE REGISTER)"])
+    ws.append(["OUTGOING LETTERS DISPATCH & REFERENCE REGISTER"])
     ws.cell(2, 1).font = Font(name="Calibri", size=11, bold=True, color="047857")
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=7)
 
     ist_now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
     current_time_str = ist_now.strftime("%d/%m/%Y %I:%M %p")
-    ws.append([f"वित्तीय वर्ष (Financial Year): {fy or 'All (समस्त)'}  |  कुल पत्र संख्या: {len(letters)}  |  डाउनलोड तिथि: {current_time_str}"])
+    ws.append([f"Financial Year: {fy or 'All'}  |  Total Letters: {len(letters)}  |  Generated: {current_time_str}"])
     ws.cell(3, 1).font = Font(name="Calibri", size=9, italic=True, color="4B5563")
     ws.merge_cells(start_row=3, start_column=1, end_row=3, end_column=7)
     ws.append([])  # blank row
 
     headers = [
-        "क्र. सं. (Sl. No.)",
-        "पत्रांक संख्या (Reference No.)",
-        "दिनांक (Date)",
-        "विभाग का नाम (Name of Department)",
-        "स्थान / साइट (Place)",
-        "पत्र का उद्देश्य / विषय (Purpose of Letter)",
-        "टिप्पणी / प्रेषण विवरण (Remarks / Dispatch)"
+        "Sl. No.",
+        "Reference No.",
+        "Date",
+        "Name of Department",
+        "Place / Site",
+        "Purpose of Letter",
+        "Remarks / Dispatch"
     ]
     ws.append(headers)
     ws.row_dimensions[5].height = 28
@@ -1049,9 +1049,9 @@ def generate_letters_pdf(letters, fy=None):
     elements = [
         Paragraph('M/S SANDIP KUMAR &mdash; GOVERNMENT CONTRACTOR &amp; WATER SUPPLY WORKS', title_style),
         Spacer(1, 2),
-        Paragraph('जावक पत्र पत्रांक पंजी (OUTGOING LETTERS DISPATCH &amp; REFERENCE REGISTER)', sub_style),
+        Paragraph('OUTGOING LETTERS DISPATCH &amp; REFERENCE REGISTER', sub_style),
         Spacer(1, 2),
-        Paragraph(f'<b>Financial Year (वित्तीय वर्ष):</b> {fy or "All (समस्त)"} &nbsp;|&nbsp; <b>Total Outgoing Letters:</b> {len(letters)} &nbsp;|&nbsp; <b>Generated:</b> {current_time_str}', stat_style),
+        Paragraph(f'<b>Financial Year:</b> {fy or "All"} &nbsp;|&nbsp; <b>Total Outgoing Letters:</b> {len(letters)} &nbsp;|&nbsp; <b>Generated:</b> {current_time_str}', stat_style),
         Spacer(1, 6)
     ]
 

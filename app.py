@@ -70,7 +70,7 @@ def ensure_canonical_and_auth():
     if role == "worker":
         allowed_worker_paths = ["/my-attendance", "/logout", "/api/worker/ping"]
         worker_role = session.get("worker_role", "")
-        if worker_role in ["Data Entry", "DEO", "डाटा एंट्री"]:
+        if worker_role in ["Data Entry", "DEO"]:
             allowed_worker_paths.extend(["/entry", "/daily-entry", "/api/entries", "/api/scan-slip", "/api/parse-text"])
         if path not in allowed_worker_paths:
             return redirect(url_for("my_attendance_portal"))
@@ -179,7 +179,7 @@ def api_worker_login():
         phone = data.get("phone", "").strip()
 
         if not site_id or not name:
-            return jsonify({"success": False, "message": "साइट और नाम भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Site and Name are required."}), 400
 
         worker = database.get_or_create_worker(site_id, name, role, phone)
         session.permanent = True
@@ -209,7 +209,7 @@ def api_supervisor_login():
         phone = data.get("phone", "").strip()
 
         if not site_id or not name:
-            return jsonify({"success": False, "message": "साइट और नाम भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Site and Name are required."}), 400
 
         worker = database.get_or_create_worker(site_id, name, role, phone)
         session.permanent = True
@@ -360,11 +360,11 @@ def api_letters():
         custom_ref_no = data.get("ref_no") or None
 
         if not department.strip():
-            return jsonify({"success": False, "message": "विभाग का नाम (Department Name) भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Department Name is required."}), 400
         if not place.strip():
-            return jsonify({"success": False, "message": "स्थान / साइट (Place) भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Place / Site is required."}), 400
         if not purpose.strip():
-            return jsonify({"success": False, "message": "पत्र का उद्देश्य / विषय (Purpose) भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Purpose / Subject is required."}), 400
 
         res = database.add_outgoing_letter(
             letter_date=letter_date,
@@ -376,7 +376,7 @@ def api_letters():
         )
         return jsonify({
             "success": True,
-            "message": f"पत्रांक संख्या {res['ref_no']} सफलतापूर्वक दर्ज हो गया।",
+            "message": f"Letter reference no. {res['ref_no']} recorded successfully.",
             "letter": res
         })
     except Exception as e:
@@ -388,14 +388,14 @@ def api_letter_detail(letter_id):
     if request.method == "GET":
         letter = database.get_outgoing_letter_by_id(letter_id)
         if not letter:
-            return jsonify({"success": False, "message": "पत्र रिकॉर्ड नहीं मिला।"}), 404
+            return jsonify({"success": False, "message": "Letter record not found."}), 404
         return jsonify({"success": True, "letter": letter})
 
     if request.method == "DELETE":
         ok = database.delete_outgoing_letter(letter_id)
         if ok:
-            return jsonify({"success": True, "message": "पत्रांक रिकॉर्ड सफलतापूर्वक हटा दिया गया।"})
-        return jsonify({"success": False, "message": "हटाने में विफल या रिकॉर्ड मौजूद नहीं है।"}), 400
+            return jsonify({"success": True, "message": "Letter record deleted successfully."})
+        return jsonify({"success": False, "message": "Failed to delete letter or record does not exist."}), 400
 
     # POST or PUT: update letter
     try:
@@ -408,7 +408,7 @@ def api_letter_detail(letter_id):
         ref_no = data.get("ref_no")
 
         if not department or not place or not purpose:
-            return jsonify({"success": False, "message": "विभाग, स्थान और विषय भरना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Department, Place, and Subject are required."}), 400
 
         ok = database.update_outgoing_letter(
             letter_id=letter_id,
@@ -420,8 +420,8 @@ def api_letter_detail(letter_id):
             ref_no=ref_no
         )
         if ok:
-            return jsonify({"success": True, "message": "पत्रांक रिकॉर्ड सफलतापूर्वक अपडेट हो गया।"})
-        return jsonify({"success": False, "message": "अपडेट विफल रहा।"}), 400
+            return jsonify({"success": True, "message": "Letter record updated successfully."})
+        return jsonify({"success": False, "message": "Update failed."}), 400
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -531,7 +531,7 @@ def save_entries():
         user_site_id = session.get("site_id")
         if not is_owner and user_site_id:
             if site_id != int(user_site_id):
-                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की खपत दर्ज कर सकते हैं।"}), 403
+                return jsonify({"success": False, "message": "❌ Security Restriction: You can only record usage for your authorized site."}), 403
 
         added_count = 0
         for item in items:
@@ -597,7 +597,7 @@ def delete_entry(entry_id):
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही एंट्री डिलीट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete entries."}), 403
 
         database.delete_consumption_entry(entry_id)
         return jsonify({"success": True, "message": "Entry delete ho gayi."})
@@ -633,7 +633,7 @@ def update_entry(entry_id):
 def export_database_backup():
     is_owner = session.get("is_owner", False)
     if not is_owner:
-        return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अधिकृत मालिक ही पूरा डेटा बैकअप डाउनलोड कर सकते हैं।"}), 403
+        return jsonify({"success": False, "message": "❌ Security Restriction: Only authorized owner can download backup."}), 403
     try:
         conn = database.get_db()
         cursor = conn.cursor()
@@ -1246,7 +1246,7 @@ def sites_list():
 def edit_site(site_id):
     is_owner = session.get("is_owner", False)
     if not is_owner:
-        return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अधिकृत मालिक ही साइट विवरण बदल सकते हैं।"}), 403
+        return jsonify({"success": False, "message": "❌ Security Restriction: Only authorized owner can modify site details."}), 403
     try:
         data = request.form
         name = data.get("name", "").strip()
@@ -1289,7 +1289,7 @@ def add_site():
 
         is_owner = session.get("is_owner", False)
         if not is_owner:
-            flash("❌ केवल अधिकृत मालिक ही नई साइट जोड़ सकते हैं।", "error")
+            flash("❌ Only authorized owner can add new sites.", "error")
             return redirect(url_for("site_stock"))
 
         if not name:
@@ -1320,7 +1320,7 @@ def add_site():
 def delete_site(site_id):
     is_owner = session.get("is_owner", False)
     if not is_owner:
-        flash("❌ केवल अधिकृत मालिक ही साइट हटा सकते हैं।", "error")
+        flash("❌ Only authorized owner can delete sites.", "error")
         return redirect(url_for("site_stock"))
     try:
         conn = database.get_db()
@@ -1347,7 +1347,7 @@ def delete_site(site_id):
 def materials_list():
     is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     if not is_owner:
-        flash("❌ सामग्री व मूल्य सूची (Rate Master) केवल मालिक (Owner) के लिए अधिकृत है।", "error")
+        flash("❌ Rate Master is authorized for Owner only.", "error")
         return redirect(url_for("site_stock"))
 
     materials = database.get_all_materials()
@@ -1357,7 +1357,7 @@ def materials_list():
 def add_material():
     is_owner = session.get("is_owner", False)
     if not is_owner:
-        flash("❌ केवल अधिकृत मालिक ही सामग्री जोड़ सकते हैं।", "error")
+        flash("❌ Only authorized owner can add materials.", "error")
         return redirect(url_for("site_stock"))
     try:
         data = request.form
@@ -1439,7 +1439,7 @@ def app_version():
         "version_code": 7,
         "version_name": "1.6.0",
         "apk_url": "https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk",
-        "changelog": "नया लोगो (JJM वाटर शील्ड) + अल्ट्रा-क्लीन सिंपल मोबाइल डैशबोर्ड और हाजिरी",
+        "changelog": "New logo (JJM Water Shield) + ultra-clean mobile dashboard and attendance",
         "release_date": "2026-10-25"
     })
 
@@ -1516,9 +1516,9 @@ def owner_login_api():
         session.permanent = True
         session["is_owner"] = True
         session["role"] = "owner"
-        session["worker_name"] = "संदीप कुमार"
-        return jsonify({"success": True, "is_owner": True, "role": "owner", "message": "🏢 ऑफिस वर्क मोड सक्रिय (Office Work Active)!"})
-    return jsonify({"success": False, "is_owner": False, "message": "❌ गलत पासवर्ड! कृपया सही ऑफिस वर्क पासवर्ड दर्ज करें।"}), 401
+        session["worker_name"] = "Sandip Kumar"
+        return jsonify({"success": True, "is_owner": True, "role": "owner", "message": "🏢 Office Work Active!"})
+    return jsonify({"success": False, "is_owner": False, "message": "❌ Incorrect password! Please enter correct Office Work password."}), 401
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
 def owner_logout_api():
@@ -1526,7 +1526,7 @@ def owner_logout_api():
     session.pop("role", None)
     session.pop("worker_name", None)
     session.clear()
-    return jsonify({"success": True, "is_owner": False, "message": "ऑफिस वर्क मोड समाप्त हो गया है।"})
+    return jsonify({"success": True, "is_owner": False, "message": "Office Work mode ended."})
 
 @app.route("/api/owner/status", methods=["GET"])
 def owner_status_api():
@@ -1544,7 +1544,7 @@ def attendance_view():
         selected_date = ist_now.strftime("%Y-%m-%d")
 
     # Manual Attendance View: Preserves manual entries.
-    # Note: GPS auto-sync only runs when user explicitly clicks 'GPS ऑटो-फेच' button.
+    # Note: GPS auto-sync only runs when user explicitly clicks 'GPS Auto-Sync' button.
 
     rows, totals = database.get_daily_manpower(selected_date)
 
@@ -1632,7 +1632,7 @@ def save_attendance_api():
         att_date = data.get("date")
         rows = data.get("rows", [])
         if not att_date:
-            return jsonify({"success": False, "message": "तारीख चुनना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Date is required."}), 400
 
         # Security check: If not owner, only allow saving attendance for supervisor's site
         is_owner = session.get("is_owner", False)
@@ -1641,7 +1641,7 @@ def save_attendance_api():
             rows = [r for r in rows if int(r.get("site_id", 0)) == int(user_site_id)]
 
         database.save_daily_manpower(att_date, rows, updated_by=session.get("worker_name", "Web User"))
-        return jsonify({"success": True, "message": f"{att_date} की हाजिरी सफलतापूर्वक सेव हो गई!"})
+        return jsonify({"success": True, "message": f"{att_date} attendance saved successfully!"})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
 
@@ -1666,7 +1666,7 @@ def auto_fetch_attendance_from_gps():
             "site_counts": res["site_counts"],
             "rows": rows,
             "totals": totals,
-            "message": f"✅ GPS से {res['total_workers']} वर्करों की उपस्थिति 21 साइट्स की हाजिरी शीट में स्वतः फेच कर ली गई!"
+            "message": f"✅ Auto-synced attendance for {res['total_workers']} worker(s) across 21 sites!"
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -1804,22 +1804,22 @@ def site_photo_upload():
         try:
             site_id_raw = request.form.get("site_id")
             if not site_id_raw:
-                return jsonify({"success": False, "message": "कृपया साइट चुनें"}), 400
+                return jsonify({"success": False, "message": "Please select a site"}), 400
             
             # SECURITY RESTRICTION: Non-owners can only upload photos for their own assigned site
             if not is_owner and user_site_id:
                 if int(site_id_raw) != int(user_site_id):
-                    return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की फोटो अपलोड कर सकते हैं।"}), 403
+                    return jsonify({"success": False, "message": "❌ Security Restriction: You can only upload photos for your authorized site."}), 403
 
             site = database.get_site_by_id(int(site_id_raw))
             if not site:
-                return jsonify({"success": False, "message": "अमान्य साइट"}), 400
+                return jsonify({"success": False, "message": "Invalid site"}), 400
 
             file = request.files.get("photo")
             if not file or file.filename == "":
-                return jsonify({"success": False, "message": "कृपया काम की फोटो चुनें"}), 400
+                return jsonify({"success": False, "message": "Please capture/select work photo"}), 400
 
-            category = request.form.get("category") or "सामान्य कार्य"
+            category = request.form.get("category") or "General Work"
             description = request.form.get("description", "").strip()
             photo_date = request.form.get("photo_date")
             uploaded_by = request.form.get("uploaded_by") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
@@ -1844,7 +1844,7 @@ def site_photo_upload():
 
             return jsonify({
                 "success": True,
-                "message": f"✅ {site['name']} की फोटो सफलतापूर्वक सेव हो गई!",
+                "message": f"✅ {site['name']} photo saved successfully!",
                 "photo": res
             })
         except Exception as e:
@@ -1890,7 +1890,7 @@ def delete_site_photo_api(photo_id):
             row = cursor.fetchone()
             conn.close()
             if not row or row[0] != int(user_site_id):
-                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट की फोटो हटा सकते हैं।"}), 403
+                return jsonify({"success": False, "message": "❌ Security Restriction: You can only delete photos for your authorized site."}), 403
 
         url = database.delete_site_work_photo(photo_id)
         if url and url.startswith("/static/"):
@@ -1900,7 +1900,7 @@ def delete_site_photo_api(photo_id):
                     os.remove(disk_path)
                 except Exception:
                     pass
-        return jsonify({"success": True, "message": "फोटो सफलतापूर्वक हटा दी गई"})
+        return jsonify({"success": True, "message": "Photo deleted successfully"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -2059,7 +2059,7 @@ def save_stock_inward():
                          (pin and str(pin).strip() in ["Sandip@@12", "7808"]) or 
                          session.get("role") in ["supervisor", "owner"])
         if not is_authorized:
-            return jsonify({"success": False, "message": "❌ स्टॉक एंट्री (माल भेजना) केवल अधिकृत सुपरवाइज़र, साइट इनचार्ज या मालिक ही कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Stock entry (material dispatch) is only allowed for authorized supervisor, site incharge, or owner."}), 403
 
         site_id = data.get("site_id")
         # SECURITY RESTRICTION: Non-owners can only add stock to their own assigned site
@@ -2067,16 +2067,16 @@ def save_stock_inward():
         user_site_id = session.get("site_id")
         if not is_owner and user_site_id:
             if int(site_id) != int(user_site_id):
-                return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: आप केवल अपनी अधिकृत साइट का ही माल दर्ज कर सकते हैं।"}), 403
+                return jsonify({"success": False, "message": "❌ Security Restriction: You can only record materials for your authorized site."}), 403
 
         inward_date = data.get("inward_date") or datetime.date.today().strftime("%Y-%m-%d")
         challan_no = data.get("challan_no", "")
-        supplier = data.get("supplier", "मालिक / हेड ऑफिस")
+        supplier = data.get("supplier", "Owner / Head Office")
         remarks = data.get("remarks", "")
         items = data.get("items", [])
 
         if not site_id or not items:
-            return jsonify({"success": False, "message": "साइट और सामान चुनना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Site and materials are required."}), 400
 
         added_count = 0
         for it in items:
@@ -2096,7 +2096,7 @@ def save_stock_inward():
 
         return jsonify({
             "success": True,
-            "message": f"{added_count} सामान की इनवर्ड एंट्री (भेजा गया माल) सफलतापूर्वक दर्ज हो गई!",
+            "message": f"Inward entry for {added_count} material(s) recorded successfully!",
             "count": added_count
         })
     except Exception as ex:
@@ -2111,7 +2111,7 @@ def reset_stock_zero_api():
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही स्टॉक को 0 (रीसेट) कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can reset stock to 0."}), 403
 
         site_id = data.get("site_id")
         if site_id:
@@ -2120,7 +2120,7 @@ def reset_stock_zero_api():
         database.backup_database()
         database.reset_stock_to_zero(site_id=site_id)
 
-        msg = "सभी साइट्स की सामग्री मात्रा और स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।" if not site_id else "साइट का स्टॉक सफलतापूर्वक 0 (रीसेट) कर दिया गया है।"
+        msg = "All site stock balances have been reset to 0." if not site_id else "Site stock balance has been reset to 0."
         return jsonify({"success": True, "message": msg})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
@@ -2142,10 +2142,10 @@ def delete_stock_inward_api(entry_id):
         pin = request.args.get("pin") or data.get("pin") or request.headers.get("X-Admin-PIN")
         is_owner_auth = session.get("is_owner", False) or (pin and str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner_auth:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल अधिकृत मालिक ही इनवर्ड एंट्री हटा सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Incorrect Password! Only authorized owner can delete inward entries."}), 403
 
         database.delete_inward_entry(entry_id)
-        return jsonify({"success": True, "message": "इनवर्ड एंट्री हटा दी गई।"})
+        return jsonify({"success": True, "message": "Inward entry deleted successfully."})
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
 
@@ -2282,7 +2282,7 @@ def worker_location_ping():
             radius=radius
         )
 
-        if result.get("distance_m") == 99999.0 and not result.get("is_on_site") and result.get("nearest_point_name") == "GPS सेट नहीं":
+        if result.get("distance_m") == 99999.0 and not result.get("is_on_site") and result.get("nearest_point_name") == "GPS Not Set":
             return jsonify({
                 "success": True,
                 "warning": "Site ka GPS set nahi hua. Admin se GPS set karwayein.",
@@ -2337,7 +2337,7 @@ def geo_attendance_photo_checkin():
             att_date = request.form.get("date")
 
         if not photo_data:
-            return jsonify({"success": False, "message": "कृपया उपस्थिति फोटो लें।"}), 400
+            return jsonify({"success": False, "message": "Please capture attendance photo."}), 400
 
         target_wids = []
         if worker_ids and isinstance(worker_ids, list):
@@ -2349,7 +2349,7 @@ def geo_attendance_photo_checkin():
                 target_wids = [int(x.strip()) for x in str(worker_id_raw).split(",") if x.strip().isdigit()]
 
         if not target_wids:
-            return jsonify({"success": False, "message": "कम से कम 1 वर्कर चुनना आवश्यक है।"}), 400
+            return jsonify({"success": False, "message": "Please select at least 1 worker."}), 400
 
         is_owner = session.get("is_owner", False) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
@@ -2359,7 +2359,7 @@ def geo_attendance_photo_checkin():
             site_id = primary_worker["site_id"]
 
         if not is_owner and user_site_id and site_id and int(user_site_id) != site_id:
-            return jsonify({"success": False, "message": "❌ सुरक्षा प्रतिबंध: केवल अपनी साइट की हाजिरी दर्ज कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Security Restriction: You can only record attendance for your own site."}), 403
 
         site = database.get_site_by_id(site_id) if site_id else None
         site_name = site["name"] if site else (primary_worker["site_name"] if primary_worker else "Site")
@@ -2368,7 +2368,7 @@ def geo_attendance_photo_checkin():
         w_name = primary_worker["name"] if primary_worker else "Worker"
         w_role = primary_worker["role"] if primary_worker else "Staff"
         if len(target_wids) > 1:
-            w_name = f"{w_name} + {len(target_wids)-1} अन्य वर्कर (Group Photo)"
+            w_name = f"{w_name} + {len(target_wids)-1} other worker(s) (Group Photo)"
             w_role = "Team / Group"
 
         # Process photo with GPS watermark
@@ -2415,8 +2415,8 @@ def geo_attendance_photo_checkin():
             except Exception:
                 pass
 
-        action_hindi = "चेक-इन (आए)" if check_type == 'check_in' else "चेक-आउट (गए)"
-        msg = f"✅ {len(target_wids)} वर्कर की फोटो उपस्थिति ({action_hindi}) GPS के साथ दर्ज हो गई!"
+        action_text = "Check-In" if check_type == 'check_in' else "Check-Out"
+        msg = f"✅ Photo attendance ({action_text}) recorded with GPS for {len(target_wids)} worker(s)!"
 
         return jsonify({
             "success": True,
@@ -2426,7 +2426,7 @@ def geo_attendance_photo_checkin():
             "workers": results
         })
     except Exception as e:
-        return jsonify({"success": False, "message": f"फोटो हाजिरी दर्ज करने में त्रुटि: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error recording photo attendance: {str(e)}"}), 500
 
 
 # ==========================================
@@ -2512,20 +2512,20 @@ def api_worker_quick_add():
         role = str(data.get("role", "Helper")).strip()
 
         if not site_id:
-            return jsonify({"success": False, "message": "कृपया साइट चुनें।"}), 400
+            return jsonify({"success": False, "message": "Please select a site."}), 400
         if not name:
-            return jsonify({"success": False, "message": "वर्कर का नाम लिखना अनिवार्य है।"}), 400
+            return jsonify({"success": False, "message": "Worker name is required."}), 400
 
         is_owner = session.get("is_owner", False) or session.get("role") == "owner"
         user_site_id = session.get("site_id")
         if not is_owner and user_site_id and int(user_site_id) != site_id:
-            return jsonify({"success": False, "message": "केवल अपनी साइट में वर्कर जोड़ सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "You can only add workers to your authorized site."}), 403
 
         worker_id, token = database.add_worker(site_id, name, role, phone)
         site = database.get_site_by_id(site_id)
         return jsonify({
             "success": True,
-            "message": f"✅ वर्कर '{name}' ({role}) सफलतापूर्वक जोड़ा गया!",
+            "message": f"✅ Worker '{name}' ({role}) added successfully!",
             "worker": {
                 "id": worker_id,
                 "site_id": site_id,
@@ -2537,7 +2537,7 @@ def api_worker_quick_add():
             }
         })
     except Exception as e:
-        return jsonify({"success": False, "message": f"वर्कर जोड़ने में त्रुटि: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error adding worker: {str(e)}"}), 500
 
 
 @app.route("/worker/<token>")
@@ -2562,7 +2562,7 @@ def add_worker_api():
         is_sup = session.get("role") in ["supervisor", "site_incharge"] or (user_site_id and not is_owner)
 
         if not is_owner and not is_sup:
-            return jsonify({"success": False, "message": "❌ केवल मालिक या सुपरवाइजर ही वर्कर जोड़ सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only owner or supervisor can add workers."}), 403
 
         site_id = int(data.get("site_id", 0))
         if is_sup and not is_owner and user_site_id:
@@ -2598,7 +2598,7 @@ def delete_worker_api(worker_id):
         pin = data.get("pin", "")
         is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
-            return jsonify({"success": False, "message": "❌ गलत पिन! केवल मालिक ही worker हटा सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Incorrect Password! Only owner can delete workers."}), 403
         database.delete_worker(worker_id)
         return jsonify({"success": True, "message": "Worker hataya gaya."})
     except Exception as e:
@@ -2615,7 +2615,7 @@ def reset_today_attendance_api():
         pin = data.get("pin", "")
         is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही हाजिरी रीसेट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized owner can reset attendance."}), 403
 
         ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
         date_str = data.get("date") or ist_now.strftime("%Y-%m-%d")
@@ -2623,7 +2623,7 @@ def reset_today_attendance_api():
         site_id = int(site_id) if site_id else None
 
         database.reset_today_attendance(date_str, site_id)
-        return jsonify({"success": True, "message": f"✅ {date_str} की हाजिरी सफलतापूर्वक रीसेट हो गई!"})
+        return jsonify({"success": True, "message": f"✅ Attendance for {date_str} reset successfully!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -2638,13 +2638,13 @@ def reset_all_workers_api():
         pin = data.get("pin", "")
         is_owner = session.get("is_owner", False) or session.get("role") == "owner" or (str(pin).strip() in ["Sandip@@12", "7808"])
         if not is_owner:
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत मालिक ही सभी वर्कर रीसेट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized owner can reset workers."}), 403
 
         site_id = data.get("site_id")
         site_id = int(site_id) if site_id else None
 
         database.reset_all_workers(site_id)
-        return jsonify({"success": True, "message": "✅ वर्कर सूची सफलतापूर्वक रीसेट हो गई!"})
+        return jsonify({"success": True, "message": "✅ Worker list reset successfully!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -2678,7 +2678,7 @@ def api_attendance_latest_data():
             row = cur.fetchone()
         if not row:
             conn.close()
-            return jsonify({"success": False, "message": "कोई पिछला रिकॉर्ड नहीं मिला"})
+            return jsonify({"success": False, "message": "No previous records found"})
         latest_date = row["att_date"]
 
     rows, totals = database.get_daily_manpower(latest_date)
@@ -2701,7 +2701,7 @@ def api_attendance_auto_checkout():
         count = database.auto_checkout_workers_after_5pm(date_str)
         return jsonify({
             "success": True,
-            "message": f"शाम 5:00 बजे के बाद साइट से बाहर निकले {count} वर्कर का स्वतः चेक-आउट किया गया।",
+            "message": f"Auto-checked out {count} worker(s) outside site after 5:00 PM.",
             "checked_out_count": count
         })
     except Exception as e:
@@ -2719,7 +2719,7 @@ def set_site_gps(site_id):
         is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS सेट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can configure GPS."}), 403
 
         lat = float(data.get("latitude", 0))
         lng = float(data.get("longitude", 0))
@@ -2749,7 +2749,7 @@ def site_geo_points_api(site_id):
         is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor_of_site):
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल जोड़ सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can add GPS work locations."}), 403
 
         point_name = data.get("point_name", "").strip()
         lat = float(data.get("latitude", 0))
@@ -2757,13 +2757,13 @@ def site_geo_points_api(site_id):
         radius = int(data.get("radius", 1000))
 
         if not point_name or not lat or not lng:
-            return jsonify({"success": False, "message": "पॉइंट का नाम, Latitude और Longitude अनिवार्य हैं।"}), 400
+            return jsonify({"success": False, "message": "Point Name, Latitude, and Longitude are required."}), 400
 
         pid = database.add_site_geo_point(site_id, point_name, lat, lng, radius)
         return jsonify({
             "success": True,
             "point_id": pid,
-            "message": f"✅ GPS पॉइंट '{point_name}' ({lat:.4f}, {lng:.4f} — {radius}m) सफलतापूर्वक जोड़ा गया!"
+            "message": f"✅ GPS point '{point_name}' ({lat:.4f}, {lng:.4f} — {radius}m) added successfully!"
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
@@ -2779,15 +2779,15 @@ def delete_site_geo_point_api(point_id):
         pin = data.get("pin", "")
         point = database.get_site_geo_point(point_id)
         if not point:
-            return jsonify({"success": False, "message": "GPS पॉइंट नहीं मिला।"}), 404
+            return jsonify({"success": False, "message": "GPS point not found."}), 404
 
         is_owner = session.get("is_owner", False) or (str(pin).strip() in ["Sandip@@12", "7808"])
         is_supervisor_of_site = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == int(point["site_id"]))
         if not (is_owner or is_supervisor_of_site):
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही GPS कार्य स्थल हटा सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can remove GPS work locations."}), 403
 
         database.delete_site_geo_point(point_id)
-        return jsonify({"success": True, "message": "GPS पॉइंट हटा दिया गया।"})
+        return jsonify({"success": True, "message": "GPS point removed successfully."})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -2824,14 +2824,14 @@ def site_active_wards_api(site_id):
         is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही सक्रिय वार्ड सेट कर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can set active ward."}), 403
 
         updater = session.get("worker_name") or session.get("supervisor_name") or ("Owner" if is_owner else "Supervisor")
         database.set_daily_active_wards(site_id, work_date, active_point_ids, active_ward_names, updater)
 
         return jsonify({
             "success": True,
-            "message": f"✅ {work_date} के लिए सक्रिय कार्यस्थल '{active_ward_names or 'सभी वार्ड'}' सेट हो गया! अब इसी 1 KM के अंदर के वर्करों की हाजिरी बनेगी।",
+            "message": f"✅ Active work location set to '{active_ward_names or 'All Wards'}' for {work_date}! Workers within 1 KM will be marked present.",
             "active_point_ids": active_point_ids,
             "active_ward_names": active_ward_names
         })
@@ -2900,7 +2900,7 @@ def dpr_api():
         is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12", "7808"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
-            return jsonify({"success": False, "message": "❌ केवल अधिकृत सुपरवाइज़र या मालिक ही DPR भर सकते हैं।"}), 403
+            return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can submit DPR."}), 403
 
         supervisor_name = data.get("supervisor_name") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
         supervisor_phone = data.get("supervisor_phone") or session.get("worker_phone") or ""
@@ -2918,7 +2918,7 @@ def dpr_api():
             supervisor_name=supervisor_name,
             supervisor_phone=supervisor_phone
         )
-        return jsonify({"success": True, "message": f"✅ {report_date} का DPR (कार्य प्रगति रिपोर्ट) सफलतापूर्वक सेव हो गया!"})
+        return jsonify({"success": True, "message": f"✅ DPR (Daily Progress Report) for {report_date} saved successfully!"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

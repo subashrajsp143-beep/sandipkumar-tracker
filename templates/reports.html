@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}रिपोर्ट्स केंद्र (Reports Hub) - M/S SANDIP KUMAR{% endblock %}
+{% block title %}Reports Hub - M/S SANDIP KUMAR{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
@@ -13,20 +13,20 @@
                     <i class="fa-solid fa-chart-pie"></i> All-in-One Reports Center
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
-                    📊 रिपोर्ट्स केंद्र (Reports Hub)
+                    📊 Reports Hub
                 </h1>
                 <p class="text-white/90 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                    दैनिक खर्च, पूरे महीने का कुल हिसाब, साइट-वार लेजर और मटेरियल खपत — सब कुछ एक ही जगह देखें।
+                    Daily usage, monthly summaries, site-wise ledgers, and material distribution — all in one place.
                 </p>
             </div>
 
             <!-- Fast Action Pills for Quick Switching -->
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ url_for('attendance_view') }}" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 border border-white/20">
-                    <i class="fa-solid fa-users-gear text-indigo-200"></i> <span>हाजिरी शीट</span>
+                    <i class="fa-solid fa-users-gear text-indigo-200"></i> <span>Attendance Sheet</span>
                 </a>
                 <a href="{{ url_for('site_stock') }}" class="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 border border-white/20">
-                    <i class="fa-solid fa-boxes-stacked text-teal-200"></i> <span>साइट स्टॉक</span>
+                    <i class="fa-solid fa-boxes-stacked text-teal-200"></i> <span>Site Stock</span>
                 </a>
             </div>
         </div>
@@ -36,39 +36,39 @@
             <!-- 1. Daily Tab -->
             <a href="{{ url_for('reports_hub', tab='daily') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'daily' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-calendar-day {% if active_tab == 'daily' %}text-blue-600{% else %}text-blue-300{% endif %}"></i>
-                <span>📅 दैनिक रिपोर्ट (Daily)</span>
+                <span>📅 Daily Report</span>
             </a>
 
             {% if is_owner %}
             <!-- 2. Monthly Tab -->
             <a href="{{ url_for('reports_hub', tab='monthly') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'monthly' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-calendar-days {% if active_tab == 'monthly' %}text-indigo-600{% else %}text-indigo-300{% endif %}"></i>
-                <span>📆 मासिक रिपोर्ट (Monthly)</span>
+                <span>📆 Monthly Report</span>
             </a>
             {% endif %}
 
             <!-- 3. Site Wise Tab -->
             <a href="{{ url_for('reports_hub', tab='site') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'site' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-map-location-dot {% if active_tab == 'site' %}text-teal-600{% else %}text-teal-300{% endif %}"></i>
-                <span>🏗️ साइट-वार (Site Wise)</span>
+                <span>🏗️ Site Wise</span>
             </a>
 
             <!-- 4. Material Wise Tab -->
             <a href="{{ url_for('reports_hub', tab='material') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'material' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-boxes-stacked {% if active_tab == 'material' %}text-amber-600{% else %}text-amber-300{% endif %}"></i>
-                <span>📦 मटेरियल-वार (Material)</span>
+                <span>📦 Material Wise</span>
             </a>
 
             <!-- 5. Sites Matrix Tab -->
             <a href="{{ url_for('reports_hub', tab='matrix') }}" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition whitespace-nowrap {% if active_tab == 'matrix' %}bg-white text-[#166534] shadow-md font-black scale-105{% else %}bg-white/10 hover:bg-white/20 text-white border border-white/20{% endif %}">
                 <i class="fa-solid fa-table-cells {% if active_tab == 'matrix' %}text-slate-700{% else %}text-slate-400{% endif %}"></i>
-                <span>📊 साइट्स मैट्रिक्स (Matrix)</span>
+                <span>📊 Sites Matrix</span>
             </a>
         </div>
     </div>
 
     <!-- ================================================================= -->
-    <!-- TAB 1: DAILY / तारीख-वार रिपोर्ट                                     -->
+    <!-- TAB 1: DAILY / Date-wise Report                                     -->
     <!-- ================================================================= -->
     {% if active_tab == 'daily' %}
     <div class="space-y-6">
@@ -79,23 +79,23 @@
                     <i class="fa-solid fa-calendar-day"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-800">तारीख-वार दैनिक रिपोर्ट (Date-wise Material Log)</h2>
-                    <p class="text-xs text-slate-500">तारीख बदलें और देखें उस दिन किस साइट पर कितना माल खर्च हुआ</p>
+                    <h2 class="text-base font-extrabold text-slate-800">Date-wise Material Usage Log</h2>
+                    <p class="text-xs text-slate-500">Change date to view how much material was consumed across sites.</p>
                 </div>
             </div>
 
             <form method="GET" action="{{ url_for('reports_hub') }}" class="flex flex-wrap items-center gap-2.5">
                 <input type="hidden" name="tab" value="daily">
                 <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
-                    <label class="text-xs font-bold text-slate-700 whitespace-nowrap">तारीख:</label>
+                    <label class="text-xs font-bold text-slate-700 whitespace-nowrap">Date:</label>
                     <input type="date" name="date" value="{{ report_date }}" onchange="this.form.submit()" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
                 </div>
 
                 <a href="{{ url_for('export_daily_excel', date=report_date) }}" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Excel डाउनलोड</span>
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Download Excel</span>
                 </a>
                 <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-print"></i> <span>प्रिंट</span>
+                    <i class="fa-solid fa-print"></i> <span>Print</span>
                 </button>
             </form>
         </div>
@@ -103,18 +103,18 @@
         <!-- Daily Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">रिपोर्ट की तारीख</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Report Date</span>
                 <p class="text-2xl font-black text-blue-900 mt-1 font-mono">{{ report_date }}</p>
                 <span class="text-[11px] text-blue-600 font-semibold block mt-0.5">Daily Ledger</span>
             </div>
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">आज सक्रिय साइट्स</span>
-                <p class="text-2xl font-black text-indigo-700 mt-1">{{ site_summaries|length }} / {{ sites|length }} साइट्स</p>
-                <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">जहाँ माल लगा</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Active Sites Today</span>
+                <p class="text-2xl font-black text-indigo-700 mt-1">{{ site_summaries|length }} / {{ sites|length }} Sites</p>
+                <span class="text-[11px] text-indigo-600 font-semibold block mt-0.5">Where material was used</span>
             </div>
             {% if is_owner %}
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">आज का कुल खर्च</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Cost Today</span>
                 <p class="text-2xl font-black text-emerald-700 mt-1">₹{{ "{:,.2f}".format(total_day_cost) }}</p>
                 <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">Estimated Day Cost</span>
             </div>
@@ -126,7 +126,7 @@
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-3">
             <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                 <i class="fa-solid fa-network-wired text-blue-600"></i>
-                आज {{ report_date }} को सामग्री इस्तेमाल करने वाली साइट्स
+                Sites with Material Usage on {{ report_date }}
             </h3>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -134,7 +134,7 @@
                 <a href="{{ url_for('reports_hub', tab='site', site_id=s.site_id, from_date=report_date, to_date=report_date) }}" class="p-3.5 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition flex items-center justify-between">
                     <div>
                         <span class="font-bold text-slate-800 text-xs block truncate">{{ s.site_name }}</span>
-                        <span class="text-[11px] text-slate-500">{{ s.items_count }} आइटम लगे</span>
+                        <span class="text-[11px] text-slate-500">{{ s.items_count }} items used</span>
                     </div>
                     {% if is_owner %}
                     <div class="text-right">
@@ -153,11 +153,11 @@
                 <div>
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-list-check text-indigo-600"></i>
-                        सामग्री इस्तेमाल का पूरा विवरण (Detailed Entries)
+                        Detailed Material Consumption Entries
                     </h3>
-                    <p class="text-xs text-slate-500">{{ report_date }} को दर्ज हुई कुल खपत प्रविष्टियाँ</p>
+                    <p class="text-xs text-slate-500">Total consumption entries recorded on {{ report_date }}</p>
                 </div>
-                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">{{ entries|length }} कुल प्रविष्टियाँ</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">{{ entries|length }} Total Entries</span>
             </div>
 
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
@@ -165,17 +165,17 @@
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
                             <th class="py-3 px-3 w-10 text-center">#</th>
-                            <th class="py-3 px-3">साइट (Site)</th>
-                            <th class="py-3 px-3">सामग्री (Material Description)</th>
-                            <th class="py-3 px-3 text-right">मात्रा (Qty)</th>
-                            <th class="py-3 px-3 text-center">इकाई</th>
+                            <th class="py-3 px-3">Site</th>
+                            <th class="py-3 px-3">Material Description</th>
+                            <th class="py-3 px-3 text-right">Qty</th>
+                            <th class="py-3 px-3 text-center">Unit</th>
                             {% if is_owner %}
-                            <th class="py-3 px-3 text-right">दर (₹)</th>
-                            <th class="py-3 px-3 text-right">कुल राशि (₹)</th>
+                            <th class="py-3 px-3 text-right">Rate (₹)</th>
+                            <th class="py-3 px-3 text-right">Total (₹)</th>
                             {% endif %}
-                            <th class="py-3 px-3">काम / उद्देश्य (Purpose)</th>
-                            <th class="py-3 px-3">सुपरवाइजर</th>
-                            <th class="py-3 px-2 text-center no-print owner-only hidden">हटाएं</th>
+                            <th class="py-3 px-3">Purpose / Remarks</th>
+                            <th class="py-3 px-3">Supervisor</th>
+                            <th class="py-3 px-2 text-center no-print owner-only hidden">Delete</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -206,7 +206,7 @@
                         <tr>
                             <td colspan="10" class="py-12 text-center text-slate-400">
                                 <i class="fa-solid fa-clipboard-check text-3xl mb-2 text-slate-300 block"></i>
-                                इस तारीख ({{ report_date }}) को कोई मटेरियल एंट्री नहीं मिली।
+                                No material consumption entries found for {{ report_date }}.
                             </td>
                         </tr>
                         {% endfor %}
@@ -219,7 +219,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- TAB 2: MONTHLY / माहवार रिपोर्ट                                     -->
+    <!-- TAB 2: MONTHLY / Monthly Report                                     -->
     <!-- ================================================================= -->
     {% if active_tab == 'monthly' %}
     <div class="space-y-6">
@@ -230,20 +230,20 @@
                     <i class="fa-solid fa-calendar-days"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-800">माहवार खर्च रिपोर्ट (Monthly Consolidated Summary)</h2>
-                    <p class="text-xs text-slate-500">महीना चुनें और सभी {{ sites|length }} साइट्स का कुल मासिक खर्च देखें</p>
+                    <h2 class="text-base font-extrabold text-slate-800">Monthly Consolidated Summary</h2>
+                    <p class="text-xs text-slate-500">Select month to view total monthly material usage across all {{ sites|length }} sites</p>
                 </div>
             </div>
 
             <form method="GET" action="{{ url_for('reports_hub') }}" class="flex flex-wrap items-center gap-2.5">
                 <input type="hidden" name="tab" value="monthly">
                 <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
-                    <label class="text-xs font-bold text-slate-700 whitespace-nowrap">महीना:</label>
+                    <label class="text-xs font-bold text-slate-700 whitespace-nowrap">Month:</label>
                     <input type="month" name="month" value="{{ month }}" onchange="this.form.submit()" class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
                 </div>
 
                 <a href="{{ url_for('export_monthly_excel', month=month) }}" class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Excel डाउनलोड</span>
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i> <span>Download Excel</span>
                 </a>
 
                 <button type="button" onclick="shareMonthlyWhatsAppUnified()" class="px-3.5 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
@@ -251,7 +251,7 @@
                 </button>
 
                 <button type="button" onclick="window.print()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-print"></i> <span>प्रिंट</span>
+                    <i class="fa-solid fa-print"></i> <span>Print</span>
                 </button>
             </form>
         </div>
@@ -259,23 +259,23 @@
         <!-- Monthly Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">रिपोर्ट का महीना</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Report Month</span>
                 <p class="text-2xl font-black text-blue-900 mt-1 font-mono">{{ month }}</p>
                 <span class="text-[11px] text-slate-400 block mt-0.5">Monthly Consolidated</span>
             </div>
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल महीने का खर्च</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Monthly Cost</span>
                 <p class="text-2xl font-black text-emerald-700 mt-1">₹{{ "{:,.2f}".format(total_month_cost) }}</p>
-                <span class="text-[11px] text-emerald-600 font-bold block mt-0.5">{{ sites|length }} साइट्स Grand Total</span>
+                <span class="text-[11px] text-emerald-600 font-bold block mt-0.5">{{ sites|length }} Sites Grand Total</span>
             </div>
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">सक्रिय साइट्स इस माह</span>
-                <p class="text-2xl font-black text-indigo-700 mt-1">{{ active_sites_count }} / {{ sites|length }} साइट्स</p>
-                <span class="text-[11px] text-indigo-600 block mt-0.5">जहाँ सामग्री लगी</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Active Sites This Month</span>
+                <p class="text-2xl font-black text-indigo-700 mt-1">{{ active_sites_count }} / {{ sites|length }} Sites</p>
+                <span class="text-[11px] text-indigo-600 block mt-0.5">Sites with consumption</span>
             </div>
             <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल दर्ज प्रविष्टियाँ</span>
-                <p class="text-2xl font-black text-amber-700 mt-1">{{ total_items_count }} प्रविष्टियाँ</p>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Recorded Entries</span>
+                <p class="text-2xl font-black text-amber-700 mt-1">{{ total_items_count }} Entries</p>
                 <span class="text-[11px] text-slate-400 block mt-0.5">Usage log transactions</span>
             </div>
         </div>
@@ -286,9 +286,9 @@
                 <div>
                     <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-building-flag text-blue-600"></i>
-                        {{ sites|length }} साइट्स का माहवार खर्च ब्योरा (किस साइट पर कितना लगा)
+                        Monthly Consumption Breakdown across {{ sites|length }} Sites
                     </h3>
-                    <p class="text-xs text-slate-500">महीना: {{ month }} में हर साइट का कुल खर्च और कुल खर्च में हिस्सेदारी (%)</p>
+                    <p class="text-xs text-slate-500">Month: {{ month }} - Total consumption and expense share (%) per site</p>
                 </div>
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800">{{ sites|length }} Sites</span>
             </div>
@@ -298,13 +298,13 @@
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
                             <th class="py-3 px-3 w-10 text-center">#</th>
-                            <th class="py-3 px-3 w-24">कोड</th>
-                            <th class="py-3 px-3">साइट का नाम</th>
-                            <th class="py-3 px-3">सुपरवाइजर</th>
-                            <th class="py-3 px-3 text-right">खर्च सामान</th>
-                            <th class="py-3 px-3 text-right">कुल मासिक खर्च (₹)</th>
-                            <th class="py-3 px-3 w-36">% हिस्सेदारी</th>
-                            <th class="py-3 px-3 text-center no-print">एक्शन</th>
+                            <th class="py-3 px-3 w-24">Code</th>
+                            <th class="py-3 px-3">Site Name</th>
+                            <th class="py-3 px-3">Supervisor</th>
+                            <th class="py-3 px-3 text-right">Items Consumed</th>
+                            <th class="py-3 px-3 text-right">Total Monthly Cost (₹)</th>
+                            <th class="py-3 px-3 w-36">% Share</th>
+                            <th class="py-3 px-3 text-center no-print">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -322,7 +322,7 @@
                             <td class="py-3 px-3">
                                 <div class="font-medium text-slate-700">{{ s.supervisor or '-' }}</div>
                             </td>
-                            <td class="py-3 px-3 text-right font-mono font-bold text-blue-600">{{ s.items_count }} आइटम</td>
+                            <td class="py-3 px-3 text-right font-mono font-bold text-blue-600">{{ s.items_count }} items</td>
                             <td class="py-3 px-3 text-right font-mono font-black text-emerald-700 text-sm">
                                 ₹{{ "{:,.2f}".format(s.site_total_cost or 0) }}
                             </td>
@@ -336,7 +336,7 @@
                             </td>
                             <td class="py-3 px-3 text-center no-print">
                                 <a href="{{ url_for('reports_hub', tab='site', site_id=s.id) }}" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] transition inline-flex items-center gap-1">
-                                    <span>ब्योरा</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    <span>Details</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </a>
                             </td>
                         </tr>
@@ -344,10 +344,10 @@
                     </tbody>
                     <tfoot class="bg-slate-100/80 font-black border-t-2 border-slate-300">
                         <tr>
-                            <td colspan="4" class="py-3 px-3 text-right uppercase text-xs text-slate-700">कुल योग (Grand Total):</td>
-                            <td class="py-3 px-3 text-right font-mono text-blue-700">{{ total_items_count }} प्रविष्टियाँ</td>
+                            <td colspan="4" class="py-3 px-3 text-right uppercase text-xs text-slate-700">Grand Total:</td>
+                            <td class="py-3 px-3 text-right font-mono text-blue-700">{{ total_items_count }} Entries</td>
                             <td class="py-3 px-3 text-right font-mono text-emerald-800 text-base">₹{{ "{:,.2f}".format(total_month_cost) }}</td>
-                            <td colspan="2" class="py-3 px-3 text-slate-500 font-normal text-[11px]">100% खर्च</td>
+                            <td colspan="2" class="py-3 px-3 text-slate-500 font-normal text-[11px]">100% Share</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -359,7 +359,7 @@
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-amber-500"></i>
-                इस महीने सबसे ज़्यादा लगे टॉप मटेरियल (Top Materials Used in {{ month }})
+                Top Materials Consumed in {{ month }}
             </h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -367,7 +367,7 @@
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                     <div>
                         <div class="font-bold text-slate-800 text-xs truncate max-w-[180px]">{{ m.material_name or m.name }}</div>
-                        <div class="text-[11px] text-slate-500 font-mono">{{ m.total_quantity or m.total_qty or 0 }} {{ m.material_unit or m.unit }} इस्तेमाल हुआ</div>
+                        <div class="text-[11px] text-slate-500 font-mono">{{ m.total_quantity or m.total_qty or 0 }} {{ m.material_unit or m.unit }} used</div>
                     </div>
                     <div class="text-right">
                         <div class="font-mono font-bold text-emerald-700 text-xs">₹{{ "{:,.0f}".format(m.total_cost or m.total_val or 0) }}</div>
@@ -382,7 +382,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- TAB 3: SITE WISE / साइट-वार रिपोर्ट                                 -->
+    <!-- TAB 3: SITE WISE / Site-wise Report                                 -->
     <!-- ================================================================= -->
     {% if active_tab == 'site' %}
     <div class="space-y-6">
@@ -393,8 +393,8 @@
                     <i class="fa-solid fa-map-location-dot"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-800">साइट-वार सामग्री लेजर (Site Material Consumption Ledger)</h2>
-                    <p class="text-xs text-slate-500">साइट चुनें और उसका शुरू से आज तक का पूरा खर्च या तारीख-वार ब्योरा देखें</p>
+                    <h2 class="text-base font-extrabold text-slate-800">Site Material Consumption Ledger</h2>
+                    <p class="text-xs text-slate-500">Select a site to view its complete historical and date-wise ledger</p>
                 </div>
             </div>
 
@@ -402,32 +402,32 @@
                 <input type="hidden" name="tab" value="site">
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें:</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Select Site:</label>
                     <select name="site_id" onchange="this.form.submit()" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 font-bold text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
                         {% for s in sites %}
                         <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
-                            {{ s.code }} - {{ s.name }} ({{ s.supervisor or 'सुपरवाइजर' }})
+                            {{ s.code }} - {{ s.name }} ({{ s.supervisor or 'Supervisor' }})
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">से (From Date):</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">From Date:</label>
                     <input type="date" name="from_date" value="{{ from_date }}" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs font-medium">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">तक (To Date):</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">To Date:</label>
                     <input type="date" name="to_date" value="{{ to_date }}" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs font-medium">
                 </div>
 
                 <div class="flex gap-2">
                     <button type="submit" class="flex-1 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-sm transition">
-                        फ़िल्टर करें
+                        Filter
                     </button>
                     <a href="{{ url_for('reports_hub', tab='site', site_id=selected_site_id) }}" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition" title="Clear">
-                        रीसेट
+                        Reset
                     </a>
                 </div>
 
@@ -448,11 +448,11 @@
             <div>
                 <span class="px-2.5 py-0.5 rounded-full bg-teal-500/30 text-teal-200 text-xs font-mono font-bold">{{ selected_site.code }}</span>
                 <h3 class="text-xl font-black mt-1">{{ selected_site.name }}</h3>
-                <p class="text-xs text-teal-200 mt-0.5">सुपरवाइजर: {{ selected_site.supervisor or '-' }} | लोकेशन: {{ selected_site.location or '-' }}</p>
+                <p class="text-xs text-teal-200 mt-0.5">Supervisor: {{ selected_site.supervisor or '-' }} | Location: {{ selected_site.location or '-' }}</p>
             </div>
             {% if is_owner %}
             <div class="text-left sm:text-right">
-                <span class="text-xs text-teal-300 block">कुल सामग्री खपत मूल्य</span>
+                <span class="text-xs text-teal-300 block">Total Material Value Consumed</span>
                 <span class="text-2xl sm:text-3xl font-black text-emerald-300 font-mono">₹{{ "{:,.2f}".format(grand_total) }}</span>
             </div>
             {% endif %}
@@ -461,7 +461,7 @@
         <!-- Material-wise Summary for this site -->
         {% if material_summary %}
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-3">
-            <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider">सामग्री-वार सारांश (Total Materials Consumed)</h4>
+            <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Material-wise Summary (Total Consumed)</h4>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {% for m in material_summary %}
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
@@ -479,23 +479,23 @@
         <!-- Detailed Ledger Table -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
-                <h4 class="text-base font-bold text-slate-800">तारीख-वार प्रविष्टियाँ (Date-wise Usage Log)</h4>
-                <span class="text-xs font-mono text-slate-400">{{ entries|length }} कुल प्रविष्टियाँ</span>
+                <h4 class="text-base font-bold text-slate-800">Date-wise Consumption Log</h4>
+                <span class="text-xs font-mono text-slate-400">{{ entries|length }} Total Entries</span>
             </div>
 
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
-                            <th class="py-2.5 px-3">तारीख</th>
-                            <th class="py-2.5 px-3">सामग्री</th>
-                            <th class="py-2.5 px-3 text-right">मात्रा</th>
-                            <th class="py-2.5 px-3 text-center">इकाई</th>
+                            <th class="py-2.5 px-3">Date</th>
+                            <th class="py-2.5 px-3">Material</th>
+                            <th class="py-2.5 px-3 text-right">Quantity</th>
+                            <th class="py-2.5 px-3 text-center">Unit</th>
                             {% if is_owner %}
-                            <th class="py-2.5 px-3 text-right">दर (₹)</th>
-                            <th class="py-2.5 px-3 text-right">कुल (₹)</th>
+                            <th class="py-2.5 px-3 text-right">Rate (₹)</th>
+                            <th class="py-2.5 px-3 text-right">Total (₹)</th>
                             {% endif %}
-                            <th class="py-2.5 px-3">काम / विवरण</th>
+                            <th class="py-2.5 px-3">Purpose / Description</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
@@ -513,7 +513,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-400">इस साइट पर कोई प्रविष्टि नहीं मिली।</td>
+                            <td colspan="7" class="py-8 text-center text-slate-400">No entries found for this site.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -526,7 +526,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- TAB 4: MATERIAL WISE / मटेरियल-वार रिपोर्ट                           -->
+    <!-- TAB 4: MATERIAL WISE / Material-wise Report                           -->
     <!-- ================================================================= -->
     {% if active_tab == 'material' %}
     <div class="space-y-6">
@@ -536,8 +536,8 @@
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-extrabold text-slate-800">सामग्री-वार खपत रिपोर्ट (Material-wise Distribution)</h2>
-                    <p class="text-xs text-slate-500">कोई भी सामान चुनें और देखें वह किस-किस साइट पर कितना लगा है</p>
+                    <h2 class="text-base font-extrabold text-slate-800">Material-wise Distribution Report</h2>
+                    <p class="text-xs text-slate-500">Select any material to view its distribution across sites.</p>
                 </div>
             </div>
 
@@ -559,30 +559,30 @@
                 <span class="px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-200 text-xs font-mono font-bold">{{ selected_material.category or 'Material' }}</span>
                 <h3 class="text-xl font-black mt-1">{{ selected_material.name }}</h3>
                 {% if is_owner %}
-                <p class="text-xs text-amber-200 mt-0.5">दर: ₹{{ selected_material.unit_rate }} प्रति {{ selected_material.unit }}</p>
+                <p class="text-xs text-amber-200 mt-0.5">Rate: ₹{{ selected_material.unit_rate }} per {{ selected_material.unit }}</p>
                 {% endif %}
             </div>
             <div class="text-left sm:text-right">
-                <span class="text-xs text-amber-300 block">सभी साइट्स पर कुल खपत</span>
+                <span class="text-xs text-amber-300 block">Total Consumption Across All Sites</span>
                 <span class="text-2xl sm:text-3xl font-black text-amber-300 font-mono">{{ total_qty }} {{ selected_material.unit }}</span>
                 {% if is_owner %}
-                <div class="text-xs text-amber-200 mt-0.5">कुल मूल्य: ₹{{ "{:,.2f}".format(total_cost) }}</div>
+                <div class="text-xs text-amber-200 mt-0.5">Total Value: ₹{{ "{:,.2f}".format(total_cost) }}</div>
                 {% endif %}
             </div>
         </div>
 
         <!-- Sites Distribution Table -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-            <h4 class="text-base font-bold text-slate-800">किस साइट पर कितना लगा (Site-by-Site Consumption)</h4>
+            <h4 class="text-base font-bold text-slate-800">Site-by-Site Consumption</h4>
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
                 <table class="w-full text-left text-xs border-collapse">
                     <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                         <tr>
-                            <th class="py-2.5 px-3">साइट कोड</th>
-                            <th class="py-2.5 px-3">साइट का नाम</th>
-                            <th class="py-2.5 px-3 text-right">खपत मात्रा</th>
+                            <th class="py-2.5 px-3">Site Code</th>
+                            <th class="py-2.5 px-3">Site Name</th>
+                            <th class="py-2.5 px-3 text-right">Consumed Qty</th>
                             {% if is_owner %}
-                            <th class="py-2.5 px-3 text-right">कुल खर्च (₹)</th>
+                            <th class="py-2.5 px-3 text-right">Total Cost (₹)</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -598,7 +598,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-slate-400">यह सामान अभी किसी साइट पर दर्ज नहीं हुआ है।</td>
+                            <td colspan="4" class="py-8 text-center text-slate-400">This material has not yet been recorded at any site.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -611,7 +611,7 @@
 
 
     <!-- ================================================================= -->
-    <!-- TAB 5: MATRIX / साइट्स मैट्रिक्स                                    -->
+    <!-- TAB 5: MATRIX / Sites Matrix                                    -->
     <!-- ================================================================= -->
     {% if active_tab == 'matrix' %}
     <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
@@ -619,12 +619,12 @@
             <div>
                 <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-table-cells text-slate-700"></i>
-                    {{ matrix_sites|length }} साइट्स बनाम टॉप सामग्री मैट्रिक्स
+                    {{ matrix_sites|length }} Sites vs Top Materials Matrix
                 </h2>
-                <p class="text-xs text-slate-500">सभी साइट्स पर मुख्य सामग्रियों की कुल खपत का तुलनात्मक चार्ट</p>
+                <p class="text-xs text-slate-500">Comparative summary of key material consumption across all sites</p>
             </div>
             <button onclick="window.print()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold no-print">
-                <i class="fa-solid fa-print"></i> प्रिंट
+                <i class="fa-solid fa-print"></i> Print
             </button>
         </div>
 
@@ -632,7 +632,7 @@
             <table class="w-full text-left text-xs border-collapse">
                 <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                     <tr>
-                        <th class="py-3 px-3 bg-slate-100 sticky left-0 z-10">साइट</th>
+                        <th class="py-3 px-3 bg-slate-100 sticky left-0 z-10">Site</th>
                         {% for mat in top_mats %}
                         <th class="py-3 px-3 text-right whitespace-nowrap">{{ mat.name }}<br><span class="text-[9px] font-normal text-slate-400">({{ mat.unit }})</span></th>
                         {% endfor %}
@@ -667,11 +667,11 @@ function shareMonthlyWhatsAppUnified() {
     const totalCost = "₹{{ '{:,.2f}'.format(total_month_cost) if active_tab == 'monthly' else '' }}";
     const activeSites = "{{ active_sites_count if active_tab == 'monthly' else '' }}";
 
-    let text = `*M/S SANDIP KUMAR - माहवार खर्च सारांश*\n`;
-    text += `📅 महीना: *${month}*\n`;
-    text += `💰 कुल मासिक खर्च: *${totalCost}*\n`;
-    text += `🏗️ सक्रिय साइट्स: *${activeSites} / 21 साइट्स*\n\n`;
-    text += `🌐 पूरा हिसाब ऑनलाइन देखें:\n${window.location.origin}/reports?tab=monthly&month=${month}`;
+    let text = `*M/S SANDIP KUMAR - Monthly Usage Summary*\n`;
+    text += `📅 Month: *${month}*\n`;
+    text += `💰 Total Monthly Cost: *${totalCost}*\n`;
+    text += `🏗️ Active Sites: *${activeSites} / 21 Sites*\n\n`;
+    text += `🌐 View details online:\n${window.location.origin}/reports?tab=monthly&month=${month}`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -680,13 +680,13 @@ function shareMonthlyWhatsAppUnified() {
 // Delete Entry Handler for Office Work in Unified Hub
 async function deleteEntryUnified(entryId) {
     if (!localStorage.getItem('sandip_is_owner')) {
-        alert('केवल अधिकृत ऑफिस वर्क ही एंट्री हटा सकते हैं। कृपया पहले ऑफिस वर्क लॉगिन करें।');
+        alert('Only authorized Office Work users can delete entries. Please log in to Office Work first.');
         return;
     }
-    const pin = prompt('एंट्री हटाने के लिए ऑफिस वर्क पासवर्ड दर्ज करें:');
+    const pin = prompt('Enter Office Work Password to delete entry:');
     if (!pin) return;
 
-    if (!confirm('क्या आप वाकई इस एंट्री को हटाना चाहते हैं?')) return;
+    if (!confirm('Are you sure you want to delete this entry?')) return;
 
     try {
         const res = await fetch(`/api/entries/${entryId}/delete`, {
@@ -700,10 +700,10 @@ async function deleteEntryUnified(entryId) {
             const row = document.getElementById(`entry-row-${entryId}`);
             if (row) row.remove();
         } else {
-            alert('❌ ' + (data.message || 'त्रुटि!'));
+            alert('❌ ' + (data.message || 'Error!'));
         }
     } catch(err) {
-        alert('❌ नेटवर्क एरर: ' + err);
+        alert('❌ Network Error: ' + err);
     }
 }
 </script>

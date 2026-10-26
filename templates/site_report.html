@@ -289,7 +289,7 @@
                                 <button type="button" onclick="openWebEditModal({{ entry.id }}, {{ entry.site_id }}, '{{ entry.material_name|replace("'", "\\'") }}', '{{ entry.material_unit }}', '{{ entry.usage_date }}', {{ entry.quantity }}, {{ entry.rate }}, '{{ (entry.purpose or '')|replace("'", "\\'") }}', '{{ (entry.entered_by or '')|replace("'", "\\'") }}', '{{ (entry.remarks or '')|replace("'", "\\'") }}')" class="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition" title="Edit Karein">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button type="button" onclick="deleteEntry({{ entry.id }})" class="owner-delete-btn p-1.5 rounded-lg bg-rose-50 text-rose-500 hover:text-rose-700 transition" title="Delete Karein (मालिक केवल)">
+                                <button type="button" onclick="deleteEntry({{ entry.id }})" class="owner-delete-btn p-1.5 rounded-lg bg-rose-50 text-rose-500 hover:text-rose-700 transition" title="Delete Entry (Owner Only)">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>

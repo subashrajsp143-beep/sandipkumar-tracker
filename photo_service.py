@@ -14,14 +14,14 @@ UPLOAD_ROOT = os.path.join(os.path.dirname(__file__), "static", "uploads", "site
 
 # Default Categories for Jal Jeevan Mission
 PHOTO_CATEGORIES = [
-    "पाइपलाइन कार्य (Pipe Laying)",
-    "बोरिंग / मोटर पंप (Boring & Pump)",
-    "पानी टंकी / CWR (OHT & Tank)",
-    "हाउस कनेक्शन (FHTC Tap)",
-    "चेंबर व वाल्व (Chamber & Valve)",
-    "स्टार्टर पैनल व वायरिंग (Electrical)",
-    "सड़क पुनर्स्थापन (Road Restoration)",
-    "साइट निरीक्षण / अन्य (Site Inspection)"
+    "Pipe Laying",
+    "Boring & Pump",
+    "Water Tank / CWR",
+    "House Connection (FHTC Tap)",
+    "Chamber & Valve",
+    "Electrical & Wiring",
+    "Road Restoration",
+    "Site Inspection / Other"
 ]
 
 def ensure_upload_dir(site_code, year_month):
@@ -185,7 +185,7 @@ def process_and_save_attendance_photo(file_storage, worker_name, worker_role, si
     acc_val = int(accuracy) if accuracy else 0
 
     gps_str = f"🌐 GPS: {lat_val:.5f}° N, {lng_val:.5f}° E (±{acc_val}m)" if (lat_val and lng_val) else "🌐 GPS: Location Verified"
-    type_str = "चेक-इन (Check-In)" if check_type == 'check_in' else "चेक-आउट (Check-Out)"
+    type_str = "Check-In" if check_type == 'check_in' else "Check-Out"
     
     line1 = f"🏢 M/S SANDIP KUMAR  |  JAL JEEVAN MISSION  |  📍 {site_name.upper()} ({clean_code})"
     line2 = f"👷 {worker_name} ({worker_role})  |  📅 {att_date} {time_str}"

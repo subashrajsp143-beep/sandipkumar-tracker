@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}GPS हाजिरी व लोकेशन मॉनिटर - M/S SANDIP KUMAR{% endblock %}
+{% block title %}GPS Attendance & Location Monitor - M/S SANDIP KUMAR{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
@@ -10,17 +10,17 @@
         <div class="flex items-center gap-2 w-full sm:w-auto">
             <a href="/attendance" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-200 transition">
                 <i class="fa-solid fa-clipboard-list text-indigo-600"></i>
-                <span>1. 📝 मैन्युअल हाजिरी (21 साइट्स शीट) ↗</span>
+                <span>1. 📝 Manual Attendance (21 Sites Sheet) ↗</span>
             </a>
             <span class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-sm">
                 <i class="fa-solid fa-satellite-dish text-amber-300"></i>
-                <span>2. 📍 GPS हाजिरी (जियो-लोकेशन)</span>
+                <span>2. 📍 GPS Attendance (Geo-Location)</span>
             </span>
         </div>
         <div class="flex items-center gap-2">
             <span class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold text-xs flex items-center gap-1.5 shadow-xs">
                 <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
-                <span>GPS हाजिरी रजिस्टर सक्रिय है</span>
+                <span>GPS Attendance Register is Active</span>
             </span>
         </div>
     </div>
@@ -34,10 +34,10 @@
             </div>
             <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
                 <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
-                <span>GPS Live Attendance (दैनिक GPS हाजिरी व समय)</span>
+                <span>GPS Live Attendance (Daily GPS Attendance & Time)</span>
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">
-                साइट के 500m दायरे में लाइव GPS हाजिरी, कार्य समय व फोटो मॉनिटर
+                Live GPS attendance, working hours, and photo monitoring within 500m radius of site.
             </p>
         </div>
 
@@ -45,7 +45,7 @@
         <div class="flex flex-wrap items-center gap-2.5 no-print">
             <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 shadow-sm">
                 <i class="fa-solid fa-calendar-days text-slate-400 text-xs"></i>
-                <label for="dateSelector" class="text-xs font-bold text-slate-700">तारीख:</label>
+                <label for="dateSelector" class="text-xs font-bold text-slate-700">Date:</label>
                 <input type="date" id="dateSelector" value="{{ date_str }}" 
                        onchange="window.location.href='/geo-attendance?date=' + this.value"
                        class="bg-transparent text-xs font-bold text-slate-900 border-none focus:outline-none">
@@ -53,23 +53,23 @@
 
             <button onclick="openAddWorkerModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-user-plus"></i>
-                <span>+ नया वर्कर</span>
+                <span>+ Add Worker</span>
             </button>
 
             <button onclick="openMultiGpsModal()" class="px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5 border border-violet-400/40 cursor-pointer">
                 <i class="fa-solid fa-draw-polygon"></i>
-                <span>📍 कार्य स्थल व वार्ड</span>
+                <span>📍 Work Sites & Wards</span>
             </button>
 
             <button onclick="openSiteGpsModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-map-location-dot"></i>
-                <span>केंद्र GPS</span>
+                <span>Center GPS</span>
             </button>
 
             {% if session.get('is_owner') or user_role == 'owner' %}
-            <button onclick="handleResetSiteAttendance(null, 'सभी 21 साइट्स')" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer" title="आज की पूरी GPS हाजिरी रीसेट करें">
+            <button onclick="handleResetSiteAttendance(null, 'All 21 Sites')" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer" title="Reset all GPS attendance for today">
                 <i class="fa-solid fa-rotate-left"></i>
-                <span>हाजिरी रीसेट</span>
+                <span>Reset Attendance</span>
             </button>
             {% endif %}
         </div>
@@ -79,9 +79,9 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">कुल पंजीकृत वर्कर</span>
-                <p class="text-2xl font-black text-slate-900 mt-1">{{ total_w }} लोग</p>
-                <span class="text-[11px] text-slate-500 font-semibold block mt-0.5">सभी 21 साइट्स मिलाकर</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Registered Workers</span>
+                <p class="text-2xl font-black text-slate-900 mt-1">{{ total_w }} Persons</p>
+                <span class="text-[11px] text-slate-500 font-semibold block mt-0.5">Across All 21 Sites</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-users"></i>
@@ -90,9 +90,9 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">साइट पर मौजूद</span>
-                <p class="text-2xl font-black text-emerald-600 mt-1">{{ present_w }} वर्कर</p>
-                <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">🟢 On-Site (दायरे में)</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Present On-Site</span>
+                <p class="text-2xl font-black text-emerald-600 mt-1">{{ present_w }} Worker</p>
+                <span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">🟢 On-Site (Within Radius)</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-user-check"></i>
@@ -101,9 +101,9 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">काम पूरा / चेक-आउट</span>
-                <p class="text-2xl font-black text-amber-600 mt-1">{{ left_w }} वर्कर</p>
-                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">🚶 Checked Out (निकल चुके)</span>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Duty Finished / Checked Out</span>
+                <p class="text-2xl font-black text-amber-600 mt-1">{{ left_w }} Worker</p>
+                <span class="text-[11px] text-amber-600 font-semibold block mt-0.5">🚶 Checked Out</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                 <i class="fa-solid fa-person-walking-arrow-right"></i>
@@ -112,8 +112,8 @@
 
         <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">अनुपस्थित / नहीं पहुंचे</span>
-                <p class="text-2xl font-black text-rose-600 mt-1">{{ absent_w }} वर्कर</p>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Absent / Not Arrived</span>
+                <p class="text-2xl font-black text-rose-600 mt-1">{{ absent_w }} Worker</p>
                 <span class="text-[11px] text-rose-500 font-semibold block mt-0.5">⚪ No Signal / Absent</span>
             </div>
             <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
@@ -131,20 +131,20 @@
             <div>
                 <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    ⚡ सुपरवाइजर हाजिरी केंद्र (Supervisor Attendance Desk)
+                    ⚡ Supervisor Attendance Desk
                 </span>
                 <h3 class="text-lg sm:text-xl font-black text-white mt-1 flex items-center gap-2">
                     <i class="fa-solid fa-camera text-emerald-400"></i>
-                    <span>वर्कर का नाम व नंबर लिख कर जोड़ें और लाइव फोटो हाजिरी लें</span>
+                    <span>Add worker name & number to punch live photo attendance</span>
                 </h3>
                 <p class="text-xs text-slate-300 mt-0.5">
-                    नया वर्कर तुरंत जोड़ें या लिस्ट में से वर्कर चुनकर मोबाइल कैमरे से उनकी ऑन-साइट फोटो हाजिरी दर्ज करें।
+                    Add new worker or select from list to record on-site photo attendance with mobile camera.
                 </p>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" onclick="openAddWorkerModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-user-plus"></i>
-                    <span>+ वर्कर फॉर्म</span>
+                    <span>+ Worker Form</span>
                 </button>
             </div>
         </div>
@@ -156,15 +156,15 @@
                     <div class="flex items-center justify-between mb-3">
                         <label class="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-user-check text-emerald-400"></i>
-                            <span>1. वर्कर चुनें व फोटो हाजिरी लें (Photo Punch)</span>
+                            <span>1. Select Worker & Punch Photo Attendance</span>
                         </label>
-                        <span class="text-[11px] text-slate-400 font-semibold" id="quickWorkerCountBadge">{{ rows|length }} वर्कर उपलब्ध</span>
+                        <span class="text-[11px] text-slate-400 font-semibold" id="quickWorkerCountBadge">{{ rows|length }} Workers Available</span>
                     </div>
 
                     <div class="space-y-3">
                         <div>
                             <select id="quickPunchWorkerSelect" class="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm font-bold focus:ring-2 focus:ring-amber-400 focus:outline-none">
-                                <option value="">-- वर्कर का नाम चुनें (Select Worker) --</option>
+                                <option value="">-- Select Worker --</option>
                                 {% for w in rows %}
                                 <option value="{{ w.worker_id }}" 
                                         data-name="{{ w.worker_name }}" 
@@ -182,11 +182,11 @@
                         <div class="flex items-center gap-3">
                             <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-950/50 text-emerald-200 font-bold text-xs cursor-pointer">
                                 <input type="radio" name="quickPunchCheckType" value="check_in" checked class="text-emerald-500 focus:ring-0">
-                                <span>🟢 चेक-इन (आए)</span>
+                                <span>🟢 Check-In</span>
                             </label>
                             <label class="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-300 font-bold text-xs cursor-pointer">
                                 <input type="radio" name="quickPunchCheckType" value="check_out" class="text-amber-500 focus:ring-0">
-                                <span>🔴 चेक-आउट (गए)</span>
+                                <span>🔴 Check-Out</span>
                             </label>
                         </div>
                     </div>
@@ -195,13 +195,13 @@
                 <div class="flex flex-wrap items-center gap-2.5 mt-4 pt-3 border-t border-slate-800">
                     <button type="button" onclick="launchQuickWorkerPunch()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/50 transition flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
                         <i class="fa-solid fa-camera text-base"></i>
-                        <span>📸 कैमरा खोलें व फोटो हाजिरी दर्ज करें</span>
+                        <span>📸 Open Camera & Punch Photo Attendance</span>
                     </button>
                     {% if by_site %}
                     {% set first_site_id = (by_site.keys() | list)[0] %}
-                    <button type="button" onclick="openGroupPhotoModal({{ first_site_id }}, '{{ by_site[first_site_id].site_name|replace("'", "\\'") }}')" class="py-3 px-3.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer" title="पूरी टीम की 1 सामूहिक फोटो लें">
+                    <button type="button" onclick="openGroupPhotoModal({{ first_site_id }}, '{{ by_site[first_site_id].site_name|replace("'", "\\'") }}')" class="py-3 px-3.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 active:scale-95 cursor-pointer" title="Take 1 Group Photo of Entire Team">
                         <i class="fa-solid fa-users-viewfinder"></i>
-                        <span>सामूहिक फोटो</span>
+                        <span>Group Photo</span>
                     </button>
                     {% endif %}
                 </div>
@@ -212,7 +212,7 @@
                 <div>
                     <label class="block text-xs font-black text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                         <i class="fa-solid fa-user-plus text-amber-400"></i>
-                        <span>2. नया वर्कर तुरंत जोड़ें (नाम व नंबर)</span>
+                        <span>2. Quick Add Worker (Name & Mobile)</span>
                     </label>
 
                     <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
@@ -229,33 +229,33 @@
                         {% endif %}
 
                         <div>
-                            <input type="text" id="quickAddWorkerName" required placeholder="वर्कर का पूरा नाम (उदा. मुकेश कुमार) *" 
+                            <input type="text" id="quickAddWorkerName" required placeholder="Full Worker Name (e.g. Mukesh Kumar) *" 
                                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="tel" id="quickAddWorkerPhone" placeholder="मोबाइल नंबर (10 अंक)" 
+                            <input type="tel" id="quickAddWorkerPhone" placeholder="Mobile Number (10 digits)" 
                                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold placeholder-slate-500 focus:ring-2 focus:ring-emerald-400">
                             <select id="quickAddWorkerRole" required class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:ring-2 focus:ring-emerald-400">
-                                <option value="Plumber">प्लंबर (Plumber)</option>
-                                <option value="Helper" selected>हेल्पर (Helper)</option>
-                                <option value="GI Mistri">जी.आई. मिस्त्री</option>
-                                <option value="Electrician">इलेक्ट्रीशियन</option>
-                                <option value="Fitter">फिटर (Fitter)</option>
-                                <option value="Supervisor">सुपरवाइज़र</option>
-                                <option value="Data Entry">डाटा एंट्री (DEO)</option>
-                                <option value="Other">अन्य (Other)</option>
+                                <option value="Plumber">Plumber</option>
+                                <option value="Helper" selected>Helper</option>
+                                <option value="GI Mistri">GI Mistri</option>
+                                <option value="Electrician">Electrician</option>
+                                <option value="Fitter">Fitter</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Data Entry">Data Entry (DEO)</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
 
                         <button type="submit" id="quickAddSubmitBtn" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-2">
                             <i class="fa-solid fa-plus-circle"></i>
-                            <span>+ यह वर्कर सुरक्षित करें</span>
+                            <span>+ Save Worker</span>
                         </button>
                     </form>
                 </div>
                 <div class="text-[10px] text-slate-400 mt-2 text-center">
-                    सेव होते ही वर्कर ऊपर फोटो हाजिरी लिस्ट में तुरंत आ जाएगा।
+                    Once saved, the worker will appear in the photo attendance list above.
                 </div>
             </div>
         </div>
@@ -271,18 +271,18 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5 animate-pulse">
-                        <i class="fa-solid fa-satellite-dish"></i> 🛰️ मालिक विशेष (Owner Exclusive)
+                        <i class="fa-solid fa-satellite-dish"></i> 🛰️ Owner Exclusive
                     </span>
                     <span class="text-xs text-amber-200 font-bold bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-500/30">
-                        साइलेंट बैकग्राउंड ट्रैकिंग
+                        Silent Background Tracking
                     </span>
                 </div>
                 <h2 class="text-xl sm:text-2xl font-black text-white mt-2 flex items-center gap-2.5">
                     <i class="fa-solid fa-location-crosshairs text-amber-400 text-2xl"></i>
-                    <span>सुपरवाइजर व साइट इंचार्ज लाइव लोकेशन ट्रैकिंग</span>
+                    <span>Supervisor & Site Incharge Live Location Tracking</span>
                 </h2>
                 <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-3xl leading-relaxed">
-                    सभी 21 साइट्स के सुपरवाइजर/इंचार्ज इस समय कहाँ हैं, साइट पर उपस्थित हैं या दूर — वे जब भी ऐप खोलते हैं या काम करते हैं, उनकी लाइव GPS लोकेशन यहाँ स्वतः अपडेट होती है (उन्हें बिना पता लगे)।
+                    Real-time location of supervisors & site incharges across all 21 sites — GPS automatically updates in background when app is open.
                 </p>
             </div>
 
@@ -294,22 +294,22 @@
                 {% set no_signal_count = supervisors_tracking|length - pinged_today_count %}
 
                 <div class="px-3.5 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase">कुल साइट्स</div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Total Sites</div>
                     <div class="text-base font-black text-white font-mono">{{ supervisors_tracking|length }}</div>
                 </div>
                 <div class="px-3.5 py-2 rounded-xl bg-emerald-950/70 border border-emerald-500/50 text-center">
                     <div class="text-[10px] font-bold text-emerald-300 uppercase flex items-center justify-center gap-1">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        साइट पर
+                        On-Site
                     </div>
                     <div class="text-base font-black text-emerald-400 font-mono" id="supOnSiteCount">{{ on_site_count }}</div>
                 </div>
                 <div class="px-3.5 py-2 rounded-xl bg-amber-950/70 border border-amber-500/50 text-center">
-                    <div class="text-[10px] font-bold text-amber-300 uppercase">साइट से बाहर</div>
+                    <div class="text-[10px] font-bold text-amber-300 uppercase">Outside Site</div>
                     <div class="text-base font-black text-amber-400 font-mono" id="supOffSiteCount">{{ off_site_count }}</div>
                 </div>
                 <div class="px-3.5 py-2 rounded-xl bg-rose-950/70 border border-rose-500/50 text-center">
-                    <div class="text-[10px] font-bold text-rose-300 uppercase">आज सिग्नल नहीं</div>
+                    <div class="text-[10px] font-bold text-rose-300 uppercase">No Signal Today</div>
                     <div class="text-base font-black text-rose-400 font-mono" id="supOfflineCount">{{ no_signal_count }}</div>
                 </div>
             </div>
@@ -320,14 +320,14 @@
             <div class="relative flex-1 max-w-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                 <input type="text" id="supSearchInput" onkeyup="searchSupervisorRows(this.value)"
-                       placeholder="सुपरवाइजर या साइट खोजें..."
+                       placeholder="Search supervisor or site..."
                        class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-slate-700 text-xs text-white placeholder-slate-400 focus:ring-2 focus:ring-amber-400">
             </div>
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold">
-                <button type="button" onclick="filterSupervisorRows('all')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-black shadow-xs transition" data-filter="all">सभी ({{ supervisors_tracking|length }})</button>
-                <button type="button" onclick="filterSupervisorRows('onsite')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-300 hover:bg-slate-700 transition" data-filter="onsite">🟢 साइट पर ({{ on_site_count }})</button>
-                <button type="button" onclick="filterSupervisorRows('offsite')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-amber-300 hover:bg-slate-700 transition" data-filter="offsite">🚶 बाहर ({{ off_site_count }})</button>
-                <button type="button" onclick="filterSupervisorRows('nosignal')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-rose-300 hover:bg-slate-700 transition" data-filter="nosignal">⚪ ऑफलाइन ({{ no_signal_count }})</button>
+                <button type="button" onclick="filterSupervisorRows('all')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-black shadow-xs transition" data-filter="all">All ({{ supervisors_tracking|length }})</button>
+                <button type="button" onclick="filterSupervisorRows('onsite')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-emerald-300 hover:bg-slate-700 transition" data-filter="onsite">🟢 On-Site ({{ on_site_count }})</button>
+                <button type="button" onclick="filterSupervisorRows('offsite')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-amber-300 hover:bg-slate-700 transition" data-filter="offsite">🚶 Outside ({{ off_site_count }})</button>
+                <button type="button" onclick="filterSupervisorRows('nosignal')" class="sup-filter-btn px-3 py-1.5 rounded-lg bg-slate-800 text-rose-300 hover:bg-slate-700 transition" data-filter="nosignal">⚪ Offline ({{ no_signal_count }})</button>
             </div>
         </div>
 
@@ -337,12 +337,12 @@
                 <thead class="bg-indigo-950/90 text-indigo-200 uppercase text-[10px] font-bold tracking-wider border-b border-indigo-800/70">
                     <tr>
                         <th class="py-3 px-3.5 text-center">#</th>
-                        <th class="py-3 px-3.5">साइट विवरण (Site)</th>
-                        <th class="py-3 px-3.5">सुपरवाइजर / साइट इंचार्ज</th>
-                        <th class="py-3 px-3.5">वर्तमान स्थिति (Live GPS Status)</th>
-                        <th class="py-3 px-3.5">अंतिम सक्रियता (Last Seen)</th>
-                        <th class="py-3 px-3.5">GPS निर्देशांक (Coordinates)</th>
-                        <th class="py-3 px-3.5 text-right">लाइव एक्शन (Maps / Route)</th>
+                        <th class="py-3 px-3.5">Site Details</th>
+                        <th class="py-3 px-3.5">Supervisor / Site Incharge</th>
+                        <th class="py-3 px-3.5">Live GPS Status</th>
+                        <th class="py-3 px-3.5">Last Seen</th>
+                        <th class="py-3 px-3.5">GPS Coordinates</th>
+                        <th class="py-3 px-3.5 text-right">Live Actions (Maps / Route)</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800/80" id="supervisorTableBody">
@@ -352,7 +352,7 @@
                         <td class="py-3 px-3.5 text-center text-slate-500 font-mono">{{ loop.index }}</td>
                         <td class="py-3 px-3.5">
                             <div class="font-extrabold text-white">{{ sup.site_name }}</div>
-                            <div class="text-[11px] text-indigo-300 font-mono">{{ sup.site_code }} &bull; {{ sup.site_location or 'बिहार' }}</div>
+                            <div class="text-[11px] text-indigo-300 font-mono">{{ sup.site_code }} &bull; {{ sup.site_location or 'Bihar' }}</div>
                         </td>
                         <td class="py-3 px-3.5">
                             <div class="font-bold text-amber-200 flex items-center gap-1.5">
@@ -371,27 +371,27 @@
                             {% if sup.is_on_site %}
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                                <span>🟢 साइट पर मौजूद</span>
+                                <span>🟢 Present On-Site</span>
                             </span>
                             <div class="text-[10px] text-emerald-200 mt-1 font-mono">
-                                {{ sup.last_distance_m|round|int }}m दूरी &bull; {{ sup.nearest_point or 'कार्य स्थल' }}
+                                {{ sup.last_distance_m|round|int }}m distance &bull; {{ sup.nearest_point or 'Work Location' }}
                             </div>
                             {% elif sup.has_ping %}
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
                                 <i class="fa-solid fa-person-walking text-[11px]"></i>
-                                <span>🚶 साइट से बाहर</span>
+                                <span>🚶 Outside Site</span>
                             </span>
                             <div class="text-[10px] text-amber-200 mt-1 font-mono">
                                 {% if sup.last_distance_m >= 1000 %}
-                                    {{ (sup.last_distance_m / 1000)|round(1) }} किमी दूर
+                                    {{ (sup.last_distance_m / 1000)|round(1) }} km away
                                 {% else %}
-                                    {{ sup.last_distance_m|round|int }}m दूर
+                                    {{ sup.last_distance_m|round|int }}m away
                                 {% endif %}
                             </div>
                             {% else %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
                                 <i class="fa-solid fa-signal text-[10px]"></i>
-                                <span>आज कोई सिग्नल नहीं</span>
+                                <span>No Signal Today</span>
                             </span>
                             {% endif %}
                         </td>
@@ -401,8 +401,8 @@
                                 {{ sup.last_ping_time.split(' ')[1][:5] }}
                                 <span class="text-[10px] text-slate-400 font-normal">({{ sup.last_ping_time.split(' ')[0] }})</span>
                             </div>
-                            <div class="text-[10px] text-indigo-300 mt-0.5 truncate max-w-[140px]" title="{{ sup.page_source or 'बैकग्राउंड' }}">
-                                📱 {{ sup.page_source or 'बैकग्राउंड ट्रैकिंग' }}
+                            <div class="text-[10px] text-indigo-300 mt-0.5 truncate max-w-[140px]" title="{{ sup.page_source or 'Background' }}">
+                                📱 {{ sup.page_source or 'Background Tracking' }}
                             </div>
                             {% else %}
                             <span class="text-slate-500 text-xs">—</span>
@@ -414,7 +414,7 @@
                                 {{ "%.5f"|format(sup.last_lat) }}, {{ "%.5f"|format(sup.last_lng) }}
                             </div>
                             <div class="text-[10px] text-slate-500 mt-0.5">
-                                ±{{ sup.last_accuracy|round|int }}m सटीकता
+                                ±{{ sup.last_accuracy|round|int }}m accuracy
                             </div>
                             {% else %}
                             <span class="text-slate-500 text-xs">—</span>
@@ -425,16 +425,16 @@
                                 {% if sup.last_lat and sup.last_lng %}
                                 <a href="https://www.google.com/maps?q={{ sup.last_lat }},{{ sup.last_lng }}" target="_blank"
                                    class="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 active:scale-95"
-                                   title="Google Maps पर लाइव पिन देखें">
+                                   title="View live pin on Google Maps">
                                     <i class="fa-solid fa-map-pin text-[10px]"></i>
-                                    <span>मैप</span>
+                                    <span>Map</span>
                                 </a>
                                 {% endif %}
                                 <button type="button" onclick="openSupervisorRouteModal({{ sup.site_id }}, '{{ sup.site_name|replace("'", "\\'") }}', '{{ sup.supervisor_name|replace("'", "\\'") }}')"
                                         class="px-2.5 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 active:scale-95 cursor-pointer"
-                                        title="आज दिन भर का पूरा रूट व मूवमेंट देखें">
+                                        title="View today's full route & movement">
                                     <i class="fa-solid fa-route text-[10px]"></i>
-                                    <span>रूट ({{ sup.today_pings_count }})</span>
+                                    <span>Route ({{ sup.today_pings_count }})</span>
                                 </button>
                             </div>
                         </td>
@@ -452,17 +452,17 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt"></i> 1 KM (1000 मीटर) ऑटो-हाजिरी दायरा
+                        <i class="fa-solid fa-bolt"></i> 1 KM (1000m) Auto-Attendance Radius
                     </span>
-                    <span class="text-xs text-indigo-300 font-semibold">सुपरवाइज़र डेली कंट्रोल</span>
+                    <span class="text-xs text-indigo-300 font-semibold">Supervisor Daily Control</span>
                 </div>
                 <h2 class="text-xl sm:text-2xl font-black text-white mt-2 flex items-center gap-2.5">
                     <i class="fa-solid fa-map-location-dot text-amber-400"></i>
-                    <span>आज का कार्य स्थल व वार्ड लोकेशन (Ward Geofencing)</span>
+                    <span>Today's Work Location & Ward (Ward Geofencing)</span>
                 </h2>
                 <p class="text-xs sm:text-sm text-indigo-200 mt-1 max-w-2xl leading-relaxed">
-                    सुपरवाइज़र आज जहाँ काम हो रहा है (जैसे <strong>वार्ड 1, वार्ड 2, पानी टंकी या पाइपलाइन</strong>) वहाँ का लोकेशन सेट करें। 
-                    उस लोकेशन के <strong>1 KM (1000 मीटर) के दायरे</strong> में जो भी वर्कर काम कर रहे हैं, उनकी हाजिरी <strong>स्वतः On-Site (Present)</strong> दर्ज हो जाएगी।
+                    Set the location where work is happening today (e.g. <strong>Ward 1, Ward 2, Water Tank, or Pipeline</strong>). 
+                    Any workers within the 1 KM (1000m) radius will be marked On-Site (Present) automatically.
                 </p>
             </div>
 
@@ -470,11 +470,11 @@
                 <!-- 1-Click Set Current Phone GPS as Today's Work Ward -->
                 <button type="button" onclick="quickSetTodayWorkSpot()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-emerald-950/40 transition flex items-center gap-2 active:scale-95 cursor-pointer">
                     <i class="fa-solid fa-crosshairs text-base"></i>
-                    <span>📍 मेरी फोन लोकेशन से आज का वार्ड बनाएं</span>
+                    <span>📍 Create today's ward from phone location</span>
                 </button>
                 <button type="button" onclick="openMultiGpsModal()" class="px-3.5 py-2.5 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 border border-violet-500/40 cursor-pointer">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>+ वार्ड / पॉइंट जोड़ें</span>
+                    <span>+ Add Ward / Point</span>
                 </button>
             </div>
         </div>
@@ -484,20 +484,20 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span class="text-xs font-bold text-indigo-200 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-layer-group text-amber-400"></i>
-                    <span>आज सक्रिय कार्य स्थल व वार्ड (Active Work Wards):</span>
+                    <span>Active Work Locations & Wards Today:</span>
                 </span>
                 <div class="flex items-center gap-2">
                     {% if session.get('is_owner') and sites|length > 1 %}
-                    <label class="text-xs text-indigo-300 font-bold">साइट:</label>
+                    <label class="text-xs text-indigo-300 font-bold">Site:</label>
                     <select id="supervisorSitePicker" onchange="switchSupervisorSiteView(this.value); filterAttendanceBySite(this.value);" class="bg-indigo-950 text-white border border-indigo-600 rounded-xl px-3 py-1.5 text-xs font-bold focus:ring-2 focus:ring-amber-400">
-                        <option value="all">🌟 सभी साइट्स (All Sites)</option>
+                        <option value="all">🌟 All Sites</option>
                         {% for s in sites %}
                         <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                         {% endfor %}
                     </select>
                     {% else %}
                     <span class="text-xs font-black text-amber-300 bg-indigo-950/90 px-3 py-1 rounded-xl border border-indigo-700/80">
-                        साइट: {{ sites[0].name if sites else 'कार्य स्थल' }}
+                        Site: {{ sites[0].name if sites else 'Work Location' }}
                     </span>
                     {% endif %}
                 </div>
@@ -506,7 +506,7 @@
             <!-- Dynamic Ward Cards Grid -->
             <div id="activeWardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 <div class="col-span-full text-center py-6 text-xs text-indigo-300">
-                    <i class="fa-solid fa-spinner animate-spin"></i> कार्य स्थल लोड हो रहे हैं...
+                    <i class="fa-solid fa-spinner animate-spin"></i> Loading work locations...
                 </div>
             </div>
         </div>
@@ -528,20 +528,20 @@
             <div>
                 <h2 class="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-users text-indigo-600"></i>
-                    <span>साइट अनुसार वर्कर हाजिरी व समय (Working Hours)</span>
+                    <span>Worker Attendance & Hours by Site</span>
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5">तारीख: <strong>{{ date_str }}</strong> — हर 30 सेकंड में ऑटो-रिफ्रेश</p>
+                <p class="text-xs text-slate-500 mt-0.5">Date: <strong>{{ date_str }}</strong> — Auto-refreshes every 30 seconds</p>
                 <p class="text-[11px] text-amber-700 font-bold mt-1 flex items-center gap-1.5">
                     <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
-                    <span>⚡ ऑटो चेक-आउट: शाम 5:00 बजे के बाद जैसे ही वर्कर साइट से बाहर निकलेंगे, सिस्टम स्वतः चेक-आउट दर्ज कर लेगा।</span>
+                    <span>⚡ Auto Check-Out: Automatic check-out is recorded when workers leave site after 5:00 PM.</span>
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <div class="flex items-center gap-1.5 bg-indigo-50 border-2 border-indigo-500 rounded-xl px-3 py-1.5 shadow-sm">
                     <i class="fa-solid fa-filter text-indigo-600 text-xs"></i>
-                    <span class="text-xs font-black text-indigo-950">साइट चुनें:</span>
+                    <span class="text-xs font-black text-indigo-950">Select Site:</span>
                     <select id="attendanceTableSiteFilter" onchange="filterAttendanceBySite(this.value)" class="bg-transparent text-indigo-950 font-black text-xs sm:text-sm focus:outline-none cursor-pointer">
-                        <option value="all">🌟 सभी साइट्स (All Sites)</option>
+                        <option value="all">🌟 All Sites</option>
                         {% for s in sites %}
                         <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                         {% endfor %}
@@ -549,7 +549,7 @@
                 </div>
                 <button onclick="refreshData()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate text-indigo-600" id="refreshIcon"></i>
-                    <span>अभी ताज़ा करें</span>
+                    <span>Refresh Now</span>
                 </button>
             </div>
         </div>
@@ -559,12 +559,12 @@
             <div class="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
                 <i class="fa-solid fa-user-clock"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-800">अभी तक कोई वर्कर नहीं जोड़ा गया है</h3>
+            <h3 class="text-base font-bold text-slate-800">No workers added yet</h3>
             <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                साइट के वर्कर (प्लंबर, सुपरवाइज़र, हेल्पर) को जोड़ने के लिए ऊपर <strong>"+ नया वर्कर"</strong> बटन दबाएं।
+                Click <strong>"+ Add Worker"</strong> above to add workers (plumber, supervisor, helper).
             </p>
             <button onclick="openAddWorkerModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition">
-                + पहला वर्कर जोड़ें
+                + Add First Worker
             </button>
         </div>
         {% else %}
@@ -579,31 +579,31 @@
                         <span class="font-black text-slate-900 text-sm sm:text-base">{{ site_data.site_name }}</span>
                         <span class="text-xs text-slate-500 font-semibold">({{ site_data.site_code }})</span>
                         <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[10px] font-bold">
-                            📍 {{ points_counts.get(site_id, 0) if points_counts else 0 }} मल्टी-पॉइंट्स
+                            📍 {{ points_counts.get(site_id, 0) if points_counts else 0 }} Multi-Points
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-slate-600 mr-1">
-                            {{ site_data.workers|length }} वर्कर
+                            {{ site_data.workers|length }} Worker
                         </span>
                         <button onclick="openGroupPhotoModal({{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
                                 class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow-xs transition flex items-center gap-1 active:scale-95"
-                                title="साइट पर उपस्थित सभी वर्करों की सामूहिक फोटो लें">
+                                title="Take group photo of all workers present on site">
                             <i class="fa-solid fa-camera text-[10px]"></i>
-                            <span>📸 सामूहिक फोटो</span>
+                            <span>📸 Group Photo</span>
                         </button>
                         <button onclick="openMultiGpsModalForSite({{ site_id }}, '{{ site_data.site_name }}')" 
                                 class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[11px] shadow-xs transition flex items-center gap-1">
                             <i class="fa-solid fa-draw-polygon text-[10px]"></i>
-                            <span>4-5 GPS पॉइंट्स</span>
+                            <span>4-5 GPS Points</span>
                         </button>
                         {% if session.get('is_owner') or user_role == 'owner' %}
                         <div class="relative inline-block text-left">
                             <button type="button" onclick="toggleSiteResetMenu({{ site_id }})" 
                                     class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 font-bold text-[11px] shadow-xs transition flex items-center gap-1 active:scale-95"
-                                    title="रीसेट विकल्प">
+                                    title="Reset Options">
                                 <i class="fa-solid fa-rotate-left text-[10px]"></i>
-                                <span>रीसेट</span>
+                                <span>Reset</span>
                                 <i class="fa-solid fa-chevron-down text-[8px]"></i>
                             </button>
                             <div id="siteResetMenu-{{ site_id }}" class="hidden absolute right-0 mt-1 w-56 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
@@ -611,16 +611,16 @@
                                         class="w-full text-left px-3 py-2 rounded-xl text-amber-300 hover:bg-slate-800 font-bold flex items-center gap-2 transition">
                                     <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
                                     <div>
-                                        <div class="text-[11px] text-white">आज की हाजिरी रीसेट करें</div>
-                                        <div class="text-[9px] text-slate-400 font-normal">चेक-इन व फोटो साफ करें</div>
+                                        <div class="text-[11px] text-white">Reset Today's Attendance</div>
+                                        <div class="text-[9px] text-slate-400 font-normal">Clear Check-In & Photo</div>
                                     </div>
                                 </button>
                                 <button type="button" onclick="handleResetSiteWorkers({{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
                                         class="w-full text-left px-3 py-2 rounded-xl text-rose-300 hover:bg-slate-800 font-bold flex items-center gap-2 transition mt-1 border-t border-slate-800">
                                     <i class="fa-solid fa-user-xmark text-rose-400"></i>
                                     <div>
-                                        <div class="text-[11px] text-white">सभी वर्कर हटाएं (Delete All)</div>
-                                        <div class="text-[9px] text-slate-400 font-normal">इस साइट के सारे वर्कर हटाएँ</div>
+                                        <div class="text-[11px] text-white">Delete All Workers</div>
+                                        <div class="text-[9px] text-slate-400 font-normal">Remove all workers for this site</div>
                                     </div>
                                 </button>
                             </div>
@@ -634,15 +634,15 @@
                     <table class="w-full text-left text-xs sm:text-sm">
                         <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                             <tr>
-                                <th class="py-3 px-4">वर्कर का नाम व पद</th>
-                                <th class="py-3 px-3 text-center">📸 फोटो हाजिरी</th>
-                                <th class="py-3 px-3">स्थिति (Status)</th>
-                                <th class="py-3 px-3">चेक-इन (आए)</th>
-                                <th class="py-3 px-3">चेक-आउट (गए)</th>
-                                <th class="py-3 px-3 text-center">कार्य समय</th>
-                                <th class="py-3 px-3">वर्कर GPS लोकेशन (Lat, Lng)</th>
-                                <th class="py-3 px-3">दूरी व नजदीकी पॉइंट</th>
-                                <th class="py-3 px-4 text-right">वर्कर लिंक व एक्शन</th>
+                                <th class="py-3 px-4">Worker Name & Role</th>
+                                <th class="py-3 px-3 text-center">📸 Photo Attendance</th>
+                                <th class="py-3 px-3">Status (Status)</th>
+                                <th class="py-3 px-3">Check-In</th>
+                                <th class="py-3 px-3">Check-Out</th>
+                                <th class="py-3 px-3 text-center">Work Hours</th>
+                                <th class="py-3 px-3">Worker GPS Location (Lat, Lng)</th>
+                                <th class="py-3 px-3">Distance & Nearest Point</th>
+                                <th class="py-3 px-4 text-right">Worker Link & Action</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -664,22 +664,22 @@
                                     {% if w.photo_url %}
                                     <div class="inline-flex items-center gap-1.5">
                                         <div class="relative group cursor-pointer inline-block" onclick="viewPhotoLightbox('{{ w.photo_url }}', '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', '{{ site_data.site_name|replace("'", "\\'") }}', '{{ w.check_in_time or '' }}', '{{ w.last_lat or '' }}', '{{ w.last_lng or '' }}')">
-                                            <img src="{{ w.photo_url }}" class="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-xs group-hover:scale-105 transition" title="बड़ी फोटो देखें" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('{{ w.worker_name }}') + '&background=1e293b&color=38bdf8&size=128&bold=true';">
+                                            <img src="{{ w.photo_url }}" class="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-xs group-hover:scale-105 transition" title="View Photo" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent('{{ w.worker_name }}') + '&background=1e293b&color=38bdf8&size=128&bold=true';">
                                             <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[8px] border border-white">
                                                 <i class="fa-solid fa-check"></i>
                                             </span>
                                         </div>
                                         <button onclick="openIndividualPhotoModal({{ w.worker_id }}, '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', {{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
-                                                class="p-1 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition text-xs" title="नई फोटो खींचें / बदलें">
+                                                class="p-1 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition text-xs" title="Take New Photo / Replace">
                                             <i class="fa-solid fa-camera-rotate"></i>
                                         </button>
                                     </div>
                                     {% else %}
                                     <button onclick="openIndividualPhotoModal({{ w.worker_id }}, '{{ w.worker_name|replace("'", "\\'") }}', '{{ w.role }}', {{ site_id }}, '{{ site_data.site_name|replace("'", "\\'") }}')" 
                                             class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 mx-auto active:scale-95"
-                                            title="इस वर्कर की फोटो लेकर उपस्थिति दर्ज करें">
+                                            title="Punch attendance with photo for this worker">
                                         <i class="fa-solid fa-camera"></i>
-                                        <span>फोटो लें</span>
+                                        <span>Take Photo</span>
                                     </button>
                                     {% endif %}
                                 </td>
@@ -689,15 +689,15 @@
                                     {% if w.att_status == 'present' %}
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
-                                        <span>🟢 साइट पर मौजूद</span>
+                                        <span>🟢 Present On-Site</span>
                                     </span>
                                     {% elif w.att_status == 'left' %}
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-                                        <span>🚶 निकल चुके</span>
+                                        <span>🚶 Checked Out</span>
                                     </span>
                                     {% else %}
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">
-                                        <span>⚪ नहीं पहुंचे</span>
+                                        <span>⚪ Not Arrived</span>
                                     </span>
                                     {% endif %}
                                 </td>
@@ -716,10 +716,10 @@
                                     {% if w.check_out_time %}
                                     <div class="flex flex-col">
                                         <span class="text-amber-700 font-black text-sm">{{ w.check_out_time.split(' ')[1][:5] }}</span>
-                                        <span class="text-[10px] text-slate-400 font-semibold">चेक-आउट</span>
+                                        <span class="text-[10px] text-slate-400 font-semibold">Check-Out</span>
                                     </div>
                                     {% elif w.att_status == 'present' %}
-                                    <span class="text-emerald-600 text-xs italic font-bold">काम जारी...</span>
+                                    <span class="text-emerald-600 text-xs italic font-bold">In progress...</span>
                                     {% else %}
                                     <span class="text-slate-400">—</span>
                                     {% endif %}
@@ -734,7 +734,7 @@
                                         {{ hrs }}h {{ mins }}m
                                     </span>
                                     {% elif w.att_status == 'present' %}
-                                    <span class="text-emerald-600 font-bold text-xs animate-pulse">जारी है</span>
+                                    <span class="text-emerald-600 font-bold text-xs animate-pulse">Active</span>
                                     {% else %}
                                     <span class="text-slate-400 text-xs">0h 0m</span>
                                     {% endif %}
@@ -759,7 +759,7 @@
                                         {% endif %}
                                     </div>
                                     {% else %}
-                                    <span class="text-slate-400 text-xs italic">सिग्नल प्रतीक्षारत</span>
+                                    <span class="text-slate-400 text-xs italic">Awaiting signal</span>
                                     {% endif %}
                                 </td>
 
@@ -779,11 +779,11 @@
                                         </span>
                                         {% else %}
                                         <span class="inline-flex items-center gap-1 font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 text-[11px]">
-                                            {{ (w.last_dist / 1000)|round(2) }} km दूर
+                                            {{ (w.last_dist / 1000)|round(2) }} km away
                                         </span>
                                         {% endif %}
                                     {% else %}
-                                        <span class="text-slate-400">GPS नहीं मिला</span>
+                                        <span class="text-slate-400">GPS Not Found</span>
                                     {% endif %}
                                 </td>
 
@@ -791,13 +791,13 @@
                                 <td class="py-3 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button onclick="copyWorkerLink('{{ w.worker_token }}', '{{ w.worker_name }}')" 
-                                                title="Worker का हाजिरी लिंक कॉपी व WhatsApp शेयर करें"
+                                                title="Copy Worker Attendance Link & Share on WhatsApp"
                                                 class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition flex items-center gap-1 border border-emerald-200">
                                             <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
-                                            <span class="hidden sm:inline">WhatsApp लिंक</span>
+                                            <span class="hidden sm:inline">WhatsApp Link</span>
                                         </button>
                                         <button onclick="deleteWorker('{{ w.worker_id }}', '{{ w.worker_name }}')" 
-                                                title="हटाएं"
+                                                title="Delete"
                                                 class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
@@ -811,11 +811,11 @@
                                     <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-2 text-xl">
                                         <i class="fa-solid fa-users"></i>
                                     </div>
-                                    <p class="text-xs font-bold text-slate-700">इस साइट ({{ site_data.site_name }}) पर अभी कोई वर्कर नहीं जुड़ा है।</p>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">मिस्त्री, प्लंबर व हेल्पर जोड़ने के लिए नीचे दिया गया बटन दबाएं।</p>
+                                    <p class="text-xs font-bold text-slate-700">No workers added for this site ({{ site_data.site_name }}) yet.</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Click the button below to add mistri, plumber, or helper.</p>
                                     <button type="button" onclick="openAddWorkerModalForSite({{ site_id }})" class="mt-3 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs shadow-md transition inline-flex items-center gap-1.5 active:scale-95">
                                         <i class="fa-solid fa-user-plus"></i>
-                                        <span>+ {{ site_data.site_name }} में वर्कर जोड़ें</span>
+                                        <span>+ Add Worker to {{ site_data.site_name }}</span>
                                     </button>
                                 </td>
                             </tr>
@@ -833,13 +833,13 @@
     <div class="bg-indigo-50/70 border border-indigo-200/80 rounded-3xl p-5 sm:p-6 text-slate-800">
         <h3 class="font-black text-indigo-950 text-sm sm:text-base flex items-center gap-2 mb-2">
             <i class="fa-solid fa-circle-question text-indigo-600"></i>
-            <span>यह 500 मीटर GPS सिस्टम कैसे काम करता है?</span>
+            <span>How does this GPS system work?</span>
         </h3>
         <ol class="list-decimal list-inside space-y-1.5 text-xs sm:text-sm text-slate-700 font-medium">
-            <li><strong>साइट GPS सेट करें:</strong> ऊपर नीले बटन से साइट (जैसे सीवान) की GPS लोकेशन दर्ज करें (या साइट पर खड़े होकर 'मेरी लोकेशन लें' दबाएं)।</li>
-            <li><strong>वर्कर को जोड़ें:</strong> हरे बटन से प्लंबर, सुपरवाइज़र या मिस्त्री को जोड़ें और उनका लिंक कॉपी करके WhatsApp पर भेजें।</li>
-            <li><strong>वर्कर फोन में लिंक खोलेंगे:</strong> वर्कर को केवल 1 बार लिंक खोलकर लोकेशन Allow करनी है। ऐप उनके फोन में 500m दायरे में आते ही ऑटो चेक-इन और निकलते ही चेक-आउट कर देगा।</li>
-            <li><strong>घंटे स्वतः गिने जाएंगे:</strong> वो कितने घंटे रुके, यह ऊपर टेबल में लाइव दिखाई देगा।</li>
+            <li><strong>Set Site GPS:</strong> Acquire GPS coordinates from the button above while standing on site.</li>
+            <li><strong>Add Worker:</strong> Add plumbers, supervisors, or mistri and share their tracking link on WhatsApp.</li>
+            <li><strong>Workers open link on phone:</strong> Workers open the link once to allow location. The app automatically checks them in within radius and checks out when leaving.</li>
+            <li><strong>Working hours calculated automatically:</strong> Total working hours will be tracked live in the table above.</li>
         </ol>
     </div>
 
@@ -851,16 +851,16 @@
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 class="font-black text-slate-900 text-lg flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-emerald-600"></i>
-                <span>नया वर्कर जोड़ें (GPS Attendance)</span>
+                <span>Add New Worker (GPS Attendance)</span>
             </h3>
             <button onclick="closeAddWorkerModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
         </div>
 
         <form id="addWorkerForm" onsubmit="submitWorkerForm(event)" class="space-y-4 mt-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें (Site) *</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Select Site *</label>
                 <select id="workerSiteId" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
-                    <option value="">-- साइट चुनें --</option>
+                    <option value="">-- Select Site --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
                     {% endfor %}
@@ -868,37 +868,37 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">वर्कर का नाम *</label>
-                <input type="text" id="workerName" required placeholder="उदा. राजू कुमार, संतोष मिस्त्री" 
+                <label class="block text-xs font-bold text-slate-700 mb-1">Worker Name *</label>
+                <input type="text" id="workerName" required placeholder="e.g. Raju Kumar, Santosh Mistri" 
                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">पद / कार्य (Role) *</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Role *</label>
                 <select id="workerRole" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
-                    <option value="Data Entry">डाटा एंट्री (Data Entry / DEO)</option>
-                    <option value="Plumber">प्लंबर (Plumber)</option>
-                    <option value="Supervisor">सुपरवाइज़र (Supervisor)</option>
-                    <option value="GI Mistri">जी.आई. मिस्त्री (GI Mistri)</option>
-                    <option value="Helper">हेल्पर / मजदूर (Helper)</option>
-                    <option value="Electrician">इलेक्ट्रीशियन (Electrician)</option>
-                    <option value="Site Incharge">साइट इनचार्ज (Site Incharge)</option>
+                    <option value="Data Entry">Data Entry (DEO)</option>
+                    <option value="Plumber">Plumber</option>
+                    <option value="Supervisor">Supervisor (Supervisor)</option>
+                    <option value="GI Mistri">GI Mistri (GI Mistri)</option>
+                    <option value="Helper">Helper / Labor</option>
+                    <option value="Electrician">Electrician (Electrician)</option>
+                    <option value="Site Incharge">Site  (Site Incharge)</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">मोबाइल नंबर (वैकल्पिक)</label>
-                <input type="tel" id="workerPhone" placeholder="उदा. 9876543210" 
+                <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Number (Optional)</label>
+                <input type="tel" id="workerPhone" placeholder="e.g. 9876543210" 
                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-emerald-500">
             </div>
 
             <div class="pt-2 flex items-center justify-end gap-2">
                 <button type="button" onclick="closeAddWorkerModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="saveWorkerBtn" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-check"></i>
-                    <span>सेव करें और लिंक बनाएं</span>
+                    <span>Save & Create Link</span>
                 </button>
             </div>
         </form>
@@ -911,16 +911,16 @@
         <div class="flex items-center justify-between pb-3 border-b border-slate-100">
             <h3 class="font-black text-slate-900 text-lg flex items-center gap-2">
                 <i class="fa-solid fa-map-location-dot text-blue-600"></i>
-                <span>साइट GPS लोकेशन व दायरा (Radius) सेट करें</span>
+                <span>Set Site Center GPS & Radius</span>
             </h3>
             <button onclick="closeSiteGpsModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
         </div>
 
         <form id="siteGpsForm" onsubmit="submitSiteGps(event)" class="space-y-4 mt-4">
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें *</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Select Site *</label>
                 <select id="gpsSiteSelect" required onchange="populateSiteGps(this.value)" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- साइट चुनें --</option>
+                    <option value="">-- Select Site --</option>
                     {% for s in sites %}
                     <option value="{{ s.id }}" data-lat="{{ s.latitude or '' }}" data-lng="{{ s.longitude or '' }}" data-radius="{{ s.geo_radius or 500 }}">
                         {{ s.name }} ({{ s.code }}) {% if s.latitude %}📍 Set{% endif %}
@@ -932,38 +932,38 @@
             <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200">
                 <button type="button" onclick="getCurrentDeviceLocation()" class="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-sm transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-crosshairs"></i>
-                    <span>मेरी वर्तमान फोन लोकेशन लें (Use My GPS)</span>
+                    <span>Use My Current Phone GPS Location</span>
                 </button>
-                <div class="text-[11px] text-blue-800 text-center mt-1.5">साइट पर खड़े होकर यह बटन दबाएं तो ऑटोमैटिक कोऑर्डिनेट भर जाएंगे।</div>
+                <div class="text-[11px] text-blue-800 text-center mt-1.5">Click while standing on site to fill coordinates automatically.</div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Latitude</label>
-                    <input type="number" step="any" id="gpsLatitude" required placeholder="उदा. 26.2196" 
+                    <input type="number" step="any" id="gpsLatitude" required placeholder="e.g. 26.2196" 
                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Longitude</label>
-                    <input type="number" step="any" id="gpsLongitude" required placeholder="उदा. 84.3567" 
+                    <input type="number" step="any" id="gpsLongitude" required placeholder="e.g. 84.3567" 
                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">दायरा (Radius in Meters)</label>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Radius (in Meters)</label>
                 <input type="number" id="gpsRadius" value="1000" required min="50" max="5000"
                        class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-blue-500">
-                <span class="text-[11px] text-slate-500">डिफ़ॉल्ट: 1000 मीटर (1 KM दायरा)</span>
+                <span class="text-[11px] text-slate-500">Default: 1000m (1 KM radius)</span>
             </div>
 
             <div class="pt-2 flex items-center justify-end gap-2">
                 <button type="button" onclick="closeSiteGpsModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="saveGpsBtn" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
                     <i class="fa-solid fa-save"></i>
-                    <span>GPS लोकेशन सुरक्षित करें</span>
+                    <span>Save GPS Location</span>
                 </button>
             </div>
         </form>
@@ -979,8 +979,8 @@
                     <i class="fa-solid fa-draw-polygon"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-slate-900 text-base sm:text-lg">📍 आज का कार्य स्थल व वार्ड लोकेशन (1 KM दायरा)</h3>
-                    <p class="text-[11px] text-slate-500">वार्ड 1, 2, पानी टंकी आदि जोड़ें — 1 KM (1000m) दायरे के अंदर वर्कर की उपस्थिति स्वतः दर्ज होगी</p>
+                    <h3 class="font-black text-slate-900 text-base sm:text-lg">📍 Today's Work Location & Ward (1 KM Radius)</h3>
+                    <p class="text-[11px] text-slate-500">Add Ward 1, 2, Water Tank, etc. Workers within 1 KM radius will be automatically marked present.</p>
                 </div>
             </div>
             <button onclick="closeMultiGpsModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
@@ -988,7 +988,7 @@
 
         <!-- Site Selector inside Modal -->
         <div class="mt-4">
-            <label class="block text-xs font-bold text-slate-700 mb-1">साइट चुनें (Select Site) *</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Select Site *</label>
             <select id="multiGpsSiteSelect" onchange="loadSiteGeoPoints(this.value)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                 {% for s in sites %}
                 <option value="{{ s.id }}" {% if (session.get('site_id') and s.id == session.get('site_id')) or loop.first %}selected{% endif %}>
@@ -1003,13 +1003,13 @@
             <div class="flex items-center justify-between mb-2">
                 <span class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                     <i class="fa-solid fa-list-check text-violet-600"></i>
-                    <span>मौजूदा सक्रिय GPS पॉइंट्स (Active Sub-Locations)</span>
+                    <span>Active GPS Points (Sub-Locations)</span>
                 </span>
-                <span id="pointCountBadge" class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[11px] font-black">0 पॉइंट्स</span>
+                <span id="pointCountBadge" class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[11px] font-black">0 Points</span>
             </div>
 
             <div id="pointsListContainer" class="space-y-2 mt-2">
-                <div class="text-center py-4 text-xs text-slate-400">पॉइंट्स लोड हो रहे हैं...</div>
+                <div class="text-center py-4 text-xs text-slate-400">Loading points...</div>
             </div>
         </div>
 
@@ -1017,48 +1017,48 @@
         <div class="mt-5 pt-4 border-t border-slate-200">
             <h4 class="text-xs font-black uppercase tracking-wider text-slate-800 mb-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-plus-circle text-emerald-600"></i>
-                <span>+ नया कार्य स्थल / वार्ड लोकेशन जोड़ें</span>
+                <span>+ Add New Work Location / Ward</span>
             </h4>
 
             <form id="addPointForm" onsubmit="submitNewPoint(event)" class="space-y-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">पॉइंट का नाम / वार्ड *</label>
-                    <input type="text" id="newPointName" required placeholder="उदा. वार्ड 1 (पाइपलाइन), वार्ड 2 (पानी टंकी), बोरिंग कैंप"
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Point Name / Ward *</label>
+                    <input type="text" id="newPointName" required placeholder="e.g. Ward 1 (Pipeline), Ward 2 (Tank), Boring Camp"
                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-violet-500">
                 </div>
 
                 <div class="bg-violet-50 p-3 rounded-xl border border-violet-200 flex flex-col sm:flex-row items-center justify-between gap-2">
                     <div class="text-[11px] text-violet-900 font-medium">
-                        यदि आप उस स्थान पर खड़े हैं, तो सीधे फोन से लोकेशन लें:
+                        If you are standing on site, acquire location directly from phone:
                     </div>
                     <button type="button" onclick="getCurrentLocationForNewPoint()" class="w-full sm:w-auto px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-sm transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-crosshairs"></i>
-                        <span>मेरी फोन लोकेशन लें</span>
+                        <span>Acquire Location from Phone</span>
                     </button>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Latitude *</label>
-                        <input type="number" step="any" id="newPointLat" required placeholder="उदा. 26.21950"
+                        <input type="number" step="any" id="newPointLat" required placeholder="e.g. 26.21950"
                                 class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Longitude *</label>
-                        <input type="number" step="any" id="newPointLng" required placeholder="उदा. 84.35670"
+                        <input type="number" step="any" id="newPointLng" required placeholder="e.g. 84.35670"
                                 class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-mono font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                     </div>
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="block text-xs font-bold text-slate-700">हाजिरी का दायरा (Geofence Radius) *</label>
-                        <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded">डिफ़ॉल्ट 1000m (1 KM)</span>
+                        <label class="block text-xs font-bold text-slate-700">Geofence Radius *</label>
+                        <span class="text-[10px] font-black text-violet-700 bg-violet-50 px-2 py-0.5 rounded">Default 1000m (1 KM)</span>
                     </div>
                     <input type="number" id="newPointRadius" value="1000" min="50" max="5000" required
                            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-violet-500">
                     <div class="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span class="text-[10px] text-slate-500 font-bold mr-1">त्वरित दायरा चुनें:</span>
+                        <span class="text-[10px] text-slate-500 font-bold mr-1">Quick Select Radius:</span>
                         <button type="button" onclick="setRadiusVal(500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">500m</button>
                         <button type="button" onclick="setRadiusVal(1000)" class="px-2.5 py-1 rounded-lg bg-violet-100 hover:bg-violet-200 text-[11px] font-black text-violet-800 border border-violet-300 transition">⭐ 1 KM (1000m)</button>
                         <button type="button" onclick="setRadiusVal(1500)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">1.5 KM</button>
@@ -1068,11 +1068,11 @@
 
                 <div class="pt-2 flex items-center justify-end gap-2">
                     <button type="button" onclick="closeMultiGpsModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                        बंद करें
+                        Close
                     </button>
                     <button type="submit" id="savePointBtn" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-black shadow-md transition flex items-center gap-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span>+ यह GPS पॉइंट सुरक्षित करें</span>
+                        <span>+ Save GPS Point</span>
                     </button>
                 </div>
             </form>
@@ -1090,8 +1090,8 @@
                     <i class="fa-solid fa-camera"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black leading-tight">📸 फोटो उपस्थिति (Photo Attendance)</h3>
-                    <p class="text-[11px] text-emerald-100 font-medium">वर्कर की लाइव फोटो लेकर हाजिरी लगाएं</p>
+                    <h3 class="text-sm font-black leading-tight">📸 Photo Attendance</h3>
+                    <p class="text-[11px] text-emerald-100 font-medium">Capture live photo to punch attendance</p>
                 </div>
             </div>
             <button type="button" onclick="closeIndividualPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none p-1">&times;</button>
@@ -1100,12 +1100,12 @@
         <!-- Worker Info Bar -->
         <div class="bg-slate-100 px-5 py-2 border-b border-slate-200 flex items-center justify-between text-xs shrink-0">
             <div>
-                <span class="text-slate-400 block text-[10px]">वर्कर:</span>
+                <span class="text-slate-400 block text-[10px]">Worker:</span>
                 <strong class="text-slate-800 text-sm" id="indivWorkerName">—</strong>
                 <span class="text-[10px] text-indigo-700 bg-indigo-50 font-bold px-1.5 py-0.5 rounded ml-1" id="indivWorkerRole">—</span>
             </div>
             <div class="text-right">
-                <span class="text-slate-400 block text-[10px]">साइट:</span>
+                <span class="text-slate-400 block text-[10px]">Site:</span>
                 <strong class="text-teal-700 font-bold" id="indivSiteName">—</strong>
             </div>
         </div>
@@ -1124,12 +1124,12 @@
                     <label id="lblCheckIn" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-black text-xs cursor-pointer">
                         <input type="radio" name="indivCheckType" value="check_in" checked onchange="toggleCheckType('check_in')" class="hidden">
                         <i class="fa-solid fa-right-to-bracket text-emerald-600"></i>
-                        <span>🟢 आए (Check-In)</span>
+                        <span>🟢 In (Check-In)</span>
                     </label>
                     <label id="lblCheckOut" class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-xs cursor-pointer">
                         <input type="radio" name="indivCheckType" value="check_out" onchange="toggleCheckType('check_out')" class="hidden">
                         <i class="fa-solid fa-right-from-bracket text-amber-600"></i>
-                        <span>🔴 गए (Check-Out)</span>
+                        <span>🔴 Out (Check-Out)</span>
                     </label>
                 </div>
 
@@ -1138,7 +1138,7 @@
                     <input type="file" id="indivNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleNativePhotoFile(event)">
                     <button type="button" onclick="document.getElementById('indivNativeFileInput').click()" class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-700 to-indigo-800 hover:from-blue-600 hover:to-indigo-600 text-white font-black text-sm shadow-md transition flex items-center justify-center gap-2 active:scale-95 border border-indigo-400/40 cursor-pointer">
                         <i class="fa-solid fa-camera text-amber-300 text-lg"></i>
-                        <span>📸 फोन कैमरे से फोटो खींचें (कैमरा खोलें)</span>
+                        <span>📸 Take Photo with Phone Camera (Open Camera)</span>
                     </button>
                 </div>
 
@@ -1147,13 +1147,13 @@
                     <img id="indivPreviewImg" src="" class="w-full h-full object-cover hidden">
                     <div id="indivPlaceholder" class="text-center p-4 text-slate-400">
                         <i class="fa-solid fa-camera text-3xl mb-1 text-slate-500 block"></i>
-                        <p class="text-xs font-bold text-slate-300">कैमरे से फोटो खींचें</p>
-                        <p class="text-[10px] text-emerald-400 mt-1 font-semibold">फोटो खींचते ही हाजिरी अपने आप दर्ज हो जाएगी!</p>
+                        <p class="text-xs font-bold text-slate-300">Take Photo with Camera</p>
+                        <p class="text-[10px] text-emerald-400 mt-1 font-semibold">Attendance will be recorded automatically upon taking photo!</p>
                     </div>
                     <div id="indivGpsBadge" class="absolute bottom-2 left-2 right-2 bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded-xl flex items-center justify-between border border-white/20 hidden">
                         <div class="flex items-center gap-1.5 truncate">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span id="indivGpsCoordsText">GPS: प्राप्त हो रहा है...</span>
+                            <span id="indivGpsCoordsText">GPS: Acquiring...</span>
                         </div>
                         <span class="text-emerald-300 font-bold ml-1">On-Site</span>
                     </div>
@@ -1162,24 +1162,24 @@
                 <!-- Auto-Submit Status Banner -->
                 <div id="indivAutoSubmitBanner" class="hidden p-3 rounded-xl bg-emerald-100 border-2 border-emerald-400 text-emerald-900 text-xs font-black flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-base animate-bounce"></i>
-                    <span>✅ फोटो प्राप्त हो गई! उपस्थिति अपने आप दर्ज की जा रही है...</span>
+                    <span>✅ Photo acquired! Attendance is being recorded automatically...</span>
                 </div>
 
                 <!-- Location Status Row -->
                 <div id="indivLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
                     <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
-                    <span id="indivLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+                    <span id="indivLocText">Searching phone GPS location...</span>
                 </div>
             </div>
 
             <!-- ALWAYS-VISIBLE STICKY BOTTOM ACTION BAR -->
             <div class="p-3 bg-white border-t-2 border-emerald-500 shrink-0 shadow-2xl flex items-center gap-2">
                 <button type="button" onclick="closeIndividualPhotoModal()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="indivSubmitBtn" class="flex-1 py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer border border-emerald-400/50">
                     <i class="fa-solid fa-circle-check text-lg"></i>
-                    <span id="indivSubmitBtnText">✓ उपस्थिति दर्ज करें (SAVE)</span>
+                    <span id="indivSubmitBtnText">✓ Save Attendance (SAVE)</span>
                 </button>
             </div>
         </form>
@@ -1195,8 +1195,8 @@
                     <i class="fa-solid fa-users-viewfinder"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black leading-tight">📸 सामूहिक फोटो हाजिरी (Group Attendance)</h3>
-                    <p class="text-[11px] text-emerald-100 font-medium" id="groupModalSiteName">साइट पर उपस्थित टीम की फोटो लें</p>
+                    <h3 class="text-sm font-black leading-tight">📸 Group Photo Attendance (Group Attendance)</h3>
+                    <p class="text-[11px] text-emerald-100 font-medium" id="groupModalSiteName">Take Photo of Team Present On-Site</p>
                 </div>
             </div>
             <button onclick="closeGroupPhotoModal()" class="text-white/80 hover:text-white text-2xl font-bold leading-none">&times;</button>
@@ -1213,8 +1213,8 @@
                 <img id="groupPreviewImg" src="" class="w-full h-full object-cover hidden">
                 <div id="groupPlaceholder" class="text-center p-6 text-slate-400">
                     <i class="fa-solid fa-users text-4xl mb-2 text-slate-500 block"></i>
-                    <p class="text-xs font-bold text-slate-300">साइट पर पूरी टीम को खड़ा करके फोटो खींचें</p>
-                    <p class="text-[10px] text-slate-500 mt-0.5">सभी चुने गए वर्करों की 1-क्लिक में हाजिरी लग जाएगी</p>
+                    <p class="text-xs font-bold text-slate-300">Assemble entire team on site and take photo</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">1-click attendance for all selected workers</p>
                 </div>
             </div>
 
@@ -1222,19 +1222,19 @@
                 <input type="file" id="groupNativeFileInput" accept="image/*" capture="environment" class="hidden" onchange="handleGroupNativePhotoFile(event)">
                 <button type="button" onclick="document.getElementById('groupNativeFileInput').click()" class="w-full py-3 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs transition flex items-center justify-center gap-2 shadow-md active:scale-95">
                     <i class="fa-solid fa-camera"></i>
-                    <span>📸 फोन कैमरे से सामूहिक फोटो खींचें</span>
+                    <span>📸 Take Group Photo with Camera</span>
                 </button>
             </div>
 
             <div id="groupLocStatus" class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2">
                 <i class="fa-solid fa-location-crosshairs text-blue-600 animate-spin"></i>
-                <span id="groupLocText">फोन की GPS लोकेशन खोजी जा रही है...</span>
+                <span id="groupLocText">Searching phone GPS location...</span>
             </div>
 
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <label class="text-xs font-black text-slate-800">कौन-कौन से वर्कर इस फोटो में मौजूद हैं? *</label>
-                    <button type="button" onclick="toggleAllGroupWorkers()" class="text-[11px] text-emerald-700 font-bold hover:underline">सभी चुनें / हटाएं</button>
+                    <label class="text-xs font-black text-slate-800">Which workers are present in this photo? *</label>
+                    <button type="button" onclick="toggleAllGroupWorkers()" class="text-[11px] text-emerald-700 font-bold hover:underline">Select All / Clear</button>
                 </div>
                 <div class="border border-slate-200 rounded-2xl p-2.5 bg-slate-50 max-h-48 overflow-y-auto space-y-1.5" id="groupWorkersChecklist">
                 </div>
@@ -1242,11 +1242,11 @@
 
             <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-200">
                 <button type="button" onclick="closeGroupPhotoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    रद्द करें
+                    Cancel
                 </button>
                 <button type="submit" id="groupSubmitBtn" disabled class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-md transition flex items-center gap-2">
                     <i class="fa-solid fa-check-double"></i>
-                    <span>सामूहिक हाजिरी दर्ज करें</span>
+                    <span>Submit Group Attendance</span>
                 </button>
             </div>
         </form>
@@ -1270,8 +1270,8 @@
 
         <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-2 text-xs">
             <div class="flex items-center justify-between text-slate-300">
-                <span>साइट: <strong class="text-white" id="lightboxSiteName">—</strong></span>
-                <span>समय: <strong class="text-emerald-400" id="lightboxCheckinTime">—</strong></span>
+                <span>Site: <strong class="text-white" id="lightboxSiteName">—</strong></span>
+                <span>Time: <strong class="text-emerald-400" id="lightboxCheckinTime">—</strong></span>
             </div>
             <div class="flex items-center justify-between pt-1 border-t border-slate-800/80">
                 <span class="font-mono text-slate-400" id="lightboxGpsCoords">GPS: —</span>
@@ -1290,10 +1290,10 @@
             <div>
                 <div class="flex items-center gap-2 text-xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                    <span class="font-bold text-amber-300 uppercase tracking-wider">लाइव मूवमेंट ट्रैक व रूट</span>
+                    <span class="font-bold text-amber-300 uppercase tracking-wider">Live Movement Track & Route</span>
                 </div>
                 <h3 class="font-black text-white text-base sm:text-lg mt-0.5" id="supRouteModalTitle">
-                    सुपरवाइजर रूट इतिहास
+                    Supervisor Route History
                 </h3>
             </div>
             <button onclick="closeSupervisorRouteModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-2 leading-none cursor-pointer">&times;</button>
@@ -1302,14 +1302,14 @@
         <div class="p-4 overflow-y-auto space-y-3 flex-1" id="supRouteModalBody">
             <div class="text-center py-10 text-xs text-slate-400">
                 <i class="fa-solid fa-spinner animate-spin text-lg mb-2"></i><br>
-                लोकेशन इतिहास लोड हो रहा है...
+                Loading location history...
             </div>
         </div>
 
         <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <span>📅 तारीख: <strong class="text-white">{{ date_str }}</strong></span>
+            <span>📅 Date: <strong class="text-white">{{ date_str }}</strong></span>
             <button onclick="closeSupervisorRouteModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
-                बंद करें
+                Close
             </button>
         </div>
     </div>
@@ -1356,7 +1356,7 @@
     function getLiveGpsCoords() {
         return new Promise((resolve, reject) => {
             if (!("geolocation" in navigator)) {
-                return reject(new Error("फोन में Geolocation समर्थित नहीं है"));
+                return reject(new Error("Geolocation is not supported on this device"));
             }
             navigator.geolocation.getCurrentPosition(
                 (pos) => resolve({
@@ -1397,7 +1397,7 @@
         document.getElementById('indivSubmitBtn').disabled = true;
 
         document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] font-bold flex items-center gap-2";
-        document.getElementById('indivLocText').textContent = "फोन की GPS लोकेशन खोजी जा रही है...";
+        document.getElementById('indivLocText').textContent = "Searching phone GPS location...";
 
         document.getElementById('individualPhotoModal').classList.remove('hidden');
 
@@ -1407,12 +1407,12 @@
             document.getElementById('indivLng').value = gps.longitude.toFixed(6);
             document.getElementById('indivAccuracy').value = Math.round(gps.accuracy);
             document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
-            document.getElementById('indivLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+            document.getElementById('indivLocText').textContent = `✅ GPS Acquired: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
             document.getElementById('indivGpsCoordsText').textContent = `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`;
             document.getElementById('indivGpsBadge').classList.remove('hidden');
         } catch (e) {
             document.getElementById('indivLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
-            document.getElementById('indivLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+            document.getElementById('indivLocText').textContent = "⚠️ Location permission denied (photo will still record without GPS)";
         }
     }
 
@@ -1461,7 +1461,7 @@
         const btn = document.getElementById('indivSubmitBtn');
         btn.disabled = false;
         const btnText = document.getElementById('indivSubmitBtnText');
-        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> उपस्थिति दर्ज की जा रही है...';
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Recording attendance...';
 
         // Auto-save automatically in 1.2 seconds!
         indivAutoSubmitTimer = setTimeout(() => {
@@ -1485,14 +1485,14 @@
         const checkType = document.querySelector('input[name="indivCheckType"]:checked').value;
 
         if (!b64) {
-            alert("कृपया पहले कैमरे से फोटो खींचें!");
+            alert("Please take a photo first!");
             return;
         }
 
         const btn = document.getElementById('indivSubmitBtn');
         btn.disabled = true;
         const btnText = document.getElementById('indivSubmitBtnText');
-        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सुरक्षित हो रहा है...';
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         try {
             const res = await fetch('/api/geo-attendance/photo-checkin', {
@@ -1515,10 +1515,10 @@
                 const banner = document.getElementById('indivAutoSubmitBanner');
                 if (banner) {
                     banner.className = 'p-3 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg animate-in fade-in zoom-in-95 duration-150';
-                    banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>✅ ${data.message || 'उपस्थिति सफलतापूर्वक दर्ज हो गई!'}</span>`;
+                    banner.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i> <span>✅ ${data.message || 'Attendance recorded successfully!'}</span>`;
                     banner.classList.remove('hidden');
                 }
-                if (btnText) btnText.innerHTML = '✅ उपस्थिति दर्ज हो गई!';
+                if (btnText) btnText.innerHTML = '✅ Attendance recorded!';
                 setTimeout(() => {
                     closeIndividualPhotoModal();
                     window.location.reload();
@@ -1527,7 +1527,7 @@
                 const banner = document.getElementById('indivAutoSubmitBanner');
                 if (banner) {
                     banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
-                    banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ ${data.message || 'फोटो हाजिरी दर्ज नहीं हो सकी'}</span>`;
+                    banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ ${data.message || 'Photo attendance could not be saved'}</span>`;
                     banner.classList.remove('hidden');
                 } else {
                     alert('❌ ' + data.message);
@@ -1537,21 +1537,21 @@
             const banner = document.getElementById('indivAutoSubmitBanner');
             if (banner) {
                 banner.className = 'p-3 rounded-xl bg-rose-600 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg';
-                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ नेटवर्क एरर: ${err.message}</span>`;
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>❌ Network Error: ${err.message}</span>`;
                 banner.classList.remove('hidden');
             } else {
-                alert('❌ नेटवर्क एरर: ' + err.message);
+                alert('❌ Network Error: ' + err.message);
             }
         } finally {
             btn.disabled = false;
-            if (btnText) btnText.innerHTML = '✓ उपस्थिति दर्ज करें (SAVE)';
+            if (btnText) btnText.innerHTML = '✓ Save Attendance (SAVE)';
         }
     }
 
     // Group Photo Modal Handlers
     async function openGroupPhotoModal(siteId, siteName) {
         document.getElementById('groupSiteId').value = siteId;
-        document.getElementById('groupModalSiteName').textContent = `${siteName} — सामूहिक फोटो`;
+        document.getElementById('groupModalSiteName').textContent = `${siteName} — Group Photo`;
         document.getElementById('groupPhotoBase64').value = '';
         document.getElementById('groupLat').value = '';
         document.getElementById('groupLng').value = '';
@@ -1578,7 +1578,7 @@
                 checklist.appendChild(item);
             });
         } else {
-            checklist.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">इस साइट पर कोई वर्कर नहीं मिला।</div>';
+            checklist.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">No workers found for this site.</div>';
         }
 
         document.getElementById('groupPhotoModal').classList.remove('hidden');
@@ -1589,10 +1589,10 @@
             document.getElementById('groupLng').value = gps.longitude.toFixed(6);
             document.getElementById('groupAccuracy').value = Math.round(gps.accuracy);
             document.getElementById('groupLocStatus').className = "p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-2";
-            document.getElementById('groupLocText').textContent = `✅ GPS प्राप्त: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
+            document.getElementById('groupLocText').textContent = `✅ GPS Acquired: ${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)} (±${Math.round(gps.accuracy)}m)`;
         } catch (e) {
             document.getElementById('groupLocStatus').className = "p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold flex items-center gap-2";
-            document.getElementById('groupLocText').textContent = "⚠️ लोकेशन अनुमति नहीं मिली (फोटो बिना GPS भी दर्ज होगी)";
+            document.getElementById('groupLocText').textContent = "⚠️ Location permission denied (photo will still record without GPS)";
         }
     }
 
@@ -1631,18 +1631,18 @@
         const workerIds = Array.from(checkedBoxes).map(b => parseInt(b.value));
 
         if (!b64) {
-            alert("कृपया पहले कैमरे से सामूहिक फोटो खींचें!");
+            alert("Please take a group photo first!");
             return;
         }
 
         if (workerIds.length === 0) {
-            alert("कम से कम 1 वर्कर चुनना आवश्यक है!");
+            alert("Please select at least 1 worker!");
             return;
         }
 
         const btn = document.getElementById('groupSubmitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> दर्ज हो रही है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Recording...';
 
         try {
             const res = await fetch('/api/geo-attendance/photo-checkin', {
@@ -1668,10 +1668,10 @@
                 alert('❌ ' + data.message);
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>सामूहिक हाजिरी दर्ज करें</span>';
+            btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Submit Group Attendance</span>';
         }
     }
 
@@ -1687,7 +1687,7 @@
             document.getElementById('lightboxMapLink').href = `https://www.google.com/maps?q=${lat},${lng}`;
             document.getElementById('lightboxMapLink').classList.remove('hidden');
         } else {
-            document.getElementById('lightboxGpsCoords').textContent = 'GPS: लोकेशन रिकॉर्ड नहीं';
+            document.getElementById('lightboxGpsCoords').textContent = 'GPS: Location Not Recorded';
             document.getElementById('lightboxMapLink').classList.add('hidden');
         }
 
@@ -1750,17 +1750,17 @@
     // Get device GPS location
     function getCurrentDeviceLocation() {
         if (!navigator.geolocation) {
-            alert('इस डिवाइस में GPS सपोर्ट नहीं है।');
+            alert('GPS is not supported on this device.');
             return;
         }
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 document.getElementById('gpsLatitude').value = pos.coords.latitude.toFixed(6);
                 document.getElementById('gpsLongitude').value = pos.coords.longitude.toFixed(6);
-                alert(`✅ लोकेशन प्राप्त हुई: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
+                alert(`✅ Location acquired: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
             },
             (err) => {
-                alert('GPS एरर: ' + err.message + ' — कृपया फोन में Location चालू करें।');
+                alert('GPS Error: ' + err.message + ' — Please enable location on your phone.');
             },
             { enableHighAccuracy: true, timeout: 15000 }
         );
@@ -1776,7 +1776,7 @@
 
         const btn = document.getElementById('saveWorkerBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         try {
             const res = await fetch('/api/workers', {
@@ -1792,17 +1792,17 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ वर्कर सफलतापूर्वक जुड़ गया!\n\nवर्कर का हाजिरी लिंक:\n${data.worker_link}\n\nइसे कॉपी करके वर्कर को WhatsApp पर भेजें।`);
+                alert(`✅ Worker successfully  !\n\nWorker  attendance :\n${data.worker_link}\n\n   Worker  WhatsApp  `);
                 closeAddWorkerModal();
                 window.location.reload();
             } else {
-                alert('❌ एरर: ' + data.message);
+                alert('❌ Error: ' + data.message);
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>सेव करें और लिंक बनाएं</span>';
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Save & Create Link</span>';
         }
     }
 
@@ -1816,7 +1816,7 @@
 
         const btn = document.getElementById('saveGpsBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         try {
             const res = await fetch(`/api/sites/${siteId}/gps`, {
@@ -1841,7 +1841,7 @@
             alert('❌ ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>GPS लोकेशन सुरक्षित करें</span>';
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> <span>Save GPS Location</span>';
         }
     }
 
@@ -1850,18 +1850,18 @@
         const link = `https://sandipkumar-tracker.onrender.com/worker/${token}`;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(link).then(() => {
-                alert(`✅ ${name} का हाजिरी लिंक कॉपी हो गया:\n\n${link}\n\nइसे WhatsApp पर पेस्ट करके वर्कर को भेज दें।`);
+                alert(`✅ ${name} 's attendance link copied:\n\n${link}\n\n WhatsApp    Worker   `);
             }).catch(() => {
-                prompt(`${name} का हाजिरी लिंक (कॉपी करें):`, link);
+                prompt(`${name} 's attendance link (copy):`, link);
             });
         } else {
-            prompt(`${name} का हाजिरी लिंक (कॉपी करें):`, link);
+            prompt(`${name} 's attendance link (copy):`, link);
         }
     }
 
     // Delete Worker
     async function deleteWorker(workerId, name) {
-        if (!confirm(`क्या आप ${name} को हटाना चाहते हैं?`)) return;
+        if (!confirm(`Are you sure you want ${name} to be removed?`)) return;
         const res = await fetch(`/api/workers/${workerId}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1891,7 +1891,7 @@
     });
 
     async function handleResetSiteAttendance(siteId, siteName) {
-        const promptMsg = siteId ? `⚠️ क्या आप ${siteName} की आज की पूरी हाजिरी रीसेट करना चाहते हैं?\n\n(सभी चेक-इन व फोटो साफ हो जाएंगे और आज का स्टेटस शून्य हो जाएगा)` : `⚠️ क्या आप सभी साइट्स की आज की पूरी हाजिरी रीसेट करना चाहते हैं?\n\n(आज का पूरा हाजिरी रिकॉर्ड शून्य हो जाएगा)`;
+        const promptMsg = siteId ? `⚠️ Are you sure you want ${siteName}  Today   Reset Attendance   ?\n\n( Check-In  Photo     Today     )` : `⚠️ Are you sure you want  Site  Today   Reset Attendance   ?\n\n(Today   attendance    )`;
         if (!confirm(promptMsg)) return;
         try {
             const res = await fetch('/api/attendance/reset-today', {
@@ -1907,12 +1907,12 @@
                 alert('❌ ' + data.message);
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         }
     }
 
     async function handleResetSiteWorkers(siteId, siteName) {
-        if (!confirm(`⚠️ क्या आप ${siteName} के सभी वर्करों को हटाना चाहते हैं?\n\n(इस साइट के सभी वर्कर हट जाएंगे ताकि आप नए वर्कर जोड़ सकें)`)) return;
+        if (!confirm(`⚠️ Are you sure you want ${siteName}   Worker to be removed?\n\n( Site   Worker      Worker  )`)) return;
         try {
             const res = await fetch('/api/workers/reset-all', {
                 method: 'POST',
@@ -1927,7 +1927,7 @@
                 alert('❌ ' + data.message);
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         }
     }
 
@@ -2017,14 +2017,14 @@
     async function quickSetTodayWorkSpot() {
         const siteId = currentSelectedSiteId;
         const sel = document.getElementById('supervisorSitePicker') || document.getElementById('multiGpsSiteSelect');
-        const siteName = sel && sel.options && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : "साइट";
+        const siteName = sel && sel.options && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : "Site";
 
         if (!navigator.geolocation) {
-            alert('❌ इस डिवाइस में GPS सपोर्ट नहीं है।');
+            alert('❌ GPS is not supported on this device.');
             return;
         }
 
-        const wardName = prompt(`📍 आज ${siteName} में किस वार्ड / जगह पर काम होगा?\n(वार्ड का नाम दर्ज करें — 1 KM के अंदर सभी वर्कर की हाजिरी स्वतः 'On-Site' बनेगी):`, "वार्ड 1 (आज का कार्य स्थल)");
+        const wardName = prompt(`📍 Today ${siteName}   Ward /    ?\n(Ward     — 1 KM    Worker  attendance  'On-Site' ):`, "Ward 1 (Active Site)");
         if (!wardName || !wardName.trim()) return;
 
         // Feedback in grid
@@ -2033,7 +2033,7 @@
             grid.innerHTML = `
                 <div class="col-span-full text-center py-6 text-xs text-amber-300 font-bold bg-indigo-950/60 rounded-2xl border border-amber-400/40 animate-pulse">
                     <i class="fa-solid fa-satellite-dish fa-spin mr-1.5"></i>
-                    फोन GPS से सैटेलाइट लोकेशन ली जा रही है... कृपया प्रतीक्षा करें।
+                    Acquiring satellite GPS from phone... please wait.
                 </div>
             `;
         }
@@ -2056,19 +2056,19 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        alert(`✅ '${wardName.trim()}' (${lat.toFixed(5)}, ${lng.toFixed(5)}) को आज का कार्य स्थल सेट कर दिया गया!\n\n⚡ 1 KM (1000 मीटर) के दायरे में काम करने वाले सभी वर्कर की हाजिरी 'साइट पर मौजूद' दर्ज होगी।`);
+                        alert(`✅ '${wardName.trim()}' (${lat.toFixed(5)}, ${lng.toFixed(5)})  Today  Work Location    !\n\n⚡ 1 KM (1000 m)        Worker  attendance 'Present On-Site'  `);
                         loadSiteGeoPoints(siteId);
                     } else {
                         alert('❌ ' + data.message);
                         loadSiteGeoPoints(siteId);
                     }
                 } catch (err) {
-                    alert('❌ नेटवर्क एरर: ' + err.message);
+                    alert('❌ Network Error: ' + err.message);
                     loadSiteGeoPoints(siteId);
                 }
             },
             (err) => {
-                alert('❌ GPS एरर: ' + err.message + ' — कृपया फोन में Location On करें।');
+                alert('❌ GPS Error: ' + err.message + ' — Please enable Location on your phone.');
                 loadSiteGeoPoints(siteId);
             },
             { enableHighAccuracy: true, timeout: 15000 }
@@ -2080,7 +2080,7 @@
         const modalContainer = document.getElementById('pointsListContainer');
         const badge = document.getElementById('pointCountBadge');
         if (modalContainer) {
-            modalContainer.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-spinner animate-spin"></i> पॉइंट्स लोड हो रहे हैं...</div>';
+            modalContainer.innerHTML = '<div class="text-center py-4 text-xs text-slate-400"><i class="fa-solid fa-spinner animate-spin"></i> Loading points...</div>';
         }
 
         try {
@@ -2088,7 +2088,7 @@
             const data = await res.json();
             if (data.success) {
                 const pts = data.points || [];
-                if (badge) badge.textContent = `${pts.length} पॉइंट्स`;
+                if (badge) badge.textContent = `${pts.length} Points`;
 
                 // 1. Render in Modal List
                 if (modalContainer) {
@@ -2096,8 +2096,8 @@
                         modalContainer.innerHTML = `
                             <div class="text-center py-5 px-3 bg-white rounded-xl border border-dashed border-slate-200">
                                 <i class="fa-solid fa-map-pin text-2xl text-slate-300 mb-1"></i>
-                                <div class="text-xs font-bold text-slate-700">अभी तक कोई उप-लोकेशन पॉइंट नहीं जुड़ा है</div>
-                                <div class="text-[11px] text-slate-400 mt-0.5">नीचे दिए गए फॉर्म से वार्ड 1, वार्ड 2, पंप हाउस आदि जोड़ें (1 KM दायरा)।</div>
+                                <div class="text-xs font-bold text-slate-700">No sub-location points added yet</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Add Ward 1, Ward 2, Pump House, etc. using the form below (1 KM radius).</div>
                             </div>
                         `;
                     } else {
@@ -2113,7 +2113,7 @@
                                             <div class="text-xs font-extrabold text-slate-900">${p.point_name}</div>
                                             <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-0.5">
                                                 <span>Lat: ${p.latitude.toFixed(5)}, Lng: ${p.longitude.toFixed(5)}</span>
-                                                <span class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded font-sans">दायरा: ${radStr} (${p.radius_meters || 1000}m)</span>
+                                                <span class="text-violet-700 font-bold bg-violet-50 px-1.5 py-0.5 rounded font-sans">Radius: ${radStr} (${p.radius_meters || 1000}m)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -2123,7 +2123,7 @@
                                             <i class="fa-solid fa-map-pin text-rose-500"></i> Map ↗
                                         </a>
                                         <button type="button" onclick="deleteGeoPoint(${p.id}, '${escapedName}', ${siteId})" 
-                                                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs" title="हटाएं">
+                                                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition text-xs" title="Delete">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
@@ -2144,10 +2144,10 @@
                     renderActiveWardsGrid(pts, siteId, null);
                 }
             } else {
-                if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'एरर'}</div>`;
+                if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">${data.message || 'Error'}</div>`;
             }
         } catch (err) {
-            if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">नेटवर्क एरर: ${err.message}</div>`;
+            if (modalContainer) modalContainer.innerHTML = `<div class="text-rose-600 text-xs text-center py-2">Network Error: ${err.message}</div>`;
         }
     }
 
@@ -2158,7 +2158,7 @@
         const activeIdsStr = (activeRecord && activeRecord.active_point_ids) ? activeRecord.active_point_ids : 'all';
         const activeIds = activeIdsStr === 'all' ? [] : activeIdsStr.split(',').map(s => parseInt(s.trim()));
         const isAllActive = (activeIdsStr === 'all' || activeIds.length === 0);
-        const activeWardNames = (activeRecord && activeRecord.active_ward_names) ? activeRecord.active_ward_names : (isAllActive ? 'सभी वार्ड सक्रिय' : '');
+        const activeWardNames = (activeRecord && activeRecord.active_ward_names) ? activeRecord.active_ward_names : (isAllActive ? 'All Wards Active' : '');
 
         if (pts.length === 0) {
             grid.innerHTML = `
@@ -2166,9 +2166,9 @@
                     <div class="w-12 h-12 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center text-xl mx-auto mb-2 border border-amber-400/20">
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
-                    <h4 class="font-black text-sm text-white">आज का कोई कार्य स्थल (वार्ड) सेट नहीं है</h4>
+                    <h4 class="font-black text-sm text-white">No active work location (ward) set for today</h4>
                     <p class="text-xs text-indigo-200 mt-1 max-w-md mx-auto">
-                        सुपरवाइज़र जहाँ खड़े होकर काम करवा रहे हैं, ऊपर <strong>'📍 मेरी फोन लोकेशन से आज का वार्ड बनाएं'</strong> दबाकर तुरंत 1 KM दायरा सक्रिय करें।
+                        Supervisor can click <strong>'📍 Create today's ward from phone location'</strong> while on site to activate a 1 KM radius.
                     </p>
                 </div>
             `;
@@ -2184,25 +2184,25 @@
                     </div>
                     <div>
                         <div class="text-xs font-black text-white flex flex-wrap items-center gap-2">
-                            <span>🎯 आज काम कहाँ चल रहा है? (Active Work Ward):</span>
+                            <span>🎯 Where is work ongoing today? (Active Work Ward):</span>
                             <span class="px-2.5 py-0.5 rounded-full ${isAllActive ? 'bg-indigo-500/30 text-indigo-200 border-indigo-400/40' : 'bg-emerald-500 text-slate-950 font-black'} text-[11px] border">
-                                ${activeWardNames || 'सभी वार्ड सक्रिय'}
+                                ${activeWardNames || 'All Wards Active'}
                             </span>
                         </div>
                         <p class="text-[11px] text-indigo-200 mt-0.5">
-                            सुपरवाइज़र जिस वार्ड को चुनेंगे, केवल उसके <strong>1 KM (1000m) दायरे</strong> के अंदर के वर्करों की हाजिरी स्वतः 'Present' बनेगी।
+                            Workers within 1 KM of the selected ward will automatically be marked Present.
                         </p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">
                     <select id="quickWardPicker" class="bg-slate-900 text-amber-300 font-bold text-xs rounded-xl px-3 py-2 border border-amber-400/40 focus:ring-2 focus:ring-amber-400">
-                        <option value="all" ${isAllActive ? 'selected' : ''}>⚡ सभी वार्ड / केंद्र सक्रिय (All Points)</option>
+                        <option value="all" ${isAllActive ? 'selected' : ''}>⚡ All Wards / Points Active</option>
                         ${pts.map(p => `<option value="${p.id}" ${(!isAllActive && activeIds.includes(p.id)) ? 'selected' : ''}>📍 ${p.point_name}</option>`).join('')}
                     </select>
                     <button type="button" onclick="applySelectedWard(${siteId})" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer active:scale-95">
                         <i class="fa-solid fa-check"></i>
-                        <span>सक्रिय करें</span>
+                        <span>Activate</span>
                     </button>
                 </div>
             </div>
@@ -2227,20 +2227,20 @@
                                     <div class="flex items-center gap-1.5 mt-1">
                                         ${isThisPointActive ? 
                                             `<span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-400/30 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 🟢 आज सक्रिय (1 KM)
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 🟢 Active Today (1 KM)
                                              </span>` : 
                                             `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-medium text-[10px] border border-slate-700">
-                                                ⚪ आज बंद
+                                                ⚪ Closed Today
                                              </span>`
                                         }
                                         <span class="text-[10px] text-indigo-300 font-mono bg-indigo-950 px-1.5 py-0.5 rounded border border-indigo-800">
-                                            दायरा: ${radStr}
+                                            Radius: ${radStr}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             <button type="button" onclick="deleteGeoPoint(${p.id}, '${escapedName}', ${siteId})" 
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition text-xs" title="यह कार्य स्थल हटाएं">
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition text-xs" title="Delete this work location">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -2254,7 +2254,7 @@
                         <button type="button" onclick="setSingleActiveWard(${siteId}, ${p.id}, '${escapedName}')" 
                                 class="px-3 py-1.5 rounded-xl ${isThisPointActive ? 'bg-amber-400 text-slate-950 font-black' : 'bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 font-bold'} text-[11px] transition flex items-center gap-1 cursor-pointer">
                             <i class="fa-solid fa-crosshairs"></i>
-                            <span>${isThisPointActive ? '✓ सक्रिय वार्ड है' : '🎯 आज यहाँ काम है'}</span>
+                            <span>${isThisPointActive ? '✓ Active Ward' : '🎯 Working here today'}</span>
                         </button>
                         <a href="https://www.google.com/maps?q=${p.latitude},${p.longitude}" target="_blank" 
                            class="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition flex items-center gap-1 border border-slate-700">
@@ -2293,26 +2293,26 @@
                 alert(`🎯 ${data.message}`);
                 loadSitePoints(siteId);
             } else {
-                alert('एरर: ' + data.message);
+                alert('Error: ' + data.message);
             }
         } catch(err) {
-            alert('नेटवर्क एरर: ' + err.message);
+            alert('Network Error: ' + err.message);
         }
     }
 
     function getCurrentLocationForNewPoint() {
         if (!navigator.geolocation) {
-            alert('इस डिवाइस में GPS सपोर्ट नहीं है।');
+            alert('GPS is not supported on this device.');
             return;
         }
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 document.getElementById('newPointLat').value = pos.coords.latitude.toFixed(6);
                 document.getElementById('newPointLng').value = pos.coords.longitude.toFixed(6);
-                alert(`✅ लोकेशन प्राप्त हुई: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
+                alert(`✅ Location acquired: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`);
             },
             (err) => {
-                alert('GPS एरर: ' + err.message + ' — कृपया फोन में Location चालू करें।');
+                alert('GPS Error: ' + err.message + ' — Please enable location on your phone.');
             },
             { enableHighAccuracy: true, timeout: 15000 }
         );
@@ -2328,7 +2328,7 @@
 
         const btn = document.getElementById('savePointBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         try {
             const res = await fetch(`/api/sites/${siteId}/points`, {
@@ -2353,15 +2353,15 @@
                 alert('❌ ' + data.message);
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>+ यह GPS पॉइंट सुरक्षित करें</span>';
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>+ Save GPS Point</span>';
         }
     }
 
     async function deleteGeoPoint(pointId, pointName, optSiteId) {
-        if (!confirm(`क्या आप '${pointName}' कार्य स्थल को हटाना चाहते हैं?`)) return;
+        if (!confirm(`Are you sure you want '${pointName}' Work Location to be removed?`)) return;
         const siteId = optSiteId || document.getElementById('multiGpsSiteSelect').value || currentSelectedSiteId;
         try {
             const res = await fetch(`/api/sites/points/${pointId}/delete`, {
@@ -2416,11 +2416,11 @@
         const title = document.getElementById('supRouteModalTitle');
         const body = document.getElementById('supRouteModalBody');
 
-        title.textContent = `${siteName} — ${supervisorName} (आज का रूट)`;
+        title.textContent = `${siteName} — ${supervisorName} (Today's Route)`;
         body.innerHTML = `
             <div class="text-center py-10 text-xs text-slate-400">
                 <i class="fa-solid fa-spinner animate-spin text-lg mb-2"></i><br>
-                लोकेशन इतिहास लोड हो रहा है...
+                Loading location history...
             </div>
         `;
         modal.classList.remove('hidden');
@@ -2434,8 +2434,8 @@
                         <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-2 text-xl text-slate-500">
                             <i class="fa-solid fa-map-pin"></i>
                         </div>
-                        आज ${supervisorName} की कोई लाइव लोकेशन दर्ज नहीं हुई है।<br>
-                        जैसे ही वे ऐप पर काम करेंगे, उनका रूट यहाँ स्वतः दिखने लगेगा।
+                        Today ${supervisorName}  has no live location recorded.<br>
+                        Their route will appear here automatically when they use the app.
                     </div>
                 `;
                 return;
@@ -2443,8 +2443,8 @@
 
             let html = `
                 <div class="text-xs text-indigo-300 mb-2 font-bold flex items-center justify-between">
-                    <span>कुल ${data.route.length} लोकेशन रिकॉर्ड (टाइमलाइन)</span>
-                    <span class="text-slate-400">समय अनुसार क्रमित</span>
+                    <span>Total ${data.route.length} location records (Timeline)</span>
+                    <span class="text-slate-400">Chronological order</span>
                 </div>
                 <div class="space-y-2.5 relative border-l-2 border-indigo-700/60 ml-3 pl-4">
             `;
@@ -2452,8 +2452,8 @@
             data.route.forEach((pt, idx) => {
                 const isSite = pt.is_on_site;
                 const statusBadge = isSite ? 
-                    `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">🟢 साइट पर (${Math.round(pt.distance_meters)}m)</span>` :
-                    `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">🚶 बाहर (${(pt.distance_meters >= 1000 ? (pt.distance_meters/1000).toFixed(1) + ' किमी' : Math.round(pt.distance_meters) + 'm')})</span>`;
+                    `<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">🟢 On-Site (${Math.round(pt.distance_meters)}m)</span>` :
+                    `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">🚶 Outside (${(pt.distance_meters >= 1000 ? (pt.distance_meters/1000).toFixed(1) + ' km' : Math.round(pt.distance_meters) + 'm')})</span>`;
 
                 const timeStr = pt.ping_time ? pt.ping_time.split(' ')[1] : '—';
 
@@ -2468,12 +2468,12 @@
                             <div>${statusBadge}</div>
                         </div>
                         <div class="text-[11px] text-slate-300 mt-1">
-                            गतिविधि: <strong>${pt.page_source || 'बैकग्राउंड GPS'}</strong> &bull; पॉइंट: ${pt.nearest_point_name || 'कार्य स्थल'}
+                            Activity: <strong>${pt.page_source || 'Background GPS'}</strong> &bull; Point: ${pt.nearest_point_name || 'Work Location'}
                         </div>
                         <div class="flex items-center justify-between pt-1.5 mt-1.5 border-t border-slate-900 text-[10px] text-slate-400">
                             <span class="font-mono">${pt.latitude.toFixed(5)}, ${pt.longitude.toFixed(5)}</span>
                             <a href="https://www.google.com/maps?q=${pt.latitude},${pt.longitude}" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1 font-bold">
-                                <span>मैप पर पिन देखें ↗</span>
+                                <span>View Pin on Map ↗</span>
                             </a>
                         </div>
                     </div>
@@ -2483,7 +2483,7 @@
             html += `</div>`;
             body.innerHTML = html;
         } catch (e) {
-            body.innerHTML = `<div class="text-center py-8 text-rose-400 text-xs">रूट लोड करने में एरर: ${e.message}</div>`;
+            body.innerHTML = `<div class="text-center py-8 text-rose-400 text-xs">Error loading route: ${e.message}</div>`;
         }
     }
 
@@ -2497,7 +2497,7 @@
     function launchQuickWorkerPunch() {
         const sel = document.getElementById('quickPunchWorkerSelect');
         if (!sel || !sel.value) {
-            alert("कृपया पहले वर्कर का नाम चुनें!");
+            alert("Please select worker name first!");
             sel.focus();
             return;
         }
@@ -2528,13 +2528,13 @@
         const role = document.getElementById('quickAddWorkerRole').value;
 
         if (!name) {
-            alert("कृपया वर्कर का नाम लिखें!");
+            alert("Please enter worker name!");
             return;
         }
 
         const btn = document.getElementById('quickAddSubmitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> सेव हो रहा है...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Saving...';
 
         try {
             const res = await fetch('/api/workers/quick-add', {
@@ -2544,7 +2544,7 @@
             });
             const data = await res.json();
             if (data.success && data.worker) {
-                alert(`✅ वर्कर '${name}' (${role}) सफलतापूर्वक जोड़ा गया! अब आप इनकी फोटो हाजिरी ले सकते हैं।`);
+                alert(`✅ Worker '${name}' (${role}) added successfully! You can now record photo attendance.`);
                 
                 // Add to quick select dropdown
                 const sel = document.getElementById('quickPunchWorkerSelect');
@@ -2566,19 +2566,19 @@
                 document.getElementById('quickAddWorkerPhone').value = '';
                 
                 // Prompt supervisor to take photo immediately
-                if (confirm(`क्या आप अभी '${name}' की लाइव फोटो हाजिरी लेना चाहते हैं?`)) {
+                if (confirm(`Do you want to punch live photo attendance for '${name}' now?`)) {
                     launchQuickWorkerPunch();
                 } else {
                     window.location.reload();
                 }
             } else {
-                alert('❌ ' + (data.message || 'वर्कर सेव नहीं हो सका।'));
+                alert('❌ ' + (data.message || 'Could not save worker.'));
             }
         } catch (err) {
-            alert('❌ नेटवर्क एरर: ' + err.message);
+            alert('❌ Network Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> <span>+ यह वर्कर सुरक्षित करें</span>';
+            btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> <span>+ Save Worker</span>';
         }
     }
 
