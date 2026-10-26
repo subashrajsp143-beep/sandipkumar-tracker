@@ -65,7 +65,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/static/icons/icon-512.png?v=2.0">
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=2.0">
 </head>
-<body class="bg-[#FFFFFF] text-[#0F172A] antialiased min-h-screen overflow-x-hidden">
+<body class="bg-[#F0FDF4] text-[#052E16] antialiased min-h-screen overflow-x-hidden">
 
     <!-- Custom CSS for HRMS Theme & Layout -->
     <style>
@@ -442,7 +442,7 @@
             </header>
 
             <!-- SCROLLABLE CONTENT BODY (Off-White #F4F6F5) -->
-            <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 bg-[#FFFFFF] space-y-4 sm:space-y-6">
+            <main class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 bg-[#F0FDF4] space-y-4 sm:space-y-6">
                 <!-- Flash Messages -->
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -546,9 +546,13 @@
             <a href="{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}{{ url_for('site_stock') }}{% else %}{{ url_for('dashboard') }}{% endif %}" 
                class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path in ['/stock', '/dashboard', '/'] %}text-white font-bold bg-white/15{% else %}text-[#E2F3E7] hover:text-white{% endif %} transition">
                 <div class="w-5 h-5 flex items-center justify-center text-sm">
+                    {% if session.get('role') == 'supervisor' and not session.get('is_owner') %}
                     <i class="fa-solid fa-boxes-stacked"></i>
+                    {% else %}
+                    <i class="fa-solid fa-house"></i>
+                    {% endif %}
                 </div>
-                <span class="text-[11px] font-semibold tracking-tight">स्टॉक</span>
+                <span class="text-[11px] font-semibold tracking-tight">{% if session.get('role') == 'supervisor' and not session.get('is_owner') %}स्टॉक{% else %}होम{% endif %}</span>
             </a>
 
             <!-- 2. दैनिक एंट्री -->
@@ -560,13 +564,13 @@
                 <span class="text-[11px] font-semibold tracking-tight">एंट्री</span>
             </a>
 
-            <!-- 3. हाजिरी - Center Floating Button -->
+            <!-- 3. हाजिरी - Center Button (Same uniform size as other icons) -->
             <a href="{{ url_for('attendance_view') }}" 
-               class="flex flex-col items-center justify-center -mt-3.5 group transition">
-                <div class="w-12 h-12 rounded-xl bg-[#22C55E] text-[#052E16] flex items-center justify-center text-xl shadow-md border-2 border-white">
-                    <i class="fa-solid fa-clipboard-user text-white"></i>
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-md {% if request.path == '/attendance' %}text-white font-bold bg-white/15{% else %}text-[#E2F3E7] hover:text-white{% endif %} transition">
+                <div class="w-5 h-5 flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-clipboard-user"></i>
                 </div>
-                <span class="text-[11px] font-bold text-white mt-0.5">हाजिरी</span>
+                <span class="text-[11px] font-semibold tracking-tight">हाजिरी</span>
             </a>
 
             <!-- 4. स्टोर (Material Store) -->
