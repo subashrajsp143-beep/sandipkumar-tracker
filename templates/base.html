@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=26.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=27.0">
     <style>
         html {
             overflow-x: hidden;
@@ -1184,6 +1184,90 @@
     })();
     </script>
     {% endif %}
+
+    <!-- Global Universal Info / Help Modal (Clean i icon popover) -->
+    <div id="globalInfoModal" class="fixed inset-0 bg-[#14300A]/60 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeInfoModal()">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-[#93C572] animate-in fade-in zoom-in-95 duration-150 text-[#14300A]">
+            <div class="flex items-center justify-between pb-3 border-b border-[#93C572]/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-2xl bg-[#93C572] text-[#14300A] flex items-center justify-center text-base font-bold shadow-xs">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-base text-[#14300A]" id="globalInfoModalTitle">Information</h3>
+                        <p class="text-[10px] text-[#14300A]/70 font-semibold uppercase tracking-wider">Quick Help & Guide</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeInfoModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-[#93C572]/20 text-[#14300A] text-lg font-bold flex items-center justify-center cursor-pointer transition">&times;</button>
+            </div>
+            <div class="py-4 text-xs sm:text-sm leading-relaxed text-[#14300A]/90 space-y-2.5" id="globalInfoModalBody">
+                <!-- Dynamic Info Content -->
+            </div>
+            <div class="pt-3 border-t border-[#93C572]/30 flex justify-end">
+                <button type="button" onclick="closeInfoModal()" class="px-5 py-2.5 rounded-xl bg-[#14300A] text-white text-xs font-bold shadow-sm transition hover:opacity-90 cursor-pointer">
+                    Got It
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const APP_INFO_REGISTRY = {
+        'daily_manpower': {
+            title: 'Daily Manpower Register',
+            body: '<p><strong>Purpose:</strong> Record daily headcounts for Mistri, Plumber, Helper, and Staff across all 21 project sites.</p><p><strong>Actions:</strong> Enter counts directly into site rows, use <em>GPS Auto-Sync</em> to auto-populate from live punch records, or <em>Fill from Previous Attendance</em> to copy previous counts.</p>'
+        },
+        'supervisor_desk': {
+            title: 'Supervisor Live Photo Attendance',
+            body: '<p><strong>Select & Punch:</strong> Pick a worker from the dropdown and tap <em>Record Photo Attendance</em> to open the camera and punch on-site check-in.</p><p><strong>Quick Add:</strong> Enter worker name, phone number, and trade to register them instantly without leaving the page.</p>'
+        },
+        'photo_feed': {
+            title: "Today's Live Photo Feed",
+            body: '<p>Real-time gallery of all worker photo attendances captured today on site.</p><p>Click any thumbnail to inspect high-resolution verification photo, timestamp, and GPS coordinates.</p>'
+        },
+        'gps_engine': {
+            title: 'GPS Auto-Attendance Engine',
+            body: '<p>Analyzes geo-fence check-ins within 500m of project sites at 10:30 AM daily.</p><p>Tap <em>Sync with GPS</em> at any time to refresh manpower counts from mobile app check-ins.</p>'
+        },
+        'gps_register': {
+            title: 'GPS Geo Attendance Monitor',
+            body: '<p>Live tracking of registered workers and staff within the 500-meter geo-fence radius of assigned sites.</p><p>View real-time check-in/out times, duration on site, and live location map.</p>'
+        },
+        'store_cart': {
+            title: 'Material Store Transfer',
+            body: '<p>Select items from the central store, specify quantities, and dispatch to project sites.</p><p>Dispatched items are added to the site material inventory upon confirmation.</p>'
+        }
+    };
+
+    function openInfoModal(key, customTitle, customContent) {
+        let title = customTitle || 'Information';
+        let content = customContent || '';
+        if (typeof key === 'string' && APP_INFO_REGISTRY[key]) {
+            title = APP_INFO_REGISTRY[key].title;
+            content = APP_INFO_REGISTRY[key].body;
+        } else if (typeof key === 'object' && key !== null) {
+            title = key.title || title;
+            content = key.body || key.content || content;
+        } else if (!customContent && typeof key === 'string' && !APP_INFO_REGISTRY[key]) {
+            content = key;
+        }
+        const tEl = document.getElementById('globalInfoModalTitle');
+        const bEl = document.getElementById('globalInfoModalBody');
+        const mEl = document.getElementById('globalInfoModal');
+        if (tEl) tEl.textContent = title;
+        if (bEl) bEl.innerHTML = content;
+        if (mEl) mEl.classList.remove('hidden');
+    }
+
+    function closeInfoModal() {
+        const mEl = document.getElementById('globalInfoModal');
+        if (mEl) mEl.classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeInfoModal();
+    });
+    </script>
 </body>
 
 </html>

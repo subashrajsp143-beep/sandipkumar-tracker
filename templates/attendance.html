@@ -42,12 +42,7 @@
                 <span>2. 📍 GPS Attendance (Geo-Location) ↗</span>
             </a>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center gap-1.5 shadow-xs">
-                <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                <span>Manual Attendance Register is Active</span>
-            </span>
-        </div>
+
     </div>
 
     <!-- Top Action Bar -->
@@ -63,21 +58,19 @@
                 <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites Sheet</span>
                 {% endif %}
             </div>
-            <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
-                <i class="fa-solid fa-users-gear text-indigo-600"></i>
-                {% if is_supervisor_view %}
-                <span>Daily Attendance — {{ locked_site.name }} Site</span>
-                {% else %}
-                <span>Daily Manpower Attendance</span>
-                {% endif %}
-            </h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                {% if is_supervisor_view %}
-                Record how many mistri, plumbers, helpers, and staff worked on your site today (your site only)
-                {% else %}
-                Daily breakdown of mistri, plumbers, helpers, and staff across sites
-                {% endif %}
-            </p>
+            <div class="flex items-center gap-2 mt-1">
+                <h1 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-indigo-600"></i>
+                    {% if is_supervisor_view %}
+                    <span>Daily Attendance — {{ locked_site.name }} Site</span>
+                    {% else %}
+                    <span>Daily Manpower Attendance</span>
+                    {% endif %}
+                </h1>
+                <button type="button" onclick="openInfoModal('daily_manpower')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Controls: Date Picker & Export Buttons -->
@@ -141,24 +134,26 @@
     <!-- SUPERVISOR ACTION CENTER: QUICK PHOTO ATTENDANCE & ADD WORKER -->
     <!-- ======================================================== -->
     <div class="bg-white rounded-3xl p-5 sm:p-6 text-[#0F172A] shadow-sm border border-[#E2E8F0] relative no-print">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#E2E8F0]">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0]">
             <div>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex border border-emerald-200">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    ⚡ Supervisor Attendance Desk
-                </span>
-                <h3 class="text-lg sm:text-xl font-black text-[#0F172A] mt-1 flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-emerald-400"></i>
-                    <span>Add worker name & mobile number to punch live photo attendance</span>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-[#93C572]/20 text-[#14300A] text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex border border-[#93C572]">
+                        <span class="w-2 h-2 rounded-full bg-[#93C572] animate-ping"></span>
+                        ⚡ Supervisor Attendance Desk
+                    </span>
+                    <button type="button" onclick="openInfoModal('supervisor_desk')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                </div>
+                <h3 class="text-base sm:text-lg font-black text-[#0F172A] mt-1 flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-emerald-600"></i>
+                    <span>Live Photo Attendance</span>
                 </h3>
-                <p class="text-xs text-[#475569] mt-0.5">
-                    Add a new worker or select from the list to record on-site photo attendance using mobile camera.
-                </p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-satellite-dish text-amber-300"></i>
-                    <span>Open GPS 500M Monitor &rarr;</span>
+                <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-satellite-dish text-[#93C572]"></i>
+                    <span>GPS 500M Monitor &rarr;</span>
                 </a>
             </div>
         </div>
@@ -170,7 +165,7 @@
                     <div class="flex items-center justify-between mb-3">
                         <label class="text-xs font-black text-[#0F172A] uppercase tracking-wider flex items-center gap-1.5">
                             <i class="fa-solid fa-user-check text-emerald-400"></i>
-                            <span>1. Select Worker & Punch Photo Attendance</span>
+                            <span>1. Select Worker & Punch Photo</span>
                         </label>
                         <span class="text-[11px] text-[#475569] font-semibold" id="quickWorkerCountBadge">{{ site_workers|length }} Workers Available</span>
                     </div>
@@ -219,7 +214,7 @@
                 <div>
                     <label class="block text-xs font-black text-[#0F172A] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                         <i class="fa-solid fa-user-plus text-amber-400"></i>
-                        <span>2. Quick Add Worker (Name & Mobile)</span>
+                        <span>2. Quick Add Worker</span>
                     </label>
 
                     <form id="inlineQuickWorkerForm" onsubmit="submitQuickInlineWorker(event)" class="space-y-2.5">
@@ -261,9 +256,7 @@
                         </button>
                     </form>
                 </div>
-                <div class="text-[10px] text-[#475569] mt-2 text-center">
-                    Once saved, the worker will appear in the photo attendance list above.
-                </div>
+
             </div>
         </div>
     </div>
@@ -277,11 +270,15 @@
                     <i class="fa-solid fa-camera"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm sm:text-base font-black text-[#0F172A] flex items-center gap-2">
-                        <span>📸 Today's Live Photo Attendance Feed</span>
-                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-black shadow">{{ today_photos|length }} Workers Present</span>
-                    </h3>
-                    <p class="text-[11px] text-[#475569]">Photos captured live on site — Click on photo to view full image and GPS coordinates</p>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm sm:text-base font-black text-[#0F172A] flex items-center gap-2">
+                            <span>📸 Today's Live Photo Feed</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-[#14300A] text-white text-xs font-bold">{{ today_photos|length }} Present</span>
+                        </h3>
+                        <button type="button" onclick="openInfoModal('photo_feed')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <a href="/geo-attendance" class="px-3 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
@@ -324,24 +321,24 @@
     {% endif %}
 
     <!-- 10:30 AM Smart Auto-Analysis Banner -->
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
-        <div class="flex items-start md:items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#166534] text-white flex items-center justify-center shrink-0 shadow-sm">
-                <i class="fa-solid fa-satellite-dish text-amber-300 text-lg animate-pulse"></i>
+    <div class="bg-white border border-[#93C572] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-[#93C572] text-[#14300A] flex items-center justify-center shrink-0 font-bold">
+                <i class="fa-solid fa-satellite-dish text-base"></i>
             </div>
-            <div>
-                <p class="font-black text-slate-800 text-sm flex items-center gap-2">
-                    <span>GPS Auto-Attendance Engine (10:30 AM Auto-Analysis)</span>
-                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black tracking-wide uppercase">Active</span>
+            <div class="flex items-center gap-2">
+                <p class="font-black text-[#14300A] text-sm">
+                    GPS Auto-Attendance Engine
                 </p>
-                <p class="text-slate-600 mt-0.5">
-                       <strong>10:30 </strong>   21 Sites  Worker,     GPS Check-In      <strong></strong>       <strong>"GPS -"</strong>         
-                </p>
+                <span class="px-2 py-0.5 rounded-full bg-[#93C572]/20 text-[#14300A] border border-[#93C572] text-[10px] font-bold uppercase">10:30 AM Active</span>
+                <button type="button" onclick="openInfoModal('gps_engine')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
             </div>
         </div>
         <div class="shrink-0 flex items-center gap-2">
-            <button type="button" onclick="autoFetchFromGps()" class="px-3.5 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs shadow-sm transition flex items-center gap-1.5">
-                <i class="fa-solid fa-rotate"></i> <span>Sync with GPS Now</span>
+            <button type="button" onclick="autoFetchFromGps()" class="px-3.5 py-2 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-rotate"></i> <span>Sync with GPS</span>
             </button>
         </div>
     </div>
@@ -539,7 +536,7 @@
 
             <div class="flex items-center gap-2">
                 <button type="button" onclick="saveAllManpower()" class="px-6 py-2 rounded-xl bg-[#F97316] hover:bg-[#EA580C] text-[#1C0A00] font-bold text-xs shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-check-double"></i> Save Karein
+                    <i class="fa-solid fa-check-double"></i> Save Attendance
                 </button>
             </div>
         </div>
@@ -628,7 +625,7 @@ function setQuickRemark(text) {
         lastFocusedRemarkInput.value = text;
         lastFocusedRemarkInput.focus();
     } else {
-        alert("  Site    ,  Remarks     !");
+        alert("Please select or focus on a remarks field first!");
     }
 }
 
@@ -754,7 +751,7 @@ function shareAttendanceWhatsApp() {
                  `🔧 *Mistri & Plumber:* ${totalMistri} Persons\n` +
                  `👷 *Helpers:* ${totalHelper} Persons\n\n` +
                  `📄 *Download 1-Page PDF:*\n${pdfUrl}\n\n` +
-                 `🔗 * 21 Sites   :*\n${liveUrl}`;
+                 `🔗 *21 Sites Register Link:*\n${liveUrl}`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');

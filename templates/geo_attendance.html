@@ -17,12 +17,7 @@
                 <span>2. 📍 GPS Attendance (Geo-Location)</span>
             </span>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold text-xs flex items-center gap-1.5 shadow-xs">
-                <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
-                <span>GPS Attendance Register is Active</span>
-            </span>
-        </div>
+
     </div>
 
     <!-- Top Action Bar (Matching Manual Attendance Design) -->
@@ -32,13 +27,15 @@
                 <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 font-mono text-xs font-bold uppercase">GPS Geo Register</span>
                 <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-semibold">21 Sites GPS</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-800 mt-1 flex items-center gap-2">
-                <i class="fa-solid fa-satellite-dish text-indigo-600"></i>
-                <span>GPS Live Attendance (Daily GPS Attendance & Time)</span>
-            </h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Live GPS attendance, working hours, and photo monitoring within 500m radius of site.
-            </p>
+            <div class="flex items-center gap-2 mt-1">
+                <h1 class="text-2xl font-black text-[#14300A] flex items-center gap-2">
+                    <i class="fa-solid fa-satellite-dish text-[#93C572]"></i>
+                    <span>GPS Live Attendance</span>
+                </h1>
+                <button type="button" onclick="openInfoModal('gps_register')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                    <i class="fa-solid fa-circle-info"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Controls: Date Picker & Action Buttons -->

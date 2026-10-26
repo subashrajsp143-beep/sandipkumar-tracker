@@ -22,27 +22,24 @@
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400 text-slate-900 text-xs font-black uppercase tracking-wider mb-3 shadow">
                     <i class="fa-solid fa-boxes-stacked"></i> M/S SANDIP KUMAR - MATERIAL STORE
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2">
-                    {% if not is_owner and locked_site %}
-                    {{ locked_site.name }} - Site Material Store
-                    <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Received Materials</span>
-                    {% elif is_owner and locked_site %}
-                    {{ locked_site.name }} - Site Material Store (Dispatched Stock)
-                    <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Materials</span>
-                    {% else %}
-                    M/S SANDIP KUMAR Material Catalog
-                    <span class="text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Products</span>
-                    {% endif %}
-                </h1>
-                {% if not is_owner and locked_site %}
-                <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
-                    This store only displays materials that were sent to your site ({{ locked_site.name }}) by <strong>Owner</strong>. Here you can check live balances and record usage/issue on site.
-                </p>
-                {% else %}
-                <p class="text-blue-100 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
-                    Yahan se sabhi materials ki photo dekhkar <strong>"+ ADD"</strong> karke kisi bhi site par ek sath issue (entry) kar sakte hain. Online photo badalne ki suvidha bhi upalabdh hai!
-                </p>
-                {% endif %}
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2">
+                        {% if not is_owner and locked_site %}
+                        {{ locked_site.name }} - Site Material Store
+                        <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Received Materials</span>
+                        {% elif is_owner and locked_site %}
+                        {{ locked_site.name }} - Site Material Store
+                        <span class="text-xs bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Materials</span>
+                        {% else %}
+                        Material Catalog
+                        <span class="text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30 px-2.5 py-1 rounded-full font-medium">{{ materials|length }} Products</span>
+                        {% endif %}
+                    </h1>
+                    <button type="button" onclick="openInfoModal('store_cart')" class="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition cursor-pointer" title="Information">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                </div>
+
             </div>
 
             <!-- Quick Cart Widget in Header -->
@@ -330,8 +327,12 @@
                     <i class="fa-solid fa-boxes-packing"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-black">Site Material Dispatch & Requisition Cart</h3>
-                    <p class="text-xs text-emerald-100" id="cartHeaderSubtitle">Select items from store and send to site (Stock Inward)</p>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-black">Material Dispatch & Requisition Cart</h3>
+                        <button type="button" onclick="openInfoModal('store_cart')" class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center transition cursor-pointer" title="Information">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-lg text-white/80 hover:text-white hover:bg-white/10 flex items-center justify-center text-lg">
