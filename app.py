@@ -34,22 +34,29 @@ database.init_db()
 
 @app.context_processor
 def inject_common():
-    is_master = (session.get("is_owner", False) or 
-                 session.get("role") == "owner" or 
-                 session.get("worker_phone") == "9835180075")
     user_site_id = session.get("site_id", None)
-    is_sup = (session.get("role") == "supervisor" and not is_master)
-    open_complaints_count = database.get_open_complaints_count(user_site_id if is_sup else None)
+    user_role = session.get("role", "guest")
+    # Master owner mode is ONLY active if logged in as head-office owner without being locked to a supervisor site
+    is_owner_admin = (session.get("is_owner", False) or user_role == "owner") and not user_site_id
+    
+    all_sites = database.get_all_sites()
+    if user_site_id:
+        visible_sites = [s for s in all_sites if s["id"] == int(user_site_id)]
+    else:
+        visible_sites = all_sites
+
+    open_complaints_count = database.get_open_complaints_count(int(user_site_id) if user_site_id else None)
     return {
         "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
         "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year,
-        "user_role": session.get("role", "guest"),
+        "user_role": user_role,
         "user_name": session.get("worker_name", ""),
         "user_site_id": user_site_id,
         "user_site_name": session.get("site_name", ""),
-        "all_sites_list": database.get_all_sites(),
-        "is_owner": session.get("is_owner", False) or session.get("role") == "owner",
-        "is_master_owner": is_master,
+        "locked_site_id": int(user_site_id) if user_site_id else None,
+        "all_sites_list": visible_sites,
+        "is_owner": is_owner_admin,
+        "is_master_owner": is_owner_admin,
         "open_complaints_count": open_complaints_count
     }
 
@@ -2096,25 +2103,27 @@ def site_photos_print_album():
 # 9. Site Stock & Inventory Register
 @app.route("/stock")
 def site_stock():
-    is_master_owner = (session.get("is_owner", False) or 
-                       session.get("role") == "owner" or 
-                       session.get("worker_phone") == "9835180075")
-    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     user_site_id = session.get("site_id")
+    user_role = session.get("role")
+    is_owner_admin = (session.get("is_owner", False) or user_role == "owner") and not user_site_id
 
-    site_id_arg = request.args.get("site_id")
-    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
-    
-    # SECURITY LOCK: If not master owner, lock strictly to supervisor's site!
-    if not is_master_owner and user_site_id:
+    # STRICT SITE LOCK: Anyone bound to a site (supervisor) can ONLY see their assigned site!
+    if user_site_id:
         selected_site_id = int(user_site_id)
-
-    sites = database.get_all_sites()
-    if not is_master_owner and user_site_id:
-        sites = [s for s in sites if s["id"] == int(user_site_id)]
+        locked_site_id = int(user_site_id)
+        selected_site = database.get_site_by_id(selected_site_id)
+        sites = [selected_site] if selected_site else []
+    elif is_owner_admin:
+        site_id_arg = request.args.get("site_id")
+        selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+        locked_site_id = None
+        sites = database.get_all_sites()
+        selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+    else:
+        return redirect(url_for("login_page"))
 
     materials = database.get_all_materials()
-    if not is_master_owner:
+    if not is_owner_admin:
         sanitized_materials = []
         for m in materials:
             mc = dict(m)
@@ -2123,9 +2132,8 @@ def site_stock():
         materials = sanitized_materials
 
     stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
-    overview = database.get_all_sites_stock_overview()
-
-    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+    all_overview = database.get_all_sites_stock_overview()
+    overview = [o for o in all_overview if o["id"] == int(user_site_id)] if user_site_id else all_overview
 
     total_inward_sum = sum(r["total_inward"] for r in stock_rows)
     total_consumed_sum = sum(r["total_consumed"] for r in stock_rows)
@@ -2140,12 +2148,12 @@ def site_stock():
         overview=overview,
         selected_site=selected_site,
         selected_site_id=selected_site_id,
-        locked_site_id=int(user_site_id) if (not is_master_owner and user_site_id) else None,
+        locked_site_id=locked_site_id,
         total_inward_sum=total_inward_sum,
         total_consumed_sum=total_consumed_sum,
         balance_sum=balance_sum,
         low_stock_count=low_stock_count,
-        is_master_owner=is_master_owner,
+        is_master_owner=is_owner_admin,
         today=datetime.date.today().strftime("%Y-%m-%d")
     )
 
@@ -3040,28 +3048,29 @@ if __name__ == "__main__":
 # ==========================================
 @app.route("/complaints")
 def complaints_view():
-    is_master = (session.get("is_owner", False) or 
-                 session.get("role") == "owner" or 
-                 session.get("worker_phone") == "9835180075")
     user_site_id = session.get("site_id")
-    
-    # Query filters
-    site_id_arg = request.args.get("site_id")
-    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
-    selected_status = request.args.get("status", "all").strip().lower()
+    user_role = session.get("role")
+    is_owner_admin = (session.get("is_owner", False) or user_role == "owner") and not user_site_id
 
-    # Security check: Supervisors can ONLY view their own site complaints
-    if not is_master and user_site_id:
+    # STRICT SITE LOCK: Anyone on a specific site (supervisors) can ONLY see their assigned site!
+    if user_site_id:
         selected_site_id = int(user_site_id)
+        locked_site_id = int(user_site_id)
+        selected_site = database.get_site_by_id(selected_site_id)
+        sites = [selected_site] if selected_site else []
+    elif is_owner_admin:
+        site_id_arg = request.args.get("site_id")
+        selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+        locked_site_id = None
+        sites = database.get_all_sites()
+        selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+    else:
+        return redirect(url_for("login_page"))
 
-    sites = database.get_all_sites()
-    if not is_master and user_site_id:
-        sites = [s for s in sites if s["id"] == int(user_site_id)]
-
+    selected_status = request.args.get("status", "all").strip().lower()
     complaints = database.get_site_complaints(site_id=selected_site_id, status=selected_status)
-    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
 
-    # Summary metrics
+    # Summary metrics (strictly for this site if supervisor)
     total_count = len(complaints)
     open_count = sum(1 for c in complaints if c.get("status") == "open")
     urgent_count = sum(1 for c in complaints if c.get("priority") == "urgent" and c.get("status") == "open")
@@ -3074,8 +3083,8 @@ def complaints_view():
         selected_site=selected_site,
         selected_site_id=selected_site_id,
         selected_status=selected_status,
-        locked_site_id=int(user_site_id) if (not is_master and user_site_id) else None,
-        is_master_owner=is_master,
+        locked_site_id=locked_site_id,
+        is_master_owner=is_owner_admin,
         total_count=total_count,
         open_count=open_count,
         urgent_count=urgent_count,
@@ -3124,7 +3133,8 @@ def api_create_complaint():
                 photo_file.save(filepath)
                 photo_url = f"/uploads/complaints/{filename}"
 
-        if not is_master and user_site_id:
+        # STRICT ENFORCEMENT: If session is bound to a site, force that site_id!
+        if user_site_id:
             site_id = int(user_site_id)
 
         if not site_id:

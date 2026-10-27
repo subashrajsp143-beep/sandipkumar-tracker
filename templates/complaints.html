@@ -92,11 +92,11 @@
 
         <!-- Site Filter (If master owner or multiple sites available) -->
         <div class="flex items-center gap-2">
-            {% if locked_site_id %}
+            {% if locked_site_id or user_site_id %}
             <div class="px-3 py-1.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-xs font-bold text-[#14300A] flex items-center gap-1.5">
                 <i class="fa-solid fa-location-dot text-[#14300A]"></i>
-                <span>{{ selected_site.name if selected_site else 'Your Site' }}</span>
-                <span class="text-[10px] bg-[#93C572] text-[#14300A] px-1.5 py-0.5 rounded font-black">Authorized</span>
+                <span>{{ selected_site.name if selected_site else (user_site_name or 'Your Site') }}</span>
+                <span class="text-[10px] bg-[#14300A] text-[#93C572] px-1.5 py-0.5 rounded font-black">🔒 आपकी अधिकृत साइट</span>
             </div>
             {% else %}
             <label class="text-xs font-bold text-[#14300A] whitespace-nowrap">साइट चुनें:</label>
@@ -307,12 +307,14 @@
                 <label class="block text-xs font-black text-[#14300A] mb-1">
                     साइट का नाम (Work Site) <span class="text-rose-500">*</span>
                 </label>
-                {% if locked_site_id %}
+                {% if locked_site_id or user_site_id %}
+                {% set eff_site_id = locked_site_id or user_site_id %}
+                {% set eff_site_name = selected_site.name if selected_site else (user_site_name or 'Your Authorized Site') %}
                 <div class="px-3.5 py-2.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-sm font-bold text-[#14300A] flex items-center justify-between">
-                    <span>{{ selected_site.name if selected_site else 'Your Authorized Site' }}</span>
-                    <span class="text-[10px] font-black uppercase bg-[#93C572] text-[#14300A] px-2 py-0.5 rounded">🔒 Your Site</span>
+                    <span>📍 {{ eff_site_name }}</span>
+                    <span class="text-[10px] font-black uppercase bg-[#14300A] text-[#93C572] px-2 py-0.5 rounded">🔒 आपकी अधिकृत साइट</span>
                 </div>
-                <input type="hidden" id="cSiteId" name="site_id" value="{{ locked_site_id }}">
+                <input type="hidden" id="cSiteId" name="site_id" value="{{ eff_site_id }}">
                 {% else %}
                 <select id="cSiteId" name="site_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white">
                     <option value="">-- साइट चुनें --</option>
