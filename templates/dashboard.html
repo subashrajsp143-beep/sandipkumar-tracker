@@ -275,11 +275,15 @@
                             <i class="fa-solid fa-user-tie"></i>
                         </div>
                         <div class="truncate">
-                            <span class="font-bold text-slate-800 block truncate" id="supName_{{ s.site_id }}">{{ s.supervisor_name or 'Supervisor' }}</span>
-                            <span class="text-[10px] text-slate-500 font-mono" id="supPhone_{{ s.site_id }}">{{ s.supervisor_phone or 'No Phone' }}</span>
+                            <span class="font-bold text-slate-800 block truncate" id="supName_{{ s.site_id }}">{% if 'sandip' in (s.supervisor_name|lower) %}Supervisor{% else %}{{ s.supervisor_name or 'Supervisor' }}{% endif %}</span>
+                            {% if s.supervisor_phone and '9835180075' not in s.supervisor_phone %}
+                            <span class="text-[10px] text-slate-500 font-mono" id="supPhone_{{ s.site_id }}">{{ s.supervisor_phone }}</span>
+                            {% else %}
+                            <span class="text-[10px] text-slate-400 font-mono" id="supPhone_{{ s.site_id }}">--</span>
+                            {% endif %}
                         </div>
                     </div>
-                    {% if s.supervisor_phone %}
+                    {% if s.supervisor_phone and '9835180075' not in s.supervisor_phone %}
                     <div class="flex items-center gap-1 shrink-0">
                         <a href="tel:{{ s.supervisor_phone }}" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs border border-emerald-200 transition" title="Call">
                             <i class="fa-solid fa-phone"></i>

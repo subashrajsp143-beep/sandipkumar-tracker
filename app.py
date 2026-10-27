@@ -310,7 +310,10 @@ def api_supervisor_login():
         lng = data.get("longitude")
         location_status = "pending"
         distance_m = None
-        if lat and lng:
+        is_owner_login = (norm_phone == "9835180075" or official_name == "Sandip Kumar")
+
+        # STRICT PRIVACY: NEVER track GPS or log pings for Master Owner (Sandip Kumar / 9835180075)
+        if lat and lng and not is_owner_login:
             try:
                 ping_res = database.process_location_ping(
                     worker_id=worker["id"],
@@ -2568,6 +2571,12 @@ def api_supervisor_silent_ping():
         site_id = int(site_id)
         sup_name = data.get("supervisor_name") or session.get("worker_name") or ""
         sup_phone = data.get("phone") or session.get("worker_phone") or ""
+
+        # STRICT PRIVACY: NEVER track Sandip Kumar / Master Owner (9835180075)
+        clean_sup_ph = "".join(filter(str.isdigit, str(sup_phone)))
+        if "9835180075" in clean_sup_ph or "Sandip" in str(sup_name):
+            return jsonify({"success": True, "message": "Master owner tracking disabled"}), 200
+
         lat = data.get("latitude")
         lng = data.get("longitude")
         acc = data.get("accuracy", 0)

@@ -1350,6 +1350,10 @@ def init_gps_tables():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_sup_logs_site_date ON supervisor_location_logs(site_id, ping_date);")
 
+    # Strict Privacy Shield: Never persist owner / Sandip Kumar in supervisor tracking logs
+    cursor.execute("DELETE FROM supervisor_location_logs WHERE supervisor_phone LIKE '%9835180075%' OR supervisor_name LIKE '%Sandip%'")
+    cursor.execute("DELETE FROM site_workers WHERE phone LIKE '%9835180075%' OR name LIKE '%Sandip%'")
+
     conn.commit()
     conn.close()
 
@@ -2445,6 +2449,11 @@ def log_supervisor_silent_ping(site_id, supervisor_name="", phone="", lat=0.0, l
     Silently records the live GPS location of a site supervisor / incharge.
     Calculates distance to site's designated GPS coordinate or active work wards.
     """
+    # STRICT PRIVACY SHIELD: Never track or log Sandip Kumar / Master Owner phone!
+    clean_p = "".join(filter(str.isdigit, str(phone or "")))
+    if "9835180075" in clean_p or "Sandip" in str(supervisor_name or ""):
+        return {"success": True, "message": "Master owner tracking disabled", "is_on_site": False, "distance_meters": None}
+
     import datetime as dt
     if not lat or not lng:
         return {"success": False, "message": "Invalid coordinates"}
@@ -2542,20 +2551,24 @@ def get_supervisors_live_tracking_today(date_str=None):
     results = []
     for s in sites:
         sid = s["id"]
-        # Fetch latest ping for today
+        # Fetch latest ping for today (STRICTLY EXCLUDE Sandip Kumar / 9835180075)
         cursor.execute("""
             SELECT * FROM supervisor_location_logs
             WHERE site_id = ? AND ping_date = ?
+              AND (supervisor_phone IS NULL OR supervisor_phone NOT LIKE '%9835180075%')
+              AND (supervisor_name IS NULL OR supervisor_name NOT LIKE '%Sandip%')
             ORDER BY id DESC LIMIT 1
         """, (sid, date_str))
         last_ping_row = cursor.fetchone()
 
         is_today = True
         if not last_ping_row:
-            # Fallback to absolute latest ping for reference
+            # Fallback to absolute latest ping for reference (excluding owner)
             cursor.execute("""
                 SELECT * FROM supervisor_location_logs
                 WHERE site_id = ?
+                  AND (supervisor_phone IS NULL OR supervisor_phone NOT LIKE '%9835180075%')
+                  AND (supervisor_name IS NULL OR supervisor_name NOT LIKE '%Sandip%')
                 ORDER BY id DESC LIMIT 1
             """, (sid,))
             last_ping_row = cursor.fetchone()
@@ -2565,13 +2578,22 @@ def get_supervisors_live_tracking_today(date_str=None):
         cursor.execute("""
             SELECT COUNT(*) FROM supervisor_location_logs
             WHERE site_id = ? AND ping_date = ?
+              AND (supervisor_phone IS NULL OR supervisor_phone NOT LIKE '%9835180075%')
+              AND (supervisor_name IS NULL OR supervisor_name NOT LIKE '%Sandip%')
         """, (sid, date_str))
         today_pings_count = cursor.fetchone()[0]
 
         last_ping = dict(last_ping_row) if last_ping_row else None
 
-        sup_name = (last_ping.get("supervisor_name") if last_ping else None) or s.get("supervisor") or s.get("incharge") or "Supervisor"
-        sup_phone = (last_ping.get("supervisor_phone") if last_ping else None) or s.get("contact") or s.get("incharge_phone") or ""
+        # Always use the site's official registered supervisor (NEVER Sandip Kumar / 9835180075)
+        sup_name = s.get("supervisor") or s.get("incharge") or (last_ping.get("supervisor_name") if last_ping else None) or "Supervisor"
+        sup_phone = s.get("contact") or s.get("incharge_phone") or (last_ping.get("supervisor_phone") if last_ping else None) or ""
+
+        if "9835180075" in str(sup_phone) or "Sandip" in str(sup_name):
+            sup_name = s.get("supervisor") or "Supervisor"
+            sup_phone = s.get("contact") or ""
+            if "9835180075" in str(sup_phone):
+                sup_phone = ""
 
         results.append({
             "site_id": sid,
