@@ -46,6 +46,10 @@
                     <i class="fa-solid fa-plus-circle text-base"></i>
                     <span>Quick Inward</span>
                 </button>
+                <a href="{{ url_for('complaints_view', site_id=selected_site_id or '') }}" class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs shadow-sm transition flex items-center gap-1.5 border border-amber-600">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>समस्या / Help</span>
+                </a>
                 {% if is_master_owner %}
                 <button type="button" onclick="openResetZeroModal()" class="px-3.5 py-2.5 rounded-xl bg-[#B91C1C] hover:bg-[#991B1B] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5" title="Reset Stock & Usage to 0">
                     <i class="fa-solid fa-rotate-left"></i>

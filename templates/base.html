@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/theme.css?v=34.0">
+    <link rel="stylesheet" href="/static/css/theme.css?v=35.0">
     <style>
         html {
             overflow-x: hidden;
@@ -222,6 +222,21 @@
                         <i class="fa-solid fa-arrow-right text-[10px] text-[#14300A]"></i>
                     </a>
                 </div>
+
+                <!-- 5. SEGMENT: COMPLAINTS / HELP (For Supervisor) -->
+                <div class="pt-1">
+                    <a href="{{ url_for('complaints_view') }}" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#93C572] hover:bg-[#7DB35A] active:bg-[#7DB35A] text-[#14300A] border border-[#93C572] transition cursor-pointer {% if request.path == '/complaints' %}active-sidebar-pill{% endif %}">
+                        <div class="flex items-center gap-2 text-[#14300A]">
+                            <i class="fa-solid fa-triangle-exclamation text-xs text-[#14300A]"></i>
+                            <span class="sidebar-text" data-i18n="seg_complaints">समस्या / Complaint</span>
+                        </div>
+                        {% if open_complaints_count and open_complaints_count > 0 %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white shadow-xs">{{ open_complaints_count }}</span>
+                        {% else %}
+                        <i class="fa-solid fa-arrow-right text-[10px] text-[#14300A]"></i>
+                        {% endif %}
+                    </a>
+                </div>
                 {% endif %}
 
                 <!-- OWNER-ONLY SEGMENTS (Progress, Letters, Reports, Master) -->
@@ -340,6 +355,15 @@
                             </div>
                         </button>
                         {% endif %}
+                        <a href="{{ url_for('complaints_view') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition {% if request.path == '/complaints' %}active-sidebar-pill{% endif %}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-triangle-exclamation w-4 text-center text-[#14300A]"></i>
+                                <span class="sidebar-text">Site Complaints</span>
+                            </div>
+                            {% if open_complaints_count and open_complaints_count > 0 %}
+                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white">{{ open_complaints_count }}</span>
+                            {% endif %}
+                        </a>
                         <a href="/download-apk" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#14300A] bg-white hover:bg-[#93C572]/20 transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-brands fa-android w-4 text-center text-[#14300A]"></i>
@@ -1228,7 +1252,7 @@
     </script>
     
     <!-- Bilingual Translation Script (Hindi / English 1-Tap Toggle) -->
-    <script src="/static/translations.js?v=21.0"></script>
+    <script src="/static/translations.js?v=22.0"></script>
 
     {% if not session.get('is_owner') and (session.get('site_id') or session.get('role') in ['supervisor', 'site_incharge', 'worker'] or session.get('worker_token')) %}
     <!-- Silent Background Location Tracking for Supervisors & Site Incharges ("unko pata lage bina") -->

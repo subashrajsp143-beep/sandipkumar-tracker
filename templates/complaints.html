@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block title %}Site Issues & Complaints — M/S Sandip Kumar{% endblock %}
+
+{% block content %}
+<div class="space-y-4 max-w-7xl mx-auto">
+    <!-- Top Banner Card (Pista Green & Dark Green Theme) -->
+    <div class="bg-gradient-to-r from-[#93C572] to-[#7DB35A] rounded-2xl p-5 sm:p-6 text-[#14300A] shadow-sm border border-[#93C572]">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/70 text-[#14300A] mb-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Help & Site Issue Center</span>
+                </span>
+                <h1 class="text-xl sm:text-2xl font-black text-[#14300A] tracking-tight">
+                    🚨 साइट समस्या एवं शिकायत निवारण (Site Complaints)
+                </h1>
+                <p class="text-xs sm:text-sm text-[#14300A]/90 mt-1 font-medium">
+                    साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें और संदीप सर को भेजें।
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openNewComplaintModal()" class="px-4 py-2.5 rounded-xl bg-[#14300A] hover:bg-[#1E4310] text-white font-black text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-plus-circle text-base text-[#93C572]"></i>
+                    <span>+ नई समस्या दर्ज करें</span>
+                </button>
+                <a href="https://wa.me/919835180075" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-white/90 text-[#14300A] font-bold text-xs shadow-sm transition flex items-center gap-1.5 border border-[#93C572]">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
+                    <span>Office WhatsApp: 9835180075</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white border border-[#93C572]/40 rounded-2xl p-4 shadow-xs">
+            <div class="flex items-center justify-between text-[#14300A] mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">कुल समस्याएं (Total)</span>
+                <i class="fa-solid fa-list-check text-[#7DB35A] text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-[#14300A] mt-1">{{ total_count }}</div>
+            <p class="text-[11px] text-[#14300A]/70 mt-0.5">दर्ज की गई कुल शिकायतें</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-300 rounded-2xl p-4 shadow-xs">
+            <div class="flex items-center justify-between text-amber-900 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">लंबित (Open / Pending)</span>
+                <i class="fa-solid fa-clock text-amber-600 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-amber-950 mt-1">{{ open_count }}</div>
+            <p class="text-[11px] text-amber-800 mt-0.5">जिनका समाधान अभी बाकी है</p>
+        </div>
+
+        <div class="bg-rose-50 border border-rose-300 rounded-2xl p-4 shadow-xs">
+            <div class="flex items-center justify-between text-rose-900 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">अति आवश्यक (Urgent)</span>
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-rose-950 mt-1">{{ urgent_count }}</div>
+            <p class="text-[11px] text-rose-800 mt-0.5">जहाँ काम रुका हुआ है</p>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 shadow-xs">
+            <div class="flex items-center justify-between text-emerald-900 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider">हल हो गया (Resolved)</span>
+                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+            </div>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-950 mt-1">{{ resolved_count }}</div>
+            <p class="text-[11px] text-emerald-800 mt-0.5">समाधान की गई समस्याएं</p>
+        </div>
+    </div>
+
+    <!-- Filter & Site Selector Bar -->
+    <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#93C572]/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <!-- Status Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='all') }}" 
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition {% if selected_status == 'all' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+                All (सभी)
+            </a>
+            <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='open') }}" 
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'open' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span>Open (लंबित - {{ open_count }})</span>
+            </a>
+            <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='resolved') }}" 
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'resolved' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Resolved (हल हो गया - {{ resolved_count }})</span>
+            </a>
+        </div>
+
+        <!-- Site Filter (If master owner or multiple sites available) -->
+        <div class="flex items-center gap-2">
+            {% if locked_site_id %}
+            <div class="px-3 py-1.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-xs font-bold text-[#14300A] flex items-center gap-1.5">
+                <i class="fa-solid fa-location-dot text-[#14300A]"></i>
+                <span>{{ selected_site.name if selected_site else 'Your Site' }}</span>
+                <span class="text-[10px] bg-[#93C572] text-[#14300A] px-1.5 py-0.5 rounded font-black">Authorized</span>
+            </div>
+            {% else %}
+            <label class="text-xs font-bold text-[#14300A] whitespace-nowrap">साइट चुनें:</label>
+            <select onchange="onSiteFilterChange(this.value)" class="px-3 py-1.5 rounded-xl bg-white border border-[#93C572] text-xs font-bold text-[#14300A] focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+                <option value="" {% if not selected_site_id %}selected{% endif %}>🌐 All 21 Sites (सभी साइटें)</option>
+                {% for s in sites %}
+                <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
+                    📍 {{ s.name }} ({{ s.code }}) — {{ s.supervisor or 'Supervisor' }}
+                </option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Complaints Cards Grid -->
+    {% if complaints %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for c in complaints %}
+        <div class="bg-white rounded-2xl border {% if c.priority == 'urgent' and c.status == 'open' %}border-rose-400 shadow-md ring-1 ring-rose-300{% elif c.status == 'resolved' %}border-emerald-200{% else %}border-[#93C572]/40{% endif %} p-4 sm:p-5 flex flex-col justify-between transition hover:shadow-md">
+            <!-- Header Row -->
+            <div>
+                <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shadow-xs {% if c.priority == 'urgent' and c.status == 'open' %}bg-rose-600 text-white{% elif c.status == 'resolved' %}bg-emerald-600 text-white{% else %}bg-[#93C572] text-[#14300A]{% endif %}">
+                            {% if c.category == 'सामान की कमी' or c.category == 'Material Shortage' %}
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                            {% elif c.category == 'साइट विवाद' or c.category == 'Site Dispute' %}
+                            <i class="fa-solid fa-shield-halved"></i>
+                            {% elif c.category == 'मशीन खराबी' or c.category == 'Machine Breakdown' %}
+                            <i class="fa-solid fa-gears"></i>
+                            {% elif c.category == 'पाइपलाइन लीकेज' or c.category == 'Pipeline Leakage' %}
+                            <i class="fa-solid fa-faucet-drip"></i>
+                            {% else %}
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="font-black text-sm text-[#14300A] flex items-center gap-1.5">
+                                <span>{{ c.site_name }}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">#{{ c.id }}</span>
+                            </h3>
+                            <p class="text-[11px] text-slate-500 font-medium">
+                                <i class="fa-regular fa-clock text-[10px]"></i> {{ c.created_at }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Status & Priority Badges -->
+                    <div class="flex flex-col items-end gap-1">
+                        {% if c.status == 'resolved' %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <i class="fa-solid fa-check"></i> <span>हल हो गया (Resolved)</span>
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                            <span>पेंडिंग (Open)</span>
+                        </span>
+                        {% endif %}
+
+                        {% if c.priority == 'urgent' and c.status == 'open' %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-600 text-white animate-pulse">
+                            <i class="fa-solid fa-bell"></i> <span>अति आवश्यक (URGENT)</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Category Badge -->
+                <div class="mb-2">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/40">
+                        <i class="fa-solid fa-tag text-[10px] text-[#7DB35A]"></i>
+                        <span>{{ c.category }}</span>
+                    </span>
+                    {% if c.subject %}
+                    <span class="text-xs font-bold text-slate-800 ml-1.5">{{ c.subject }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Problem Description ("Kya dikkat hai") -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-900 font-medium leading-relaxed whitespace-pre-line mb-3">
+                    {{ c.description }}
+                </div>
+
+                <!-- Photo (if attached) -->
+                {% if c.photo_url %}
+                <div class="mb-3">
+                    <a href="{{ c.photo_url }}" target="_blank" class="inline-flex items-center gap-2 p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-xs font-bold text-slate-700">
+                        <img src="{{ c.photo_url }}" class="w-12 h-12 rounded-lg object-cover border border-slate-300 shadow-xs" alt="Complaint Photo">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-magnifying-glass-plus text-xs"></i>
+                            <span>फोटो देखें (View Photo)</span>
+                        </span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Supervisor Details -->
+                <div class="flex items-center justify-between text-xs text-slate-600 border-t border-slate-100 pt-2.5 mb-3">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-tie text-slate-400"></i>
+                        <span>सुपरवाइजर: <strong class="text-slate-800">{{ c.supervisor_name or 'N/A' }}</strong></span>
+                    </div>
+                    {% if c.supervisor_phone %}
+                    <a href="tel:{{ c.supervisor_phone }}" class="text-[#14300A] hover:underline font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-phone text-[10px] text-emerald-600"></i>
+                        <span>{{ c.supervisor_phone }}</span>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Resolution Note (if resolved) -->
+                {% if c.status == 'resolved' and c.resolution_notes %}
+                <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 mb-3">
+                    <div class="font-bold flex items-center gap-1.5 mb-0.5">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span>समाधान विवरण (Resolution):</span>
+                    </div>
+                    <p class="leading-relaxed">{{ c.resolution_notes }}</p>
+                    {% if c.resolved_at %}
+                    <span class="text-[10px] text-emerald-700 block mt-1">तारीख: {{ c.resolved_at }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer Action Buttons -->
+            <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <!-- WhatsApp Share Button (For Anyone to message Sandip Sir) -->
+                {% set wa_text = "*⚠️ साइट समस्या / COMPLAINT*\n📍 साइट: " ~ c.site_name ~ "\n👤 सुपरवाइजर: " ~ c.supervisor_name ~ " (" ~ c.supervisor_phone ~ ")\n🏷️ समस्या: " ~ c.category ~ "\n📝 विवरण: " ~ c.description ~ "\n📅 दिनांक: " ~ c.created_at %}
+                <a href="https://wa.me/919835180075?text={{ wa_text|urlencode }}" target="_blank" 
+                   class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                    <span>WhatsApp पर भेजें</span>
+                </a>
+
+                <!-- Owner Actions (Resolve / Delete) -->
+                {% if is_master_owner %}
+                <div class="flex items-center gap-1.5">
+                    {% if c.status == 'open' %}
+                    <button type="button" onclick="openResolveModal({{ c.id }}, '{{ c.site_name|escape }}')" class="px-3 py-1.5 rounded-xl bg-[#93C572] hover:bg-[#7DB35A] text-[#14300A] font-bold text-xs transition flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-check"></i>
+                        <span>हल करें (Resolve)</span>
+                    </button>
+                    {% endif %}
+                    <button type="button" onclick="deleteComplaint({{ c.id }})" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer" title="Delete">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-3xl p-10 text-center border border-dashed border-[#93C572] space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-[#93C572]/20 text-[#14300A] flex items-center justify-center text-3xl mx-auto border border-[#93C572]">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3 class="text-base font-black text-[#14300A]">कोई समस्या या शिकायत दर्ज नहीं है</h3>
+        <p class="text-xs text-[#14300A]/70 max-w-sm mx-auto">
+            {% if selected_status == 'open' %}
+            इस समय कोई भी खुली (Open) समस्या नहीं है। सब कुछ ठीक चल रहा है!
+            {% else %}
+            अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।
+            {% endif %}
+        </p>
+        <button type="button" onclick="openNewComplaintModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-md hover:bg-[#1E4310] transition cursor-pointer">
+            <i class="fa-solid fa-plus-circle text-[#93C572]"></i>
+            <span>+ नई समस्या दर्ज करें</span>
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: REPORT NEW ISSUE / COMPLAINT                          -->
+<!-- ============================================================ -->
+<div id="newComplaintModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-[#93C572] overflow-hidden transform transition-all my-8 animate-scaleIn">
+        <!-- Modal Header (Pista Green) -->
+        <div class="bg-gradient-to-r from-[#93C572] to-[#7DB35A] text-[#14300A] p-5 flex items-center justify-between border-b border-[#93C572]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/70 flex items-center justify-center text-[#14300A] text-lg font-black shadow-xs">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-base text-[#14300A]">नई समस्या / शिकायत दर्ज करें</h3>
+                    <p class="text-[11px] text-[#14300A]/80">साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeNewComplaintModal()" class="text-[#14300A]/70 hover:text-[#14300A] p-2 text-xl font-bold cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form id="newComplaintForm" onsubmit="submitComplaintForm(event)" class="p-5 sm:p-6 space-y-4">
+            <!-- 1. Site Selector -->
+            <div>
+                <label class="block text-xs font-black text-[#14300A] mb-1">
+                    साइट का नाम (Work Site) <span class="text-rose-500">*</span>
+                </label>
+                {% if locked_site_id %}
+                <div class="px-3.5 py-2.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-sm font-bold text-[#14300A] flex items-center justify-between">
+                    <span>{{ selected_site.name if selected_site else 'Your Authorized Site' }}</span>
+                    <span class="text-[10px] font-black uppercase bg-[#93C572] text-[#14300A] px-2 py-0.5 rounded">🔒 Your Site</span>
+                </div>
+                <input type="hidden" id="cSiteId" name="site_id" value="{{ locked_site_id }}">
+                {% else %}
+                <select id="cSiteId" name="site_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white">
+                    <option value="">-- साइट चुनें --</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
+                        📍 {{ s.name }} ({{ s.code }}) — {{ s.supervisor or 'Supervisor' }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+
+            <!-- 2. Category Selector -->
+            <div>
+                <label class="block text-xs font-black text-[#14300A] mb-1">
+                    समस्या का प्रकार (Issue Category) <span class="text-rose-500">*</span>
+                </label>
+                <select id="cCategory" name="category" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white">
+                    <option value="सामान की कमी (Material Shortage)">📦 सामान की कमी (Material Shortage - Pipe, Solvent, Valve)</option>
+                    <option value="साइट विवाद / रुकावट (Site Dispute)">⚠️ साइट विवाद / जनता द्वारा रुकावट (Dispute / Obstruction)</option>
+                    <option value="मशीन / बोरिंग खराबी (Machine Breakdown)">🚜 मशीन / बोरिंग रिग खराबी (Boring / Machine Issue)</option>
+                    <option value="पाइपलाइन लीकेज / खराबी (Pipeline Issue)">💧 पाइपलाइन लीकेज / टेक्निकल समस्या (Leakage / Defect)</option>
+                    <option value="लेबर / मजदूरी समस्या (Labour / Payment)">👷 लेबर / मजदूरी समस्या (Labour / Payment)</option>
+                    <option value="अन्य समस्या (Other)">❓ अन्य समस्या (Other Problem)</option>
+                </select>
+            </div>
+
+            <!-- 3. Urgency / Priority -->
+            <div>
+                <label class="block text-xs font-black text-[#14300A] mb-1.5">
+                    प्राथमिकता (Urgency Level) <span class="text-rose-500">*</span>
+                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-300 hover:border-[#93C572] cursor-pointer bg-white has-checked:border-[#93C572] has-checked:bg-[#93C572]/20">
+                        <input type="radio" name="priority" value="normal" checked class="accent-[#14300A]">
+                        <span class="text-xs font-bold text-[#14300A]">🟢 सामान्य (Normal)</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-300 hover:border-rose-500 cursor-pointer bg-white has-checked:border-rose-500 has-checked:bg-rose-50">
+                        <input type="radio" name="priority" value="urgent" class="accent-rose-600">
+                        <span class="text-xs font-bold text-rose-800">🔴 अति आवश्यक (काम रुका है)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 4. Description ("Kya dikkat hai") -->
+            <div>
+                <label class="block text-xs font-black text-[#14300A] mb-1">
+                    क्या दिक्कत है? विस्तार से लिखें <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="cDescription" name="description" rows="3" required 
+                          placeholder="उदाहरण: 63mm PVC पाइप खत्म हो गया है, 200 मीटर तुरंत चाहिए। या मशीन में खराबी आ गई है..."
+                          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white leading-relaxed"></textarea>
+            </div>
+
+            <!-- 5. Optional Photo Upload -->
+            <div>
+                <label class="block text-xs font-black text-[#14300A] mb-1 flex items-center justify-between">
+                    <span>साइट फोटो (Optional)</span>
+                    <span class="text-[10px] text-slate-500 font-normal">खराबी या साइट का लाइव फोटो लें</span>
+                </label>
+                <input type="file" id="cPhoto" name="photo" accept="image/*" capture="environment"
+                       onchange="previewComplaintPhoto(this)"
+                       class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#93C572] file:text-[#14300A] hover:file:bg-[#7DB35A] cursor-pointer">
+                <div id="cPhotoPreviewContainer" class="hidden mt-2">
+                    <img id="cPhotoPreview" class="w-20 h-20 rounded-xl object-cover border border-slate-300 shadow-xs" alt="Preview">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2 flex items-center gap-2">
+                <button type="button" onclick="closeNewComplaintModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+                    रद्द करें (Cancel)
+                </button>
+                <button type="submit" id="submitComplaintBtn" class="flex-2 py-3 rounded-xl bg-[#14300A] hover:bg-[#1E4310] text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane text-[#93C572]"></i>
+                    <span>शिकायत दर्ज करें (Submit)</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SUCCESS POPUP WITH INSTANT WHATSAPP SEND BUTTON              -->
+<!-- ============================================================ -->
+<div id="complaintSuccessModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-emerald-300 animate-scaleIn">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+            <h3 class="text-base font-black text-slate-900">शिकायत दर्ज हो गई है!</h3>
+            <p class="text-xs text-slate-600 mt-1">आपकी समस्या सिस्टम में रिकॉर्ड हो गई है। तुरंत संदीप सर के WhatsApp पर भी भेजें:</p>
+        </div>
+
+        <a id="successWhatsAppBtn" href="#" target="_blank" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg shadow-emerald-900/20 transition flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <span>WhatsApp पर संदीप सर को भेजें</span>
+        </a>
+
+        <button type="button" onclick="window.location.reload()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
+            बंद करें (Done)
+        </button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- RESOLVE COMPLAINT MODAL (For Owner)                          -->
+<!-- ============================================================ -->
+<div id="resolveComplaintModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-[#93C572] overflow-hidden p-6 space-y-4 animate-scaleIn">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="font-black text-sm text-[#14300A] flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span id="resolveModalTitle">समस्या का समाधान दर्ज करें</span>
+            </h3>
+            <button type="button" onclick="closeResolveModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <input type="hidden" id="resolveComplaintId">
+
+        <div>
+            <label class="block text-xs font-bold text-[#14300A] mb-1">समाधान विवरण / ऑफिस टिप्पणी (Optional):</label>
+            <textarea id="resolveNotes" rows="3" placeholder="उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="closeResolveModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                Cancel
+            </button>
+            <button type="button" onclick="confirmResolveComplaint()" class="flex-1 py-2.5 rounded-xl bg-[#93C572] hover:bg-[#7DB35A] text-[#14300A] font-black text-xs shadow-sm transition">
+                ✅ Mark Resolved
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function onSiteFilterChange(siteId) {
+    const url = new URL(window.location.href);
+    if (siteId) {
+        url.searchParams.set('site_id', siteId);
+    } else {
+        url.searchParams.delete('site_id');
+    }
+    window.location.href = url.toString();
+}
+
+function openNewComplaintModal() {
+    document.getElementById('newComplaintModal').classList.remove('hidden');
+}
+
+function closeNewComplaintModal() {
+    document.getElementById('newComplaintModal').classList.add('hidden');
+}
+
+function previewComplaintPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('cPhotoPreview').src = e.target.result;
+            document.getElementById('cPhotoPreviewContainer').classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+async function submitComplaintForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitComplaintBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>दर्ज हो रहा है...</span>';
+
+    const form = document.getElementById('newComplaintForm');
+    const formData = new FormData(form);
+
+    try {
+        const res = await fetch('/api/complaints', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeNewComplaintModal();
+            // Show WhatsApp button popup
+            document.getElementById('successWhatsAppBtn').href = data.whatsapp_url;
+            document.getElementById('complaintSuccessModal').classList.remove('hidden');
+        } else {
+            alert('❌ ' + (data.message || 'त्रुटि हुई'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#93C572]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
+        }
+    } catch(err) {
+        alert('❌ Network Error: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#93C572]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
+    }
+}
+
+function openResolveModal(cid, siteName) {
+    document.getElementById('resolveComplaintId').value = cid;
+    document.getElementById('resolveModalTitle').textContent = `समाधान दर्ज करें — ${siteName} (#${cid})`;
+    document.getElementById('resolveNotes').value = '';
+    document.getElementById('resolveComplaintModal').classList.remove('hidden');
+}
+
+function closeResolveModal() {
+    document.getElementById('resolveComplaintModal').classList.add('hidden');
+}
+
+async function confirmResolveComplaint() {
+    const cid = document.getElementById('resolveComplaintId').value;
+    const notes = document.getElementById('resolveNotes').value.trim();
+
+    try {
+        const res = await fetch(`/api/complaints/${cid}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: notes || 'Resolved' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch(err) {
+        alert('❌ Error: ' + err.message);
+    }
+}
+
+async function deleteComplaint(cid) {
+    if (!confirm('क्या आप सचमुच इस शिकायत को हटाना चाहते हैं?')) return;
+    try {
+        const res = await fetch(`/api/complaints/${cid}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch(err) {
+        alert('❌ Error: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

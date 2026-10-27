@@ -6,6 +6,7 @@ Database configuration and queries using SQLite.
 import sqlite3
 import os
 import time
+import datetime
 from functools import wraps
 from data_seed import INITIAL_SITES, get_unique_materials
 
@@ -188,6 +189,7 @@ def init_db():
     init_gps_tables()
     init_photo_tables()
     init_outgoing_letters_table()
+    init_complaints_table()
 
 # Helper query functions
 def get_all_sites():
@@ -2897,3 +2899,143 @@ def get_outgoing_letters_stats():
         "last_ref_no": last_letter[0] if last_letter else None,
         "last_date": last_letter[1] if last_letter else None
     }
+
+
+# ==========================================
+# SITE COMPLAINTS & ISSUE REPORTING SYSTEM
+# ==========================================
+def init_complaints_table():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS site_complaints (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        site_name TEXT NOT NULL,
+        supervisor_name TEXT DEFAULT '',
+        supervisor_phone TEXT DEFAULT '',
+        category TEXT NOT NULL,
+        subject TEXT DEFAULT '',
+        description TEXT NOT NULL,
+        photo_url TEXT DEFAULT '',
+        priority TEXT DEFAULT 'normal',
+        status TEXT DEFAULT 'open',
+        created_at TEXT NOT NULL,
+        resolved_at TEXT DEFAULT '',
+        resolution_notes TEXT DEFAULT '',
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
+    );
+    """)
+    conn.commit()
+    conn.close()
+
+@db_retry()
+def add_site_complaint(site_id, site_name, supervisor_name, supervisor_phone, category, description, subject="", photo_url="", priority="normal"):
+    """Records a new supervisor / site issue complaint."""
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    created_at = ist_now.strftime("%Y-%m-%d %I:%M %p")
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO site_complaints 
+        (site_id, site_name, supervisor_name, supervisor_phone, category, subject, description, photo_url, priority, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)
+    """, (
+        int(site_id),
+        str(site_name or "").strip(),
+        str(supervisor_name or "").strip(),
+        str(supervisor_phone or "").strip(),
+        str(category or "General Issue").strip(),
+        str(subject or "").strip(),
+        str(description or "").strip(),
+        str(photo_url or "").strip(),
+        str(priority or "normal").strip().lower(),
+        created_at
+    ))
+    cid = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return cid
+
+@db_retry()
+def get_site_complaints(site_id=None, status=None, limit=200):
+    """Fetches list of complaints with optional site and status filtering."""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    query = "SELECT * FROM site_complaints WHERE 1=1"
+    params = []
+    
+    if site_id:
+        query += " AND site_id = ?"
+        params.append(int(site_id))
+    
+    if status and status != "all":
+        query += " AND status = ?"
+        params.append(str(status).strip().lower())
+        
+    query += " ORDER BY id DESC LIMIT ?"
+    params.append(int(limit))
+    
+    cursor.execute(query, tuple(params))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+@db_retry()
+def get_complaint_by_id(complaint_id):
+    """Retrieves a single complaint by its ID."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM site_complaints WHERE id = ?", (int(complaint_id),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+@db_retry()
+def update_complaint_status(complaint_id, status, resolution_notes=""):
+    """Updates complaint status ('open' or 'resolved') with optional resolution notes."""
+    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    resolved_at = ist_now.strftime("%Y-%m-%d %I:%M %p") if status == "resolved" else ""
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE site_complaints
+        SET status = ?, resolved_at = ?, resolution_notes = ?
+        WHERE id = ?
+    """, (
+        str(status).strip().lower(),
+        resolved_at,
+        str(resolution_notes or "").strip(),
+        int(complaint_id)
+    ))
+    success = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+@db_retry()
+def delete_complaint(complaint_id):
+    """Deletes a complaint entry."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM site_complaints WHERE id = ?", (int(complaint_id),))
+    success = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+@db_retry()
+def get_open_complaints_count(site_id=None):
+    """Returns count of active open complaints for badge alerts."""
+    conn = get_db()
+    cursor = conn.cursor()
+    if site_id:
+        cursor.execute("SELECT COUNT(*) FROM site_complaints WHERE site_id = ? AND status = 'open'", (int(site_id),))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM site_complaints WHERE status = 'open'")
+    cnt = cursor.fetchone()[0]
+    conn.close()
+    return cnt or 0

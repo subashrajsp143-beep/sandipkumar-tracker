@@ -37,16 +37,20 @@ def inject_common():
     is_master = (session.get("is_owner", False) or 
                  session.get("role") == "owner" or 
                  session.get("worker_phone") == "9835180075")
+    user_site_id = session.get("site_id", None)
+    is_sup = (session.get("role") == "supervisor" and not is_master)
+    open_complaints_count = database.get_open_complaints_count(user_site_id if is_sup else None)
     return {
         "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
         "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year,
         "user_role": session.get("role", "guest"),
         "user_name": session.get("worker_name", ""),
-        "user_site_id": session.get("site_id", None),
+        "user_site_id": user_site_id,
         "user_site_name": session.get("site_name", ""),
         "all_sites_list": database.get_all_sites(),
         "is_owner": session.get("is_owner", False) or session.get("role") == "owner",
-        "is_master_owner": is_master
+        "is_master_owner": is_master,
+        "open_complaints_count": open_complaints_count
     }
 
 @app.before_request
@@ -3029,3 +3033,185 @@ def dpr_api():
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 
+
+
+# ==========================================
+# 10. SITE COMPLAINTS & ISSUE REPORTING
+# ==========================================
+@app.route("/complaints")
+def complaints_view():
+    is_master = (session.get("is_owner", False) or 
+                 session.get("role") == "owner" or 
+                 session.get("worker_phone") == "9835180075")
+    user_site_id = session.get("site_id")
+    
+    # Query filters
+    site_id_arg = request.args.get("site_id")
+    selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    selected_status = request.args.get("status", "all").strip().lower()
+
+    # Security check: Supervisors can ONLY view their own site complaints
+    if not is_master and user_site_id:
+        selected_site_id = int(user_site_id)
+
+    sites = database.get_all_sites()
+    if not is_master and user_site_id:
+        sites = [s for s in sites if s["id"] == int(user_site_id)]
+
+    complaints = database.get_site_complaints(site_id=selected_site_id, status=selected_status)
+    selected_site = database.get_site_by_id(selected_site_id) if selected_site_id else None
+
+    # Summary metrics
+    total_count = len(complaints)
+    open_count = sum(1 for c in complaints if c.get("status") == "open")
+    urgent_count = sum(1 for c in complaints if c.get("priority") == "urgent" and c.get("status") == "open")
+    resolved_count = sum(1 for c in complaints if c.get("status") == "resolved")
+
+    return render_template(
+        "complaints.html",
+        complaints=complaints,
+        sites=sites,
+        selected_site=selected_site,
+        selected_site_id=selected_site_id,
+        selected_status=selected_status,
+        locked_site_id=int(user_site_id) if (not is_master and user_site_id) else None,
+        is_master_owner=is_master,
+        total_count=total_count,
+        open_count=open_count,
+        urgent_count=urgent_count,
+        resolved_count=resolved_count
+    )
+
+@app.route("/api/complaints", methods=["POST", "OPTIONS"])
+def api_create_complaint():
+    """Submit a new site complaint with optional photo upload."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        is_master = (session.get("is_owner", False) or 
+                     session.get("role") == "owner" or 
+                     session.get("worker_phone") == "9835180075")
+        user_site_id = session.get("site_id")
+
+        if request.is_json:
+            data = request.get_json(silent=True) or {}
+            site_id = int(data.get("site_id", 0) or user_site_id or 0)
+            category = data.get("category", "General Issue")
+            subject = data.get("subject", "")
+            description = data.get("description", "").strip()
+            priority = data.get("priority", "normal")
+            supervisor_name = data.get("supervisor_name") or session.get("worker_name", "")
+            supervisor_phone = data.get("supervisor_phone") or session.get("worker_phone", "")
+            photo_url = data.get("photo_url", "")
+        else:
+            site_id = int(request.form.get("site_id", 0) or user_site_id or 0)
+            category = request.form.get("category", "General Issue")
+            subject = request.form.get("subject", "")
+            description = request.form.get("description", "").strip()
+            priority = request.form.get("priority", "normal")
+            supervisor_name = request.form.get("supervisor_name") or session.get("worker_name", "")
+            supervisor_phone = request.form.get("supervisor_phone") or session.get("worker_phone", "")
+            photo_url = ""
+
+            photo_file = request.files.get("photo")
+            if photo_file and photo_file.filename:
+                import os, uuid
+                complaints_dir = os.path.join(UPLOAD_FOLDER, "complaints")
+                os.makedirs(complaints_dir, exist_ok=True)
+                ext = os.path.splitext(photo_file.filename)[1].lower() or ".jpg"
+                filename = f"issue_{site_id}_{uuid.uuid4().hex[:8]}{ext}"
+                filepath = os.path.join(complaints_dir, filename)
+                photo_file.save(filepath)
+                photo_url = f"/uploads/complaints/{filename}"
+
+        if not is_master and user_site_id:
+            site_id = int(user_site_id)
+
+        if not site_id:
+            return jsonify({"success": False, "message": "Site चुनना अनिवार्य है।"}), 400
+        if not description:
+            return jsonify({"success": False, "message": "समस्या का विवरण (क्या दिक्कत है) लिखना अनिवार्य है।"}), 400
+
+        site = database.get_site_by_id(site_id)
+        site_name = site["name"] if site else f"Site-{site_id}"
+        site_code = site.get("code", "") if site else ""
+        if not supervisor_name:
+            supervisor_name = site.get("supervisor", "") if site else "Supervisor"
+        if not supervisor_phone:
+            supervisor_phone = site.get("contact", "") if site else ""
+
+        cid = database.add_site_complaint(
+            site_id=site_id,
+            site_name=site_name,
+            supervisor_name=supervisor_name,
+            supervisor_phone=supervisor_phone,
+            category=category,
+            description=description,
+            subject=subject,
+            photo_url=photo_url,
+            priority=priority
+        )
+
+        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+        dt_str = ist_now.strftime("%d-%b-%Y %I:%M %p")
+        prio_label = "अति आवश्यक (URGENT)" if priority == "urgent" else "सामान्य (Normal)"
+
+        whatsapp_msg = (
+            "*⚠️ नई साइट समस्या / COMPLAINT*\n"
+            "━━━━━━━━━━━━━━━━━━━━\n"
+            f"📍 *साइट:* {site_name} ({site_code})\n"
+            f"👤 *सुपरवाइजर:* {supervisor_name}\n"
+            f"📞 *फोन:* {supervisor_phone}\n"
+            f"🏷️ *प्रकार:* {category}\n"
+            f"🚨 *प्राथमिकता:* {prio_label}\n"
+            "📝 *समस्या विवरण:*\n"
+            f"{description}\n"
+            "━━━━━━━━━━━━━━━━━━━━\n"
+            f"📅 *दिनांक:* {dt_str}\n"
+            "🏢 M/S Sandip Kumar - JJM Tracker"
+        )
+        whatsapp_url = "https://wa.me/919835180075?text=" + urllib.parse.quote(whatsapp_msg)
+
+        return jsonify({
+            "success": True,
+            "message": "✅ शिकायत सफलता-पूर्वक दर्ज हो गई!",
+            "complaint_id": cid,
+            "whatsapp_url": whatsapp_url,
+            "whatsapp_text": whatsapp_msg
+        })
+    except Exception as ex:
+        return jsonify({"success": False, "message": f"Error: {str(ex)}"}), 500
+
+@app.route("/api/complaints/<int:complaint_id>/resolve", methods=["POST", "OPTIONS"])
+def api_resolve_complaint(complaint_id):
+    """Mark complaint as resolved with optional resolution remarks."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        data = request.get_json(silent=True) or {}
+        notes = data.get("notes", "Resolved by Office / Supervisor")
+        success = database.update_complaint_status(complaint_id, "resolved", resolution_notes=notes)
+        if success:
+            return jsonify({"success": True, "message": "✅ समस्या का समाधान (Resolved) दर्ज हो गया!"})
+        return jsonify({"success": False, "message": "Complaint not found."}), 404
+    except Exception as ex:
+        return jsonify({"success": False, "message": str(ex)}), 500
+
+@app.route("/api/complaints/<int:complaint_id>", methods=["DELETE", "OPTIONS"])
+def api_delete_complaint(complaint_id):
+    """Delete complaint entry (Owner only)."""
+    if request.method == "OPTIONS":
+        return "", 200
+    try:
+        is_master = (session.get("is_owner", False) or 
+                     session.get("role") == "owner" or 
+                     session.get("worker_phone") == "9835180075")
+        if not is_master:
+            return jsonify({"success": False, "message": "❌ Only owner can delete complaints."}), 403
+
+        success = database.delete_complaint(complaint_id)
+        if success:
+            return jsonify({"success": True, "message": "Complaint removed successfully."})
+        return jsonify({"success": False, "message": "Complaint not found."}), 404
+    except Exception as ex:
+        return jsonify({"success": False, "message": str(ex)}), 500
