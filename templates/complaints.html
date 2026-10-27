@@ -16,7 +16,7 @@
                     🚨 साइट समस्या एवं शिकायत निवारण (Site Complaints)
                 </h1>
                 <p class="text-xs sm:text-sm text-[#14300A]/90 mt-1 font-medium">
-                    साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें और संदीप सर को भेजें।
+                    साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।
                 </p>
             </div>
 
@@ -26,10 +26,7 @@
                     <i class="fa-solid fa-plus-circle text-base text-[#93C572]"></i>
                     <span>+ नई समस्या दर्ज करें</span>
                 </button>
-                <a href="https://wa.me/919835180075" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-white hover:bg-white/90 text-[#14300A] font-bold text-xs shadow-sm transition flex items-center gap-1.5 border border-[#93C572]">
-                    <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i>
-                    <span>Office WhatsApp: 9835180075</span>
-                </a>
+
             </div>
         </div>
     </div>
@@ -229,13 +226,18 @@
 
             <!-- Footer Action Buttons -->
             <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                <!-- WhatsApp Share Button (For Anyone to message Sandip Sir) -->
-                {% set wa_text = "*⚠️ साइट समस्या / COMPLAINT*\n📍 साइट: " ~ c.site_name ~ "\n👤 सुपरवाइजर: " ~ c.supervisor_name ~ " (" ~ c.supervisor_phone ~ ")\n🏷️ समस्या: " ~ c.category ~ "\n📝 विवरण: " ~ c.description ~ "\n📅 दिनांक: " ~ c.created_at %}
-                <a href="https://wa.me/919835180075?text={{ wa_text|urlencode }}" target="_blank" 
-                   class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-xs">
-                    <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>WhatsApp पर भेजें</span>
-                </a>
+                <!-- Status Note -->
+                <div>
+                    {% if c.status == 'open' %}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                        <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> ऑफिस संज्ञान हेतु लंबित (Pending)
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                        <i class="fa-solid fa-circle-check text-[10px]"></i> समस्या हल हो चुकी है (Resolved)
+                    </span>
+                    {% endif %}
+                </div>
 
                 <!-- Owner Actions (Resolve / Delete) -->
                 {% if is_master_owner %}
@@ -397,22 +399,19 @@
 <!-- SUCCESS POPUP WITH INSTANT WHATSAPP SEND BUTTON              -->
 <!-- ============================================================ -->
 <div id="complaintSuccessModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-emerald-300 animate-scaleIn">
-        <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
-            <i class="fa-solid fa-check"></i>
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-[#93C572] animate-scaleIn">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-[#14300A] flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
         </div>
         <div>
-            <h3 class="text-base font-black text-slate-900">शिकायत दर्ज हो गई है!</h3>
-            <p class="text-xs text-slate-600 mt-1">आपकी समस्या सिस्टम में रिकॉर्ड हो गई है। तुरंत संदीप सर के WhatsApp पर भी भेजें:</p>
+            <h3 class="text-base font-black text-[#14300A]">समस्या दर्ज हो गई है!</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।
+            </p>
         </div>
 
-        <a id="successWhatsAppBtn" href="#" target="_blank" class="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg shadow-emerald-900/20 transition flex items-center justify-center gap-2">
-            <i class="fa-brands fa-whatsapp text-lg"></i>
-            <span>WhatsApp पर संदीप सर को भेजें</span>
-        </a>
-
-        <button type="button" onclick="window.location.reload()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
-            बंद करें (Done)
+        <button type="button" onclick="window.location.reload()" class="w-full py-3 rounded-2xl bg-[#14300A] hover:bg-[#1E4310] text-white font-bold text-sm shadow-md transition cursor-pointer">
+            ठीक है (Done)
         </button>
     </div>
 </div>
@@ -498,7 +497,7 @@ async function submitComplaintForm(e) {
         if (data.success) {
             closeNewComplaintModal();
             // Show WhatsApp button popup
-            document.getElementById('successWhatsAppBtn').href = data.whatsapp_url;
+            // modal confirmed
             document.getElementById('complaintSuccessModal').classList.remove('hidden');
         } else {
             alert('❌ ' + (data.message || 'त्रुटि हुई'));

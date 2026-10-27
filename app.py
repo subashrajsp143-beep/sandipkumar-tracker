@@ -3152,32 +3152,10 @@ def api_create_complaint():
             priority=priority
         )
 
-        ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
-        dt_str = ist_now.strftime("%d-%b-%Y %I:%M %p")
-        prio_label = "अति आवश्यक (URGENT)" if priority == "urgent" else "सामान्य (Normal)"
-
-        whatsapp_msg = (
-            "*⚠️ नई साइट समस्या / COMPLAINT*\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            f"📍 *साइट:* {site_name} ({site_code})\n"
-            f"👤 *सुपरवाइजर:* {supervisor_name}\n"
-            f"📞 *फोन:* {supervisor_phone}\n"
-            f"🏷️ *प्रकार:* {category}\n"
-            f"🚨 *प्राथमिकता:* {prio_label}\n"
-            "📝 *समस्या विवरण:*\n"
-            f"{description}\n"
-            "━━━━━━━━━━━━━━━━━━━━\n"
-            f"📅 *दिनांक:* {dt_str}\n"
-            "🏢 M/S Sandip Kumar - JJM Tracker"
-        )
-        whatsapp_url = "https://wa.me/919835180075?text=" + urllib.parse.quote(whatsapp_msg)
-
         return jsonify({
             "success": True,
-            "message": "✅ शिकायत सफलता-पूर्वक दर्ज हो गई!",
-            "complaint_id": cid,
-            "whatsapp_url": whatsapp_url,
-            "whatsapp_text": whatsapp_msg
+            "message": "✅ शिकायत सफलता-पूर्वक दर्ज हो गई! ऑफिस द्वारा जल्द ही संज्ञान लिया जाएगा।",
+            "complaint_id": cid
         })
     except Exception as ex:
         return jsonify({"success": False, "message": f"Error: {str(ex)}"}), 500
