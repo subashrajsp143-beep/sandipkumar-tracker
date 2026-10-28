@@ -63,8 +63,8 @@ def inject_common():
 @app.before_request
 def ensure_canonical_and_auth():
     host = request.host.lower()
-    if "ms-sandipkumar-tracker.onrender.com" in host:
-        url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker.onrender.com")
+    if "ms-sandipkumar-tracker.onrender.com" in host or ("sandipkumar-tracker.onrender.com" in host and "-i4ub" not in host):
+        url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker-i4ub.onrender.com").replace("sandipkumar-tracker.onrender.com", "sandipkumar-tracker-i4ub.onrender.com")
         return redirect(url, code=301)
 
     # Public paths that never require login
@@ -97,35 +97,36 @@ def ensure_canonical_and_auth():
             return redirect(url_for("login_page"))
 
 
-# 24/7 Keep-Alive & 10:30 AM GPS Attendance Auto-Analyzer Daemon
+# Smart Working-Hours Keep-Alive (06:00 AM to 12:00 AM IST) & 10:30 AM GPS Attendance Auto-Sync
 def _start_keep_alive_daemon():
     def ping_worker():
         import time
         import urllib.request
-        # Wait 60 seconds after boot to let server warm up
-        time.sleep(60)
-        target_urls = [
-            "https://sandipkumar-tracker.onrender.com/api/live-status",
-            "https://ms-sandipkumar-tracker.onrender.com/api/live-status"
-        ]
+        import datetime
+        # Wait 45 seconds after boot to let server warm up
+        time.sleep(45)
+        live_url = "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status"
         last_synced_date = None
         while True:
-            # 1. 24/7 Render Keep-Alive Ping
-            for url in target_urls:
-                try:
-                    req = urllib.request.Request(
-                        url,
-                        headers={"User-Agent": "SandipTracker-KeepAlive/2.0"}
-                    )
-                    urllib.request.urlopen(req, timeout=12)
-                except Exception:
-                    pass
-
-            # 2. Check IST time for 10:30 AM Auto-Sync
             try:
                 ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+                current_hour = ist_now.hour
+
+                # 1. Active Working Window: 06:00 AM to 11:59 PM IST (hours 6 through 23)
+                # Keep server warm and awake so supervisors NEVER see a loading/sleep screen!
+                # Between 12:00 AM (midnight) and 06:00 AM, pings stop completely so Render sleeps safely.
+                if 6 <= current_hour < 24:
+                    try:
+                        req = urllib.request.Request(
+                            live_url,
+                            headers={"User-Agent": "SandipTracker-KeepAlive/2.0"}
+                        )
+                        urllib.request.urlopen(req, timeout=12)
+                    except Exception:
+                        pass
+
+                # 2. Check IST time for 10:30 AM Auto-Sync
                 today_str = ist_now.strftime("%Y-%m-%d")
-                # Trigger once daily at 10:30 AM IST
                 if ist_now.hour == 10 and ist_now.minute >= 30 and last_synced_date != today_str:
                     database.auto_sync_gps_to_manpower(today_str)
                     last_synced_date = today_str
@@ -133,8 +134,8 @@ def _start_keep_alive_daemon():
             except Exception as e:
                 print(f"Auto-sync worker notice: {e}")
 
-            # Sleep 60 seconds (1 minute interval)
-            time.sleep(60)
+            # Ping every 10 minutes (600s) during the day (Render idles after 15m, so 10m keeps it awake)
+            time.sleep(600)
 
     try:
         import threading
@@ -559,10 +560,10 @@ def export_letters_pdf():
 # 1.1 Download Windows Desktop Launcher BAT
 @app.route("/download/desktop-launcher")
 def download_desktop_launcher():
-    bat_content = """@echo off
-title M/S SANDIP KUMAR 24x7 TRACKER
-echo Opening M/S Sandip Kumar 24x7 Cloud Tracker...
-start https://sandipkumar-tracker.onrender.com/
+    bat_content = f"""@echo off
+title M/S SANDIP KUMAR TRACKER
+echo Opening M/S Sandip Kumar Tracker...
+start {request.host_url}
 exit
 """
     return send_file(
@@ -2700,7 +2701,8 @@ def add_worker_api():
             return jsonify({"success": False, "message": "Site aur naam zaruri hai."}), 400
 
         worker_id, token = database.add_worker(site_id, name, role, phone)
-        worker_link = f"https://sandipkumar-tracker.onrender.com/worker/{token}"
+        base_url = request.host_url.rstrip("/")
+        worker_link = f"{base_url}/worker/{token}"
         return jsonify({
             "success": True,
             "worker_id": worker_id,

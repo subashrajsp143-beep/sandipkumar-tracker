@@ -1,0 +1,20 @@
+name: Morning Server Wakeup (6:00 AM IST)
+
+on:
+  schedule:
+    # 00:30 UTC = 06:00 AM IST (Wakes up Render server before supervisors reach site)
+    - cron: '30 0 * * *'
+    # 00:45 UTC = 06:15 AM IST (Backup wakeup trigger)
+    - cron: '45 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  wakeup:
+    name: Wakeup Render Server for Daytime Work
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Live Service
+        run: |
+          echo "Waking up M/S Sandip Kumar Tracker on Render..."
+          curl -s -m 60 "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status" || true
+          echo "Morning wakeup ping dispatched successfully."

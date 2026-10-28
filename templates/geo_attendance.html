@@ -1844,7 +1844,7 @@
 
     // Copy Worker Link & WhatsApp
     function copyWorkerLink(token, name) {
-        const link = `https://sandipkumar-tracker.onrender.com/worker/${token}`;
+        const link = `${window.location.origin}/worker/${token}`;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(link).then(() => {
                 alert(`✅ ${name} 's attendance link copied:\n\n${link}\n\n WhatsApp    Worker   `);
