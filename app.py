@@ -1538,13 +1538,44 @@ def download_apk():
 @app.route("/api/app-version")
 def app_version():
     """Returns the latest available Android APK version and release metadata."""
-    return jsonify({
+    meta = database.get_latest_app_version()
+    apk_url = meta.get("apk_url", "/download-apk")
+    if apk_url.startswith("/"):
+        apk_url = request.host_url.rstrip("/") + apk_url
+    resp = jsonify({
         "status": "ok",
-        "version_code": 7,
-        "version_name": "1.6.0",
-        "apk_url": "https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk",
-        "changelog": "New logo (JJM Water Shield) + ultra-clean mobile dashboard and attendance",
-        "release_date": "2026-10-25"
+        "version_code": meta.get("version_code", 8),
+        "version_name": meta.get("version_name", "2.1.0"),
+        "apk_url": apk_url,
+        "changelog": meta.get("changelog", "Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance"),
+        "release_date": meta.get("release_date", "2026-10-29"),
+        "force_update": meta.get("force_update", False)
+    })
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return resp
+
+@app.route("/api/app-version/publish", methods=["POST"])
+def publish_app_version():
+    """Owner-only endpoint to bump the app version and publish release notes to all devices."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    data = request.get_json(silent=True) or {}
+    pin = data.get("pin") or request.args.get("pin")
+    if not is_owner and str(pin).strip() != "Sandip@@12":
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+
+    v_code = data.get("version_code")
+    v_name = data.get("version_name")
+    changelog = data.get("changelog", "")
+    apk_url = data.get("apk_url", "/download-apk")
+    force_update = data.get("force_update", False)
+
+    if not v_code or not v_name:
+        return jsonify({"success": False, "message": "Version Code aur Version Name required hain."}), 400
+
+    database.update_latest_app_version(v_code, v_name, changelog, apk_url, force_update)
+    return jsonify({
+        "success": True,
+        "message": f"Naya Version {v_name} (Code: {v_code}) successfully publish ho gaya hai! Sabhi users ko notification aur banner dikhega."
     })
 
 

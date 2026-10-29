@@ -3061,3 +3061,82 @@ def get_open_complaints_count(site_id=None):
     cnt = cursor.fetchone()[0]
     conn.close()
     return cnt or 0
+
+# ==============================================================================
+# APP VERSIONING & UPDATE NOTIFICATION MANAGEMENT
+# ==============================================================================
+
+@db_retry()
+def init_app_version_table():
+    """Ensures app_version_meta table exists with default version v2.1.0."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS app_version_meta (
+            id INTEGER PRIMARY KEY,
+            version_code INTEGER NOT NULL,
+            version_name TEXT NOT NULL,
+            apk_url TEXT NOT NULL,
+            changelog TEXT,
+            release_date TEXT,
+            force_update INTEGER DEFAULT 0,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+    cursor.execute("SELECT COUNT(*) FROM app_version_meta")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("""
+            INSERT INTO app_version_meta (id, version_code, version_name, apk_url, changelog, release_date, force_update)
+            VALUES (1, 8, '2.1.0', '/download-apk', 'Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability', '2026-10-29', 0)
+        """)
+    conn.commit()
+    conn.close()
+
+@db_retry()
+def get_latest_app_version():
+    """Returns the latest available APK version and release notes."""
+    init_app_version_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT version_code, version_name, apk_url, changelog, release_date, force_update FROM app_version_meta WHERE id = 1")
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "version_code": row[0],
+            "version_name": row[1],
+            "apk_url": row[2],
+            "changelog": row[3],
+            "release_date": row[4],
+            "force_update": bool(row[5])
+        }
+    return {
+        "version_code": 8,
+        "version_name": "2.1.0",
+        "apk_url": "/download-apk",
+        "changelog": "Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability",
+        "release_date": "2026-10-29",
+        "force_update": False
+    }
+
+@db_retry()
+def update_latest_app_version(version_code, version_name, changelog, apk_url="/download-apk", force_update=False):
+    """Updates latest APK release details and triggers background database backup."""
+    init_app_version_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    import datetime
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    cursor.execute("""
+        UPDATE app_version_meta 
+        SET version_code = ?, version_name = ?, changelog = ?, apk_url = ?, release_date = ?, force_update = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+    """, (int(version_code), str(version_name).strip(), str(changelog).strip(), str(apk_url).strip(), today, 1 if force_update else 0))
+    conn.commit()
+    conn.close()
+    try:
+        from github_sync import trigger_cloud_backup_async
+        trigger_cloud_backup_async()
+    except Exception:
+        pass
+    return True

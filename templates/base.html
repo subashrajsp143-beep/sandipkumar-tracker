@@ -370,7 +370,17 @@
                                 <i class="fa-brands fa-android w-4 text-center text-[#A8C5BF]"></i>
                                 <span class="sidebar-text" data-i18n="sub_apk">App Download</span>
                             </div>
+                            <span id="sidebarUpdateBadge" class="hidden px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#D97706] text-slate-900 animate-pulse">UPDATE</span>
                         </a>
+                        {% if session.get('is_owner') or user_role == 'owner' %}
+                        <button type="button" onclick="openOwnerVersionModal()" class="w-full text-left sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#A8C5BF] bg-transparent hover:bg-[#1E4940] hover:text-white transition cursor-pointer">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-cloud-arrow-up w-4 text-center text-[#D97706]"></i>
+                                <span class="sidebar-text font-semibold text-[#D97706]">Version Manager</span>
+                            </div>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#D97706]/20 text-[#D97706] font-bold">APK</span>
+                        </button>
+                        {% endif %}
                         <a href="{{ url_for('company_website') }}" class="sidebar-sub-item flex items-center justify-between px-3 py-2 rounded-xl text-[#A8C5BF] bg-transparent hover:bg-[#1E4940] hover:text-white transition">
                             <div class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-globe w-4 text-center text-[#A8C5BF]"></i>
@@ -477,6 +487,42 @@
                     </div>
                 </div>
             </header>
+
+            <!-- APP UPDATE TOP ALERT BANNER (Shown when new APK / version is available) -->
+            <div id="appUpdateBanner" class="hidden bg-[#163F37] text-white border-b-2 border-[#D97706] px-4 py-2.5 transition-all duration-300 no-print z-30 shadow-md">
+                <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-8 h-8 rounded-xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] flex-shrink-0 animate-bounce">
+                            <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-[#D97706] text-slate-900">
+                                    Naya Update
+                                </span>
+                                <span class="text-xs sm:text-sm font-bold text-white">
+                                    Version <span id="bannerVersionName" class="text-[#FBBF24]">v2.1.0</span> Available Hai!
+                                </span>
+                            </div>
+                            <p id="bannerChangelog" class="text-[11px] text-[#A8C5BF] truncate mt-0.5 max-w-xl hidden sm:block">
+                                Latest performance updates and features.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0 ml-auto sm:ml-0">
+                        <button type="button" onclick="openAppUpdateModal()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/15 cursor-pointer">
+                            <i class="fa-solid fa-circle-info mr-1 text-[#D97706]"></i> Details
+                        </button>
+                        <a id="bannerDownloadBtn" href="/download-apk" class="px-3.5 py-1.5 rounded-lg bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Download APK</span>
+                        </a>
+                        <button type="button" onclick="dismissAppUpdateBanner()" class="w-7 h-7 rounded-lg text-[#A8C5BF] hover:text-white hover:bg-white/10 flex items-center justify-center text-sm transition cursor-pointer" title="Dismiss">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <!-- SCROLLABLE CONTENT BODY (Off-White #F4F6F5) -->
             <main style="background-color: #F8FAF9 !important;" class="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 md:pb-8 bg-white space-y-4 sm:space-y-6">
@@ -1415,6 +1461,340 @@
         if (e.key === 'Escape') closeInfoModal();
     });
     </script>
+
+    <!-- APP UPDATE DETAIL POPUP MODAL -->
+    <div id="appUpdateModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeAppUpdateModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] relative">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-2xl flex-shrink-0 shadow-inner">
+                            <i class="fa-solid fa-rocket"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-[#D97706] text-slate-900">Update Available</span>
+                                <span id="modalVersionBadge" class="text-xs font-bold text-[#FBBF24]">v2.1.0</span>
+                            </div>
+                            <h3 class="text-base sm:text-lg font-black text-white mt-1">Naya Update Ready Hai</h3>
+                            <p class="text-xs text-[#A8C5BF]">M/S Sandip Kumar Construction Tracker</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeAppUpdateModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5 sm:p-6 space-y-4">
+                <div class="bg-[#F8FAF9] p-4 rounded-2xl border border-[#E5ECE9] space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-[#163F37]">
+                        <i class="fa-solid fa-sparkles text-[#D97706]"></i>
+                        <span>Is Update Me Kya Naya Hai?</span>
+                    </div>
+                    <div id="modalChangelog" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line pl-4 border-l-2 border-[#D97706]">
+                        Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability.
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2.5">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <strong class="font-bold">Zaruri Suchna:</strong> Naye features aur fast speed ke liye kripya niche diye button se <strong>Naya APK download karke install karein</strong>.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 sm:p-5 bg-[#F8FAF9] border-t border-[#E5ECE9] flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5">
+                <button type="button" onclick="closeAppUpdateModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-50 transition text-center cursor-pointer">
+                    Baad Me Karein
+                </button>
+                <a id="modalDownloadBtn" href="/download-apk" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-download text-[#D97706]"></i>
+                    <span>Naya APK Download Karein</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- OWNER VERSION PUBLISHER MODAL (Sandip Kumar Only) -->
+    {% if session.get('is_owner') or user_role == 'owner' %}
+    <div id="ownerVersionModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeOwnerVersionModal()">
+        <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-white">Publish App Version Update</h3>
+                        <p class="text-xs text-[#A8C5BF]">Supervisors & Workers ke phone par alert bhejein</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeOwnerVersionModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form onsubmit="submitNewAppVersion(event)" class="p-5 sm:p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Version Code (Numeric) *</label>
+                        <input type="number" id="newVersionCode" required min="1" step="1" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none" placeholder="e.g. 9">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Current: <span id="currentOwnerVersionCode">8</span></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Version Name *</label>
+                        <input type="text" id="newVersionName" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none" placeholder="e.g. 2.2.0">
+                        <p class="text-[10px] text-slate-400 mt-0.5">Current: <span id="currentOwnerVersionName">2.1.0</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Changelog / Kya Naya Hai? *</label>
+                    <textarea id="newChangelog" required rows="3" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none" placeholder="e.g. Bada update: Store cart issue fixed, new fast GPS attendance, speed improvements"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">APK Download URL</label>
+                    <input type="text" id="newApkUrl" value="/download-apk" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none" placeholder="/download-apk">
+                </div>
+
+                <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <input type="checkbox" id="newIsForce" class="w-4 h-4 text-[#D97706] rounded border-slate-300 focus:ring-[#D97706] cursor-pointer">
+                    <label for="newIsForce" class="text-xs font-semibold text-amber-900 cursor-pointer">
+                        Force Update (Sabhi users ko turant modal pop-up dikhayega)
+                    </label>
+                </div>
+
+                <div id="publishStatusMsg" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+                <div class="pt-2 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeOwnerVersionModal()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-50 transition cursor-pointer">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btnPublishVersion" class="px-5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#D97706]"></i>
+                        <span>Publish Update</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- APP UPDATE & NOTIFICATION SYSTEM JAVASCRIPT -->
+    <script>
+    (function() {
+        // Default base client version is 7 (v1.6.0)
+        let clientVersionCode = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+        let latestVersionData = null;
+
+        window.openAppUpdateModal = function() {
+            const m = document.getElementById('appUpdateModal');
+            if (m) m.classList.remove('hidden');
+        };
+
+        window.closeAppUpdateModal = function() {
+            const m = document.getElementById('appUpdateModal');
+            if (m) m.classList.add('hidden');
+        };
+
+        window.dismissAppUpdateBanner = function() {
+            const b = document.getElementById('appUpdateBanner');
+            if (b) b.classList.add('hidden');
+            if (latestVersionData && latestVersionData.version_code) {
+                localStorage.setItem('sandip_dismissed_version', String(latestVersionData.version_code));
+            }
+        };
+
+        window.openOwnerVersionModal = function() {
+            const m = document.getElementById('ownerVersionModal');
+            if (m) {
+                m.classList.remove('hidden');
+                if (latestVersionData) {
+                    const cCode = document.getElementById('currentOwnerVersionCode');
+                    const cName = document.getElementById('currentOwnerVersionName');
+                    const nCode = document.getElementById('newVersionCode');
+                    if (cCode) cCode.textContent = latestVersionData.version_code;
+                    if (cName) cName.textContent = latestVersionData.version_name;
+                    if (nCode && !nCode.value) nCode.value = (latestVersionData.version_code + 1);
+                }
+            }
+        };
+
+        window.closeOwnerVersionModal = function() {
+            const m = document.getElementById('ownerVersionModal');
+            if (m) m.classList.add('hidden');
+        };
+
+        window.submitNewAppVersion = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnPublishVersion');
+            const msg = document.getElementById('publishStatusMsg');
+            const vCode = parseInt(document.getElementById('newVersionCode').value, 10);
+            const vName = document.getElementById('newVersionName').value.trim();
+            const changelog = document.getElementById('newChangelog').value.trim();
+            const apkUrl = document.getElementById('newApkUrl').value.trim() || '/download-apk';
+            const isForce = document.getElementById('newIsForce').checked;
+
+            if (!vCode || !vName) {
+                alert('Version code aur name dono zaruri hain.');
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Publishing...';
+            }
+
+            try {
+                const res = await fetch('/api/app-version/publish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        version_code: vCode,
+                        version_name: vName,
+                        changelog: changelog,
+                        apk_url: apkUrl,
+                        force_update: isForce
+                    })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    if (msg) {
+                        msg.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 block';
+                        msg.textContent = result.message;
+                    }
+                    setTimeout(() => {
+                        closeOwnerVersionModal();
+                        checkForAppUpdates(true);
+                    }, 1200);
+                } else {
+                    if (msg) {
+                        msg.className = 'p-3 rounded-xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 block';
+                        msg.textContent = result.message || 'Error publishing update.';
+                    }
+                }
+            } catch(err) {
+                if (msg) {
+                    msg.className = 'p-3 rounded-xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 block';
+                    msg.textContent = 'Network error: ' + err.message;
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up text-[#D97706]"></i> <span>Publish Update</span>';
+                }
+            }
+        };
+
+        // Phone Notification Dispatcher
+        function triggerPhoneNotification(data) {
+            try {
+                if (!('Notification' in window)) return;
+
+                const sendAlert = () => {
+                    const title = '🔔 Naya Update Available: v' + data.version_name;
+                    const options = {
+                        body: 'M/S Sandip Kumar Tracker: ' + (data.changelog || 'Naya update ready hai.') + '\nTap karke download karein.',
+                        icon: '/static/icons/icon-192.png',
+                        badge: '/static/icons/icon-192.png',
+                        vibrate: [200, 100, 200],
+                        tag: 'sandip-update-' + data.version_code,
+                        renotify: true,
+                        data: { url: data.apk_url || '/download-apk' }
+                    };
+
+                    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification(title, options).catch(() => new Notification(title, options));
+                        }).catch(() => new Notification(title, options));
+                    } else {
+                        new Notification(title, options);
+                    }
+                    localStorage.setItem('sandip_notified_version', String(data.version_code));
+                };
+
+                if (Notification.permission === 'granted') {
+                    sendAlert();
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            sendAlert();
+                        }
+                    });
+                }
+            } catch(e) {
+                console.log('[UpdateNotification] Error:', e);
+            }
+        }
+
+        // Check for updates
+        async function checkForAppUpdates(forceCheck) {
+            try {
+                const res = await fetch('/api/app-version?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                latestVersionData = data;
+
+                const serverCode = parseInt(data.version_code, 10);
+                if (serverCode > clientVersionCode) {
+                    // 1. Populate UI text
+                    const bVer = document.getElementById('bannerVersionName');
+                    const bLog = document.getElementById('bannerChangelog');
+                    const bBtn = document.getElementById('bannerDownloadBtn');
+                    const mBadge = document.getElementById('modalVersionBadge');
+                    const mLog = document.getElementById('modalChangelog');
+                    const mBtn = document.getElementById('modalDownloadBtn');
+                    const sideBadge = document.getElementById('sidebarUpdateBadge');
+
+                    if (bVer) bVer.textContent = 'v' + data.version_name;
+                    if (bLog) bLog.textContent = data.changelog || 'Naye features aur fast performance updates.';
+                    if (bBtn) bBtn.href = data.apk_url || '/download-apk';
+                    if (mBadge) mBadge.textContent = 'v' + data.version_name;
+                    if (mLog) mLog.textContent = data.changelog || 'Naye features aur bug fixes.';
+                    if (mBtn) mBtn.href = data.apk_url || '/download-apk';
+                    if (sideBadge) sideBadge.classList.remove('hidden');
+
+                    // 2. Show Banner if not dismissed
+                    const dismissed = localStorage.getItem('sandip_dismissed_version');
+                    const banner = document.getElementById('appUpdateBanner');
+                    if (banner && (forceCheck || dismissed !== String(serverCode))) {
+                        banner.classList.remove('hidden');
+                    }
+
+                    // 3. Trigger phone notification if not yet alerted for this version
+                    const notified = localStorage.getItem('sandip_notified_version');
+                    if (forceCheck || notified !== String(serverCode)) {
+                        triggerPhoneNotification(data);
+                    }
+
+                    // 4. Force modal if marked force_update
+                    if (data.force_update) {
+                        openAppUpdateModal();
+                    }
+                }
+            } catch(err) {
+                console.log('[AppUpdateCheck] Silent error:', err);
+            }
+        }
+
+        // Run check after initial page render (delayed 1.5s so critical UI loads first)
+        window.addEventListener('load', function() {
+            setTimeout(() => checkForAppUpdates(false), 1500);
+        });
+
+        // Also expose checkForAppUpdates globally
+        window.checkForAppUpdates = checkForAppUpdates;
+    })();
+    </script>
+
 </body>
 
 </html>

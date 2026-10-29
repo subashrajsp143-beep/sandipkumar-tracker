@@ -2,6 +2,10 @@ package com.sandipkumar.tracker;
 
 import android.Manifest;
 import android.app.DownloadManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import androidx.core.app.NotificationCompat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -53,7 +57,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String APP_URL = "https://sandipkumar-tracker.onrender.com";
+    private static final String APP_URL = "https://sandipkumar-tracker-i4ub.onrender.com";
     private static final int MAX_AUTO_RETRIES = 5;
 
     private WebView webView;
@@ -517,7 +521,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception ignored) {}
 
                     if (latestVersionCode > currentVersionCode && !apkUrl.isEmpty()) {
-                        runOnUiThread(() -> showUpdateDialog(latestVersionName, changelog, apkUrl));
+                        runOnUiThread(() -> {
+                            showUpdateDialog(latestVersionName, changelog, apkUrl);
+                            showUpdateNotification(latestVersionName, changelog, apkUrl);
+                        });
                     }
                 }
             } catch (Exception ignored) {
