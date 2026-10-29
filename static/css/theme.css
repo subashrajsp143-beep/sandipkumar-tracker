@@ -563,3 +563,13 @@ table tbody tr:last-child td {
 table tbody tr:hover td {
     background-color: #F5F9F7 !important;
 }
+
+/* Enforce crisp white text and white icons on any element with Pine background */
+a[class*="bg-[#163F37]"],
+a[class*="bg-[#163F37]"] *,
+button[class*="bg-[#163F37]"],
+button[class*="bg-[#163F37]"] *,
+[class*="bg-[#163F37]"] > i,
+[class*="bg-[#163F37]"] > span {
+    color: var(--white) !important;
+}
