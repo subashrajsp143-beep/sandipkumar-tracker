@@ -908,7 +908,7 @@
     {% endif %}
 
     // Submit Cart Requisition to Backend
-    async let currentCartMode = 'dispatch'; // 'dispatch' (default for owner) or 'consumption'
+    let currentCartMode = 'dispatch'; // 'dispatch' (default for owner) or 'consumption'
 
     function setCartMode(mode) {
         currentCartMode = mode;

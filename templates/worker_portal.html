@@ -338,7 +338,7 @@
                     text.textContent = 'Duty Finished — Auto Check-out';
                     text.className = 'text-lg font-black text-amber-400';
                     sub.textContent = `Automatic check-out has been recorded after leaving ${data.site_name} after 5:00 PM.`;
-                    document.getElementById('punchBtnText').textContent = '🔴 Today's duty finished';
+                    document.getElementById('punchBtnText').textContent = '🔴 Today\'s duty finished';
                     const co = document.getElementById('checkOutTime');
                     if (co) co.textContent = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
                 } else if (data.action === 'temporarily_off_site') {
