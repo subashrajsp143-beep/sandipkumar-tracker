@@ -3068,7 +3068,7 @@ def get_open_complaints_count(site_id=None):
 
 @db_retry()
 def init_app_version_table():
-    """Ensures app_version_meta table exists with default version v2.1.0."""
+    """Ensures app_version_meta table exists with default version v2.1.0 and broadcast_active column."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -3080,25 +3080,32 @@ def init_app_version_table():
             changelog TEXT,
             release_date TEXT,
             force_update INTEGER DEFAULT 0,
+            broadcast_active INTEGER DEFAULT 0,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+    # Check if broadcast_active column exists
+    cursor.execute("PRAGMA table_info(app_version_meta)")
+    cols = [c[1] for c in cursor.fetchall()]
+    if "broadcast_active" not in cols:
+        cursor.execute("ALTER TABLE app_version_meta ADD COLUMN broadcast_active INTEGER DEFAULT 0")
+
     cursor.execute("SELECT COUNT(*) FROM app_version_meta")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
-            INSERT INTO app_version_meta (id, version_code, version_name, apk_url, changelog, release_date, force_update)
-            VALUES (1, 8, '2.1.0', '/download-apk', 'Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability', '2026-10-29', 0)
+            INSERT INTO app_version_meta (id, version_code, version_name, apk_url, changelog, release_date, force_update, broadcast_active)
+            VALUES (1, 8, '2.1.0', '/download-apk', 'Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability', '2026-10-29', 0, 0)
         """)
     conn.commit()
     conn.close()
 
 @db_retry()
 def get_latest_app_version():
-    """Returns the latest available APK version and release notes."""
+    """Returns the latest available APK version, release notes, and broadcast status."""
     init_app_version_table()
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT version_code, version_name, apk_url, changelog, release_date, force_update FROM app_version_meta WHERE id = 1")
+    cursor.execute("SELECT version_code, version_name, apk_url, changelog, release_date, force_update, broadcast_active FROM app_version_meta WHERE id = 1")
     row = cursor.fetchone()
     conn.close()
     if row:
@@ -3108,7 +3115,8 @@ def get_latest_app_version():
             "apk_url": row[2],
             "changelog": row[3],
             "release_date": row[4],
-            "force_update": bool(row[5])
+            "force_update": bool(row[5]),
+            "broadcast_active": bool(row[6]) if len(row) > 6 and row[6] is not None else False
         }
     return {
         "version_code": 8,
@@ -3116,12 +3124,13 @@ def get_latest_app_version():
         "apk_url": "/download-apk",
         "changelog": "Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance & Stability",
         "release_date": "2026-10-29",
-        "force_update": False
+        "force_update": False,
+        "broadcast_active": False
     }
 
 @db_retry()
-def update_latest_app_version(version_code, version_name, changelog, apk_url="/download-apk", force_update=False):
-    """Updates latest APK release details and triggers background database backup."""
+def update_latest_app_version(version_code, version_name, changelog, apk_url="/download-apk", force_update=False, broadcast_active=True):
+    """Updates latest APK release details and activates broadcast to phones."""
     init_app_version_table()
     conn = get_db()
     cursor = conn.cursor()
@@ -3129,9 +3138,29 @@ def update_latest_app_version(version_code, version_name, changelog, apk_url="/d
     today = datetime.date.today().strftime("%Y-%m-%d")
     cursor.execute("""
         UPDATE app_version_meta 
-        SET version_code = ?, version_name = ?, changelog = ?, apk_url = ?, release_date = ?, force_update = ?, updated_at = CURRENT_TIMESTAMP
+        SET version_code = ?, version_name = ?, changelog = ?, apk_url = ?, release_date = ?, force_update = ?, broadcast_active = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = 1
-    """, (int(version_code), str(version_name).strip(), str(changelog).strip(), str(apk_url).strip(), today, 1 if force_update else 0))
+    """, (int(version_code), str(version_name).strip(), str(changelog).strip(), str(apk_url).strip(), today, 1 if force_update else 0, 1 if broadcast_active else 0))
+    conn.commit()
+    conn.close()
+    try:
+        from github_sync import trigger_cloud_backup_async
+        trigger_cloud_backup_async()
+    except Exception:
+        pass
+    return True
+
+@db_retry()
+def set_app_version_broadcast(broadcast_active: bool):
+    """Toggles update alert broadcast ON or OFF for all users."""
+    init_app_version_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE app_version_meta 
+        SET broadcast_active = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+    """, (1 if broadcast_active else 0,))
     conn.commit()
     conn.close()
     try:

@@ -1549,7 +1549,8 @@ def app_version():
         "apk_url": apk_url,
         "changelog": meta.get("changelog", "Executive HRMS Theme, Fast Store Dispatch, Enhanced GPS Attendance"),
         "release_date": meta.get("release_date", "2026-10-29"),
-        "force_update": meta.get("force_update", False)
+        "force_update": meta.get("force_update", False),
+        "broadcast_active": meta.get("broadcast_active", False)
     })
     resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return resp
@@ -1568,14 +1569,33 @@ def publish_app_version():
     changelog = data.get("changelog", "")
     apk_url = data.get("apk_url", "/download-apk")
     force_update = data.get("force_update", False)
+    broadcast_active = data.get("broadcast_active", True)
 
     if not v_code or not v_name:
         return jsonify({"success": False, "message": "Version Code aur Version Name required hain."}), 400
 
-    database.update_latest_app_version(v_code, v_name, changelog, apk_url, force_update)
+    database.update_latest_app_version(v_code, v_name, changelog, apk_url, force_update, broadcast_active)
     return jsonify({
         "success": True,
-        "message": f"Naya Version {v_name} (Code: {v_code}) successfully publish ho gaya hai! Sabhi users ko notification aur banner dikhega."
+        "message": f"Naya Version {v_name} (Code: {v_code}) successfully publish ho gaya hai! Sabhi users ke phone par alert on ho gaya hai."
+    })
+
+@app.route("/api/app-version/toggle", methods=["POST"])
+def toggle_app_version_broadcast():
+    """Owner-only endpoint to toggle update alert broadcast ON or OFF."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    data = request.get_json(silent=True) or {}
+    pin = data.get("pin") or request.args.get("pin")
+    if not is_owner and str(pin).strip() != "Sandip@@12":
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+
+    active = bool(data.get("active", False))
+    database.set_app_version_broadcast(active)
+    status_txt = "ON (Abhi sabhi phones par alert dikhega)" if active else "OFF (Abhi kisi ko koi alert nahi dikhega)"
+    return jsonify({
+        "success": True,
+        "broadcast_active": active,
+        "message": f"App Update Alert successfully {status_txt} kar diya gaya hai."
     })
 
 

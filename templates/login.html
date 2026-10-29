@@ -387,6 +387,14 @@
                 const res = await fetch('/api/app-version?t=' + Date.now());
                 if (!res.ok) return;
                 const data = await res.json();
+
+                // If office has not activated broadcast, keep banner completely hidden
+                if (!data.broadcast_active) {
+                    const b = document.getElementById('appUpdateBanner');
+                    if (b) b.classList.add('hidden');
+                    return;
+                }
+
                 const serverCode = parseInt(data.version_code, 10);
                 if (serverCode > clientVersionCode) {
                     const b = document.getElementById('appUpdateBanner');

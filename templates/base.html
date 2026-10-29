@@ -1541,6 +1541,26 @@
             </div>
 
             <!-- Form -->
+            <!-- Live Broadcast Alert Control Box -->
+            <div class="px-5 sm:px-6 pt-5">
+                <div class="p-3.5 rounded-2xl bg-[#F8FAF9] border border-[#E5ECE9] flex items-center justify-between gap-3">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-[#52736B]">Live Alert Status:</span>
+                        <div class="mt-0.5">
+                            <span id="ownerBroadcastStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span> ⚪ Alert OFF (Kisi ko nahi dikh raha)
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" id="btnToggleBroadcast" onclick="toggleBroadcastAlert()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#163F37] text-white border border-[#163F37] hover:bg-[#1E4940] transition cursor-pointer">
+                            <i class="fa-solid fa-bell mr-1"></i> Alert On Karein
+                        </button>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1.5">Jab aap yahan se naya version publish karenge ya Alert ON karenge, tabhi sabhi phones par popup aur notification aayega.</p>
+            </div>
+
             <form onsubmit="submitNewAppVersion(event)" class="p-5 sm:p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -1624,9 +1644,60 @@
                     if (cCode) cCode.textContent = latestVersionData.version_code;
                     if (cName) cName.textContent = latestVersionData.version_name;
                     if (nCode && !nCode.value) nCode.value = (latestVersionData.version_code + 1);
+                    updateOwnerModalBroadcastUI(Boolean(latestVersionData.broadcast_active));
                 }
             }
         };
+
+        window.toggleBroadcastAlert = async function() {
+            if (!latestVersionData) return;
+            const newStatus = !latestVersionData.broadcast_active;
+            const btn = document.getElementById('btnToggleBroadcast');
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/app-version/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: newStatus })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    latestVersionData.broadcast_active = newStatus;
+                    updateOwnerModalBroadcastUI(newStatus);
+                    checkForAppUpdates(true);
+                    alert(result.message);
+                } else {
+                    alert(result.message || 'Error toggling broadcast.');
+                }
+            } catch(e) {
+                alert('Network error: ' + e.message);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        function updateOwnerModalBroadcastUI(isActive) {
+            const badge = document.getElementById('ownerBroadcastStatusBadge');
+            const btn = document.getElementById('btnToggleBroadcast');
+            if (badge) {
+                if (isActive) {
+                    badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 Alert LIVE (Sabhi phones par alert dikh raha hai)';
+                } else {
+                    badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> ⚪ Alert OFF (Normal - Kisi ko koi alert nahi dikhega)';
+                }
+            }
+            if (btn) {
+                if (isActive) {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition cursor-pointer';
+                    btn.innerHTML = '<i class="fa-solid fa-bell-slash mr-1"></i> Alert Band Karein';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#163F37] text-white border border-[#163F37] hover:bg-[#1E4940] transition cursor-pointer';
+                    btn.innerHTML = '<i class="fa-solid fa-bell mr-1"></i> Alert On Karein';
+                }
+            }
+        }
 
         window.closeOwnerVersionModal = function() {
             const m = document.getElementById('ownerVersionModal');
@@ -1742,6 +1813,15 @@
                 if (!res.ok) return;
                 const data = await res.json();
                 latestVersionData = data;
+
+                // STRICT RULE: If Office has NOT broadcasted an update, NEVER show banner, modal or badge!
+                if (!data.broadcast_active) {
+                    const banner = document.getElementById('appUpdateBanner');
+                    if (banner) banner.classList.add('hidden');
+                    const sideBadge = document.getElementById('sidebarUpdateBadge');
+                    if (sideBadge) sideBadge.classList.add('hidden');
+                    return;
+                }
 
                 const serverCode = parseInt(data.version_code, 10);
                 if (serverCode > clientVersionCode) {

@@ -509,6 +509,7 @@ public class MainActivity extends AppCompatActivity {
                     String latestVersionName = json.optString("version_name", "");
                     String apkUrl = json.optString("apk_url", "");
                     String changelog = json.optString("changelog", "");
+                    boolean broadcastActive = json.optBoolean("broadcast_active", false);
 
                     int currentVersionCode = 0;
                     try {
@@ -520,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } catch (Exception ignored) {}
 
-                    if (latestVersionCode > currentVersionCode && !apkUrl.isEmpty()) {
+                    if (broadcastActive && latestVersionCode > currentVersionCode && !apkUrl.isEmpty()) {
                         runOnUiThread(() -> {
                             showUpdateDialog(latestVersionName, changelog, apkUrl);
                             showUpdateNotification(latestVersionName, changelog, apkUrl);
