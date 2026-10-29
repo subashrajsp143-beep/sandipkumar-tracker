@@ -5,25 +5,25 @@
 {% block content %}
 <div class="space-y-4 max-w-7xl mx-auto">
     <!-- Top Banner Card (Pista Green & Dark Green Theme) -->
-    <div class="bg-gradient-to-r from-[#93C572] to-[#7DB35A] rounded-2xl p-5 sm:p-6 text-[#14300A] shadow-sm border border-[#93C572]">
+    <div class="bg-gradient-to-r from-[#163F37] to-[#1C4D44] rounded-2xl p-5 sm:p-6 text-white shadow-sm shadow-sm border border-[#E5ECE9]">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/70 text-[#14300A] mb-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/70 text-[#163F37] mb-2">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <span>Help & Site Issue Center</span>
                 </span>
-                <h1 class="text-xl sm:text-2xl font-black text-[#14300A] tracking-tight">
+                <h1 class="text-xl sm:text-2xl font-black text-[#163F37] tracking-tight">
                     🚨 साइट समस्या एवं शिकायत निवारण (Site Complaints)
                 </h1>
-                <p class="text-xs sm:text-sm text-[#14300A]/90 mt-1 font-medium">
+                <p class="text-xs sm:text-sm text-[#163F37]/90 mt-1 font-medium">
                     साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।
                 </p>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="openNewComplaintModal()" class="px-4 py-2.5 rounded-xl bg-[#14300A] hover:bg-[#1E4310] text-white font-black text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-plus-circle text-base text-[#93C572]"></i>
+                <button type="button" onclick="openNewComplaintModal()" class="px-4 py-2.5 rounded-xl bg-[#163F37] hover:bg-[#1E4310] text-white font-black text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-plus-circle text-base text-[#7EA79E]"></i>
                     <span>+ नई समस्या दर्ज करें</span>
                 </button>
 
@@ -33,13 +33,13 @@
 
     <!-- Summary Metrics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div class="bg-white border border-[#93C572]/40 rounded-2xl p-4 shadow-xs">
-            <div class="flex items-center justify-between text-[#14300A] mb-1">
+        <div class="bg-white border border-[#E5ECE9]/40 rounded-2xl p-4 shadow-xs">
+            <div class="flex items-center justify-between text-[#163F37] mb-1">
                 <span class="text-xs font-bold uppercase tracking-wider">कुल समस्याएं (Total)</span>
                 <i class="fa-solid fa-list-check text-[#7DB35A] text-lg"></i>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-[#14300A] mt-1">{{ total_count }}</div>
-            <p class="text-[11px] text-[#14300A]/70 mt-0.5">दर्ज की गई कुल शिकायतें</p>
+            <div class="text-2xl sm:text-3xl font-black text-[#163F37] mt-1">{{ total_count }}</div>
+            <p class="text-[11px] text-[#163F37]/70 mt-0.5">दर्ज की गई कुल शिकायतें</p>
         </div>
 
         <div class="bg-amber-50 border border-amber-300 rounded-2xl p-4 shadow-xs">
@@ -71,20 +71,20 @@
     </div>
 
     <!-- Filter & Site Selector Bar -->
-    <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#93C572]/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div class="bg-white rounded-2xl p-4 shadow-xs border border-[#E5ECE9]/40 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <!-- Status Tabs -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='all') }}" 
-               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition {% if selected_status == 'all' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition {% if selected_status == 'all' %}bg-[#EAF5EF] text-[#163F37] shadow-xs{% else %}bg-white hover:bg-[#EAF5EF]/20 text-[#163F37] border border-[#E5ECE9]/30{% endif %}">
                 All (सभी)
             </a>
             <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='open') }}" 
-               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'open' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'open' %}bg-[#EAF5EF] text-[#163F37] shadow-xs{% else %}bg-white hover:bg-[#EAF5EF]/20 text-[#163F37] border border-[#E5ECE9]/30{% endif %}">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 <span>Open (लंबित - {{ open_count }})</span>
             </a>
             <a href="{{ url_for('complaints_view', site_id=selected_site_id or '', status='resolved') }}" 
-               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'resolved' %}bg-[#93C572] text-[#14300A] shadow-xs{% else %}bg-white hover:bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/30{% endif %}">
+               class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 {% if selected_status == 'resolved' %}bg-[#EAF5EF] text-[#163F37] shadow-xs{% else %}bg-white hover:bg-[#EAF5EF]/20 text-[#163F37] border border-[#E5ECE9]/30{% endif %}">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>Resolved (हल हो गया - {{ resolved_count }})</span>
             </a>
@@ -93,14 +93,14 @@
         <!-- Site Filter (If master owner or multiple sites available) -->
         <div class="flex items-center gap-2">
             {% if locked_site_id or user_site_id %}
-            <div class="px-3 py-1.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-xs font-bold text-[#14300A] flex items-center gap-1.5">
-                <i class="fa-solid fa-location-dot text-[#14300A]"></i>
+            <div class="px-3 py-1.5 rounded-xl bg-[#EAF5EF]/20 border border-[#E5ECE9] text-xs font-bold text-[#163F37] flex items-center gap-1.5">
+                <i class="fa-solid fa-location-dot text-[#163F37]"></i>
                 <span>{{ selected_site.name if selected_site else (user_site_name or 'Your Site') }}</span>
-                <span class="text-[10px] bg-[#14300A] text-[#93C572] px-1.5 py-0.5 rounded font-black">🔒 आपकी अधिकृत साइट</span>
+                <span class="text-[10px] bg-[#163F37] text-[#7EA79E] px-1.5 py-0.5 rounded font-black">🔒 आपकी अधिकृत साइट</span>
             </div>
             {% else %}
-            <label class="text-xs font-bold text-[#14300A] whitespace-nowrap">साइट चुनें:</label>
-            <select onchange="onSiteFilterChange(this.value)" class="px-3 py-1.5 rounded-xl bg-white border border-[#93C572] text-xs font-bold text-[#14300A] focus:outline-none focus:ring-2 focus:ring-[#93C572]">
+            <label class="text-xs font-bold text-[#163F37] whitespace-nowrap">साइट चुनें:</label>
+            <select onchange="onSiteFilterChange(this.value)" class="px-3 py-1.5 rounded-xl bg-white border border-[#E5ECE9] text-xs font-bold text-[#163F37] focus:outline-none focus:ring-2 focus:ring-[#93C572]">
                 <option value="" {% if not selected_site_id %}selected{% endif %}>🌐 All 21 Sites (सभी साइटें)</option>
                 {% for s in sites %}
                 <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
@@ -116,12 +116,12 @@
     {% if complaints %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for c in complaints %}
-        <div class="bg-white rounded-2xl border {% if c.priority == 'urgent' and c.status == 'open' %}border-rose-400 shadow-md ring-1 ring-rose-300{% elif c.status == 'resolved' %}border-emerald-200{% else %}border-[#93C572]/40{% endif %} p-4 sm:p-5 flex flex-col justify-between transition hover:shadow-md">
+        <div class="bg-white rounded-2xl border {% if c.priority == 'urgent' and c.status == 'open' %}border-rose-400 shadow-md ring-1 ring-rose-300{% elif c.status == 'resolved' %}border-emerald-200{% else %}border-[#E5ECE9]/40{% endif %} p-4 sm:p-5 flex flex-col justify-between transition hover:shadow-md">
             <!-- Header Row -->
             <div>
                 <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3 mb-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shadow-xs {% if c.priority == 'urgent' and c.status == 'open' %}bg-rose-600 text-white{% elif c.status == 'resolved' %}bg-emerald-600 text-white{% else %}bg-[#93C572] text-[#14300A]{% endif %}">
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shadow-xs {% if c.priority == 'urgent' and c.status == 'open' %}bg-rose-600 text-white{% elif c.status == 'resolved' %}bg-emerald-600 text-white{% else %}bg-[#EAF5EF] text-[#163F37]{% endif %}">
                             {% if c.category == 'सामान की कमी' or c.category == 'Material Shortage' %}
                             <i class="fa-solid fa-boxes-stacked"></i>
                             {% elif c.category == 'साइट विवाद' or c.category == 'Site Dispute' %}
@@ -135,7 +135,7 @@
                             {% endif %}
                         </div>
                         <div>
-                            <h3 class="font-black text-sm text-[#14300A] flex items-center gap-1.5">
+                            <h3 class="font-black text-sm text-[#163F37] flex items-center gap-1.5">
                                 <span>{{ c.site_name }}</span>
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">#{{ c.id }}</span>
                             </h3>
@@ -168,7 +168,7 @@
 
                 <!-- Category Badge -->
                 <div class="mb-2">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#93C572]/20 text-[#14300A] border border-[#93C572]/40">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#EAF5EF]/20 text-[#163F37] border border-[#E5ECE9]/40">
                         <i class="fa-solid fa-tag text-[10px] text-[#7DB35A]"></i>
                         <span>{{ c.category }}</span>
                     </span>
@@ -202,7 +202,7 @@
                         <span>सुपरवाइजर: <strong class="text-slate-800">{{ c.supervisor_name or 'N/A' }}</strong></span>
                     </div>
                     {% if c.supervisor_phone %}
-                    <a href="tel:{{ c.supervisor_phone }}" class="text-[#14300A] hover:underline font-bold flex items-center gap-1">
+                    <a href="tel:{{ c.supervisor_phone }}" class="text-[#163F37] hover:underline font-bold flex items-center gap-1">
                         <i class="fa-solid fa-phone text-[10px] text-emerald-600"></i>
                         <span>{{ c.supervisor_phone }}</span>
                     </a>
@@ -243,7 +243,7 @@
                 {% if is_master_owner %}
                 <div class="flex items-center gap-1.5">
                     {% if c.status == 'open' %}
-                    <button type="button" onclick="openResolveModal({{ c.id }}, '{{ c.site_name|escape }}')" class="px-3 py-1.5 rounded-xl bg-[#93C572] hover:bg-[#7DB35A] text-[#14300A] font-bold text-xs transition flex items-center gap-1 cursor-pointer">
+                    <button type="button" onclick="openResolveModal({{ c.id }}, '{{ c.site_name|escape }}')" class="px-3 py-1.5 rounded-xl bg-[#EAF5EF] hover:bg-[#7DB35A] text-[#163F37] font-bold text-xs transition flex items-center gap-1 cursor-pointer">
                         <i class="fa-solid fa-check"></i>
                         <span>हल करें (Resolve)</span>
                     </button>
@@ -259,20 +259,20 @@
     </div>
     {% else %}
     <!-- Empty State -->
-    <div class="bg-white rounded-3xl p-10 text-center border border-dashed border-[#93C572] space-y-3">
-        <div class="w-16 h-16 rounded-2xl bg-[#93C572]/20 text-[#14300A] flex items-center justify-center text-3xl mx-auto border border-[#93C572]">
+    <div class="bg-white rounded-3xl p-10 text-center border border-dashed border-[#E5ECE9] space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-[#EAF5EF]/20 text-[#163F37] flex items-center justify-center text-3xl mx-auto border border-[#E5ECE9]">
             <i class="fa-solid fa-circle-check"></i>
         </div>
-        <h3 class="text-base font-black text-[#14300A]">कोई समस्या या शिकायत दर्ज नहीं है</h3>
-        <p class="text-xs text-[#14300A]/70 max-w-sm mx-auto">
+        <h3 class="text-base font-black text-[#163F37]">कोई समस्या या शिकायत दर्ज नहीं है</h3>
+        <p class="text-xs text-[#163F37]/70 max-w-sm mx-auto">
             {% if selected_status == 'open' %}
             इस समय कोई भी खुली (Open) समस्या नहीं है। सब कुछ ठीक चल रहा है!
             {% else %}
             अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।
             {% endif %}
         </p>
-        <button type="button" onclick="openNewComplaintModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-md hover:bg-[#1E4310] transition cursor-pointer">
-            <i class="fa-solid fa-plus-circle text-[#93C572]"></i>
+        <button type="button" onclick="openNewComplaintModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#163F37] text-white font-bold text-xs shadow-md hover:bg-[#1E4310] transition cursor-pointer">
+            <i class="fa-solid fa-plus-circle text-[#7EA79E]"></i>
             <span>+ नई समस्या दर्ज करें</span>
         </button>
     </div>
@@ -283,19 +283,19 @@
 <!-- MODAL: REPORT NEW ISSUE / COMPLAINT                          -->
 <!-- ============================================================ -->
 <div id="newComplaintModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-[#93C572] overflow-hidden transform transition-all my-8 animate-scaleIn">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-[#E5ECE9] overflow-hidden transform transition-all my-8 animate-scaleIn">
         <!-- Modal Header (Pista Green) -->
-        <div class="bg-gradient-to-r from-[#93C572] to-[#7DB35A] text-[#14300A] p-5 flex items-center justify-between border-b border-[#93C572]">
+        <div class="bg-[#163F37] text-white p-5 flex items-center justify-between border-b border-[#E5ECE9]">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/70 flex items-center justify-center text-[#14300A] text-lg font-black shadow-xs">
+                <div class="w-10 h-10 rounded-xl bg-white/70 flex items-center justify-center text-[#163F37] text-lg font-black shadow-xs">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-base text-[#14300A]">नई समस्या / शिकायत दर्ज करें</h3>
-                    <p class="text-[11px] text-[#14300A]/80">साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी</p>
+                    <h3 class="font-black text-base text-[#163F37]">नई समस्या / शिकायत दर्ज करें</h3>
+                    <p class="text-[11px] text-[#163F37]/80">साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी</p>
                 </div>
             </div>
-            <button type="button" onclick="closeNewComplaintModal()" class="text-[#14300A]/70 hover:text-[#14300A] p-2 text-xl font-bold cursor-pointer">
+            <button type="button" onclick="closeNewComplaintModal()" class="text-[#163F37]/70 hover:text-[#163F37] p-2 text-xl font-bold cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -304,15 +304,15 @@
         <form id="newComplaintForm" onsubmit="submitComplaintForm(event)" class="p-5 sm:p-6 space-y-4">
             <!-- 1. Site Selector -->
             <div>
-                <label class="block text-xs font-black text-[#14300A] mb-1">
+                <label class="block text-xs font-black text-[#163F37] mb-1">
                     साइट का नाम (Work Site) <span class="text-rose-500">*</span>
                 </label>
                 {% if locked_site_id or user_site_id %}
                 {% set eff_site_id = locked_site_id or user_site_id %}
                 {% set eff_site_name = selected_site.name if selected_site else (user_site_name or 'Your Authorized Site') %}
-                <div class="px-3.5 py-2.5 rounded-xl bg-[#93C572]/20 border border-[#93C572] text-sm font-bold text-[#14300A] flex items-center justify-between">
+                <div class="px-3.5 py-2.5 rounded-xl bg-[#EAF5EF]/20 border border-[#E5ECE9] text-sm font-bold text-[#163F37] flex items-center justify-between">
                     <span>📍 {{ eff_site_name }}</span>
-                    <span class="text-[10px] font-black uppercase bg-[#14300A] text-[#93C572] px-2 py-0.5 rounded">🔒 आपकी अधिकृत साइट</span>
+                    <span class="text-[10px] font-black uppercase bg-[#163F37] text-[#7EA79E] px-2 py-0.5 rounded">🔒 आपकी अधिकृत साइट</span>
                 </div>
                 <input type="hidden" id="cSiteId" name="site_id" value="{{ eff_site_id }}">
                 {% else %}
@@ -329,7 +329,7 @@
 
             <!-- 2. Category Selector -->
             <div>
-                <label class="block text-xs font-black text-[#14300A] mb-1">
+                <label class="block text-xs font-black text-[#163F37] mb-1">
                     समस्या का प्रकार (Issue Category) <span class="text-rose-500">*</span>
                 </label>
                 <select id="cCategory" name="category" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white">
@@ -344,13 +344,13 @@
 
             <!-- 3. Urgency / Priority -->
             <div>
-                <label class="block text-xs font-black text-[#14300A] mb-1.5">
+                <label class="block text-xs font-black text-[#163F37] mb-1.5">
                     प्राथमिकता (Urgency Level) <span class="text-rose-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-300 hover:border-[#93C572] cursor-pointer bg-white has-checked:border-[#93C572] has-checked:bg-[#93C572]/20">
-                        <input type="radio" name="priority" value="normal" checked class="accent-[#14300A]">
-                        <span class="text-xs font-bold text-[#14300A]">🟢 सामान्य (Normal)</span>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-300 hover:border-[#E5ECE9] cursor-pointer bg-white has-checked:border-[#E5ECE9] has-checked:bg-[#EAF5EF]/20">
+                        <input type="radio" name="priority" value="normal" checked class="accent-[#163F37]">
+                        <span class="text-xs font-bold text-[#163F37]">🟢 सामान्य (Normal)</span>
                     </label>
                     <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-300 hover:border-rose-500 cursor-pointer bg-white has-checked:border-rose-500 has-checked:bg-rose-50">
                         <input type="radio" name="priority" value="urgent" class="accent-rose-600">
@@ -361,7 +361,7 @@
 
             <!-- 4. Description ("Kya dikkat hai") -->
             <div>
-                <label class="block text-xs font-black text-[#14300A] mb-1">
+                <label class="block text-xs font-black text-[#163F37] mb-1">
                     क्या दिक्कत है? विस्तार से लिखें <span class="text-rose-500">*</span>
                 </label>
                 <textarea id="cDescription" name="description" rows="3" required 
@@ -371,13 +371,13 @@
 
             <!-- 5. Optional Photo Upload -->
             <div>
-                <label class="block text-xs font-black text-[#14300A] mb-1 flex items-center justify-between">
+                <label class="block text-xs font-black text-[#163F37] mb-1 flex items-center justify-between">
                     <span>साइट फोटो (Optional)</span>
                     <span class="text-[10px] text-slate-500 font-normal">खराबी या साइट का लाइव फोटो लें</span>
                 </label>
                 <input type="file" id="cPhoto" name="photo" accept="image/*" capture="environment"
                        onchange="previewComplaintPhoto(this)"
-                       class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#93C572] file:text-[#14300A] hover:file:bg-[#7DB35A] cursor-pointer">
+                       class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#EAF5EF] file:text-[#163F37] hover:file:bg-[#7DB35A] cursor-pointer">
                 <div id="cPhotoPreviewContainer" class="hidden mt-2">
                     <img id="cPhotoPreview" class="w-20 h-20 rounded-xl object-cover border border-slate-300 shadow-xs" alt="Preview">
                 </div>
@@ -388,8 +388,8 @@
                 <button type="button" onclick="closeNewComplaintModal()" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer">
                     रद्द करें (Cancel)
                 </button>
-                <button type="submit" id="submitComplaintBtn" class="flex-2 py-3 rounded-xl bg-[#14300A] hover:bg-[#1E4310] text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-paper-plane text-[#93C572]"></i>
+                <button type="submit" id="submitComplaintBtn" class="flex-2 py-3 rounded-xl bg-[#163F37] hover:bg-[#1E4310] text-white font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane text-[#7EA79E]"></i>
                     <span>शिकायत दर्ज करें (Submit)</span>
                 </button>
             </div>
@@ -401,18 +401,18 @@
 <!-- SUCCESS POPUP WITH INSTANT WHATSAPP SEND BUTTON              -->
 <!-- ============================================================ -->
 <div id="complaintSuccessModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-[#93C572] animate-scaleIn">
-        <div class="w-16 h-16 rounded-full bg-emerald-100 text-[#14300A] flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-[#E5ECE9] animate-scaleIn">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 text-[#163F37] flex items-center justify-center text-3xl mx-auto shadow-inner border border-emerald-300">
             <i class="fa-solid fa-circle-check text-emerald-600"></i>
         </div>
         <div>
-            <h3 class="text-base font-black text-[#14300A]">समस्या दर्ज हो गई है!</h3>
+            <h3 class="text-base font-black text-[#163F37]">समस्या दर्ज हो गई है!</h3>
             <p class="text-xs text-slate-600 mt-2 leading-relaxed">
                 आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।
             </p>
         </div>
 
-        <button type="button" onclick="window.location.reload()" class="w-full py-3 rounded-2xl bg-[#14300A] hover:bg-[#1E4310] text-white font-bold text-sm shadow-md transition cursor-pointer">
+        <button type="button" onclick="window.location.reload()" class="w-full py-3 rounded-2xl bg-[#163F37] hover:bg-[#1E4310] text-white font-bold text-sm shadow-md transition cursor-pointer">
             ठीक है (Done)
         </button>
     </div>
@@ -422,9 +422,9 @@
 <!-- RESOLVE COMPLAINT MODAL (For Owner)                          -->
 <!-- ============================================================ -->
 <div id="resolveComplaintModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-[#93C572] overflow-hidden p-6 space-y-4 animate-scaleIn">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-[#E5ECE9] overflow-hidden p-6 space-y-4 animate-scaleIn">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 class="font-black text-sm text-[#14300A] flex items-center gap-1.5">
+            <h3 class="font-black text-sm text-[#163F37] flex items-center gap-1.5">
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
                 <span id="resolveModalTitle">समस्या का समाधान दर्ज करें</span>
             </h3>
@@ -436,7 +436,7 @@
         <input type="hidden" id="resolveComplaintId">
 
         <div>
-            <label class="block text-xs font-bold text-[#14300A] mb-1">समाधान विवरण / ऑफिस टिप्पणी (Optional):</label>
+            <label class="block text-xs font-bold text-[#163F37] mb-1">समाधान विवरण / ऑफिस टिप्पणी (Optional):</label>
             <textarea id="resolveNotes" rows="3" placeholder="उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#93C572] bg-white"></textarea>
         </div>
 
@@ -444,7 +444,7 @@
             <button type="button" onclick="closeResolveModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
                 Cancel
             </button>
-            <button type="button" onclick="confirmResolveComplaint()" class="flex-1 py-2.5 rounded-xl bg-[#93C572] hover:bg-[#7DB35A] text-[#14300A] font-black text-xs shadow-sm transition">
+            <button type="button" onclick="confirmResolveComplaint()" class="flex-1 py-2.5 rounded-xl bg-[#EAF5EF] hover:bg-[#7DB35A] text-[#163F37] font-black text-xs shadow-sm transition">
                 ✅ Mark Resolved
             </button>
         </div>
@@ -504,12 +504,12 @@ async function submitComplaintForm(e) {
         } else {
             alert('❌ ' + (data.message || 'त्रुटि हुई'));
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#93C572]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#7EA79E]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
         }
     } catch(err) {
         alert('❌ Network Error: ' + err.message);
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#93C572]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#7EA79E]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
     }
 }
 

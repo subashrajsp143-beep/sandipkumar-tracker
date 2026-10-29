@@ -1,57 +1,88 @@
 /* ==========================================================================
-   PALETTE — ONLY 3 COLOURS IN THE WHOLE APP (STRICT SPECIFICATION)
-   --pista: #93C572     (header, normal buttons, selected menu item, borders, icon backgrounds)
-   --dark:  #14300A     (all text, main action buttons, secondary button borders)
-   --white: #FFFFFF     (page, cards, sidebar, fields, text on dark buttons)
+   HRMS EXECUTIVE ENTERPRISE THEME
+   Exact Color Palette from User Reference Screenshot
+   
+   --pine-dark:       #163F37 (Deep Pine Green: Sidebar, Primary Action Buttons)
+   --pine-darker:     #0F2F29 (Deepest Pine: Hover on Buttons)
+   --pine-active:     #254E46 (Active Nav Container: e.g. Salary Slip)
+   --pine-hover:      #1E4940 (Nav Hover State)
+   --pine-light:      #7EA79E (Sidebar Subtitles, Section Headers)
+   --pine-muted:      #A8C5BF (Nav Inactive Text/Icons)
+   
+   --amber:           #D97706 (Golden Honey Amber: Active Pill & Highlights)
+   --amber-light:     #FEF3C7 (Soft Amber Background)
+   
+   --mint-bg:         #EAF5EF (Soft Mint Pill: PUBLISHED Status Badge)
+   --mint-text:       #163F37 (Pine Text on Mint Badge)
+   --mint-border:     #C3E3D2 (Subtle Mint Border)
+   
+   --canvas:          #F8FAF9 (Main Content Canvas: Soft Off-White/Sage)
+   --card:            #FFFFFF (Crisp Pure White Cards, Modals, Forms)
+   --card-border:     #E5ECE9 (Refined Subtle Border for Cards)
+   --card-border-alt: #D1DCD7 (Input & Stronger Border)
+   
+   --text-primary:    #0F172A (Headings, Values, Main Numbers)
+   --text-pine:       #163F37 (Brand Titles, Section Headers)
+   --text-secondary:  #52736B (Uppercase Labels, Field Titles)
+   --text-muted:      #64748B (Secondary Hints, Muted Text)
+   --white:           #FFFFFF
    ========================================================================== */
 
 :root {
-    --pista: #93C572;
-    --dark: #14300A;
-    --white: #FFFFFF;
-    --dark-soft: rgba(20, 48, 10, 0.7);
+    --pine-dark: #163F37;
+    --pine-darker: #0F2F29;
+    --pine-active: #254E46;
+    --pine-hover: #1E4940;
+    --pine-light: #7EA79E;
+    --pine-muted: #A8C5BF;
 
-    /* Direct token mappings */
-    --primary: var(--pista);
-    --bg: var(--white);
-    --card: var(--white);
-    --border: var(--pista);
-    --text: var(--dark);
-    --text-soft: var(--dark-soft);
-    --on-primary: var(--dark);     /* Text on pista green must always be --dark, never white */
-    --action: var(--dark);         /* Main action button: --dark fill, --white text */
+    --amber: #D97706;
+    --amber-light: #FEF3C7;
+
+    --mint-bg: #EAF5EF;
+    --mint-text: #163F37;
+    --mint-border: #C3E3D2;
+
+    --canvas: #F8FAF9;
+    --card: #FFFFFF;
+    --card-border: #E5ECE9;
+    --card-border-alt: #D1DCD7;
+
+    --text-primary: #0F172A;
+    --text-pine: #163F37;
+    --text-secondary: #52736B;
+    --text-muted: #64748B;
+    --white: #FFFFFF;
+
+    /* Legacy Token Aliases Mapped to HRMS Palette */
+    --pista: var(--mint-bg);
+    --dark: var(--pine-dark);
+    --dark-soft: var(--text-secondary);
+    --primary: var(--pine-dark);
+    --bg: var(--canvas);
+    --border: var(--card-border);
+    --text: var(--text-primary);
+    --text-soft: var(--text-secondary);
+    --on-primary: var(--white);
+    --action: var(--pine-dark);
     --action-text: var(--white);
-    --highlight: var(--pista);
-    --danger: var(--dark);
+    --highlight: var(--amber);
+    --danger: #DC2626;
     --on-danger: var(--white);
 
-    /* Backward compatibility tokens mapped strictly to 3 colours */
-    --color-primary: var(--pista);
-    --color-highlight: var(--pista);
-    --color-background: var(--white);
-    --color-card: var(--white);
-    --color-border: var(--pista);
-    --color-text: var(--dark);
-    --color-text-soft: var(--dark-soft);
-    --color-primary-text: var(--dark);
-    --color-cta: var(--dark);
-    --color-cta-text: var(--white);
-    --color-success: var(--pista);
-    --color-error: var(--dark);
-    --color-warning: var(--pista);
-
-    --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
 }
 
 /* ==========================================================================
    1. GLOBAL RESET & PAGE CANVAS
-   Page background is --white, text is --dark.
+   Page canvas is soft light sage/off-white #F8FAF9, text is #0F172A.
    ========================================================================== */
 html, body {
-    background-color: var(--white) !important;
-    color: var(--dark) !important;
+    background-color: var(--canvas) !important;
+    color: var(--text-primary) !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 15px !important;
     line-height: 1.6 !important;
@@ -60,543 +91,475 @@ html, body {
 
 main,
 .bg-screen,
-[class*="bg-slate"],
-[class*="bg-gray"],
-[class*="bg-zinc"],
-[class*="bg-neutral"],
-[class*="bg-[#F0FDF4]"],
-[class*="bg-[#EAF7EE]"],
+[class*="bg-slate-50"],
+[class*="bg-gray-50"],
+[class*="bg-zinc-50"],
+[class*="bg-neutral-50"],
 [class*="bg-[#F4F6F5]"] {
-    background-color: var(--white) !important;
-    color: var(--dark) !important;
+    background-color: var(--canvas) !important;
+    color: var(--text-primary) !important;
 }
 
 /* ==========================================================================
-   2. RULE 4: CARDS AND FIELDS
-   --white with a 1px --pista border.
+   2. CARDS AND CONTAINERS
+   Pure crisp white #FFFFFF with subtle 1px border #E5ECE9 and rounded-2xl.
    ========================================================================== */
 .card-theme,
 .bg-white,
 [class*="bg-white"],
 .rounded-xl,
 .rounded-2xl {
-    background-color: var(--white) !important;
-    border-color: var(--pista) !important;
-    color: var(--dark) !important;
-    box-shadow: none !important;
+    background-color: var(--card) !important;
+    border-color: var(--card-border) !important;
+    color: var(--text-primary) !important;
 }
 
 .card-theme,
 main .bg-white,
 main .rounded-xl,
 main .rounded-2xl {
-    border: 1px solid var(--pista) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
 }
 
 .card-theme h1, .card-theme h2, .card-theme h3, .card-theme h4,
 .bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4 {
-    color: var(--dark) !important;
+    color: var(--text-primary) !important;
 }
 
+/* Form Inputs, Selects, and Textareas */
 input, select, textarea {
-    background-color: var(--white) !important;
-    color: var(--dark) !important;
-    border: 1px solid var(--pista) !important;
-    box-shadow: none !important;
+    background-color: var(--card) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--card-border-alt) !important;
     border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
 }
 input:focus, select:focus, textarea:focus {
-    border-color: var(--dark) !important;
+    border-color: var(--pine-dark) !important;
     outline: none !important;
+    box-shadow: 0 0 0 2px rgba(22, 63, 55, 0.15) !important;
 }
 
 /* ==========================================================================
-   3. RULE 1 & RULE 6: ALL TEXT (--dark)
-   Text on pista green must always be --dark, never white.
+   3. TYPOGRAPHY
    ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-    color: var(--dark) !important;
+    color: var(--text-primary) !important;
     letter-spacing: -0.015em !important;
 }
 
-p, span, div, td, th, li, a, strong, b, em,
-.text-main,
-[class*="text-slate"],
-[class*="text-gray"],
-[class*="text-zinc"],
-[class*="text-neutral"],
-[class*="text-emerald"],
-[class*="text-teal"],
-[class*="text-blue"],
-[class*="text-indigo"],
-[class*="text-violet"],
-[class*="text-amber"],
-[class*="text-rose"],
-[class*="text-red"],
-[class*="text-orange"],
-[class*="text-[#052E16]"],
-[class*="text-[#0F172A]"] {
-    color: var(--dark) !important;
+p, span, div, td, th, li, a, strong, b, em {
+    color: var(--text-primary);
 }
 
-/* ==========================================================================
-   4. RULE 2: HINTS, PLACEHOLDERS, LABELS AND DISABLED TEXT
-   Use --dark at 70% opacity, not a new grey.
-   ========================================================================== */
+/* Small Subtitles & Field Labels (e.g. PAYROLL, STATUS, Skill Category in screenshot) */
+.text-label,
+label,
+.text-xs.uppercase,
+[class*="text-[10px]"].uppercase,
+[class*="text-xs"].uppercase {
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+}
+
 .text-soft,
 .text-muted,
-label,
-.text-slate-400,
 .text-slate-500,
-.text-slate-600,
-.text-gray-400,
-.text-gray-500,
-.text-zinc-400,
-.text-zinc-500,
-[class*="text-[#4B6B57]"],
-[disabled],
-.disabled {
-    color: var(--dark-soft) !important;
-}
-
-::placeholder,
-::-webkit-input-placeholder,
-::-moz-placeholder,
-:-ms-input-placeholder {
-    color: var(--dark-soft) !important;
-    opacity: 1 !important;
+.text-gray-500 {
+    color: var(--text-muted) !important;
 }
 
 /* ==========================================================================
-   5. RULE 3: HEADER & SIDEBAR
-   Header: --pista with --dark text.
-   Sidebar: --white with --dark text, selected item --pista.
+   4. TOP APP HEADER
+   Clean Crisp White #FFFFFF matching HRMS Reference Screenshot
    ========================================================================== */
 header,
+header.h-16 {
+    background-color: var(--card) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    color: var(--text-pine) !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
 header * {
-    background-color: var(--pista) !important;
-    color: var(--dark) !important;
-    border-color: var(--pista) !important;
+    color: var(--text-pine) !important;
 }
 
+/* Operational Status Pill (matches "● HRMS operations" in screenshot) */
+header .inline-flex.rounded-full,
+header [class*="rounded-full"][class*="border"] {
+    background-color: var(--canvas) !important;
+    border: 1px solid var(--card-border) !important;
+    color: var(--text-pine) !important;
+}
+
+/* Notification Bell and Pill Buttons in Header */
 header button,
-header a {
-    background-color: transparent !important;
-    border: 1px solid var(--dark) !important;
-    color: var(--dark) !important;
+header a.btn-header {
+    background-color: var(--card) !important;
+    border: 1px solid var(--card-border) !important;
+    color: var(--text-pine) !important;
+    border-radius: var(--radius-md) !important;
 }
 
-header i,
-header span,
-header h1,
-header h2 {
-    color: var(--dark) !important;
+header button:hover {
+    background-color: var(--canvas) !important;
+    border-color: var(--card-border-alt) !important;
 }
 
-#appSidebar,
-aside {
-    background-color: var(--white) !important;
-    border-right: 1px solid var(--pista) !important;
-}
-
-#appSidebar *,
-aside * {
-    color: var(--dark) !important;
-}
-
-#appSidebar a,
-#appSidebar button {
-    background-color: transparent !important;
-    color: var(--dark) !important;
-}
-
-#appSidebar a:hover,
-#appSidebar button:hover {
-    background-color: rgba(147, 197, 114, 0.25) !important;
-    color: var(--dark) !important;
+/* Header User Profile Pill */
+header [class*="border-l"] {
+    border-color: var(--card-border) !important;
 }
 
 /* ==========================================================================
-   LEFT SIDEBAR (STRICT 3-COLOUR SPECIFICATION)
-   1. Group buttons ATTENDANCE, MATERIAL, PROGRESS, LETTERS, REPORTS, MASTER:
-      Solid pista #93C572 background, same border, text & icon & arrow #14300A.
-   2. Hover & pressed state:
-      Background #7DB35A, text stays #14300A.
-   3. Dashboard item & sub-items:
-      White with #14300A text. Currently opened page's item gets pista #93C572 with #14300A text.
-   4. Language box at bottom:
-      Pista background #93C572, text #14300A. Sign out stays white with #14300A text.
-   5. Only 3 colours used: pista #93C572, dark green #14300A, and white (exception: #7DB35A).
-   6. Text on pista green must always be #14300A, never white.
+   5. LEFT SIDEBAR
+   Deep Pine Green #163F37 matching HRMS Reference Screenshot
    ========================================================================== */
-
 #appSidebar,
 aside#appSidebar {
-    background-color: #FFFFFF !important;
-    border-right: 1px solid #93C572 !important;
+    background-color: var(--pine-dark) !important;
+    border-right: 1px solid #1C4D44 !important;
+    color: var(--white) !important;
 }
 
-#appSidebar,
 #appSidebar * {
-    color: #14300A !important;
+    color: var(--white);
 }
 
-/* 1. Group buttons ATTENDANCE, MATERIAL, PROGRESS, LETTERS, REPORTS, MASTER */
+/* Brand Box in Sidebar */
+#appSidebar .p-4.border-b,
+#appSidebar [class*="border-b"] {
+    background-color: var(--pine-dark) !important;
+    border-color: #1C4D44 !important;
+}
+
+#appSidebar .brand-subtitle {
+    color: var(--pine-light) !important;
+}
+
+/* Sidebar Collapse Circle Button on Edge */
+#sidebarCollapseBtn {
+    background-color: var(--white) !important;
+    border: 1px solid var(--pine-dark) !important;
+    color: var(--pine-dark) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+
+#sidebarCollapseBtn i {
+    color: var(--pine-dark) !important;
+}
+
+#sidebarCollapseBtn:hover {
+    background-color: var(--canvas) !important;
+}
+
+/* Scrollable Container in Sidebar */
+#appSidebar .flex-1.overflow-y-auto {
+    background-color: var(--pine-dark) !important;
+}
+
+/* Category / Folder Toggle Buttons (e.g. ATTENDANCE, MATERIAL, REPORTS) */
 #appSidebar .folder-toggle-btn,
 #appSidebar button.folder-toggle-btn {
-    background-color: #93C572 !important;
-    border: 1px solid #93C572 !important;
-    color: #14300A !important;
+    background-color: #1C4840 !important;
+    border: 1px solid rgba(35, 83, 74, 0.6) !important;
+    color: var(--pine-light) !important;
+    border-radius: var(--radius-md) !important;
 }
 
 #appSidebar .folder-toggle-btn *,
-#appSidebar .folder-toggle-btn i,
-#appSidebar .folder-toggle-btn span,
-#appSidebar .folder-toggle-btn .fa-chevron-right,
-#appSidebar .folder-toggle-btn .fa-chevron-down {
-    color: #14300A !important;
+#appSidebar button.folder-toggle-btn * {
+    color: var(--pine-light) !important;
 }
 
-/* 2. Hover and pressed state for group buttons */
 #appSidebar .folder-toggle-btn:hover,
-#appSidebar .folder-toggle-btn:active,
-#appSidebar .folder-toggle-btn:focus,
-#appSidebar button.folder-toggle-btn:hover,
-#appSidebar button.folder-toggle-btn:active,
-#appSidebar button.folder-toggle-btn:focus {
-    background-color: #7DB35A !important;
-    border-color: #7DB35A !important;
-    color: #14300A !important;
+#appSidebar button.folder-toggle-btn:hover {
+    background-color: var(--pine-hover) !important;
+    color: var(--white) !important;
 }
 
-#appSidebar .folder-toggle-btn:hover *,
-#appSidebar .folder-toggle-btn:active *,
-#appSidebar .folder-toggle-btn:focus * {
-    color: #14300A !important;
+#appSidebar .folder-toggle-btn:hover * {
+    color: var(--white) !important;
 }
 
-/* 3. Dashboard item (top) and sub-items (Register, Excel, PDF) */
+/* Navigation Links (Inactive Items) */
 #appSidebar .sidebar-nav-item,
 #appSidebar .sidebar-sub-item {
-    background-color: #FFFFFF !important;
-    color: #14300A !important;
+    background-color: transparent !important;
+    color: var(--pine-muted) !important;
+    border-radius: var(--radius-md) !important;
+    transition: all 0.15s ease !important;
 }
 
 #appSidebar .sidebar-nav-item *,
 #appSidebar .sidebar-sub-item * {
-    color: #14300A !important;
+    color: var(--pine-muted) !important;
 }
 
 #appSidebar .sidebar-nav-item:hover,
 #appSidebar .sidebar-sub-item:hover {
-    background-color: rgba(147, 197, 114, 0.25) !important;
-    color: #14300A !important;
+    background-color: var(--pine-hover) !important;
+    color: var(--white) !important;
 }
 
-/* Currently opened page's item gets the pista background #93C572 */
+#appSidebar .sidebar-nav-item:hover *,
+#appSidebar .sidebar-sub-item:hover * {
+    color: var(--white) !important;
+}
+
+/* Active Nav Item (Exact Match to "Salary Slip" in Screenshot) */
 #appSidebar .active-sidebar-pill,
-#appSidebar .sidebar-nav-item.active-sidebar-pill,
-#appSidebar .sidebar-sub-item.active-sidebar-pill,
-#appSidebar a.active-sidebar-pill,
-#appSidebar .active-pill,
-#appSidebar a.active {
-    background-color: #93C572 !important;
-    color: #14300A !important;
-    border-left: 3px solid #14300A !important;
+#appSidebar a.active-sidebar-pill {
+    background-color: var(--pine-active) !important;
+    color: var(--white) !important;
     font-weight: 700 !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
 }
 
-#appSidebar .active-sidebar-pill *,
-#appSidebar .sidebar-nav-item.active-sidebar-pill *,
-#appSidebar .sidebar-sub-item.active-sidebar-pill * {
-    color: #14300A !important;
+#appSidebar .active-sidebar-pill * {
+    color: var(--white) !important;
 }
 
-#appSidebar .active-indicator {
-    background-color: #14300A !important;
+/* Active Amber Indicator Pill (Vertical Amber Bar on Active Nav Item) */
+#appSidebar .active-sidebar-pill .active-indicator,
+.active-indicator {
+    display: inline-block !important;
+    background-color: var(--amber) !important;
+    width: 4px !important;
+    height: 18px !important;
+    border-radius: 9999px !important;
 }
 
-/* 4. Language box at bottom: pista background #93C572, text #14300A */
+/* Bottom Section of Sidebar */
+#appSidebar .p-3.border-t {
+    background-color: var(--pine-dark) !important;
+    border-color: #1C4D44 !important;
+}
+
 #appSidebar .sidebar-lang-box {
-    background-color: #93C572 !important;
-    border: 1px solid #93C572 !important;
-    color: #14300A !important;
+    background-color: #1C4840 !important;
+    border: 1px solid #23534A !important;
+    color: var(--pine-muted) !important;
 }
 
 #appSidebar .sidebar-lang-box * {
-    color: #14300A !important;
+    color: var(--pine-muted) !important;
 }
 
-#appSidebar .sidebar-lang-pill-container {
-    background-color: rgba(20, 48, 10, 0.12) !important;
-    border: 1px solid rgba(20, 48, 10, 0.25) !important;
-}
-
-#appSidebar .sidebar-lang-btn.active,
-#appSidebar .sidebar-lang-btn-active {
-    background-color: #FFFFFF !important;
-    color: #14300A !important;
-    font-weight: 700 !important;
-}
-
-#appSidebar .sidebar-lang-btn {
-    color: #14300A !important;
-}
-
-/* Sign out stays white with #14300A text */
 #appSidebar .sidebar-signout-btn {
-    background-color: #FFFFFF !important;
-    border: 1px solid #93C572 !important;
-    color: #14300A !important;
-}
-
-#appSidebar .sidebar-signout-btn * {
-    color: #14300A !important;
+    background-color: #1C4840 !important;
+    border: 1px solid #23534A !important;
+    color: var(--pine-muted) !important;
+    border-radius: var(--radius-md) !important;
 }
 
 #appSidebar .sidebar-signout-btn:hover {
-    background-color: rgba(147, 197, 114, 0.25) !important;
-    color: #14300A !important;
+    background-color: var(--pine-hover) !important;
+    color: var(--white) !important;
 }
 
-/* Mobile Sticky Bottom Navigation Bar */
-nav.fixed.bottom-0 {
-    background-color: var(--pista) !important;
-    border-top: 1px solid var(--pista) !important;
-    box-shadow: none !important;
-}
-
-nav.fixed.bottom-0 * {
-    color: var(--dark) !important;
-}
-
-nav.fixed.bottom-0 a,
-nav.fixed.bottom-0 button {
-    color: var(--dark) !important;
-}
-
-nav.fixed.bottom-0 .bg-white\/15 {
-    background-color: var(--white) !important;
-    border: 1px solid var(--dark) !important;
-}
-
-nav.fixed.bottom-0 .bg-white\/15 * {
-    color: var(--dark) !important;
+#appSidebar .sidebar-signout-btn:hover * {
+    color: var(--white) !important;
 }
 
 /* ==========================================================================
-   6. RULE 5: BUTTONS
-   - Normal button: --pista fill, --dark text.
-   - Main action button (one per area): --dark fill, --white text.
-   - Secondary button: --white fill, 1.5px --dark border, --dark text.
+   6. BUTTONS
    ========================================================================== */
 
-/* 6A. Normal Buttons: --pista fill, --dark text */
-button,
-a.btn,
+/* 6A. Primary Action Button: Deep Pine Green #163F37 Fill with White Text
+   (Exact Match to "Download Salary Slip" Button in Screenshot) */
+button:not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.folder-toggle-btn):not(#sidebarCollapseBtn):not(.sidebar-lang-btn):not(.sidebar-nav-item):not(.sidebar-sub-item),
 .btn-primary,
-.btn-normal,
-.btn-pista,
-[class*="bg-[#166534]"],
-[class*="bg-teal"],
-[class*="bg-emerald"],
-[class*="bg-green"],
-[class*="bg-blue"],
-[class*="bg-indigo"],
-[class*="bg-sky"] {
-    background-color: var(--pista) !important;
-    color: var(--dark) !important;
-    border: 1px solid var(--pista) !important;
-    background-image: none !important;
-    box-shadow: none !important;
-}
-
-button *,
-a.btn *,
-.btn-primary *,
-.btn-normal * {
-    color: var(--dark) !important;
-}
-
-button:hover,
-a.btn:hover,
-.btn-primary:hover,
-.btn-normal:hover {
-    background-color: #85B864 !important;
-    color: var(--dark) !important;
-}
-
-/* 6B. Main Action Button: --dark fill, --white text */
 .btn-action,
 .btn-action-main,
 .btn-cta,
 .btn-save-attendance,
 .btn-new-letter,
 #saveAllBtn,
-[class*="bg-[#F97316]"],
-[class*="bg-orange"],
-[class*="bg-amber-500"],
 button[type="submit"]:not(.btn-secondary) {
-    background-color: var(--dark) !important;
+    background-color: var(--pine-dark) !important;
     color: var(--white) !important;
-    border: 1px solid var(--dark) !important;
-    background-image: none !important;
-    box-shadow: none !important;
+    border: 1px solid var(--pine-dark) !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.15s ease !important;
 }
 
+button:not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.folder-toggle-btn):not(#sidebarCollapseBtn):not(.sidebar-lang-btn):not(.sidebar-nav-item):not(.sidebar-sub-item) *,
+.btn-primary *,
 .btn-action *,
 .btn-action-main *,
 .btn-cta *,
 .btn-save-attendance *,
 .btn-new-letter *,
 #saveAllBtn *,
-[class*="bg-[#F97316]"] *,
-[class*="bg-orange"] *,
 button[type="submit"]:not(.btn-secondary) * {
     color: var(--white) !important;
 }
 
+button:not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.folder-toggle-btn):not(#sidebarCollapseBtn):not(.sidebar-lang-btn):not(.sidebar-nav-item):not(.sidebar-sub-item):hover,
+.btn-primary:hover,
 .btn-action:hover,
 .btn-action-main:hover,
 .btn-cta:hover,
 #saveAllBtn:hover {
-    background-color: #0c1f06 !important;
+    background-color: var(--pine-darker) !important;
+    border-color: var(--pine-darker) !important;
     color: var(--white) !important;
 }
 
-/* 6C. Secondary Button: --white fill, 1.5px --dark border, --dark text */
+/* 6B. Secondary Button: Crisp White Fill with Pine Border and Pine Text */
 .btn-secondary,
 .btn-secondary-outline,
 .btn-secondary-sm,
-.btn-outline,
-.btn-danger,
-.btn-delete,
-.owner-delete-btn,
-[class*="bg-[#B91C1C]"],
-[class*="bg-rose"],
-[class*="bg-red"] {
+.btn-outline {
     background-color: var(--white) !important;
-    color: var(--dark) !important;
-    border: 1.5px solid var(--dark) !important;
-    background-image: none !important;
-    box-shadow: none !important;
+    color: var(--pine-dark) !important;
+    border: 1.5px solid var(--card-border-alt) !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 600 !important;
 }
 
 .btn-secondary *,
 .btn-secondary-outline *,
 .btn-secondary-sm *,
-.btn-outline *,
-.btn-danger *,
-.btn-delete *,
-.owner-delete-btn * {
-    color: var(--dark) !important;
+.btn-outline * {
+    color: var(--pine-dark) !important;
 }
 
 .btn-secondary:hover,
 .btn-secondary-outline:hover,
 .btn-secondary-sm:hover,
 .btn-outline:hover {
-    background-color: rgba(147, 197, 114, 0.2) !important;
-    color: var(--dark) !important;
+    background-color: var(--mint-bg) !important;
+    border-color: var(--pine-dark) !important;
+    color: var(--pine-dark) !important;
+}
+
+/* 6C. Danger / Delete Button */
+.btn-danger,
+.btn-delete,
+.owner-delete-btn {
+    background-color: var(--white) !important;
+    color: #DC2626 !important;
+    border: 1px solid #FECACA !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.btn-danger *,
+.btn-delete *,
+.owner-delete-btn * {
+    color: #DC2626 !important;
+}
+
+.btn-danger:hover,
+.btn-delete:hover,
+.owner-delete-btn:hover {
+    background-color: #FEF2F2 !important;
+    border-color: #DC2626 !important;
 }
 
 /* ==========================================================================
-   7. ICON BACKGROUNDS & SMALL ACCENTS
-   --pista: icon backgrounds, with --dark icon.
-   ========================================================================== */
-.icon-box,
-[class*="bg-emerald-50"],
-[class*="bg-teal-50"],
-[class*="bg-blue-50"],
-[class*="bg-sky-50"],
-[class*="bg-purple-50"],
-[class*="bg-violet-50"],
-[class*="bg-amber-50"],
-[class*="bg-rose-50"],
-[class*="bg-red-50"] {
-    background-color: var(--pista) !important;
-    border: 1px solid var(--pista) !important;
-    color: var(--dark) !important;
-}
-
-.icon-box i,
-[class*="bg-emerald-50"] i,
-[class*="bg-teal-50"] i,
-[class*="bg-blue-50"] i,
-[class*="bg-sky-50"] i,
-[class*="bg-purple-50"] i,
-[class*="bg-violet-50"] i,
-[class*="bg-amber-50"] i,
-[class*="bg-rose-50"] i,
-[class*="bg-red-50"] i {
-    color: var(--dark) !important;
-}
-
-/* ==========================================================================
-   8. STATUS CHIPS & BADGES
-   Strictly use only the 3 colours.
+   7. STATUS BADGES & ACCENTS
+   (Exact Match to "PUBLISHED" Badge in Reference Screenshot)
    ========================================================================== */
 .status-pill-success,
 .status-success,
-.status-pill-active {
-    background-color: var(--pista) !important;
-    color: var(--dark) !important;
-    border: 1px solid var(--pista) !important;
+.status-pill-active,
+.badge-published,
+[class*="bg-emerald-100"],
+[class*="bg-green-100"] {
+    background-color: var(--mint-bg) !important;
+    color: var(--mint-text) !important;
+    border: 1px solid var(--mint-border) !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
 }
 
+.status-pill-success *,
+.status-success *,
+.status-pill-active *,
+.badge-published * {
+    color: var(--mint-text) !important;
+}
+
+/* Warning & Pending Status Badges */
 .status-pill-warning,
 .status-warning,
 .status-pill-danger,
-.status-danger {
-    background-color: var(--white) !important;
-    color: var(--dark) !important;
-    border: 1.5px solid var(--dark) !important;
+.status-danger,
+[class*="bg-amber-100"] {
+    background-color: var(--amber-light) !important;
+    color: var(--amber) !important;
+    border: 1px solid #FDE68A !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+}
+
+.status-pill-warning *,
+.status-warning * {
+    color: var(--amber) !important;
 }
 
 /* ==========================================================================
-   9. BORDERS & DIVIDERS
-   1px --pista border.
+   8. BORDERS & DIVIDERS
    ========================================================================== */
 .border,
 [class*="border-slate"],
 [class*="border-gray"],
 [class*="border-zinc"],
-[class*="border-emerald"],
-[class*="border-teal"],
-[class*="border-[#C7E6D1]"],
 hr,
 .divide-y > * {
-    border-color: var(--pista) !important;
+    border-color: var(--card-border) !important;
 }
 
 /* ==========================================================================
-   10. TABLES
+   9. TABLES
+   Clean, Modern Enterprise Tables
    ========================================================================== */
 table {
-    border-collapse: collapse !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
     width: 100% !important;
-    border: 1px solid var(--pista) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
 }
 
 table thead tr,
 table thead th {
-    background-color: var(--pista) !important;
-    color: var(--dark) !important;
-    border-bottom: 1px solid var(--pista) !important;
+    background-color: #F0F5F3 !important;
+    color: var(--pine-dark) !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--card-border) !important;
     padding: 12px 14px !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
 }
 
 table thead th * {
-    color: var(--dark) !important;
+    color: var(--pine-dark) !important;
 }
 
 table tbody td {
-    border-bottom: 1px solid var(--pista) !important;
-    color: var(--dark) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    color: var(--text-primary) !important;
     padding: 12px 14px !important;
     background-color: var(--white) !important;
+    font-size: 14px !important;
+}
+
+table tbody tr:last-child td {
+    border-bottom: none !important;
 }
 
 table tbody tr:hover td {
-    background-color: rgba(147, 197, 114, 0.15) !important;
+    background-color: #F5F9F7 !important;
 }

@@ -68,7 +68,7 @@
                     <span>Daily Manpower Attendance</span>
                     {% endif %}
                 </h1>
-                <button type="button" onclick="openInfoModal('daily_manpower')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                <button type="button" onclick="openInfoModal('daily_manpower')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#163F37]/30 text-[#163F37] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#E5ECE9] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
                     <i class="fa-solid fa-circle-info"></i>
                 </button>
             </div>
@@ -144,11 +144,11 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#E2E8F0]">
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full bg-[#93C572]/20 text-[#14300A] text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex border border-[#93C572]">
-                        <span class="w-2 h-2 rounded-full bg-[#93C572] animate-ping"></span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-[#EAF5EF] text-[#163F37] text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 inline-flex border border-[#E5ECE9]">
+                        <span class="w-2 h-2 rounded-full bg-[#163F37] animate-ping"></span>
                         ⚡ Supervisor Attendance Desk
                     </span>
-                    <button type="button" onclick="openInfoModal('supervisor_desk')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                    <button type="button" onclick="openInfoModal('supervisor_desk')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#163F37]/30 text-[#163F37] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#E5ECE9] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
                         <i class="fa-solid fa-circle-info"></i>
                     </button>
                 </div>
@@ -159,8 +159,8 @@
             </div>
 {% if not is_supervisor_view %}
             <div class="flex items-center gap-2">
-                <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-satellite-dish text-[#93C572]"></i>
+                <a href="/geo-attendance" class="px-3.5 py-2 rounded-xl bg-[#163F37] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-satellite-dish text-[#7EA79E]"></i>
                     <span>GPS 500M Monitor &rarr;</span>
                 </a>
             </div>
@@ -282,9 +282,9 @@
                     <div class="flex items-center gap-2">
                         <h3 class="text-sm sm:text-base font-black text-[#0F172A] flex items-center gap-2">
                             <span>📸 Today's Live Photo Feed</span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-[#14300A] text-white text-xs font-bold">{{ today_photos|length }} Present</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-[#163F37] text-white text-xs font-bold">{{ today_photos|length }} Present</span>
                         </h3>
-                        <button type="button" onclick="openInfoModal('photo_feed')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                        <button type="button" onclick="openInfoModal('photo_feed')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#163F37]/30 text-[#163F37] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#E5ECE9] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
                             <i class="fa-solid fa-circle-info"></i>
                         </button>
                     </div>
@@ -333,23 +333,23 @@
 
 {% if not is_supervisor_view %}
     <!-- 10:30 AM Smart Auto-Analysis Banner -->
-    <div class="bg-white border border-[#93C572] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
+    <div class="bg-white border border-[#E5ECE9] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs no-print">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-[#93C572] text-[#14300A] flex items-center justify-center shrink-0 font-bold">
+            <div class="w-9 h-9 rounded-xl bg-[#163F37] text-[#163F37] flex items-center justify-center shrink-0 font-bold">
                 <i class="fa-solid fa-satellite-dish text-base"></i>
             </div>
             <div class="flex items-center gap-2">
-                <p class="font-black text-[#14300A] text-sm">
+                <p class="font-black text-[#163F37] text-sm">
                     GPS Auto-Attendance Engine
                 </p>
-                <span class="px-2 py-0.5 rounded-full bg-[#93C572]/20 text-[#14300A] border border-[#93C572] text-[10px] font-bold uppercase">10:30 AM Active</span>
-                <button type="button" onclick="openInfoModal('gps_engine')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#93C572]/30 text-[#14300A] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#93C572] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
+                <span class="px-2 py-0.5 rounded-full bg-[#EAF5EF] text-[#163F37] border border-[#E5ECE9] text-[10px] font-bold uppercase">10:30 AM Active</span>
+                <button type="button" onclick="openInfoModal('gps_engine')" class="w-6 h-6 rounded-full bg-slate-100 hover:bg-[#163F37]/30 text-[#163F37] text-xs flex items-center justify-center transition border border-slate-200 hover:border-[#E5ECE9] cursor-pointer inline-flex shrink-0 shadow-2xs" title="Information">
                     <i class="fa-solid fa-circle-info"></i>
                 </button>
             </div>
         </div>
         <div class="shrink-0 flex items-center gap-2">
-            <button type="button" onclick="autoFetchFromGps()" class="px-3.5 py-2 rounded-xl bg-[#14300A] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+            <button type="button" onclick="autoFetchFromGps()" class="px-3.5 py-2 rounded-xl bg-[#163F37] text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-rotate"></i> <span>Sync with GPS</span>
             </button>
         </div>

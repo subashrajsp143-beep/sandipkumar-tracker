@@ -11,7 +11,7 @@
             <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                 <i class="fa-solid fa-circle-plus"></i> Daily Consumption Voucher
             </div>
-            <h1 class="text-2xl font-extrabold text-[#14300A]">Daily Material Usage Entry</h1>
+            <h1 class="text-2xl font-extrabold text-[#163F37]">Daily Material Usage Entry</h1>
 
         </div>
         <div class="flex items-center gap-2">
@@ -25,24 +25,24 @@
     </div>
 
     <!-- Paper Voucher Scanner / Quick Actions -->
-    <div class="bg-white rounded-2xl p-4 text-[#14300A] flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#93C572] shadow-xs">
+    <div class="bg-white rounded-2xl p-4 text-[#163F37] flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#E5ECE9] shadow-xs">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#93C572] text-[#14300A] flex items-center justify-center text-lg shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-[#163F37] text-[#163F37] flex items-center justify-center text-lg shrink-0">
                 <i class="fa-solid fa-camera"></i>
             </div>
             <div>
-                <h2 class="text-sm font-bold text-[#14300A]">Scan Paper Voucher / Receipt</h2>
-                <p class="text-xs text-[#14300A]/70">Auto-detect items from voucher photo</p>
+                <h2 class="text-sm font-bold text-[#163F37]">Scan Paper Voucher / Receipt</h2>
+                <p class="text-xs text-[#163F37]/70">Auto-detect items from voucher photo</p>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <a href="{{ url_for('material_store') }}" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[#14300A] text-[#14300A] hover:bg-[#93C572]/20 transition flex items-center gap-1.5">
+            <a href="{{ url_for('material_store') }}" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[#14300A] text-[#163F37] hover:bg-[#163F37]/20 transition flex items-center gap-1.5">
                 <i class="fa-solid fa-cart-shopping"></i> Material Store
             </a>
-            <button type="button" id="openScannerBtn" class="px-3.5 py-2 rounded-xl bg-[#93C572] text-[#14300A] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <button type="button" id="openScannerBtn" class="px-3.5 py-2 rounded-xl bg-[#163F37] text-[#163F37] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-file-arrow-up"></i> Upload Photo
             </button>
-            <button type="button" id="openTextPasteBtn" class="px-3.5 py-2 rounded-xl bg-white border border-[#93C572] text-[#14300A] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
+            <button type="button" id="openTextPasteBtn" class="px-3.5 py-2 rounded-xl bg-white border border-[#E5ECE9] text-[#163F37] text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-brands fa-whatsapp"></i> WhatsApp Import
             </button>
         </div>
@@ -62,7 +62,7 @@
                 {% if locked_site_id %}
                 <div class="w-full rounded-xl border border-teal-300 bg-teal-50 py-2.5 px-3 text-sm font-bold text-teal-900 shadow-sm flex items-center justify-between">
                     <span>{{ locked_site.code }} - {{ locked_site.name }}</span>
-                    <span class="text-[10px] text-[#14300A]/70 font-bold">Assigned Site</span>
+                    <span class="text-[10px] text-[#163F37]/70 font-bold">Assigned Site</span>
                 </div>
                 <input type="hidden" id="siteSelect" value="{{ locked_site_id }}" data-supervisor="{{ locked_site.supervisor or '' }}">
                 {% else %}
@@ -104,45 +104,45 @@
         </div>
 
         <!-- DPR Section: Daily Progress -->
-        <div class="p-4 rounded-xl border border-[#93C572] bg-white space-y-3">
+        <div class="p-4 rounded-xl border border-[#E5ECE9] bg-white space-y-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-lg bg-[#93C572] text-[#14300A] flex items-center justify-center text-xs font-bold">
+                    <span class="w-7 h-7 rounded-lg bg-[#163F37] text-[#163F37] flex items-center justify-center text-xs font-bold">
                         <i class="fa-solid fa-faucet-drip"></i>
                     </span>
-                    <h3 class="text-xs sm:text-sm font-bold text-[#14300A] uppercase tracking-wide">
+                    <h3 class="text-xs sm:text-sm font-bold text-[#163F37] uppercase tracking-wide">
                         Daily Work Progress (DPR)
                     </h3>
                 </div>
-                <a href="/dpr" target="_blank" class="text-xs font-bold text-[#14300A] hover:underline transition flex items-center gap-1">
+                <a href="/dpr" target="_blank" class="text-xs font-bold text-[#163F37] hover:underline transition flex items-center gap-1">
                     <span>View DPR</span> &rarr;
                 </a>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Ward No.</label>
-                    <input type="text" id="dprWardNo" placeholder="Ward 2" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Ward No.</label>
+                    <input type="text" id="dprWardNo" placeholder="Ward 2" class="w-full py-1.5 px-2.5 rounded-lg border border-[#E5ECE9] bg-white text-xs font-bold text-[#163F37]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Pipeline (Meters)</label>
-                    <input type="number" step="0.1" id="dprPipeMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Pipeline (Meters)</label>
+                    <input type="number" step="0.1" id="dprPipeMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#E5ECE9] bg-white text-xs font-bold text-[#163F37]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Tap Connection (FHTC)</label>
-                    <input type="number" id="dprFhtcCount" placeholder="0 taps" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Tap Connection (FHTC)</label>
+                    <input type="number" id="dprFhtcCount" placeholder="0 taps" class="w-full py-1.5 px-2.5 rounded-lg border border-[#E5ECE9] bg-white text-xs font-bold text-[#163F37]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Boring (Feet)</label>
-                    <input type="number" step="0.1" id="dprBoringFeet" placeholder="0 ft" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Boring (Feet)</label>
+                    <input type="number" step="0.1" id="dprBoringFeet" placeholder="0 ft" class="w-full py-1.5 px-2.5 rounded-lg border border-[#E5ECE9] bg-white text-xs font-bold text-[#163F37]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Road Restoration (M)</label>
-                    <input type="number" step="0.1" id="dprRoadMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#93C572] bg-white text-xs font-bold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Road Restoration (M)</label>
+                    <input type="number" step="0.1" id="dprRoadMeters" placeholder="0 m" class="w-full py-1.5 px-2.5 rounded-lg border border-[#E5ECE9] bg-white text-xs font-bold text-[#163F37]">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-[#14300A] uppercase mb-1">Civil / Pump House</label>
-                    <select id="dprCivilStage" class="w-full py-1.5 px-2 rounded-lg border border-[#93C572] bg-white text-xs font-semibold text-[#14300A]">
+                    <label class="block text-[11px] font-bold text-[#163F37] uppercase mb-1">Civil / Pump House</label>
+                    <select id="dprCivilStage" class="w-full py-1.5 px-2 rounded-lg border border-[#E5ECE9] bg-white text-xs font-semibold text-[#163F37]">
                         <option value="Pipeline Work">Pipeline Work</option>
                         <option value="Boundary / Plinth">Boundary / Plinth</option>
                         <option value="Slab Casting">Slab Casting</option>
@@ -157,12 +157,12 @@
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-sm font-bold text-[#14300A] uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-packing text-[#93C572]"></i>
+                    <h3 class="text-sm font-bold text-[#163F37] uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-[#7EA79E]"></i>
                         Materials Used
                     </h3>
                 </div>
-                <button type="button" id="addRowBtn" class="px-3.5 py-2 rounded-xl bg-[#93C572] text-[#14300A] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                <button type="button" id="addRowBtn" class="px-3.5 py-2 rounded-xl bg-[#163F37] text-[#163F37] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-plus"></i> + Add Item
                 </button>
             </div>
@@ -196,12 +196,12 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-200">
             <div class="p-4 rounded-xl bg-blue-50/80 border border-blue-100 flex items-center gap-6">
                 <div>
-                    <span class="text-[11px] font-semibold text-[#14300A]/70 uppercase tracking-wider block">Total Items</span>
+                    <span class="text-[11px] font-semibold text-[#163F37]/70 uppercase tracking-wider block">Total Items</span>
                     <span id="totalItemsCount" class="text-lg font-bold text-blue-900">0</span>
                 </div>
                 {% if is_owner %}
                 <div class="border-l border-blue-200 pl-6">
-                    <span class="text-[11px] font-semibold text-[#14300A]/70 uppercase tracking-wider block">Grand Total</span>
+                    <span class="text-[11px] font-semibold text-[#163F37]/70 uppercase tracking-wider block">Grand Total</span>
                     <span id="grandTotalDisplay" class="text-xl font-extrabold text-blue-900">₹0.00</span>
                 </div>
                 {% endif %}
