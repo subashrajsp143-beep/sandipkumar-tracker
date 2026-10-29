@@ -34,6 +34,27 @@
         <p class="text-xs font-bold text-[#163F37]/70 mt-0.5">21 Water Supply Sites Portal</p>
     </div>
 
+    <!-- APP UPDATE TOP ALERT BANNER (Shown when new APK/version is released) -->
+    <div id="appUpdateBanner" class="hidden w-full max-w-md mb-4 bg-[#163F37] text-white border-2 border-[#D97706] rounded-2xl p-3 shadow-md">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] flex-shrink-0 animate-bounce">
+                    <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#D97706] text-slate-900">Naya Update</span>
+                        <span class="text-xs font-bold text-white">Version <span id="bannerVersionName" class="text-[#FBBF24]">v2.1.0</span></span>
+                    </div>
+                    <p id="bannerChangelog" class="text-[10px] text-[#A8C5BF] truncate mt-0.5">Naye features aur fast speed.</p>
+                </div>
+            </div>
+            <a id="bannerDownloadBtn" href="/download-apk" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-black text-xs shadow-sm transition flex items-center gap-1 flex-shrink-0">
+                <i class="fa-solid fa-download"></i> <span>Download</span>
+            </a>
+        </div>
+    </div>
+
     <!-- Login Container Card -->
     <div class="w-full max-w-md bg-white rounded-lg p-6 sm:p-8 border border-[#E5ECE9]">
         
@@ -322,6 +343,71 @@
                 btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> <span>Open Office Work &rarr;</span>';
             }
         }
+    </script>
+
+    <!-- APP UPDATE CHECK & PHONE NOTIFICATION -->
+    <script>
+    (function() {
+        let clientVersionCode = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+
+        function triggerPhoneNotification(data) {
+            try {
+                if (!('Notification' in window)) return;
+                const sendAlert = () => {
+                    const title = '🔔 Naya Update Available: v' + data.version_name;
+                    const options = {
+                        body: 'M/S Sandip Kumar Tracker: ' + (data.changelog || 'Naya update ready hai.') + '\nTap karke download karein.',
+                        icon: '/static/icons/icon-192.png',
+                        badge: '/static/icons/icon-192.png',
+                        vibrate: [200, 100, 200],
+                        tag: 'sandip-update-' + data.version_code,
+                        renotify: true,
+                        data: { url: data.apk_url || '/download-apk' }
+                    };
+                    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification(title, options).catch(() => new Notification(title, options));
+                        }).catch(() => new Notification(title, options));
+                    } else {
+                        new Notification(title, options);
+                    }
+                    localStorage.setItem('sandip_notified_version', String(data.version_code));
+                };
+
+                if (Notification.permission === 'granted') {
+                    sendAlert();
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(p => { if (p === 'granted') sendAlert(); });
+                }
+            } catch(e) {}
+        }
+
+        async function checkUpdates() {
+            try {
+                const res = await fetch('/api/app-version?t=' + Date.now());
+                if (!res.ok) return;
+                const data = await res.json();
+                const serverCode = parseInt(data.version_code, 10);
+                if (serverCode > clientVersionCode) {
+                    const b = document.getElementById('appUpdateBanner');
+                    const bVer = document.getElementById('bannerVersionName');
+                    const bLog = document.getElementById('bannerChangelog');
+                    const bBtn = document.getElementById('bannerDownloadBtn');
+                    if (bVer) bVer.textContent = 'v' + data.version_name;
+                    if (bLog) bLog.textContent = data.changelog || 'Naya version ready hai.';
+                    if (bBtn) bBtn.href = data.apk_url || '/download-apk';
+                    if (b) b.classList.remove('hidden');
+
+                    const notified = localStorage.getItem('sandip_notified_version');
+                    if (notified !== String(serverCode)) {
+                        triggerPhoneNotification(data);
+                    }
+                }
+            } catch(e) {}
+        }
+
+        window.addEventListener('load', () => setTimeout(checkUpdates, 1000));
+    })();
     </script>
 </body>
 </html>
