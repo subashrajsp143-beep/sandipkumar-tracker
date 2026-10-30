@@ -93,7 +93,7 @@ def ensure_canonical_and_auth():
     # If not logged in at all, direct them to login
     if not role and not is_owner:
         if path in ["/", "/dashboard", "/portal", "/stock", "/entry", "/daily-entry", 
-                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store"]:
+                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store", "/dpr", "/bills", "/progress/bills"]:
             return redirect(url_for("login_page"))
 
 
@@ -3265,3 +3265,158 @@ def api_delete_complaint(complaint_id):
         return jsonify({"success": False, "message": "Complaint not found."}), 404
     except Exception as ex:
         return jsonify({"success": False, "message": str(ex)}), 500
+
+
+# ==============================================================================
+# PROGRESS SUB-SECTION: BILL STATUS & CLEARANCE WORKFLOW (OWNER ONLY)
+# ==============================================================================
+@app.route("/bills")
+@app.route("/progress/bills")
+def bill_status_dashboard():
+    """
+    JJM Bill Status & Clearance Workflow Tracker.
+    RESTRICTED: Strictly accessible by Owner Profile only.
+    """
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        flash("Unauthorized! Bill Status information is confidential and accessible by Owner Profile only.", "error")
+        return redirect(url_for("dashboard"))
+        
+    step_filter = request.args.get("step")
+    site_filter = request.args.get("site_id")
+    sort_by = request.args.get("sort", "step_desc")
+    search_q = request.args.get("q", "").strip()
+    active_view = request.args.get("view", "checklist") # "checklist" or "bills"
+    
+    sites = database.get_all_sites()
+    summary = database.get_bill_clearance_summary()
+    checklist = database.get_all_sites_bill_checklist(step_filter=step_filter, sort_by=sort_by, search=search_q)
+    all_bills = database.get_all_site_bills(
+        site_id=int(site_filter) if site_filter else None,
+        step=int(step_filter) if step_filter else None,
+        sort_by=sort_by,
+        search=search_q
+    )
+    
+    return render_template(
+        "bills.html",
+        sites=sites,
+        summary=summary,
+        checklist=checklist,
+        all_bills=all_bills,
+        steps=database.BILL_CLEARANCE_STEPS,
+        selected_step=int(step_filter) if step_filter else None,
+        selected_site_id=int(site_filter) if site_filter else None,
+        selected_sort=sort_by,
+        search_query=search_q,
+        active_view=active_view,
+        is_owner=True
+    )
+
+@app.route("/api/bills", methods=["GET", "POST"])
+def api_bills_list_create():
+    """API for bills: List all or Create new bill (Owner Only)."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+        
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        site_id = data.get("site_id")
+        bill_no = data.get("bill_no")
+        bill_type = data.get("bill_type", "RA Bill")
+        bill_amount = float(data.get("bill_amount", 0.0) or 0.0)
+        passed_amount = float(data.get("passed_amount", 0.0) or 0.0)
+        period_from = data.get("period_from")
+        period_to = data.get("period_to")
+        current_step = int(data.get("current_step", 1) or 1)
+        step_date = data.get("step_date")
+        ref_val = data.get("ref_val")
+        officer_val = data.get("officer_val")
+        token_val = data.get("token_val")
+        voucher_val = data.get("voucher_val")
+        utr_val = data.get("utr_val")
+        remarks = data.get("remarks")
+        
+        if not site_id or not bill_no:
+            return jsonify({"success": False, "message": "Site aur Bill Number zaruri hain."}), 400
+            
+        new_id = database.create_site_bill(
+            site_id=site_id,
+            bill_no=bill_no,
+            bill_type=bill_type,
+            period_from=period_from,
+            period_to=period_to,
+            bill_amount=bill_amount,
+            passed_amount=passed_amount,
+            current_step=current_step,
+            remarks=remarks,
+            step_date=step_date,
+            ref_val=ref_val,
+            officer_val=officer_val,
+            token_val=token_val,
+            voucher_val=voucher_val,
+            utr_val=utr_val
+        )
+        return jsonify({"success": True, "message": f"Bill {bill_no} successfully create ho gaya hai!", "bill_id": new_id})
+        
+    # GET
+    bills = database.get_all_site_bills()
+    return jsonify({"success": True, "bills": bills})
+
+@app.route("/api/bills/<int:bill_id>", methods=["GET", "POST", "DELETE"])
+def api_bill_detail_manage(bill_id):
+    """API to get, update, or delete a specific bill (Owner Only)."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+        
+    if request.method == "DELETE":
+        database.delete_site_bill(bill_id)
+        return jsonify({"success": True, "message": "Bill successfully remove/archive kar diya gaya."})
+        
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        database.update_site_bill(bill_id, **data)
+        return jsonify({"success": True, "message": "Bill details successfully update ho gayi hain."})
+        
+    # GET
+    bill = database.get_site_bill_by_id(bill_id)
+    if not bill:
+        return jsonify({"success": False, "message": "Bill nahi mila."}), 404
+    return jsonify({"success": True, "bill": bill})
+
+@app.route("/api/bills/<int:bill_id>/advance-step", methods=["POST"])
+def api_bill_advance_step(bill_id):
+    """API to advance or set the step of a bill (Owner Only)."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+        
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    next_step = int(data.get("next_step", 1))
+    step_date = data.get("step_date")
+    ref_val = data.get("ref_val")
+    officer_val = data.get("officer_val")
+    token_val = data.get("token_val")
+    voucher_val = data.get("voucher_val")
+    utr_val = data.get("utr_val")
+    passed_amount = data.get("passed_amount")
+    remarks = data.get("remarks")
+    
+    success = database.advance_site_bill_step(
+        bill_id=bill_id,
+        next_step=next_step,
+        step_date=step_date,
+        ref_val=ref_val,
+        officer_val=officer_val,
+        token_val=token_val,
+        voucher_val=voucher_val,
+        utr_val=utr_val,
+        passed_amount=passed_amount,
+        remarks=remarks
+    )
+    if success:
+        step_name = database.BILL_CLEARANCE_STEPS.get(next_step, {}).get("name", f"Step {next_step}")
+        return jsonify({"success": True, "message": f"Bill status successfully '{step_name}' par update ho gaya hai!"})
+    return jsonify({"success": False, "message": "Bill update karne me samasya aayi."}), 400

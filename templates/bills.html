@@ -1,0 +1,1101 @@
+{% extends "base.html" %}
+
+{% block title %}Bill Status & Clearance Workflow - Progress - M/S SANDIP KUMAR{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Header Banner (HRMS Theme: #163F37 / #166534 with golden amber accents) -->
+    <div class="bg-[#163F37] text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#254E46] relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Progress Sub-Sections Nav Pill Bar (Owner Profile Only) -->
+        <div class="inline-flex items-center p-1 bg-black/25 backdrop-blur rounded-2xl border border-white/10 mb-4">
+            <a href="/dpr" class="px-4 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition flex items-center gap-2">
+                <i class="fa-solid fa-faucet-drip text-emerald-300"></i>
+                <span>Daily Progress (DPR)</span>
+            </a>
+            <a href="/bills" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-[#163F37] shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-file-invoice-dollar text-[#D97706]"></i>
+                <span>Bill Status & Clearance</span>
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-[#D97706] text-slate-950">OWNER ONLY</span>
+            </a>
+        </div>
+
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-2">
+                    <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                    <span>Confidential Owner Profile &bull; 21 Sites Clearance Pipeline</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-money-bill-transfer text-[#D97706]"></i>
+                    <span>Bill Status & Clearance Tracker</span>
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+                    Track the 6-stage clearance cycle: <strong>Bill Created &rarr; Head Clerk &rarr; J.E/S.D.O Verification &rarr; Treasury &rarr; Bill Cleared &rarr; Payment Received</strong>.
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openNewBillModal()" class="px-4 py-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-circle-plus"></i>
+                    <span>+ Naya Bill Add Karein</span>
+                </button>
+                <button type="button" onclick="window.print()" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-1.5 cursor-pointer no-print">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print Report</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 5 Essential Executive KPI Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
+            <!-- 1. Total Bills & Value -->
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
+                <div class="text-[11px] font-bold uppercase text-slate-300 flex items-center gap-1">
+                    <i class="fa-solid fa-file-invoice text-sky-400"></i> Total Bills Tracked
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-white mt-1">{{ summary.overall.total_bills }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
+                <div class="text-[11px] text-amber-300 font-bold mt-1">₹ {{ "{:,.0f}".format(summary.overall.total_bill_amount) }} <span class="text-[9px] text-slate-300 font-normal">Claimed</span></div>
+            </div>
+
+            <!-- 2. Office & Head Clerk (Steps 1 & 2) -->
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
+                <div class="text-[11px] font-bold uppercase text-sky-300 flex items-center gap-1">
+                    <i class="fa-solid fa-user-tie text-sky-400"></i> 1 & 2. Head Clerk Stage
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-sky-300 mt-1">{{ summary.stages.office.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
+                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.office.amount) }} <span class="text-[9px] text-slate-400 font-normal">Under Scrutiny</span></div>
+            </div>
+
+            <!-- 3. Technical Verification (Step 3: JE/SDO) -->
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
+                <div class="text-[11px] font-bold uppercase text-indigo-300 flex items-center gap-1">
+                    <i class="fa-solid fa-clipboard-check text-indigo-400"></i> 3. With J.E / S.D.O
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-indigo-300 mt-1">{{ summary.stages.technical.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
+                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.technical.amount) }} <span class="text-[9px] text-slate-400 font-normal">MB Verification</span></div>
+            </div>
+
+            <!-- 4. Treasury (Step 4) -->
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
+                <div class="text-[11px] font-bold uppercase text-amber-300 flex items-center gap-1">
+                    <i class="fa-solid fa-building-columns text-amber-400"></i> 4. In Treasury
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-amber-300 mt-1">{{ summary.stages.treasury.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
+                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.treasury.amount) }} <span class="text-[9px] text-slate-400 font-normal">Pending Token</span></div>
+            </div>
+
+            <!-- 5. Cleared & Received (Steps 5 & 6) -->
+            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
+                <div class="text-[11px] font-bold uppercase text-emerald-300 flex items-center gap-1">
+                    <i class="fa-solid fa-sack-dollar text-emerald-400"></i> 5 & 6. Cleared / Recd
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{{ summary.stages.completed.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
+                <div class="text-[11px] text-emerald-300 font-bold mt-1">₹ {{ "{:,.0f}".format(summary.stages.completed.received_amount) }} <span class="text-[9px] text-slate-300 font-normal">Received</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6-STEP CLEARANCE PIPELINE VISUAL STEPPER BAR -->
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-[#E5ECE9] shadow-xs">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#D97706]"></span>
+                <h3 class="font-black text-sm text-[#163F37] uppercase tracking-wider">Bill Clearance Process Workflow</h3>
+            </div>
+            <span class="text-xs text-slate-400 font-semibold hidden sm:inline">Tap any step to filter sites below</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {% for st in summary.steps %}
+            <div onclick="applyStepFilter({{ st.step }})" class="p-3 rounded-2xl border transition cursor-pointer text-left relative overflow-hidden {% if selected_step == st.step %}bg-[#EAF5EF] border-[#163F37] ring-2 ring-[#163F37]{% else %}bg-[#F8FAF9] hover:bg-slate-100 border-[#E5ECE9]{% endif %}">
+                <div class="flex items-center justify-between">
+                    <span class="w-6 h-6 rounded-full text-[11px] font-black flex items-center justify-center {% if selected_step == st.step %}bg-[#163F37] text-white{% else %}bg-slate-200 text-slate-700{% endif %}">
+                        {{ st.step }}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white border border-[#E5ECE9] text-[#163F37]">
+                        {{ st.count }} Bills
+                    </span>
+                </div>
+                <div class="mt-2.5">
+                    <div class="text-xs font-black text-[#163F37] leading-tight flex items-center gap-1.5">
+                        <i class="fa-solid {{ st.icon }} text-[11px] text-[#D97706]"></i>
+                        <span class="truncate">{{ st.short }}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ st.name_hi }}</div>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-200/70 text-[11px] font-bold text-slate-700">
+                    ₹ {{ "{:,.0f}".format(st.sum_amount) }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- CONTROLS: STEP FILTER PILLS, SORTING DROPDOWN & SEARCH -->
+    <div class="bg-white rounded-3xl p-4 sm:p-5 border border-[#E5ECE9] shadow-xs space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            
+            <!-- Step Filter Pills -->
+            <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" onclick="applyStepFilter('')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {% if not selected_step %}bg-[#163F37] text-white shadow-xs{% else %}bg-[#F8FAF9] hover:bg-slate-100 text-slate-600 border border-[#E5ECE9]{% endif %}">
+                    All Sites (21)
+                </button>
+                {% for st in summary.steps %}
+                <button type="button" onclick="applyStepFilter({{ st.step }})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if selected_step == st.step %}bg-[#163F37] text-white shadow-xs{% else %}bg-[#F8FAF9] hover:bg-slate-100 text-slate-600 border border-[#E5ECE9]{% endif %}">
+                    <span>{{ st.step }}. {{ st.short }}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_step == st.step %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %}">{{ st.count }}</span>
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- View Switcher -->
+            <div class="inline-flex items-center p-1 bg-[#F8FAF9] rounded-2xl border border-[#E5ECE9] self-start md:self-auto flex-shrink-0">
+                <button type="button" onclick="switchView('checklist')" id="btnViewChecklist" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if active_view == 'checklist' %}bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                    <i class="fa-solid fa-list-check text-[#D97706]"></i>
+                    <span>Sites Checklist (21)</span>
+                </button>
+                <button type="button" onclick="switchView('bills')" id="btnViewBills" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if active_view == 'bills' %}bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                    <i class="fa-solid fa-table-list text-[#D97706]"></i>
+                    <span>All Bills Table ({{ all_bills|length }})</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Secondary Toolbar: Search + Sort Dropdown -->
+        <div class="pt-3 border-t border-[#E5ECE9] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <!-- Search -->
+            <div class="relative flex-1 max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="billSearchInput" value="{{ search_query }}" oninput="debounceSearch(event)" placeholder="Search by site, bill no, diary no, SDO, token, UTR..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37]">
+            </div>
+
+            <!-- Sorting Dropdown (Every Step Sorting as requested) -->
+            <div class="flex items-center gap-2">
+                <label for="billSortSelect" class="text-xs font-bold text-slate-500 whitespace-nowrap flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-down-short-wide text-[#D97706]"></i> Sort By:
+                </label>
+                <select id="billSortSelect" onchange="applySorting(this.value)" class="px-3 py-2 text-xs font-bold text-[#163F37] rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37] cursor-pointer">
+                    <option value="step_desc" {% if selected_sort == 'step_desc' %}selected{% endif %}>Step: Advanced First (Step 6 &rarr; 1)</option>
+                    <option value="step_asc" {% if selected_sort == 'step_asc' %}selected{% endif %}>Step: Initial First (Step 1 &rarr; 6)</option>
+                    <option value="amount_desc" {% if selected_sort == 'amount_desc' %}selected{% endif %}>Bill Amount: Highest First</option>
+                    <option value="amount_asc" {% if selected_sort == 'amount_asc' %}selected{% endif %}>Bill Amount: Lowest First</option>
+                    <option value="site_name" {% if selected_sort == 'site_name' %}selected{% endif %}>Site Name: Alphabetical (A-Z)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 1: 21 SITES BILL CLEARANCE CHECKLIST MATRIX        -->
+    <!-- ======================================================== -->
+    <div id="viewChecklistSection" class="{% if active_view != 'checklist' %}hidden{% endif %} space-y-4">
+        
+        <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
+            <div class="p-4 sm:p-5 border-b border-[#E5ECE9] flex items-center justify-between bg-[#F8FAF9]">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-[#EAF5EF] text-[#163F37] font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-sm text-[#163F37]">21 Sites Bill Clearance Checklist</h4>
+                        <p class="text-[11px] text-slate-500">Every site's current bill status & stage progression across the 6-step cycle</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-slate-500">Showing {{ checklist|length }} Sites</span>
+            </div>
+
+            <!-- Responsive Table for Desktop & Tablet -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-[#E5ECE9]">
+                        <tr>
+                            <th class="py-3.5 px-4">Site Name & Code</th>
+                            <th class="py-3.5 px-4">Active Bill</th>
+                            <th class="py-3.5 px-4">Bill Amount</th>
+                            <th class="py-3.5 px-4">6-Step Clearance Checklist</th>
+                            <th class="py-3.5 px-4">Current Status & Details</th>
+                            <th class="py-3.5 px-4 text-right no-print">Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5ECE9]">
+                        {% for item in checklist %}
+                        <tr class="hover:bg-[#F8FAF9]/80 transition">
+                            <!-- Site Info -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-black text-sm text-[#163F37] flex items-center gap-1.5">
+                                    <span>{{ item.site_name }}</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono font-bold">{{ item.site_code }}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-user-shield text-[10px] text-slate-400"></i>
+                                    <span>{{ item.supervisor or 'Supervisor Pending' }}</span>
+                                </div>
+                                {% if item.total_bills_count > 1 %}
+                                <div class="mt-1">
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+                                        {{ item.total_bills_count }} Total Bills
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Active Bill -->
+                            <td class="py-3.5 px-4 align-top">
+                                {% if item.latest_bill %}
+                                <div class="font-bold text-xs text-[#163F37] flex items-center gap-1">
+                                    <i class="fa-solid fa-file-invoice text-[#D97706]"></i>
+                                    <span>{{ item.latest_bill.bill_no }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 font-medium">
+                                    {{ item.latest_bill.bill_type }}
+                                </div>
+                                {% if item.latest_bill.period_from and item.latest_bill.period_to %}
+                                <div class="text-[10px] text-slate-400 mt-0.5">
+                                    {{ item.latest_bill.period_from }} to {{ item.latest_bill.period_to }}
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-xs text-slate-400 italic">No bill created yet</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Bill Amount -->
+                            <td class="py-3.5 px-4 align-top">
+                                {% if item.latest_bill %}
+                                <div class="font-black text-xs text-slate-900">
+                                    ₹ {{ "{:,.0f}".format(item.latest_bill.bill_amount) }}
+                                </div>
+                                {% if item.latest_bill.passed_amount and item.latest_bill.passed_amount > 0 %}
+                                <div class="text-[10px] font-bold text-emerald-700 mt-0.5">
+                                    Recd: ₹ {{ "{:,.0f}".format(item.latest_bill.passed_amount) }}
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- 6-STEP CLEARANCE CHECKLIST STEPPER -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="flex items-center gap-1.5 py-1">
+                                    {% for step in item.checklist_steps %}
+                                    <div class="relative group" title="{{ step.step }}. {{ step.name }} ({{ step.name_hi }})">
+                                        {% if step.is_completed %}
+                                        <!-- Completed Step -->
+                                        <div class="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 flex items-center justify-center text-[10px] font-black shadow-xs">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        {% elif step.is_current %}
+                                        <!-- Active Current Step (Pulsing Amber) -->
+                                        <div class="w-6 h-6 rounded-full bg-[#D97706] text-slate-950 font-black flex items-center justify-center text-[10px] ring-2 ring-[#D97706]/40 animate-pulse shadow-sm">
+                                            {{ step.step }}
+                                        </div>
+                                        {% else %}
+                                        <!-- Pending Step -->
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center text-[10px] font-bold">
+                                            {{ step.step }}
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <!-- Tooltip -->
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-30 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg whitespace-nowrap shadow-lg">
+                                            Step {{ step.step }}: {{ step.name }}
+                                        </div>
+                                    </div>
+                                    {% if not loop.last %}
+                                    <span class="w-2 sm:w-3 h-0.5 {% if step.is_completed %}bg-emerald-400{% else %}bg-slate-200{% endif %}"></span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <!-- Current Status & Key Details -->
+                            <td class="py-3.5 px-4 align-top max-w-xs">
+                                {% if item.latest_bill and item.step_meta %}
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border {{ item.step_meta.badge }}">
+                                    <i class="fa-solid {{ item.step_meta.icon }}"></i>
+                                    <span>Step {{ item.current_step }}: {{ item.step_meta.name }}</span>
+                                </div>
+
+                                <!-- Key Reference Info based on step -->
+                                <div class="text-[11px] text-slate-600 mt-1.5 space-y-0.5">
+                                    {% if item.current_step == 1 %}
+                                        <div><span class="text-slate-400">Created:</span> {{ item.latest_bill.step1_date or item.latest_bill.created_at[:10] }}</div>
+                                    {% elif item.current_step == 2 %}
+                                        <div><span class="text-slate-400">Submitted:</span> {{ item.latest_bill.step2_date or '—' }}</div>
+                                        {% if item.latest_bill.step2_ref %}<div><span class="text-slate-400">Diary Ref:</span> <strong class="text-slate-800">{{ item.latest_bill.step2_ref }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 3 %}
+                                        <div><span class="text-slate-400">Verified:</span> {{ item.latest_bill.step3_date or '—' }}</div>
+                                        {% if item.latest_bill.step3_officer %}<div><span class="text-slate-400">Officer:</span> <strong class="text-slate-800">{{ item.latest_bill.step3_officer }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 4 %}
+                                        <div><span class="text-slate-400">Forwarded:</span> {{ item.latest_bill.step4_date or '—' }}</div>
+                                        {% if item.latest_bill.step4_token %}<div><span class="text-slate-400">Token No:</span> <strong class="text-amber-800">{{ item.latest_bill.step4_token }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 5 %}
+                                        <div><span class="text-slate-400">Cleared:</span> {{ item.latest_bill.step5_date or '—' }}</div>
+                                        {% if item.latest_bill.step5_voucher %}<div><span class="text-slate-400">Voucher:</span> <strong class="text-emerald-800">{{ item.latest_bill.step5_voucher }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 6 %}
+                                        <div><span class="text-slate-400">Credited:</span> {{ item.latest_bill.step6_date or '—' }}</div>
+                                        {% if item.latest_bill.step6_utr %}<div><span class="text-slate-400">UTR:</span> <strong class="text-teal-800">{{ item.latest_bill.step6_utr }}</strong></div>{% endif %}
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    <span>Pending Bill Creation</span>
+                                </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Quick Action Buttons -->
+                            <td class="py-3.5 px-4 align-top text-right no-print whitespace-nowrap">
+                                {% if item.latest_bill %}
+                                <div class="flex items-center justify-end gap-1.5">
+                                    {% if item.current_step < 6 %}
+                                    <button type="button" onclick="openAdvanceStepModal({{ item.latest_bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.latest_bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer" title="Move to next step">
+                                        <i class="fa-solid fa-forward-step text-[#D97706]"></i>
+                                        <span>Next Step</span>
+                                    </button>
+                                    {% else %}
+                                    <span class="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center gap-1">
+                                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Done
+                                    </span>
+                                    {% endif %}
+                                    <button type="button" onclick="openEditBillModal({{ item.latest_bill.id }})" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer" title="Edit Bill">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button type="button" onclick="openNewBillModal({{ item.site_id }}, '{{ item.site_name }}')" class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition cursor-pointer" title="+ Add Another Bill for Site">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                                {% else %}
+                                <button type="button" onclick="openNewBillModal({{ item.site_id }}, '{{ item.site_name }}')" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Create Bill</span>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 2: ALL INDIVIDUAL BILLS DETAILED REGISTER          -->
+    <!-- ======================================================== -->
+    <div id="viewBillsSection" class="{% if active_view != 'bills' %}hidden{% endif %} space-y-4">
+        <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
+            <div class="p-4 sm:p-5 border-b border-[#E5ECE9] flex items-center justify-between bg-[#F8FAF9]">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-[#EAF5EF] text-[#163F37] font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-table-list"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-sm text-[#163F37]">All Individual Bills Register</h4>
+                        <p class="text-[11px] text-slate-500">Chronological register of all bills created across sites</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-slate-500">Total {{ all_bills|length }} Bills</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-[#E5ECE9]">
+                        <tr>
+                            <th class="py-3.5 px-4">Bill No & Type</th>
+                            <th class="py-3.5 px-4">Site</th>
+                            <th class="py-3.5 px-4">Billing Period</th>
+                            <th class="py-3.5 px-4">Claimed (₹)</th>
+                            <th class="py-3.5 px-4">Cleared (₹)</th>
+                            <th class="py-3.5 px-4">Current Step</th>
+                            <th class="py-3.5 px-4">Remarks / Notes</th>
+                            <th class="py-3.5 px-4 text-right no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5ECE9]">
+                        {% for b in all_bills %}
+                        <tr class="hover:bg-[#F8FAF9]/80 transition">
+                            <td class="py-3 px-4 font-bold text-slate-900">
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-invoice text-[#D97706]"></i>
+                                    <span>{{ b.bill_no }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 font-normal">{{ b.bill_type }}</div>
+                            </td>
+                            <td class="py-3 px-4 font-semibold text-slate-800">
+                                {{ b.site_name }} <span class="text-[10px] text-slate-400">({{ b.site_code }})</span>
+                            </td>
+                            <td class="py-3 px-4 text-slate-500">
+                                {{ b.period_from or '—' }} to {{ b.period_to or '—' }}
+                            </td>
+                            <td class="py-3 px-4 font-black text-slate-900">
+                                ₹ {{ "{:,.0f}".format(b.bill_amount) }}
+                            </td>
+                            <td class="py-3 px-4 font-bold text-emerald-700">
+                                {% if b.passed_amount and b.passed_amount > 0 %}
+                                ₹ {{ "{:,.0f}".format(b.passed_amount) }}
+                                {% else %}
+                                —
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black border {{ b.step_meta.badge }}">
+                                    <i class="fa-solid {{ b.step_meta.icon }}"></i>
+                                    <span>{{ b.current_step }}. {{ b.step_meta.short }}</span>
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-slate-500 max-w-xs truncate" title="{{ b.remarks }}">
+                                {{ b.remarks or '—' }}
+                            </td>
+                            <td class="py-3 px-4 text-right no-print whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button type="button" onclick="openAdvanceStepModal({{ b.id }}, {{ b.current_step }}, '{{ b.site_name }}', '{{ b.bill_no }}')" class="p-1.5 rounded-lg bg-[#163F37] text-white hover:bg-[#1E4940] transition cursor-pointer" title="Advance Step">
+                                        <i class="fa-solid fa-forward-step text-[#D97706] text-xs"></i>
+                                    </button>
+                                    <button type="button" onclick="openEditBillModal({{ b.id }})" class="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer" title="Edit">
+                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    </button>
+                                    <button type="button" onclick="deleteBill({{ b.id }}, '{{ b.bill_no }}')" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition cursor-pointer" title="Archive / Delete">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="py-8 text-center text-slate-400">No bills match the selected filter.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 1: ADVANCE BILL STEP MODAL                         -->
+<!-- ======================================================== -->
+<div id="advanceStepModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeAdvanceStepModal()">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-150">
+        <!-- Header -->
+        <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                    <i class="fa-solid fa-forward-step"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-white">Update Bill Clearance Step</h3>
+                    <p class="text-xs text-[#A8C5BF]"><span id="advModalSiteTitle">Site Name</span> &bull; <span id="advModalBillNo">RA-01</span></p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAdvanceStepModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form onsubmit="submitAdvanceStep(event)" class="p-5 sm:p-6 space-y-4">
+            <input type="hidden" id="advBillId">
+
+            <!-- Step Selector Buttons (1 to 6) -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-2">Select Target Step *</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {% for sn in range(1, 7) %}
+                    {% set sm = steps[sn] %}
+                    <label class="p-2.5 rounded-xl border border-slate-200 hover:border-[#163F37] cursor-pointer flex items-center gap-2 transition step-select-card" id="stepCard_{{ sn }}">
+                        <input type="radio" name="target_step_radio" value="{{ sn }}" onchange="handleStepSelectChange({{ sn }})" class="w-3.5 h-3.5 text-[#163F37] focus:ring-[#163F37]">
+                        <div class="min-w-0">
+                            <div class="text-[11px] font-black text-[#163F37] truncate">{{ sn }}. {{ sm.short }}</div>
+                            <div class="text-[9px] text-slate-400 truncate">{{ sm.name_hi }}</div>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Step Date *</label>
+                <input type="date" id="advStepDate" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+            </div>
+
+            <!-- Contextual Field 2: Head Clerk Diary Ref -->
+            <div id="fieldBoxStep2" class="hidden">
+                <label class="block text-xs font-bold text-blue-900 mb-1">Head Clerk Diary / Receipt Ref No</label>
+                <input type="text" id="advStep2Ref" placeholder="e.g. HC/DIARY/2026/410" class="w-full px-3 py-2 text-xs border border-blue-200 rounded-xl bg-blue-50/40 focus:ring-2 focus:ring-blue-600 focus:outline-none">
+            </div>
+
+            <!-- Contextual Field 3: JE / SDO Officer Name -->
+            <div id="fieldBoxStep3" class="hidden">
+                <label class="block text-xs font-bold text-indigo-900 mb-1">J.E / S.D.O Officer Name & Division</label>
+                <input type="text" id="advStep3Officer" placeholder="e.g. Er. Manoj Kumar (SDO, Siwan Division)" class="w-full px-3 py-2 text-xs border border-indigo-200 rounded-xl bg-indigo-50/40 focus:ring-2 focus:ring-indigo-600 focus:outline-none">
+            </div>
+
+            <!-- Contextual Field 4: Treasury Token No -->
+            <div id="fieldBoxStep4" class="hidden">
+                <label class="block text-xs font-bold text-amber-900 mb-1">Treasury Token / Bill Reference No</label>
+                <input type="text" id="advStep4Token" placeholder="e.g. TOK/2026/9821" class="w-full px-3 py-2 text-xs border border-amber-200 rounded-xl bg-amber-50/40 focus:ring-2 focus:ring-[#D97706] focus:outline-none">
+            </div>
+
+            <!-- Contextual Field 5: Voucher & Cleared Amount -->
+            <div id="fieldBoxStep5" class="hidden space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-emerald-900 mb-1">Treasury Voucher / Clearance Sanction Order No</label>
+                    <input type="text" id="advStep5Voucher" placeholder="e.g. VCH-8412 / ORDER-99" class="w-full px-3 py-2 text-xs border border-emerald-200 rounded-xl bg-emerald-50/40 focus:ring-2 focus:ring-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-emerald-900 mb-1">Sanctioned / Cleared Amount (₹)</label>
+                    <input type="number" step="0.01" id="advStep5Amount" placeholder="e.g. 438500" class="w-full px-3 py-2 text-xs border border-emerald-200 rounded-xl bg-emerald-50/40 focus:ring-2 focus:ring-emerald-600 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Contextual Field 6: Payment UTR & Received Amount -->
+            <div id="fieldBoxStep6" class="hidden space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-teal-900 mb-1">Bank UTR / Cheque / RTGS Ref No</label>
+                    <input type="text" id="advStep6Utr" placeholder="e.g. UTR-SBI-89341209" class="w-full px-3 py-2 text-xs border border-teal-200 rounded-xl bg-teal-50/40 focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-teal-900 mb-1">Final Payment Received Amount (₹)</label>
+                    <input type="number" step="0.01" id="advStep6Amount" placeholder="e.g. 438500" class="w-full px-3 py-2 text-xs border border-teal-200 rounded-xl bg-teal-50/40 focus:ring-2 focus:ring-teal-600 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Remarks -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Remarks / Note (Optional)</label>
+                <textarea id="advRemarks" rows="2" placeholder="e.g. Abstract submitted to Head Clerk, MB signed by JE" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none"></textarea>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeAdvanceStepModal()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-50 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" id="btnSubmitAdvanceStep" class="px-5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-check text-[#D97706]"></i>
+                    <span>Save Step Update</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 2: CREATE NEW BILL MODAL                           -->
+<!-- ======================================================== -->
+<div id="newBillModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeNewBillModal()">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-150">
+        <!-- Header -->
+        <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-white">Create New Site Bill</h3>
+                    <p class="text-xs text-[#A8C5BF]">Add a new Running / Final Bill to the clearance tracker</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeNewBillModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form onsubmit="submitNewBill(event)" class="p-5 sm:p-6 space-y-4">
+            <!-- Site Select -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Work Site *</label>
+                <select id="newBillSiteId" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none cursor-pointer">
+                    <option value="">-- Select Site (21 JJM Sites) --</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Bill No & Type -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Bill Number *</label>
+                    <input type="text" id="newBillNo" required placeholder="e.g. RA-01 or RA-02" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Bill Type</label>
+                    <select id="newBillType" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none cursor-pointer">
+                        <option value="RA Bill">RA Bill (रनिंग बिल)</option>
+                        <option value="Final Bill">Final Bill (फाइनल बिल)</option>
+                        <option value="First & Final Bill">First & Final Bill</option>
+                        <option value="Advance Bill">Advance Bill</option>
+                        <option value="Material Supply Bill">Material Supply Bill</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bill Claim Amount & Initial Step -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Claim Amount (₹) *</label>
+                    <input type="number" step="0.01" id="newBillAmount" required placeholder="e.g. 450000" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Initial Current Step</label>
+                    <select id="newBillStep" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none cursor-pointer">
+                        <option value="1">Step 1: Bill Created</option>
+                        <option value="2">Step 2: Submitted to Head Clerk</option>
+                        <option value="3">Step 3: Verified by J.E/S.D.O</option>
+                        <option value="4">Step 4: Forwarded to Treasury</option>
+                        <option value="5">Step 5: Bill Cleared</option>
+                        <option value="6">Step 6: Payment Received</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Billing Period -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Period From</label>
+                    <input type="date" id="newPeriodFrom" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Period To</label>
+                    <input type="date" id="newPeriodTo" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Remarks -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Remarks / Work Scope</label>
+                <textarea id="newBillRemarks" rows="2" placeholder="e.g. 1200m HDPE pipe laying + 85 FHTC tap connections" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none"></textarea>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeNewBillModal()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-50 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" id="btnSubmitNewBill" class="px-5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-plus text-[#D97706]"></i>
+                    <span>Create Bill</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 3: EDIT BILL MODAL                                 -->
+<!-- ======================================================== -->
+<div id="editBillModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-4 no-print" onclick="if(event.target===this) closeEditBillModal()">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-150">
+        <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-white">Edit Bill Details</h3>
+                    <p class="text-xs text-[#A8C5BF]" id="editBillSubtitle">Bill Details</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditBillModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form onsubmit="submitEditBill(event)" class="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+            <input type="hidden" id="editBillId">
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Bill Number *</label>
+                    <input type="text" id="editBillNo" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Bill Type</label>
+                    <input type="text" id="editBillType" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Claimed Amount (₹) *</label>
+                    <input type="number" step="0.01" id="editBillAmount" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Passed / Received (₹)</label>
+                    <input type="number" step="0.01" id="editPassedAmount" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Step References -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Head Clerk Diary Ref</label>
+                    <input type="text" id="editStep2Ref" placeholder="HC Diary No" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">JE / SDO Officer Name</label>
+                    <input type="text" id="editStep3Officer" placeholder="Officer Name" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Treasury Token No</label>
+                    <input type="text" id="editStep4Token" placeholder="Token No" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Voucher No</label>
+                    <input type="text" id="editStep5Voucher" placeholder="Voucher No" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Bank UTR / RTGS Ref No</label>
+                <input type="text" id="editStep6Utr" placeholder="Bank UTR" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Remarks</label>
+                <textarea id="editRemarks" rows="2" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:outline-none"></textarea>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeEditBillModal()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-xs hover:bg-slate-50 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" id="btnSubmitEditBill" class="px-5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-save text-[#D97706]"></i>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- BILL STATUS JAVASCRIPT LOGIC                             -->
+<!-- ======================================================== -->
+<script>
+let currentSelectedStep = {{ selected_step or 'null' }};
+
+function applyStepFilter(stepNum) {
+    const url = new URL(window.location.href);
+    if (stepNum) {
+        url.searchParams.set('step', stepNum);
+    } else {
+        url.searchParams.delete('step');
+    }
+    window.location.href = url.toString();
+}
+
+function applySorting(sortVal) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', sortVal);
+    window.location.href = url.toString();
+}
+
+let searchTimeout = null;
+function debounceSearch(e) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const url = new URL(window.location.href);
+        const val = e.target.value.trim();
+        if (val) {
+            url.searchParams.set('q', val);
+        } else {
+            url.searchParams.delete('q');
+        }
+        window.location.href = url.toString();
+    }, 450);
+}
+
+function switchView(viewName) {
+    const checklistSec = document.getElementById('viewChecklistSection');
+    const billsSec = document.getElementById('viewBillsSection');
+    const btnChecklist = document.getElementById('btnViewChecklist');
+    const btnBills = document.getElementById('btnViewBills');
+
+    if (viewName === 'checklist') {
+        if (checklistSec) checklistSec.classList.remove('hidden');
+        if (billsSec) billsSec.classList.add('hidden');
+        if (btnChecklist) {
+            btnChecklist.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]';
+        }
+        if (btnBills) {
+            btnBills.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
+        }
+    } else {
+        if (checklistSec) checklistSec.classList.add('hidden');
+        if (billsSec) billsSec.classList.remove('hidden');
+        if (btnBills) {
+            btnBills.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]';
+        }
+        if (btnChecklist) {
+            btnChecklist.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
+        }
+    }
+}
+
+// ADVANCE STEP MODAL
+function openAdvanceStepModal(billId, currentStep, siteName, billNo) {
+    document.getElementById('advBillId').value = billId;
+    document.getElementById('advModalSiteTitle').textContent = siteName;
+    document.getElementById('advModalBillNo').textContent = billNo;
+
+    const nextStep = Math.min(6, currentStep + 1);
+    const radios = document.querySelectorAll('input[name="target_step_radio"]');
+    radios.forEach(r => {
+        if (parseInt(r.value, 10) === nextStep) {
+            r.checked = true;
+        }
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('advStepDate').value = today;
+
+    handleStepSelectChange(nextStep);
+    document.getElementById('advanceStepModal').classList.remove('hidden');
+}
+
+function closeAdvanceStepModal() {
+    document.getElementById('advanceStepModal').classList.add('hidden');
+}
+
+function handleStepSelectChange(stepNum) {
+    // Hide all contextual boxes
+    ['2', '3', '4', '5', '6'].forEach(sn => {
+        const box = document.getElementById('fieldBoxStep' + sn);
+        if (box) box.classList.add('hidden');
+    });
+
+    // Show contextual box for target step
+    const targetBox = document.getElementById('fieldBoxStep' + stepNum);
+    if (targetBox) targetBox.classList.remove('hidden');
+
+    // Highlight card
+    document.querySelectorAll('.step-select-card').forEach(c => {
+        c.classList.remove('bg-[#EAF5EF]', 'border-[#163F37]', 'ring-1', 'ring-[#163F37]');
+    });
+    const activeCard = document.getElementById('stepCard_' + stepNum);
+    if (activeCard) {
+        activeCard.classList.add('bg-[#EAF5EF]', 'border-[#163F37]', 'ring-1', 'ring-[#163F37]');
+    }
+}
+
+async function submitAdvanceStep(e) {
+    e.preventDefault();
+    const billId = document.getElementById('advBillId').value;
+    const selectedRadio = document.querySelector('input[name="target_step_radio"]:checked');
+    const targetStep = selectedRadio ? parseInt(selectedRadio.value, 10) : 1;
+    const stepDate = document.getElementById('advStepDate').value;
+    const remarks = document.getElementById('advRemarks').value.trim();
+
+    const payload = {
+        next_step: targetStep,
+        step_date: stepDate,
+        remarks: remarks,
+        ref_val: document.getElementById('advStep2Ref').value.trim() || null,
+        officer_val: document.getElementById('advStep3Officer').value.trim() || null,
+        token_val: document.getElementById('advStep4Token').value.trim() || null,
+        voucher_val: document.getElementById('advStep5Voucher').value.trim() || null,
+        utr_val: document.getElementById('advStep6Utr').value.trim() || null
+    };
+
+    if (targetStep === 5) {
+        const val5 = document.getElementById('advStep5Amount').value;
+        if (val5) payload.passed_amount = parseFloat(val5);
+    } else if (targetStep === 6) {
+        const val6 = document.getElementById('advStep6Amount').value;
+        if (val6) payload.passed_amount = parseFloat(val6);
+    }
+
+    const btn = document.getElementById('btnSubmitAdvanceStep');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...';
+
+    try {
+        const res = await fetch(`/api/bills/${billId}/advance-step`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.message || 'Error updating step.'));
+        }
+    } catch(err) {
+        alert('Network Error: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check text-[#D97706]"></i> <span>Save Step Update</span>';
+    }
+}
+
+// NEW BILL MODAL
+function openNewBillModal(siteId, siteName) {
+    const sSelect = document.getElementById('newBillSiteId');
+    if (siteId && sSelect) {
+        sSelect.value = siteId;
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const m = document.getElementById('newBillModal');
+    if (m) m.classList.remove('hidden');
+}
+
+function closeNewBillModal() {
+    const m = document.getElementById('newBillModal');
+    if (m) m.classList.add('hidden');
+}
+
+async function submitNewBill(e) {
+    e.preventDefault();
+    const siteId = document.getElementById('newBillSiteId').value;
+    const billNo = document.getElementById('newBillNo').value.trim();
+    const billType = document.getElementById('newBillType').value;
+    const amount = parseFloat(document.getElementById('newBillAmount').value || 0.0);
+    const step = parseInt(document.getElementById('newBillStep').value || 1, 10);
+    const pFrom = document.getElementById('newPeriodFrom').value || null;
+    const pTo = document.getElementById('newPeriodTo').value || null;
+    const remarks = document.getElementById('newBillRemarks').value.trim();
+
+    if (!siteId || !billNo || isNaN(amount)) {
+        alert('Site, Bill No, aur Amount zaruri hain.');
+        return;
+    }
+
+    const btn = document.getElementById('btnSubmitNewBill');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Creating...';
+
+    try {
+        const res = await fetch('/api/bills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                site_id: siteId,
+                bill_no: billNo,
+                bill_type: billType,
+                bill_amount: amount,
+                current_step: step,
+                period_from: pFrom,
+                period_to: pTo,
+                remarks: remarks
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.message || 'Error creating bill.'));
+        }
+    } catch(err) {
+        alert('Network Error: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-plus text-[#D97706]"></i> <span>Create Bill</span>';
+    }
+}
+
+// EDIT BILL MODAL
+async function openEditBillModal(billId) {
+    try {
+        const res = await fetch(`/api/bills/${billId}`);
+        const data = await res.json();
+        if (!data.success || !data.bill) {
+            alert('Bill data load nahi ho paya.');
+            return;
+        }
+        const b = data.bill;
+        document.getElementById('editBillId').value = b.id;
+        document.getElementById('editBillSubtitle').textContent = `${b.site_name} (${b.site_code}) • ID: #${b.id}`;
+        document.getElementById('editBillNo').value = b.bill_no;
+        document.getElementById('editBillType').value = b.bill_type || 'RA Bill';
+        document.getElementById('editBillAmount').value = b.bill_amount;
+        document.getElementById('editPassedAmount').value = b.passed_amount || '';
+        document.getElementById('editStep2Ref').value = b.step2_ref || '';
+        document.getElementById('editStep3Officer').value = b.step3_officer || '';
+        document.getElementById('editStep4Token').value = b.step4_token || '';
+        document.getElementById('editStep5Voucher').value = b.step5_voucher || '';
+        document.getElementById('editStep6Utr').value = b.step6_utr || '';
+        document.getElementById('editRemarks').value = b.remarks || '';
+
+        document.getElementById('editBillModal').classList.remove('hidden');
+    } catch(err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+function closeEditBillModal() {
+    document.getElementById('editBillModal').classList.add('hidden');
+}
+
+async function submitEditBill(e) {
+    e.preventDefault();
+    const billId = document.getElementById('editBillId').value;
+    const payload = {
+        bill_no: document.getElementById('editBillNo').value.trim(),
+        bill_type: document.getElementById('editBillType').value.trim(),
+        bill_amount: parseFloat(document.getElementById('editBillAmount').value || 0.0),
+        passed_amount: parseFloat(document.getElementById('editPassedAmount').value || 0.0),
+        step2_ref: document.getElementById('editStep2Ref').value.trim(),
+        step3_officer: document.getElementById('editStep3Officer').value.trim(),
+        step4_token: document.getElementById('editStep4Token').value.trim(),
+        step5_voucher: document.getElementById('editStep5Voucher').value.trim(),
+        step6_utr: document.getElementById('editStep6Utr').value.trim(),
+        remarks: document.getElementById('editRemarks').value.trim()
+    };
+
+    const btn = document.getElementById('btnSubmitEditBill');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...';
+
+    try {
+        const res = await fetch(`/api/bills/${billId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.message || 'Error updating bill.'));
+        }
+    } catch(err) {
+        alert('Network Error: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-save text-[#D97706]"></i> <span>Save Changes</span>';
+    }
+}
+
+async function deleteBill(billId, billNo) {
+    if (!confirm(`Kya aap sach me Bill "${billNo}" ko archive / remove karna chahte hain?`)) return;
+    try {
+        const res = await fetch(`/api/bills/${billId}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ ' + data.message);
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.message || 'Error deleting bill.'));
+        }
+    } catch(err) {
+        alert('Network Error: ' + err.message);
+    }
+}
+</script>
+{% endblock %}

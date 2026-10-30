@@ -3169,3 +3169,446 @@ def set_app_version_broadcast(broadcast_active: bool):
     except Exception:
         pass
     return True
+
+
+# ==============================================================================
+# PROGRESS SUB-SECTION: BILL STATUS & CLEARANCE WORKFLOW MANAGEMENT (OWNER ONLY)
+# ==============================================================================
+
+BILL_CLEARANCE_STEPS = {
+    1: {"name": "Bill Created", "name_hi": "बिल तैयार हुआ", "short": "Created", "icon": "fa-file-invoice", "color": "sky", "badge": "bg-sky-50 text-sky-800 border-sky-300"},
+    2: {"name": "Submitted to Head Clerk", "name_hi": "हेड क्लर्क को जमा", "short": "Head Clerk", "icon": "fa-user-tie", "color": "blue", "badge": "bg-blue-50 text-blue-800 border-blue-300"},
+    3: {"name": "Verified by J.E/S.D.O", "name_hi": "J.E / S.D.O सत्यापित", "short": "J.E / S.D.O", "icon": "fa-clipboard-check", "color": "indigo", "badge": "bg-indigo-50 text-indigo-800 border-indigo-300"},
+    4: {"name": "Forwarded for Payment to Treasury", "name_hi": "ट्रेजरी में प्रेषित", "short": "Treasury", "icon": "fa-building-columns", "color": "amber", "badge": "bg-amber-50 text-amber-800 border-amber-300"},
+    5: {"name": "Bill Cleared", "name_hi": "बिल पास / स्वीकृत", "short": "Cleared", "icon": "fa-circle-check", "color": "emerald", "badge": "bg-emerald-50 text-emerald-800 border-emerald-300"},
+    6: {"name": "Payment Received", "name_hi": "भुगतान प्राप्त (क्रेडिट)", "short": "Received", "icon": "fa-sack-dollar", "color": "teal", "badge": "bg-teal-50 text-teal-800 border-teal-300"}
+}
+
+@db_retry()
+def init_site_bills_table():
+    """Ensures site_bills table exists with all step tracking fields."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS site_bills (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            site_id INTEGER NOT NULL,
+            bill_no TEXT NOT NULL,
+            bill_type TEXT DEFAULT 'RA Bill',
+            period_from TEXT,
+            period_to TEXT,
+            bill_amount REAL DEFAULT 0.0,
+            passed_amount REAL DEFAULT 0.0,
+            current_step INTEGER DEFAULT 1,
+            step1_date TEXT,
+            step2_date TEXT,
+            step2_ref TEXT,
+            step3_date TEXT,
+            step3_officer TEXT,
+            step4_date TEXT,
+            step4_token TEXT,
+            step5_date TEXT,
+            step5_voucher TEXT,
+            step6_date TEXT,
+            step6_utr TEXT,
+            remarks TEXT,
+            status TEXT DEFAULT 'Active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (site_id) REFERENCES sites(id)
+        );
+    """)
+    conn.commit()
+    conn.close()
+
+@db_retry()
+def get_all_site_bills(site_id=None, step=None, sort_by=None, search=None):
+    """Returns list of all bills joined with site info, with sorting and filtering."""
+    init_site_bills_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT b.*, 
+               s.name AS site_name, 
+               s.code AS site_code, 
+               s.location AS site_location,
+               s.supervisor AS supervisor_name,
+               s.contact AS supervisor_phone
+        FROM site_bills b
+        JOIN sites s ON b.site_id = s.id
+        WHERE b.status = 'Active'
+    """
+    params = []
+    
+    if site_id:
+        query += " AND b.site_id = ?"
+        params.append(int(site_id))
+        
+    if step:
+        query += " AND b.current_step = ?"
+        params.append(int(step))
+        
+    if search:
+        search_pattern = f"%{str(search).strip()}%"
+        query += """ AND (
+            s.name LIKE ? OR s.code LIKE ? OR b.bill_no LIKE ? 
+            OR b.step2_ref LIKE ? OR b.step3_officer LIKE ? 
+            OR b.step4_token LIKE ? OR b.step5_voucher LIKE ? 
+            OR b.step6_utr LIKE ? OR b.remarks LIKE ?
+        )"""
+        params.extend([search_pattern] * 9)
+        
+    # Sorting
+    if sort_by == "step_asc":
+        query += " ORDER BY b.current_step ASC, b.id DESC"
+    elif sort_by == "step_desc":
+        query += " ORDER BY b.current_step DESC, b.id DESC"
+    elif sort_by == "amount_desc":
+        query += " ORDER BY b.bill_amount DESC, b.id DESC"
+    elif sort_by == "amount_asc":
+        query += " ORDER BY b.bill_amount ASC, b.id DESC"
+    elif sort_by == "site_name":
+        query += " ORDER BY s.name ASC, b.current_step ASC"
+    elif sort_by == "date_oldest":
+        query += " ORDER BY COALESCE(b.step1_date, b.created_at) ASC, b.id ASC"
+    else: # default: newest first
+        query += " ORDER BY b.id DESC"
+        
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    
+    for r in rows:
+        st = r.get("current_step", 1)
+        r["step_meta"] = BILL_CLEARANCE_STEPS.get(st, BILL_CLEARANCE_STEPS[1])
+    return rows
+
+@db_retry()
+def get_site_bill_by_id(bill_id):
+    """Returns single bill details with site info."""
+    init_site_bills_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT b.*, 
+               s.name AS site_name, 
+               s.code AS site_code, 
+               s.location AS site_location,
+               s.supervisor AS supervisor_name,
+               s.contact AS supervisor_phone
+        FROM site_bills b
+        JOIN sites s ON b.site_id = s.id
+        WHERE b.id = ?
+    """, (int(bill_id),))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        d = dict(row)
+        d["step_meta"] = BILL_CLEARANCE_STEPS.get(d.get("current_step", 1), BILL_CLEARANCE_STEPS[1])
+        return d
+    return None
+
+@db_retry()
+def create_site_bill(site_id, bill_no, bill_type="RA Bill", period_from=None, period_to=None, bill_amount=0.0, passed_amount=0.0, current_step=1, remarks=None, step_date=None, ref_val=None, officer_val=None, token_val=None, voucher_val=None, utr_val=None):
+    """Creates a new bill entry for a site."""
+    init_site_bills_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    import datetime
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    s_date = step_date or today
+    c_step = int(current_step or 1)
+    
+    step1_date = s_date if c_step >= 1 else None
+    step2_date = s_date if c_step >= 2 else None
+    step3_date = s_date if c_step >= 3 else None
+    step4_date = s_date if c_step >= 4 else None
+    step5_date = s_date if c_step >= 5 else None
+    step6_date = s_date if c_step >= 6 else None
+    
+    cursor.execute("""
+        INSERT INTO site_bills (
+            site_id, bill_no, bill_type, period_from, period_to, bill_amount, passed_amount,
+            current_step, step1_date, step2_date, step2_ref, step3_date, step3_officer,
+            step4_date, step4_token, step5_date, step5_voucher, step6_date, step6_utr, remarks
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        int(site_id), str(bill_no).strip(), str(bill_type).strip(),
+        period_from, period_to, float(bill_amount or 0.0), float(passed_amount or 0.0),
+        c_step, step1_date, step2_date, ref_val, step3_date, officer_val,
+        step4_date, token_val, step5_date, voucher_val, step6_date, utr_val, remarks
+    ))
+    new_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    
+    try:
+        from github_sync import trigger_cloud_backup_async
+        trigger_cloud_backup_async()
+    except Exception:
+        pass
+    return new_id
+
+@db_retry()
+def update_site_bill(bill_id, **kwargs):
+    """Updates bill fields dynamically."""
+    init_site_bills_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    allowed = [
+        "site_id", "bill_no", "bill_type", "period_from", "period_to",
+        "bill_amount", "passed_amount", "current_step", "step1_date",
+        "step2_date", "step2_ref", "step3_date", "step3_officer",
+        "step4_date", "step4_token", "step5_date", "step5_voucher",
+        "step6_date", "step6_utr", "remarks", "status"
+    ]
+    updates = []
+    values = []
+    for k, v in kwargs.items():
+        if k in allowed:
+            updates.append(f"{k} = ?")
+            values.append(v)
+            
+    if not updates:
+        conn.close()
+        return False
+        
+    updates.append("updated_at = CURRENT_TIMESTAMP")
+    values.append(int(bill_id))
+    
+    query = f"UPDATE site_bills SET {', '.join(updates)} WHERE id = ?"
+    cursor.execute(query, values)
+    conn.commit()
+    conn.close()
+    
+    try:
+        from github_sync import trigger_cloud_backup_async
+        trigger_cloud_backup_async()
+    except Exception:
+        pass
+    return True
+
+@db_retry()
+def advance_site_bill_step(bill_id, next_step, step_date=None, ref_val=None, officer_val=None, token_val=None, voucher_val=None, utr_val=None, passed_amount=None, remarks=None):
+    """Advances or sets the bill step (1 to 6) and logs corresponding timestamps."""
+    init_site_bills_table()
+    bill = get_site_bill_by_id(bill_id)
+    if not bill:
+        return False
+        
+    import datetime
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    s_date = step_date or today
+    n_step = max(1, min(6, int(next_step)))
+    
+    updates = {"current_step": n_step}
+    if remarks is not None:
+        updates["remarks"] = remarks
+        
+    if passed_amount is not None:
+        try:
+            updates["passed_amount"] = float(passed_amount)
+        except Exception:
+            pass
+        
+    if n_step == 1:
+        updates["step1_date"] = s_date
+    elif n_step == 2:
+        updates["step2_date"] = s_date
+        if ref_val is not None: updates["step2_ref"] = ref_val
+    elif n_step == 3:
+        updates["step3_date"] = s_date
+        if officer_val is not None: updates["step3_officer"] = officer_val
+    elif n_step == 4:
+        updates["step4_date"] = s_date
+        if token_val is not None: updates["step4_token"] = token_val
+    elif n_step == 5:
+        updates["step5_date"] = s_date
+        if voucher_val is not None: updates["step5_voucher"] = voucher_val
+    elif n_step == 6:
+        updates["step6_date"] = s_date
+        if utr_val is not None: updates["step6_utr"] = utr_val
+        if passed_amount is not None:
+            updates["passed_amount"] = float(passed_amount)
+        elif bill.get("passed_amount") == 0.0 and bill.get("bill_amount", 0.0) > 0:
+            updates["passed_amount"] = bill.get("bill_amount", 0.0)
+            
+    return update_site_bill(bill_id, **updates)
+
+@db_retry()
+def delete_site_bill(bill_id):
+    """Soft deletes / marks bill as Archived."""
+    return update_site_bill(bill_id, status="Archived")
+
+@db_retry()
+def get_bill_clearance_summary():
+    """Returns KPI metrics and breakdown across all 6 steps."""
+    init_site_bills_table()
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as total_bills,
+            COALESCE(SUM(bill_amount), 0.0) as total_bill_amount,
+            COALESCE(SUM(passed_amount), 0.0) as total_passed_amount,
+            COUNT(DISTINCT site_id) as total_sites_with_bills
+        FROM site_bills
+        WHERE status = 'Active'
+    """)
+    ov = dict(cursor.fetchone() or {})
+    
+    cursor.execute("""
+        SELECT 
+            current_step,
+            COUNT(*) as bill_count,
+            COALESCE(SUM(bill_amount), 0.0) as sum_bill_amount,
+            COALESCE(SUM(passed_amount), 0.0) as sum_passed_amount
+        FROM site_bills
+        WHERE status = 'Active'
+        GROUP BY current_step
+    """)
+    step_rows = {r["current_step"]: dict(r) for r in cursor.fetchall()}
+    conn.close()
+    
+    steps_summary = []
+    total_bills = ov.get("total_bills", 0)
+    for step_num in range(1, 7):
+        st_meta = BILL_CLEARANCE_STEPS.get(step_num, {})
+        d = step_rows.get(step_num, {"bill_count": 0, "sum_bill_amount": 0.0, "sum_passed_amount": 0.0})
+        cnt = d.get("bill_count", 0)
+        pct = round((cnt / total_bills * 100), 1) if total_bills > 0 else 0
+        steps_summary.append({
+            "step": step_num,
+            "name": st_meta.get("name"),
+            "name_hi": st_meta.get("name_hi"),
+            "short": st_meta.get("short"),
+            "icon": st_meta.get("icon"),
+            "color": st_meta.get("color"),
+            "badge": st_meta.get("badge"),
+            "count": cnt,
+            "percentage": pct,
+            "sum_amount": d.get("sum_bill_amount", 0.0),
+            "passed_amount": d.get("sum_passed_amount", 0.0)
+        })
+        
+    stage_office_count = sum(s["count"] for s in steps_summary if s["step"] in [1, 2])
+    stage_office_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [1, 2])
+    
+    stage_technical_count = sum(s["count"] for s in steps_summary if s["step"] == 3)
+    stage_technical_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 3)
+    
+    stage_treasury_count = sum(s["count"] for s in steps_summary if s["step"] == 4)
+    stage_treasury_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 4)
+    
+    stage_completed_count = sum(s["count"] for s in steps_summary if s["step"] in [5, 6])
+    stage_completed_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [5, 6])
+    stage_received_amt = sum(s["passed_amount"] for s in steps_summary if s["step"] == 6)
+    
+    return {
+        "overall": ov,
+        "steps": steps_summary,
+        "stages": {
+            "office": {"count": stage_office_count, "amount": stage_office_amt},
+            "technical": {"count": stage_technical_count, "amount": stage_technical_amt},
+            "treasury": {"count": stage_treasury_count, "amount": stage_treasury_amt},
+            "completed": {"count": stage_completed_count, "amount": stage_completed_amt, "received_amount": stage_received_amt}
+        }
+    }
+
+@db_retry()
+def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
+    """
+    Returns ALL 21 sites with their current/latest bill status.
+    Guarantees every site is visible in the checklist!
+    """
+    init_site_bills_table()
+    sites = get_all_sites()
+    bills = get_all_site_bills()
+    
+    site_bills_map = {}
+    for b in bills:
+        sid = b["site_id"]
+        if sid not in site_bills_map:
+            site_bills_map[sid] = []
+        site_bills_map[sid].append(b)
+        
+    checklist = []
+    for s in sites:
+        sid = s["id"]
+        s_bills = site_bills_map.get(sid, [])
+        latest_bill = s_bills[0] if s_bills else None
+        
+        current_step = latest_bill.get("current_step", 0) if latest_bill else 0
+        step_meta = BILL_CLEARANCE_STEPS.get(current_step, None) if current_step else None
+        
+        step_status_list = []
+        for sn in range(1, 7):
+            meta = BILL_CLEARANCE_STEPS[sn]
+            is_completed = current_step > sn
+            is_current = current_step == sn
+            is_pending = (current_step < sn) or (current_step == 0)
+            step_status_list.append({
+                "step": sn,
+                "name": meta["name"],
+                "name_hi": meta["name_hi"],
+                "short": meta["short"],
+                "icon": meta["icon"],
+                "is_completed": is_completed,
+                "is_current": is_current,
+                "is_pending": is_pending
+            })
+            
+        checklist.append({
+            "site_id": sid,
+            "site_name": s["name"],
+            "site_code": s["code"],
+            "site_location": s.get("location", ""),
+            "supervisor": s.get("supervisor", ""),
+            "contact": s.get("contact", ""),
+            "total_bills_count": len(s_bills),
+            "all_bills": s_bills,
+            "latest_bill": latest_bill,
+            "current_step": current_step,
+            "step_meta": step_meta,
+            "checklist_steps": step_status_list
+        })
+        
+    if step_filter:
+        try:
+            s_val = int(step_filter)
+            checklist = [c for c in checklist if c["current_step"] == s_val]
+        except Exception:
+            pass
+            
+    if search:
+        s_pat = str(search).lower().strip()
+        checklist = [
+            c for c in checklist if (
+                s_pat in c["site_name"].lower() or 
+                s_pat in c["site_code"].lower() or 
+                s_pat in (c["supervisor"] or "").lower() or
+                (c["latest_bill"] and s_pat in (c["latest_bill"].get("bill_no") or "").lower()) or
+                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step4_token") or "").lower()) or
+                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step3_officer") or "").lower()) or
+                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step2_ref") or "").lower()) or
+                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step6_utr") or "").lower())
+            )
+        ]
+        
+    if sort_by == "step_asc":
+        checklist.sort(key=lambda x: (x["current_step"], x["site_name"]))
+    elif sort_by == "step_desc":
+        checklist.sort(key=lambda x: (-x["current_step"], x["site_name"]))
+    elif sort_by == "site_name":
+        checklist.sort(key=lambda x: x["site_name"])
+    elif sort_by == "amount_desc":
+        checklist.sort(key=lambda x: (-(x["latest_bill"].get("bill_amount", 0.0) if x["latest_bill"] else 0.0), x["site_name"]))
+    elif sort_by == "amount_asc":
+        checklist.sort(key=lambda x: ((x["latest_bill"].get("bill_amount", 0.0) if x["latest_bill"] else 0.0), x["site_name"]))
+    else: # default: by step_desc (most advanced first) then site name
+        checklist.sort(key=lambda x: (-x["current_step"], x["site_name"]))
+        
+    return checklist
