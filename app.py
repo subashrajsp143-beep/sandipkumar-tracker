@@ -3270,17 +3270,73 @@ def api_delete_complaint(complaint_id):
 # ==============================================================================
 # PROGRESS SUB-SECTION: BILL STATUS & CLEARANCE WORKFLOW (OWNER ONLY)
 # ==============================================================================
+def supervisor_bill_prep_view():
+    """Renders the 3-Step Field Preparation view for site supervisor."""
+    import datetime
+    now = datetime.datetime.now()
+    user_site_id = int(request.args.get("site_id") or session.get("site_id") or session.get("worker_site_id") or 1)
+    selected_month = request.args.get("month") or now.strftime("%Y-%m")
+    
+    site = database.get_site_by_id(user_site_id)
+    if not site:
+        all_sites = database.get_all_sites()
+        site = all_sites[0] if all_sites else {"id": 1, "name": "Mairwa", "code": "SITE-01"}
+        
+    prep = database.get_site_bill_prep(site["id"], selected_month)
+    
+    months_list = []
+    for i in range(-2, 14):
+        m = now.month - i
+        y = now.year
+        while m <= 0:
+            m += 12
+            y -= 1
+        while m > 12:
+            m -= 12
+            y += 1
+        dt = datetime.datetime(y, m, 1)
+        k = dt.strftime("%Y-%m")
+        months_list.append({
+            "key": k,
+            "label": dt.strftime("%B %Y"),
+            "is_current": (k == now.strftime("%Y-%m"))
+        })
+        
+    return render_template(
+        "supervisor_bill_prep.html",
+        site=site,
+        selected_month=selected_month,
+        months_list=months_list,
+        prep=prep,
+        is_owner=False,
+        is_supervisor=True
+    )
+
+@app.route("/bills/prep")
+def supervisor_bill_prep_route():
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    is_supervisor = (session.get("role") == "supervisor" or session.get("worker_role") == "supervisor")
+    if not is_owner and not is_supervisor:
+        flash("Unauthorized! Access restricted.", "error")
+        return redirect(url_for("dashboard"))
+    return supervisor_bill_prep_view()
+
 @app.route("/bills")
 @app.route("/progress/bills")
 def bill_status_dashboard():
     """
     JJM Bill Status & Clearance Workflow Tracker.
-    RESTRICTED: Strictly accessible by Owner Profile only.
+    Accessible by Owner (full control) and Supervisor (Pre-Bill 3-step field input).
     """
     is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
-    if not is_owner:
-        flash("Unauthorized! Bill Status information is confidential and accessible by Owner Profile only.", "error")
+    is_supervisor = (session.get("role") == "supervisor" or session.get("worker_role") == "supervisor")
+    
+    if not is_owner and not is_supervisor:
+        flash("Unauthorized! Access restricted to Owner and registered Supervisors.", "error")
         return redirect(url_for("dashboard"))
+        
+    if is_supervisor and not is_owner:
+        return supervisor_bill_prep_view()
         
     step_filter = request.args.get("step")
     site_filter = request.args.get("site_id")
@@ -3318,6 +3374,7 @@ def bill_status_dashboard():
         monthly_data=monthly_data,
         selected_fy=fy_filter,
         fy_data=fy_data,
+        pending_amendments=database.get_pending_amendment_requests(),
         is_owner=True
     )
 
@@ -3441,3 +3498,80 @@ def api_bill_advance_step(bill_id):
         step_name = database.BILL_CLEARANCE_STEPS.get(next_step, {}).get("name", f"Step {next_step}")
         return jsonify({"success": True, "message": f"Bill status successfully '{step_name}' par update ho gaya hai!"})
     return jsonify({"success": False, "message": "Bill update karne me samasya aayi."}), 400
+
+
+@app.route("/api/bills/prep/submit", methods=["POST"])
+def api_submit_bill_prep():
+    """Submit supervisor 3-step field preparation with one-time lock."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    is_supervisor = (session.get("role") == "supervisor" or session.get("worker_role") == "supervisor")
+    if not is_owner and not is_supervisor:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+        
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    site_id = int(data.get("site_id") or session.get("site_id") or session.get("worker_site_id") or 1)
+    month_key = str(data.get("month_key") or "").strip()
+    if not month_key:
+        return jsonify({"success": False, "message": "Month is required"}), 400
+        
+    user_name = session.get("worker_name") or session.get("user_name") or "Supervisor"
+    user_phone = session.get("worker_phone") or session.get("phone") or ""
+    
+    res = database.save_site_bill_prep(
+        site_id=site_id,
+        month_key=month_key,
+        data=data,
+        is_supervisor=(not is_owner),
+        user_name=user_name,
+        user_phone=user_phone
+    )
+    return jsonify(res)
+
+
+@app.route("/api/bills/prep/<int:prep_id>/amendment/request", methods=["POST"])
+def api_request_prep_amendment(prep_id):
+    """Supervisor requests amendment with reason."""
+    is_supervisor = (session.get("role") == "supervisor" or session.get("worker_role") == "supervisor" or session.get("is_owner"))
+    if not is_supervisor:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    reason = str(data.get("reason", "")).strip()
+    if not reason:
+        return jsonify({"success": False, "message": "Reason is required"}), 400
+    res = database.request_bill_prep_amendment(prep_id, reason)
+    return jsonify(res)
+
+
+@app.route("/api/bills/prep/<int:prep_id>/amendment/approve", methods=["POST"])
+def api_approve_prep_amendment(prep_id):
+    """Owner approves amendment, unlocking the record for supervisor."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+    approver = session.get("worker_name") or "Sandip Kumar"
+    res = database.approve_bill_prep_amendment(prep_id, approved_by=approver)
+    return jsonify(res)
+
+
+@app.route("/api/bills/prep/<int:prep_id>/amendment/reject", methods=["POST"])
+def api_reject_prep_amendment(prep_id):
+    """Owner rejects amendment request."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    notes = str(data.get("notes", "")).strip()
+    rejector = session.get("worker_name") or "Sandip Kumar"
+    res = database.reject_bill_prep_amendment(prep_id, notes=notes, rejected_by=rejector)
+    return jsonify(res)
+
+
+@app.route("/api/bills/prep/<int:site_id>/<month_key>", methods=["GET"])
+def api_get_bill_prep_data(site_id, month_key):
+    """Get preparation details for site and month."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    is_supervisor = (session.get("role") == "supervisor" or session.get("worker_role") == "supervisor")
+    if not is_owner and not is_supervisor:
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    prep = database.get_site_bill_prep(site_id, month_key)
+    return jsonify({"success": True, "prep": prep})

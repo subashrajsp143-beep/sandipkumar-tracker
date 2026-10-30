@@ -3579,6 +3579,10 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
     sites = get_all_sites()
     bills = get_all_site_bills()
     
+    now_chk = datetime.datetime.now()
+    curr_month_chk = now_chk.strftime("%Y-%m")
+    all_curr_preps = get_all_preps_for_month(curr_month_chk)
+    
     site_bills_map = {}
     for b in bills:
         sid = b["site_id"]
@@ -3591,6 +3595,7 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
         sid = s["id"]
         s_bills = site_bills_map.get(sid, [])
         latest_bill = s_bills[0] if s_bills else None
+        prep = all_curr_preps.get(sid) or get_site_bill_prep(sid, curr_month_chk)
         
         current_step = latest_bill.get("current_step", 0) if latest_bill else 0
         step_meta = BILL_CLEARANCE_STEPS.get(current_step, None) if current_step else None
@@ -3624,7 +3629,8 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
             "latest_bill": latest_bill,
             "current_step": current_step,
             "step_meta": step_meta,
-            "checklist_steps": step_status_list
+            "checklist_steps": step_status_list,
+            "prep": prep
         })
         
     if step_filter:
@@ -3828,12 +3834,14 @@ def get_monthly_bills_data(selected_month=None):
         except Exception:
             pass
             
+    month_preps = get_all_preps_for_month(active_month)
     sites_month_checklist = []
     sites_with_bills = 0
     
     for s in all_sites:
         sid = s["id"]
         sbills = site_month_bills.get(sid, [])
+        prep = month_preps.get(sid) or get_site_bill_prep(sid, active_month)
         has_bill = len(sbills) > 0
         if has_bill:
             sites_with_bills += 1
@@ -3873,7 +3881,8 @@ def get_monthly_bills_data(selected_month=None):
             "step_meta": BILL_CLEARANCE_STEPS.get(current_step) if current_step else None,
             "checklist_steps": step_status_list,
             "suggested_from": suggested_from,
-            "suggested_to": suggested_to
+            "suggested_to": suggested_to,
+            "prep": prep
         })
         
     month_summary["sites_with_bills"] = sites_with_bills
@@ -4216,3 +4225,346 @@ def get_fy_cleared_bills_data(selected_fy=None):
         "sites_matrix": sites_matrix,
         "monthly_column_totals": monthly_column_totals
     }
+
+
+# =====================================================================
+# PRE-BILL FIELD PREPARATION & SUPERVISOR VERIFICATION WORKFLOW
+# 3 Steps Before Bill Creation:
+# 1st - GPS Photo Printout
+# 2nd - Complain Register Maintained
+# 3rd - Rough Estimate of the Bill
+# =====================================================================
+
+PRE_BILL_STEPS = {
+    "pre_1": {
+        "step_key": "step1_gps_photo",
+        "num": 1,
+        "name": "GPS Photo Printout",
+        "name_hi": "जीपीएस फोटो प्रिंटआउट",
+        "short": "GPS Photos",
+        "icon": "fa-camera",
+        "role": "Supervisor",
+        "color": "cyan",
+        "badge": "bg-cyan-50 text-cyan-800 border-cyan-300"
+    },
+    "pre_2": {
+        "step_key": "step2_complain_reg",
+        "num": 2,
+        "name": "Complain Register Maintained",
+        "name_hi": "शिकायत रजिस्टर संधारण",
+        "short": "Complain Reg",
+        "icon": "fa-book-bookmark",
+        "role": "Supervisor",
+        "color": "teal",
+        "badge": "bg-teal-50 text-teal-800 border-teal-300"
+    },
+    "pre_3": {
+        "step_key": "step3_rough_est",
+        "num": 3,
+        "name": "Rough Estimate of the Bill",
+        "name_hi": "बिल रफ एस्टीमेट",
+        "short": "Rough Estimate",
+        "icon": "fa-calculator",
+        "role": "Supervisor",
+        "color": "amber",
+        "badge": "bg-amber-50 text-amber-800 border-amber-300"
+    }
+}
+
+
+@db_retry()
+def init_bill_preparations_table():
+    """Ensures site_bill_preparations table exists with locking and amendment fields."""
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS site_bill_preparations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            site_id INTEGER NOT NULL,
+            month_key TEXT NOT NULL,
+            bill_id INTEGER,
+            supervisor_name TEXT,
+            supervisor_phone TEXT,
+            step1_gps_photo INTEGER DEFAULT 0,
+            gps_photo_date TEXT,
+            gps_photo_count INTEGER DEFAULT 0,
+            gps_photo_remarks TEXT,
+            step2_complain_reg INTEGER DEFAULT 0,
+            complain_reg_date TEXT,
+            complain_reg_count INTEGER DEFAULT 0,
+            complain_reg_remarks TEXT,
+            step3_rough_est INTEGER DEFAULT 0,
+            rough_estimate_amount REAL DEFAULT 0.0,
+            rough_estimate_date TEXT,
+            rough_estimate_remarks TEXT,
+            is_submitted INTEGER DEFAULT 0,
+            submitted_at TEXT,
+            is_locked INTEGER DEFAULT 0,
+            amendment_status TEXT DEFAULT 'none',
+            amendment_reason TEXT,
+            amendment_requested_at TEXT,
+            amendment_action_at TEXT,
+            amendment_action_by TEXT,
+            amendment_action_notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(site_id, month_key)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+@db_retry()
+def get_site_bill_prep(site_id, month_key):
+    """Returns the preparation record for a site and month."""
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    row = c.execute("SELECT * FROM site_bill_preparations WHERE site_id = ? AND month_key = ?", (int(site_id), month_key.strip())).fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return {
+        "id": None,
+        "site_id": int(site_id),
+        "month_key": month_key.strip(),
+        "bill_id": None,
+        "supervisor_name": "",
+        "supervisor_phone": "",
+        "step1_gps_photo": 0,
+        "gps_photo_date": "",
+        "gps_photo_count": 0,
+        "gps_photo_remarks": "",
+        "step2_complain_reg": 0,
+        "complain_reg_date": "",
+        "complain_reg_count": 0,
+        "complain_reg_remarks": "",
+        "step3_rough_est": 0,
+        "rough_estimate_amount": 0.0,
+        "rough_estimate_date": "",
+        "rough_estimate_remarks": "",
+        "is_submitted": 0,
+        "submitted_at": None,
+        "is_locked": 0,
+        "amendment_status": "none",
+        "amendment_reason": "",
+        "amendment_requested_at": None
+    }
+
+
+@db_retry()
+def get_site_bill_prep_by_id(prep_id):
+    """Returns preparation record by its ID."""
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    row = c.execute("""
+        SELECT p.*, s.name as site_name, s.code as site_code, s.supervisor as site_supervisor
+        FROM site_bill_preparations p
+        JOIN sites s ON p.site_id = s.id
+        WHERE p.id = ?
+    """, (int(prep_id),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+@db_retry()
+def get_all_preps_for_month(month_key):
+    """Returns a dictionary {site_id: prep_dict} for all sites in a given month."""
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    rows = c.execute("SELECT * FROM site_bill_preparations WHERE month_key = ?", (month_key.strip(),)).fetchall()
+    conn.close()
+    return {r["site_id"]: dict(r) for r in rows}
+
+
+@db_retry()
+def save_site_bill_prep(site_id, month_key, data, is_supervisor=True, user_name="", user_phone=""):
+    """
+    Saves supervisor pre-bill steps with one-time lock protection.
+    If supervisor tries to edit a locked record without owner approval, it is rejected.
+    """
+    import datetime
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    existing = c.execute("SELECT * FROM site_bill_preparations WHERE site_id = ? AND month_key = ?", (int(site_id), month_key.strip())).fetchone()
+    
+    if existing:
+        ex = dict(existing)
+        # One-time input constraint for supervisor:
+        if is_supervisor and ex.get("is_locked") and ex.get("amendment_status") != "approved":
+            conn.close()
+            return {
+                "success": False,
+                "message": "Yeh record lock ho chuka hai! Badlaav karne ke liye kripya Owner ko Amendment Request bhejein."
+            }
+            
+        c.execute("""
+            UPDATE site_bill_preparations SET
+                supervisor_name = ?,
+                supervisor_phone = ?,
+                step1_gps_photo = ?,
+                gps_photo_date = ?,
+                gps_photo_count = ?,
+                gps_photo_remarks = ?,
+                step2_complain_reg = ?,
+                complain_reg_date = ?,
+                complain_reg_count = ?,
+                complain_reg_remarks = ?,
+                step3_rough_est = ?,
+                rough_estimate_amount = ?,
+                rough_estimate_date = ?,
+                rough_estimate_remarks = ?,
+                is_submitted = 1,
+                submitted_at = ?,
+                is_locked = 1,
+                amendment_status = 'none',
+                updated_at = ?
+            WHERE id = ?
+        """, (
+            data.get("supervisor_name") or user_name or ex.get("supervisor_name", ""),
+            data.get("supervisor_phone") or user_phone or ex.get("supervisor_phone", ""),
+            1 if (data.get("step1_gps_photo") in [1, "1", True, "on"]) else 0,
+            str(data.get("gps_photo_date", "")).strip(),
+            int(data.get("gps_photo_count") or 0),
+            str(data.get("gps_photo_remarks", "")).strip(),
+            1 if (data.get("step2_complain_reg") in [1, "1", True, "on"]) else 0,
+            str(data.get("complain_reg_date", "")).strip(),
+            int(data.get("complain_reg_count") or 0),
+            str(data.get("complain_reg_remarks", "")).strip(),
+            1 if (data.get("step3_rough_est") in [1, "1", True, "on"]) else 0,
+            float(data.get("rough_estimate_amount") or 0.0),
+            str(data.get("rough_estimate_date", "")).strip(),
+            str(data.get("rough_estimate_remarks", "")).strip(),
+            now_str,
+            now_str,
+            ex["id"]
+        ))
+        prep_id = ex["id"]
+    else:
+        c.execute("""
+            INSERT INTO site_bill_preparations (
+                site_id, month_key, supervisor_name, supervisor_phone,
+                step1_gps_photo, gps_photo_date, gps_photo_count, gps_photo_remarks,
+                step2_complain_reg, complain_reg_date, complain_reg_count, complain_reg_remarks,
+                step3_rough_est, rough_estimate_amount, rough_estimate_date, rough_estimate_remarks,
+                is_submitted, submitted_at, is_locked, amendment_status, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 1, 'none', ?, ?)
+        """, (
+            int(site_id),
+            month_key.strip(),
+            data.get("supervisor_name") or user_name or "Supervisor",
+            data.get("supervisor_phone") or user_phone or "",
+            1 if (data.get("step1_gps_photo") in [1, "1", True, "on"]) else 0,
+            str(data.get("gps_photo_date", "")).strip(),
+            int(data.get("gps_photo_count") or 0),
+            str(data.get("gps_photo_remarks", "")).strip(),
+            1 if (data.get("step2_complain_reg") in [1, "1", True, "on"]) else 0,
+            str(data.get("complain_reg_date", "")).strip(),
+            int(data.get("complain_reg_count") or 0),
+            str(data.get("complain_reg_remarks", "")).strip(),
+            1 if (data.get("step3_rough_est") in [1, "1", True, "on"]) else 0,
+            float(data.get("rough_estimate_amount") or 0.0),
+            str(data.get("rough_estimate_date", "")).strip(),
+            str(data.get("rough_estimate_remarks", "")).strip(),
+            now_str,
+            now_str,
+            now_str
+        ))
+        prep_id = c.lastrowid
+        
+    conn.commit()
+    conn.close()
+    return {
+        "success": True,
+        "prep_id": prep_id,
+        "message": "Field preparation steps submitted successfully and locked."
+    }
+
+
+@db_retry()
+def request_bill_prep_amendment(prep_id, reason, supervisor_name=None):
+    """Supervisor raises an amendment request to the Owner."""
+    import datetime
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("""
+        UPDATE site_bill_preparations SET
+            amendment_status = 'pending',
+            amendment_reason = ?,
+            amendment_requested_at = ?,
+            updated_at = ?
+        WHERE id = ?
+    """, (reason.strip(), now_str, now_str, int(prep_id)))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Amendment request successfully sent to Owner for approval."}
+
+
+@db_retry()
+def approve_bill_prep_amendment(prep_id, approved_by="Sandip Kumar"):
+    """Owner approves amendment request, unlocking the record for supervisor edit."""
+    import datetime
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("""
+        UPDATE site_bill_preparations SET
+            amendment_status = 'approved',
+            is_locked = 0,
+            amendment_action_at = ?,
+            amendment_action_by = ?,
+            updated_at = ?
+        WHERE id = ?
+    """, (now_str, approved_by, now_str, int(prep_id)))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Amendment approved. Record unlocked for supervisor to edit."}
+
+
+@db_retry()
+def reject_bill_prep_amendment(prep_id, notes="", rejected_by="Sandip Kumar"):
+    """Owner rejects amendment request, keeping record locked."""
+    import datetime
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("""
+        UPDATE site_bill_preparations SET
+            amendment_status = 'rejected',
+            is_locked = 1,
+            amendment_action_at = ?,
+            amendment_action_by = ?,
+            amendment_action_notes = ?,
+            updated_at = ?
+        WHERE id = ?
+    """, (now_str, rejected_by, notes.strip(), now_str, int(prep_id)))
+    conn.commit()
+    conn.close()
+    return {"success": True, "message": "Amendment request rejected. Record remains locked."}
+
+
+@db_retry()
+def get_pending_amendment_requests():
+    """Returns all pending amendment requests for the Owner dashboard."""
+    init_bill_preparations_table()
+    conn = get_db()
+    c = conn.cursor()
+    rows = c.execute("""
+        SELECT p.*, s.name as site_name, s.code as site_code, s.supervisor as site_supervisor, s.contact as site_contact
+        FROM site_bill_preparations p
+        JOIN sites s ON p.site_id = s.id
+        WHERE p.amendment_status = 'pending'
+        ORDER BY p.amendment_requested_at DESC
+    """).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
