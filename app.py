@@ -87,13 +87,16 @@ def ensure_canonical_and_auth():
         worker_role = session.get("worker_role", "")
         if worker_role in ["Data Entry", "DEO"]:
             allowed_worker_paths.extend(["/entry", "/daily-entry", "/api/entries", "/api/scan-slip", "/api/parse-text"])
+        # Allow workers and staff to access data sharing segment
+        if path.startswith("/data-sharing") or path.startswith("/shared-docs") or path.startswith("/api/shared-docs"):
+            return None
         if path not in allowed_worker_paths:
             return redirect(url_for("my_attendance_portal"))
 
     # If not logged in at all, direct them to login
     if not role and not is_owner:
         if path in ["/", "/dashboard", "/portal", "/stock", "/entry", "/daily-entry", 
-                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store", "/dpr", "/bills", "/progress/bills"]:
+                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store", "/dpr", "/bills", "/progress/bills", "/data-sharing", "/shared-docs"]:
             return redirect(url_for("login_page"))
 
 
@@ -3598,3 +3601,246 @@ def api_get_bill_prep_data(site_id, month_key):
         return jsonify({"success": False, "message": "Unauthorized"}), 403
     prep = database.get_site_bill_prep(site_id, month_key)
     return jsonify({"success": True, "prep": prep})
+
+
+# ========================================================
+# DATA SHARING / DOCUMENTS EXCHANGE ROUTES
+# ========================================================
+
+SHARED_DOCS_DIR = os.path.join(os.path.dirname(__file__), "uploads", "shared_docs")
+os.makedirs(SHARED_DOCS_DIR, exist_ok=True)
+
+ALLOWED_DOC_EXTENSIONS = {
+    # PDF
+    "pdf",
+    # Images
+    "png", "jpg", "jpeg", "webp", "gif", "heic",
+    # Excel / CSV
+    "xls", "xlsx", "csv",
+    # Word
+    "doc", "docx",
+    # Documents / Presentations / Archives
+    "txt", "rtf", "ppt", "pptx", "zip"
+}
+
+def _get_file_type_category(ext):
+    ext = ext.lower().lstrip(".")
+    if ext == "pdf":
+        return "pdf"
+    elif ext in ["xls", "xlsx", "csv"]:
+        return "excel"
+    elif ext in ["doc", "docx"]:
+        return "word"
+    elif ext in ["png", "jpg", "jpeg", "webp", "gif", "heic"]:
+        return "image"
+    else:
+        return "document"
+
+def _format_file_size(size_bytes):
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{round(size_bytes / 1024, 1)} KB"
+    else:
+        return f"{round(size_bytes / (1024 * 1024), 2)} MB"
+
+@app.route("/data-sharing")
+@app.route("/shared-docs")
+def data_sharing_dashboard():
+    """Data Sharing & Document Exchange Hub for Supervisors, Staff & Owner."""
+    role = session.get("role")
+    is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
+    
+    # Require login
+    if not role and not is_owner:
+        flash("Please log in to access the Data Sharing portal.", "error")
+        return redirect(url_for("login_page"))
+        
+    site_filter = request.args.get("site_id")
+    type_filter = request.args.get("type", "all")
+    cat_filter = request.args.get("cat", "all")
+    search_q = request.args.get("q", "").strip()
+    
+    user_site_id = session.get("site_id")
+    
+    documents = database.get_shared_documents(
+        site_id=site_filter,
+        file_type=type_filter,
+        category=cat_filter,
+        search=search_q
+    )
+    
+    stats = database.get_shared_docs_stats()
+    sites = database.get_all_sites()
+    
+    categories = [
+        "Estimate / BOQ",
+        "Measurement Sheet (MB)",
+        "Challan / Bill Copy",
+        "Site Photo / GPS Proof",
+        "Official Order / Letter",
+        "Drawing / Layout",
+        "General Document"
+    ]
+    
+    current_user_name = session.get("worker_name") or ("Sandip Kumar (Owner)" if is_owner else "Staff Member")
+    current_user_role = session.get("worker_role") or ("Owner" if is_owner else "Supervisor")
+    
+    return render_template(
+        "data_sharing.html",
+        documents=documents,
+        stats=stats,
+        sites=sites,
+        categories=categories,
+        selected_site_id=int(site_filter) if site_filter and str(site_filter).isdigit() else None,
+        selected_type=type_filter,
+        selected_cat=cat_filter,
+        search_q=search_q,
+        is_owner=is_owner,
+        current_user_name=current_user_name,
+        current_user_role=current_user_role,
+        user_site_id=user_site_id
+    )
+
+@app.route("/api/shared-docs/upload", methods=["POST"])
+def api_upload_shared_doc():
+    """Uploads a new document shared by supervisor or staff."""
+    role = session.get("role")
+    is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
+    if not role and not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Please log in."}), 403
+        
+    if "file" not in request.files:
+        return jsonify({"success": False, "message": "No file was selected for upload."}), 400
+        
+    file = request.files["file"]
+    if not file or not file.filename:
+        return jsonify({"success": False, "message": "Selected file is empty."}), 400
+        
+    orig_filename = file.filename
+    ext = os.path.splitext(orig_filename)[1].lower().lstrip(".")
+    if ext not in ALLOWED_DOC_EXTENSIONS:
+        return jsonify({
+            "success": False,
+            "message": f"File type .{ext} is not supported. Please upload PDF, Excel, Word, Images, or Documents."
+        }), 400
+        
+    # Generate unique secure filename
+    import uuid, datetime
+    now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    clean_name = re.sub(r'[^a-zA-Z0-9_.-]', '_', orig_filename)
+    unique_filename = f"{now_str}_{uuid.uuid4().hex[:8]}_{clean_name}"
+    save_path = os.path.join(SHARED_DOCS_DIR, unique_filename)
+    
+    file.save(save_path)
+    file_size_bytes = os.path.getsize(save_path)
+    file_size_formatted = _format_file_size(file_size_bytes)
+    file_type = _get_file_type_category(ext)
+    
+    # Metadata
+    title = request.form.get("title", "").strip()
+    if not title:
+        title = os.path.splitext(orig_filename)[0].replace("_", " ").title()
+        
+    category = request.form.get("category", "General Document").strip()
+    site_id = request.form.get("site_id")
+    notes = request.form.get("notes", "").strip()
+    
+    # Crucial requirement: With the name of supervisor sharing the file
+    uploader_name = request.form.get("uploader_name", "").strip()
+    if not uploader_name:
+        uploader_name = session.get("worker_name") or ("Sandip Kumar" if is_owner else "Supervisor")
+        
+    uploader_role = session.get("worker_role") or ("Owner" if is_owner else "Supervisor")
+    uploader_phone = session.get("worker_phone")
+    uploader_id = session.get("worker_id")
+    
+    doc_id = database.add_shared_document(
+        title=title,
+        category=category,
+        site_id=int(site_id) if site_id and str(site_id).isdigit() else None,
+        filename=unique_filename,
+        original_filename=orig_filename,
+        file_type=file_type,
+        file_extension=f".{ext}",
+        file_size_bytes=file_size_bytes,
+        file_size_formatted=file_size_formatted,
+        uploader_name=uploader_name,
+        uploader_role=uploader_role,
+        uploader_phone=uploader_phone,
+        uploader_id=uploader_id,
+        notes=notes
+    )
+    
+    return jsonify({
+        "success": True,
+        "message": f"Document '{title}' successfully shared by {uploader_name}!",
+        "doc_id": doc_id
+    })
+
+@app.route("/shared-docs/download/<int:doc_id>")
+def download_shared_doc(doc_id):
+    """Downloads a shared document."""
+    doc = database.get_shared_document_by_id(doc_id)
+    if not doc:
+        flash("Document not found.", "error")
+        return redirect(url_for("data_sharing_dashboard"))
+        
+    file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
+    if not os.path.exists(file_path):
+        flash("File not found on storage disk.", "error")
+        return redirect(url_for("data_sharing_dashboard"))
+        
+    database.increment_doc_download_count(doc_id)
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=doc["original_filename"]
+    )
+
+@app.route("/shared-docs/view/<int:doc_id>")
+def view_shared_doc(doc_id):
+    """View PDF or Image directly in browser."""
+    doc = database.get_shared_document_by_id(doc_id)
+    if not doc:
+        flash("Document not found.", "error")
+        return redirect(url_for("data_sharing_dashboard"))
+        
+    file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
+    if not os.path.exists(file_path):
+        flash("File not found on storage disk.", "error")
+        return redirect(url_for("data_sharing_dashboard"))
+        
+    database.increment_doc_download_count(doc_id)
+    return send_file(file_path, as_attachment=False)
+
+@app.route("/api/shared-docs/delete/<int:doc_id>", methods=["POST"])
+def api_delete_shared_doc(doc_id):
+    """Delete a shared document (Uploader or Owner only)."""
+    role = session.get("role")
+    is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
+    
+    doc = database.get_shared_document_by_id(doc_id)
+    if not doc:
+        return jsonify({"success": False, "message": "Document not found."}), 404
+        
+    # Permission check: Owner or matching uploader name / phone
+    user_name = session.get("worker_name", "")
+    user_phone = session.get("worker_phone", "")
+    can_delete = (is_owner or 
+                  (user_name and user_name.lower() == doc["uploader_name"].lower()) or
+                  (user_phone and doc.get("uploader_phone") and user_phone == doc["uploader_phone"]))
+                  
+    if not can_delete:
+        return jsonify({"success": False, "message": "Permission denied! Only the uploader or Owner can delete this document."}), 403
+        
+    # Delete from disk
+    file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception:
+            pass
+            
+    database.delete_shared_document(doc_id)
+    return jsonify({"success": True, "message": "Document deleted successfully."})

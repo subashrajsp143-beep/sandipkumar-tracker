@@ -4817,3 +4817,175 @@ def get_pending_amendment_requests():
     """).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+# ========================================================
+# DATA SHARING / SHARED DOCUMENTS MODULE
+# ========================================================
+
+@db_retry()
+def init_shared_documents_table():
+    """Initializes shared_documents table for Supervisor & Staff file exchange."""
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS shared_documents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            category TEXT DEFAULT 'General Document',
+            site_id INTEGER,
+            site_name TEXT,
+            filename TEXT NOT NULL,
+            original_filename TEXT NOT NULL,
+            file_type TEXT NOT NULL,
+            file_extension TEXT NOT NULL,
+            file_size_bytes INTEGER DEFAULT 0,
+            file_size_formatted TEXT,
+            uploader_name TEXT NOT NULL,
+            uploader_role TEXT NOT NULL,
+            uploader_phone TEXT,
+            uploader_id INTEGER,
+            notes TEXT,
+            download_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+@db_retry()
+def add_shared_document(title, category, site_id, filename, original_filename,
+                        file_type, file_extension, file_size_bytes, file_size_formatted,
+                        uploader_name, uploader_role, uploader_phone=None, uploader_id=None, notes=None):
+    """Inserts a newly shared document into shared_documents table."""
+    init_shared_documents_table()
+    site_name = None
+    if site_id:
+        s = get_site_by_id(int(site_id))
+        if s:
+            site_name = s.get("name")
+            
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO shared_documents (
+            title, category, site_id, site_name, filename, original_filename,
+            file_type, file_extension, file_size_bytes, file_size_formatted,
+            uploader_name, uploader_role, uploader_phone, uploader_id, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        title.strip(),
+        category.strip() if category else "General Document",
+        int(site_id) if site_id else None,
+        site_name,
+        filename.strip(),
+        original_filename.strip(),
+        file_type.lower().strip(),
+        file_extension.lower().strip(),
+        int(file_size_bytes or 0),
+        file_size_formatted or "0 KB",
+        uploader_name.strip() if uploader_name else "Supervisor",
+        uploader_role.strip() if uploader_role else "Staff",
+        str(uploader_phone).strip() if uploader_phone else None,
+        int(uploader_id) if uploader_id else None,
+        notes.strip() if notes else None
+    ))
+    doc_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return doc_id
+
+
+@db_retry()
+def get_shared_documents(site_id=None, file_type=None, category=None, search=None):
+    """Retrieves list of shared documents with optional filtering and search."""
+    init_shared_documents_table()
+    conn = get_db()
+    c = conn.cursor()
+    
+    query = "SELECT * FROM shared_documents WHERE 1=1"
+    params = []
+    
+    if site_id and str(site_id).isdigit():
+        query += " AND (site_id = ? OR site_id IS NULL)"
+        params.append(int(site_id))
+        
+    if file_type and file_type != "all":
+        query += " AND file_type = ?"
+        params.append(file_type.lower())
+        
+    if category and category != "all":
+        query += " AND category = ?"
+        params.append(category)
+        
+    if search:
+        search_like = f"%{search.strip()}%"
+        query += " AND (title LIKE ? OR original_filename LIKE ? OR uploader_name LIKE ? OR site_name LIKE ? OR notes LIKE ?)"
+        params.extend([search_like, search_like, search_like, search_like, search_like])
+        
+    query += " ORDER BY created_at DESC, id DESC"
+    
+    rows = c.execute(query, params).fetchall()
+    conn.close()
+    
+    return [dict(r) for r in rows]
+
+
+@db_retry()
+def get_shared_document_by_id(doc_id):
+    """Returns single shared document by id."""
+    init_shared_documents_table()
+    conn = get_db()
+    c = conn.cursor()
+    row = c.execute("SELECT * FROM shared_documents WHERE id = ?", (int(doc_id),)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+@db_retry()
+def delete_shared_document(doc_id):
+    """Deletes a shared document from database."""
+    init_shared_documents_table()
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM shared_documents WHERE id = ?", (int(doc_id),))
+    conn.commit()
+    conn.close()
+    return True
+
+
+@db_retry()
+def increment_doc_download_count(doc_id):
+    """Increments download count for document."""
+    init_shared_documents_table()
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("UPDATE shared_documents SET download_count = download_count + 1 WHERE id = ?", (int(doc_id),))
+    conn.commit()
+    conn.close()
+
+
+@db_retry()
+def get_shared_docs_stats():
+    """Returns total counts by file type for dashboard KPI cards."""
+    init_shared_documents_table()
+    conn = get_db()
+    c = conn.cursor()
+    
+    rows = c.execute("SELECT file_type, COUNT(*) as cnt FROM shared_documents GROUP BY file_type").fetchall()
+    counts = {r["file_type"]: r["cnt"] for r in rows}
+    
+    total = c.execute("SELECT COUNT(*) FROM shared_documents").fetchone()[0]
+    total_sites_active = c.execute("SELECT COUNT(DISTINCT site_id) FROM shared_documents WHERE site_id IS NOT NULL").fetchone()[0]
+    conn.close()
+    
+    return {
+        "total": total,
+        "pdf": counts.get("pdf", 0),
+        "excel": counts.get("excel", 0),
+        "word": counts.get("word", 0),
+        "image": counts.get("image", 0),
+        "other": counts.get("other", 0) + counts.get("document", 0),
+        "sites_active": total_sites_active
+    }

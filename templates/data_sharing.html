@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+
+{% block title %}Data Sharing & Documents Exchange — M/S Sandip Kumar{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6">
+
+    <!-- 1. EXECUTIVE HEADER BANNER -->
+    <div class="bg-gradient-to-r from-[#163F37] via-[#1E4940] to-[#163F37] text-white rounded-3xl p-5 sm:p-7 shadow-xl border border-emerald-900/40 relative overflow-hidden">
+        <!-- Background decorative watermark -->
+        <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl">
+            <i class="fa-solid fa-folder-open"></i>
+        </div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-[#EAF5EF]/80 text-xs font-bold uppercase tracking-wider mb-1.5">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-black">
+                        <i class="fa-solid fa-share-nodes"></i> TEAM DATA EXCHANGE
+                    </span>
+                    <span>&bull;</span>
+                    <span>M/S Sandip Kumar &bull; JJM Bihar</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-2.5 tracking-tight">
+                    <i class="fa-solid fa-folder-open text-[#D97706]"></i>
+                    <span>Data Sharing & Documents Hub</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-[#EAF5EF]/80 mt-1 max-w-2xl font-medium leading-relaxed">
+                    सुपरवाइजर और स्टाफ के बीच PDF, Excel, Word, इमेज और महत्वपूर्ण दस्तावेजों का सुरक्षित आदान-प्रदान — प्रत्येक फ़ाइल पर शेयर करने वाले सुपरवाइजर का नाम व तारीख स्पष्ट रूप से दर्ज रहेगी।
+                </p>
+            </div>
+
+            <!-- Upload CTA Button -->
+            <div class="flex items-center gap-2 self-start md:self-auto flex-shrink-0">
+                <button type="button" onclick="openUploadDocModal()" class="px-5 py-3 rounded-2xl bg-[#D97706] hover:bg-[#B45309] text-white text-xs sm:text-sm font-black shadow-lg hover:shadow-xl transition flex items-center gap-2 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fa-solid fa-cloud-arrow-up text-sm sm:text-base"></i>
+                    <span>Share New File / फ़ाइल शेयर करें</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 mt-6 pt-5 border-t border-white/15">
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider">Total Files</div>
+                <div class="text-xl sm:text-2xl font-black text-white mt-0.5">{{ stats.total }}</div>
+                <div class="text-[9px] text-emerald-200/70 font-medium">All Documents</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-file-pdf text-rose-300"></i> PDF Files
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-rose-300 mt-0.5">{{ stats.pdf }}</div>
+                <div class="text-[9px] text-rose-200/70 font-medium">Estimates & Letters</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-file-excel text-emerald-300"></i> Excel / CSV
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-emerald-300 mt-0.5">{{ stats.excel }}</div>
+                <div class="text-[9px] text-emerald-200/70 font-medium">MB & Sheets</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-file-word text-blue-300"></i> Word Docs
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-blue-300 mt-0.5">{{ stats.word }}</div>
+                <div class="text-[9px] text-blue-200/70 font-medium">DOC / DOCX</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-file-image text-amber-300"></i> Images
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-amber-300 mt-0.5">{{ stats.image }}</div>
+                <div class="text-[9px] text-amber-200/70 font-medium">Site Photos & GPS</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/10">
+                <div class="text-[10px] font-bold text-[#EAF5EF]/75 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-building-circle-check text-purple-300"></i> Active Sites
+                </div>
+                <div class="text-xl sm:text-2xl font-black text-purple-300 mt-0.5">{{ stats.sites_active }} / 21</div>
+                <div class="text-[9px] text-purple-200/70 font-medium">Sites with Docs</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. SEARCH & FILTER TOOLBAR -->
+    <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-2xs border border-[#E5ECE9] space-y-3.5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <!-- Search Input -->
+            <div class="relative flex-1 max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="docSearchInput" value="{{ search_q }}" onkeyup="handleSearchInput(event)" placeholder="Search by title, filename, supervisor name..." class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#163F37] focus:bg-white transition focus:outline-none font-medium">
+                {% if search_q %}
+                <button type="button" onclick="clearSearchFilter()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Filters & View Switcher -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Site Filter -->
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                    <i class="fa-solid fa-location-dot text-[#D97706] text-xs"></i>
+                    <select id="filterSiteSelect" onchange="applyFilters()" class="bg-transparent text-slate-800 text-xs font-bold border-0 focus:ring-0 cursor-pointer p-0">
+                        <option value="all">All Sites (सभी साइट्स)</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>
+                            {{ s.code }} — {{ s.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                    <i class="fa-solid fa-tag text-[#163F37] text-xs"></i>
+                    <select id="filterCatSelect" onchange="applyFilters()" class="bg-transparent text-slate-800 text-xs font-bold border-0 focus:ring-0 cursor-pointer p-0">
+                        <option value="all">All Categories</option>
+                        {% for c in categories %}
+                        <option value="{{ c }}" {% if selected_cat == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- View Switcher (Cards vs Table) -->
+                <div class="inline-flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200 ml-auto sm:ml-0">
+                    <button type="button" onclick="switchViewMode('grid')" id="btnViewGrid" class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white text-[#163F37] shadow-2xs">
+                        <i class="fa-solid fa-grip"></i> <span class="hidden sm:inline">Cards</span>
+                    </button>
+                    <button type="button" onclick="switchViewMode('table')" id="btnViewTable" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 text-slate-500 hover:text-slate-800">
+                        <i class="fa-solid fa-table-list"></i> <span class="hidden sm:inline">Table</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick File Type Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Type:</span>
+            <button type="button" onclick="filterByType('all')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer {% if selected_type == 'all' %}bg-[#163F37] text-white shadow-2xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                All ({{ stats.total }})
+            </button>
+            <button type="button" onclick="filterByType('pdf')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_type == 'pdf' %}bg-rose-700 text-white shadow-2xs{% else %}bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200/60{% endif %}">
+                <i class="fa-solid fa-file-pdf"></i> PDF ({{ stats.pdf }})
+            </button>
+            <button type="button" onclick="filterByType('excel')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_type == 'excel' %}bg-emerald-700 text-white shadow-2xs{% else %}bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60{% endif %}">
+                <i class="fa-solid fa-file-excel"></i> Excel ({{ stats.excel }})
+            </button>
+            <button type="button" onclick="filterByType('word')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_type == 'word' %}bg-blue-700 text-white shadow-2xs{% else %}bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200/60{% endif %}">
+                <i class="fa-solid fa-file-word"></i> Word ({{ stats.word }})
+            </button>
+            <button type="button" onclick="filterByType('image')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_type == 'image' %}bg-amber-600 text-white shadow-2xs{% else %}bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60{% endif %}">
+                <i class="fa-solid fa-file-image"></i> Images ({{ stats.image }})
+            </button>
+            <button type="button" onclick="filterByType('document')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_type in ['document', 'other'] %}bg-slate-700 text-white shadow-2xs{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                <i class="fa-solid fa-file-lines"></i> Other ({{ stats.other }})
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. DOCUMENTS LIST SECTION -->
+    <div id="docsContainer">
+        {% if documents|length == 0 %}
+        <!-- EMPTY STATE -->
+        <div class="bg-white rounded-3xl p-10 sm:p-14 text-center border border-[#E5ECE9] shadow-2xs space-y-4">
+            <div class="w-16 h-16 rounded-3xl bg-[#EAF5EF] text-[#163F37] flex items-center justify-center mx-auto text-2xl border border-[#C3E3D2]">
+                <i class="fa-regular fa-folder-open text-[#D97706]"></i>
+            </div>
+            <div>
+                <h3 class="text-base sm:text-lg font-black text-[#163F37]">No Documents Found / कोई दस्तावेज़ नहीं मिला</h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1">
+                    {% if search_q or selected_type != 'all' or selected_site_id %}
+                    फिल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें।
+                    {% else %}
+                    अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+                {% if search_q or selected_type != 'all' or selected_site_id %}
+                <button type="button" onclick="window.location.href='/data-sharing'" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer">
+                    Clear Filters / रीसेट करें
+                </button>
+                {% endif %}
+                <button type="button" onclick="openUploadDocModal()" class="px-5 py-2.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plus text-[#D97706]"></i>
+                    <span>Share First File / फ़ाइल शेयर करें</span>
+                </button>
+            </div>
+        </div>
+        {% else %}
+
+        <!-- A. CARDS GRID VIEW (Default) -->
+        <div id="gridDocsView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for doc in documents %}
+            <div class="bg-white rounded-3xl border border-[#E5ECE9] hover:border-emerald-300 p-4 sm:p-5 shadow-2xs hover:shadow-md transition duration-150 flex flex-col justify-between group">
+                <!-- Top Header: File Icon + Badges -->
+                <div>
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <!-- Type Icon Badge -->
+                            {% if doc.file_type == 'pdf' %}
+                            <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg font-black flex-shrink-0 border border-rose-200">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </div>
+                            {% elif doc.file_type == 'excel' %}
+                            <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg font-black flex-shrink-0 border border-emerald-200">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            {% elif doc.file_type == 'word' %}
+                            <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-black flex-shrink-0 border border-blue-200">
+                                <i class="fa-solid fa-file-word"></i>
+                            </div>
+                            {% elif doc.file_type == 'image' %}
+                            <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg font-black flex-shrink-0 border border-amber-200">
+                                <i class="fa-solid fa-file-image"></i>
+                            </div>
+                            {% else %}
+                            <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg font-black flex-shrink-0 border border-slate-200">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider {% if doc.file_type == 'pdf' %}bg-rose-100 text-rose-800{% elif doc.file_type == 'excel' %}bg-emerald-100 text-emerald-800{% elif doc.file_type == 'word' %}bg-blue-100 text-blue-800{% elif doc.file_type == 'image' %}bg-amber-100 text-amber-900{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                    {{ doc.file_extension|upper }}
+                                </span>
+                                <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-600 ml-1">
+                                    {{ doc.category }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Site Badge -->
+                        {% if doc.site_name %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF5EF] text-[#163F37] border border-[#C3E3D2] flex-shrink-0">
+                            <i class="fa-solid fa-location-dot text-[#D97706] text-[9px]"></i>
+                            <span>{{ doc.site_name }}</span>
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 flex-shrink-0">
+                            <i class="fa-solid fa-globe text-slate-400 text-[9px]"></i>
+                            <span>All Sites</span>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Title & Original File Info -->
+                    <div>
+                        <h4 class="font-extrabold text-sm sm:text-base text-[#163F37] leading-snug break-words group-hover:text-emerald-800 transition">
+                            {{ doc.title }}
+                        </h4>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5 flex items-center gap-2 truncate" title="{{ doc.original_filename }}">
+                            <span class="truncate">{{ doc.original_filename }}</span>
+                            <span class="text-slate-300">&bull;</span>
+                            <span class="font-bold text-slate-600 flex-shrink-0">{{ doc.file_size_formatted }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Notes (if present) -->
+                    {% if doc.notes %}
+                    <div class="mt-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 italic break-words">
+                        "{{ doc.notes }}"
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- SUPERVISOR / STAFF IDENTITY CARD (Crucial User Requirement) -->
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <div class="p-2.5 rounded-2xl bg-[#EAF5EF]/80 border border-[#C3E3D2]/70 flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <!-- Avatar circle -->
+                            <div class="w-7 h-7 rounded-full bg-[#163F37] text-white flex items-center justify-center text-[10px] font-black flex-shrink-0 shadow-2xs">
+                                {{ doc.uploader_name[:1]|upper }}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[11px] font-black text-[#163F37] truncate flex items-center gap-1">
+                                    <span class="text-[9px] text-[#D97706] font-bold uppercase tracking-wider">Shared by:</span>
+                                    <span class="truncate">{{ doc.uploader_name }}</span>
+                                </div>
+                                <div class="text-[9px] text-[#52736B] font-semibold flex items-center gap-1">
+                                    <span class="px-1 rounded bg-white text-slate-700 font-bold border border-slate-200">{{ doc.uploader_role }}</span>
+                                    <span>&bull;</span>
+                                    <span>{{ doc.created_at[:16] }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if doc.download_count > 0 %}
+                        <div class="text-[9px] font-bold text-slate-500 flex items-center gap-0.5 flex-shrink-0" title="Downloaded {{ doc.download_count }} times">
+                            <i class="fa-solid fa-download text-[8px]"></i>
+                            <span>{{ doc.download_count }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions Buttons -->
+                    <div class="flex items-center justify-between gap-1.5">
+                        <div class="flex items-center gap-1.5 flex-1">
+                            <!-- View Button (Inline Preview) -->
+                            <a href="/shared-docs/view/{{ doc.id }}" target="_blank" class="flex-1 py-1.5 px-2.5 rounded-xl bg-slate-100 hover:bg-[#EAF5EF] hover:text-[#163F37] text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1 border border-slate-200" title="Open and preview in browser">
+                                <i class="fa-solid fa-eye text-[11px]"></i>
+                                <span>View</span>
+                            </a>
+                            <!-- Download Button -->
+                            <a href="/shared-docs/download/{{ doc.id }}" class="flex-1 py-1.5 px-2.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-2xs" title="Download original file">
+                                <i class="fa-solid fa-download text-[#D97706] text-[11px]"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
+
+                        <!-- Delete Button (Owner or Uploader) -->
+                        {% if is_owner or (current_user_name and current_user_name.lower() == doc.uploader_name.lower()) %}
+                        <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, '{{ doc.title|escape }}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition cursor-pointer border border-rose-200 flex-shrink-0" title="Delete this file">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- B. DENSE TABLE VIEW (Hidden by default, toggleable) -->
+        <div id="tableDocsView" class="hidden bg-white rounded-3xl border border-[#E5ECE9] shadow-2xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-[#E5ECE9]">
+                        <tr>
+                            <th class="py-3 px-4">Document Title & Filename</th>
+                            <th class="py-3 px-4">Type</th>
+                            <th class="py-3 px-4">Category</th>
+                            <th class="py-3 px-4">Site</th>
+                            <th class="py-3 px-4">Shared By Supervisor</th>
+                            <th class="py-3 px-4">Date & Time</th>
+                            <th class="py-3 px-4">Size</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5ECE9]">
+                        {% for doc in documents %}
+                        <tr class="hover:bg-[#F8FAF9]/80 transition">
+                            <td class="py-3 px-4 align-top">
+                                <div class="font-extrabold text-[#163F37] text-xs sm:text-sm">{{ doc.title }}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">{{ doc.original_filename }}</div>
+                            </td>
+                            <td class="py-3 px-4 align-top">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase {% if doc.file_type == 'pdf' %}bg-rose-100 text-rose-800{% elif doc.file_type == 'excel' %}bg-emerald-100 text-emerald-800{% elif doc.file_type == 'word' %}bg-blue-100 text-blue-800{% elif doc.file_type == 'image' %}bg-amber-100 text-amber-900{% else %}bg-slate-100 text-slate-700{% endif %}">
+                                    {{ doc.file_extension|upper }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 align-top text-slate-700 font-medium">{{ doc.category }}</td>
+                            <td class="py-3 px-4 align-top">
+                                <span class="font-bold text-slate-800">{{ doc.site_name or 'All Sites' }}</span>
+                            </td>
+                            <td class="py-3 px-4 align-top">
+                                <div class="font-black text-[#163F37] flex items-center gap-1.5">
+                                    <span class="w-5 h-5 rounded-full bg-[#163F37] text-white flex items-center justify-center text-[9px] font-bold">
+                                        {{ doc.uploader_name[:1]|upper }}
+                                    </span>
+                                    <span>{{ doc.uploader_name }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400">{{ doc.uploader_role }}</div>
+                            </td>
+                            <td class="py-3 px-4 align-top text-slate-500 font-medium">{{ doc.created_at[:16] }}</td>
+                            <td class="py-3 px-4 align-top text-slate-600 font-mono">{{ doc.file_size_formatted }}</td>
+                            <td class="py-3 px-4 align-top text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <a href="/shared-docs/view/{{ doc.id }}" target="_blank" class="p-1.5 rounded-lg bg-slate-100 hover:bg-[#EAF5EF] text-slate-700 hover:text-[#163F37] transition" title="View">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </a>
+                                    <a href="/shared-docs/download/{{ doc.id }}" class="p-1.5 rounded-lg bg-[#163F37] hover:bg-[#1E4940] text-white transition" title="Download">
+                                        <i class="fa-solid fa-download text-xs text-[#D97706]"></i>
+                                    </a>
+                                    {% if is_owner or (current_user_name and current_user_name.lower() == doc.uploader_name.lower()) %}
+                                    <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, '{{ doc.title|escape }}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition cursor-pointer" title="Delete">
+                                        <i class="fa-regular fa-trash-can text-xs"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL: UPLOAD & SHARE NEW DOCUMENT                       -->
+<!-- ======================================================== -->
+<div id="uploadDocModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-3 sm:p-4 no-print" onclick="if(event.target===this) closeUploadDocModal()">
+    <div class="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
+        <!-- Header -->
+        <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-white">Share New Document / नया फ़ाइल शेयर करें</h3>
+                    <p class="text-xs text-[#A8C5BF] mt-0.5">PDF, Excel, Word, इमेज या दस्तावेज़ अपलोड करें</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeUploadDocModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form id="uploadDocForm" onsubmit="submitUploadDoc(event)" class="p-5 sm:p-6 overflow-y-auto space-y-4">
+            <!-- File Input Drag & Drop Box -->
+            <div>
+                <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                    Select File (फ़ाइल चुनें) *
+                </label>
+                <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-slate-300 hover:border-[#163F37] rounded-2xl p-5 text-center bg-slate-50 hover:bg-[#EAF5EF]/40 transition cursor-pointer">
+                    <input type="file" id="fileInput" name="file" onchange="handleFileSelected(this)" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.heic,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,.rtf,.zip" class="hidden" required>
+                    <div id="dropZoneContent" class="space-y-1">
+                        <div class="w-12 h-12 rounded-2xl bg-white text-[#163F37] flex items-center justify-center mx-auto text-xl border border-slate-200 shadow-2xs">
+                            <i class="fa-solid fa-cloud-arrow-up text-[#D97706]"></i>
+                        </div>
+                        <div class="text-xs font-extrabold text-[#163F37] mt-2">Click to Browse or Drag File Here</div>
+                        <div class="text-[11px] text-slate-500 font-medium">Supports PDF, Excel (.xlsx, .csv), Word (.docx), Images (.jpg, .png), Docs</div>
+                    </div>
+                    <!-- Selected File Info Banner -->
+                    <div id="selectedFileInfo" class="hidden p-3 rounded-xl bg-white border border-emerald-300 text-left flex items-center justify-between">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i id="selectedFileIcon" class="fa-solid fa-file text-emerald-700 text-lg"></i>
+                            <div class="min-w-0">
+                                <div id="selectedFileName" class="text-xs font-black text-[#163F37] truncate">Filename</div>
+                                <div id="selectedFileSize" class="text-[10px] text-slate-500 font-mono">0 KB</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Title -->
+            <div>
+                <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                    Document Title / शीर्षक *
+                </label>
+                <input type="text" id="docTitleInput" name="title" placeholder="e.g. Mairwa Ward 5 Estimate Copy or Pump Installation Letter" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition" required>
+            </div>
+
+            <!-- Category & Site Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Category -->
+                <div>
+                    <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                        Category / श्रेणी *
+                    </label>
+                    <select id="docCatSelect" name="category" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition cursor-pointer">
+                        {% for c in categories %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Site Selection -->
+                <div>
+                    <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                        Related Site / संबंधित साइट
+                    </label>
+                    <select id="docSiteSelect" name="site_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition cursor-pointer">
+                        <option value="">🌐 All Sites (General Document)</option>
+                        {% for s in sites %}
+                        <option value="{{ s.id }}" {% if user_site_id == s.id %}selected{% endif %}>
+                            {{ s.code }} — {{ s.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Uploader Name (Supervisor Name Highlight) -->
+            <div>
+                <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                    Supervisor / Staff Name (शेयर करने वाले का नाम) *
+                </label>
+                <div class="relative">
+                    <input type="text" id="docUploaderInput" name="uploader_name" value="{{ current_user_name }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition" required>
+                    <i class="fa-solid fa-user-check absolute left-3 top-1/2 -translate-y-1/2 text-emerald-700 text-xs"></i>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                    <i class="fa-solid fa-shield-halved text-[#D97706]"></i>
+                    <span>यह नाम प्रत्येक यूजर को फ़ाइल के साथ "Shared by" के रूप में प्रदर्शित होगा।</span>
+                </div>
+            </div>
+
+            <!-- Optional Notes -->
+            <div>
+                <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                    Notes / Remarks (रिमार्क या निर्देश)
+                </label>
+                <textarea id="docNotesInput" name="notes" rows="2" placeholder="e.g. Please verify page 3 signature, or for JE review..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition"></textarea>
+            </div>
+
+            <!-- Upload Feedback Message -->
+            <div id="uploadFeedback" class="hidden p-3 rounded-xl text-xs font-bold"></div>
+
+            <!-- Footer Buttons -->
+            <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeUploadDocModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer">
+                    Cancel / रद्द करें
+                </button>
+                <button type="submit" id="btnSubmitDoc" class="px-6 py-2.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane text-[#D97706]"></i>
+                    <span>Share File / फ़ाइल शेयर करें</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- JAVASCRIPT LOGIC FOR DATA SHARING                        -->
+<!-- ======================================================== -->
+<script>
+function openUploadDocModal() {
+    const modal = document.getElementById('uploadDocModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeUploadDocModal() {
+    const modal = document.getElementById('uploadDocModal');
+    if (modal) modal.classList.add('hidden');
+    // Reset file form
+    document.getElementById('uploadDocForm').reset();
+    document.getElementById('dropZoneContent').classList.remove('hidden');
+    document.getElementById('selectedFileInfo').classList.add('hidden');
+    const fb = document.getElementById('uploadFeedback');
+    fb.className = "hidden p-3 rounded-xl text-xs font-bold";
+    fb.innerHTML = "";
+}
+
+function handleFileSelected(input) {
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    
+    document.getElementById('dropZoneContent').classList.add('hidden');
+    const info = document.getElementById('selectedFileInfo');
+    info.classList.remove('hidden');
+    
+    document.getElementById('selectedFileName').textContent = file.name;
+    const sizeKb = (file.size / 1024).toFixed(1);
+    const sizeStr = sizeKb > 1024 ? (sizeKb / 1024).toFixed(2) + " MB" : sizeKb + " KB";
+    document.getElementById('selectedFileSize').textContent = sizeStr;
+    
+    // Auto-fill title if empty
+    const titleInput = document.getElementById('docTitleInput');
+    if (!titleInput.value.trim()) {
+        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        titleInput.value = baseName.replace(/_/g, ' ').replace(/-/g, ' ');
+    }
+
+    // Set icon based on extension
+    const ext = file.name.split('.').pop().toLowerCase();
+    const icon = document.getElementById('selectedFileIcon');
+    if (ext === 'pdf') {
+        icon.className = "fa-solid fa-file-pdf text-rose-600 text-lg";
+    } else if (['xls', 'xlsx', 'csv'].includes(ext)) {
+        icon.className = "fa-solid fa-file-excel text-emerald-600 text-lg";
+    } else if (['doc', 'docx'].includes(ext)) {
+        icon.className = "fa-solid fa-file-word text-blue-600 text-lg";
+    } else if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+        icon.className = "fa-solid fa-file-image text-amber-600 text-lg";
+    } else {
+        icon.className = "fa-solid fa-file-lines text-slate-600 text-lg";
+    }
+}
+
+async function submitUploadDoc(e) {
+    e.preventDefault();
+    const form = document.getElementById('uploadDocForm');
+    const formData = new FormData(form);
+    
+    const btn = document.getElementById('btnSubmitDoc');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading & Sharing...';
+    
+    const fb = document.getElementById('uploadFeedback');
+    fb.className = "p-3 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 block";
+    fb.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> File is being securely stored and shared...';
+    
+    try {
+        const resp = await fetch('/api/shared-docs/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const res = await resp.json();
+        
+        if (res.success) {
+            fb.className = "p-3 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 block";
+            fb.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> ' + res.message;
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+        } else {
+            fb.className = "p-3 rounded-xl text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 block";
+            fb.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> ' + (res.message || 'Upload failed');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#D97706]"></i> <span>Share File / फ़ाइल शेयर करें</span>';
+        }
+    } catch (err) {
+        fb.className = "p-3 rounded-xl text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 block";
+        fb.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Network error: ' + err.message;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#D97706]"></i> <span>Share File / फ़ाइल शेयर करें</span>';
+    }
+}
+
+async function confirmDeleteDoc(docId, docTitle) {
+    if (!confirm(`Are you sure you want to delete this shared document?\n\n"${docTitle}"\n\nThis will remove it for all supervisors and staff.`)) {
+        return;
+    }
+    
+    try {
+        const resp = await fetch(`/api/shared-docs/delete/${docId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const res = await resp.json();
+        if (res.success) {
+            window.location.reload();
+        } else {
+            alert('Delete failed: ' + res.message);
+        }
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+// FILTERS & SEARCH
+function applyFilters() {
+    const siteVal = document.getElementById('filterSiteSelect').value;
+    const catVal = document.getElementById('filterCatSelect').value;
+    const searchVal = document.getElementById('docSearchInput').value.trim();
+    
+    const url = new URL(window.location.href);
+    if (siteVal && siteVal !== 'all') url.searchParams.set('site_id', siteVal);
+    else url.searchParams.delete('site_id');
+    
+    if (catVal && catVal !== 'all') url.searchParams.set('cat', catVal);
+    else url.searchParams.delete('cat');
+    
+    if (searchVal) url.searchParams.set('q', searchVal);
+    else url.searchParams.delete('q');
+    
+    window.location.href = url.toString();
+}
+
+function filterByType(typeKey) {
+    const url = new URL(window.location.href);
+    if (typeKey && typeKey !== 'all') {
+        url.searchParams.set('type', typeKey);
+    } else {
+        url.searchParams.delete('type');
+    }
+    window.location.href = url.toString();
+}
+
+let searchTimer = null;
+function handleSearchInput(e) {
+    if (e.key === 'Enter') {
+        applyFilters();
+        return;
+    }
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        applyFilters();
+    }, 600);
+}
+
+function clearSearchFilter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('q');
+    window.location.href = url.toString();
+}
+
+function switchViewMode(mode) {
+    const gridView = document.getElementById('gridDocsView');
+    const tableView = document.getElementById('tableDocsView');
+    const btnGrid = document.getElementById('btnViewGrid');
+    const btnTable = document.getElementById('btnViewTable');
+    
+    if (!gridView || !tableView) return;
+    
+    if (mode === 'grid') {
+        gridView.classList.remove('hidden');
+        tableView.classList.add('hidden');
+        btnGrid.className = "px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white text-[#163F37] shadow-2xs";
+        btnTable.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
+    } else {
+        gridView.classList.add('hidden');
+        tableView.classList.remove('hidden');
+        btnTable.className = "px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 bg-white text-[#163F37] shadow-2xs";
+        btnGrid.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1 text-slate-500 hover:text-slate-800";
+    }
+}
+</script>
+{% endblock %}

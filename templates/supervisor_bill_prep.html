@@ -34,16 +34,22 @@
                 </p>
             </div>
 
-            <!-- Month Selector Dropdown -->
-            <div class="bg-white/10 backdrop-blur-md p-2.5 rounded-2xl border border-white/15 flex items-center gap-2 self-start sm:self-auto">
-                <i class="fa-regular fa-calendar-days text-[#D97706] text-sm"></i>
-                <select id="prepMonthSelect" onchange="window.location.href='?site_id={{ site.id }}&month=' + this.value" class="bg-white text-[#163F37] font-black text-xs sm:text-sm rounded-xl px-3 py-1.5 border-0 shadow-sm cursor-pointer focus:ring-2 focus:ring-[#D97706]">
-                    {% for m in months_list %}
-                    <option value="{{ m.key }}" {% if m.key == selected_month %}selected{% endif %}>
-                        {{ m.label }} {% if m.is_current %}⭐ (Current){% endif %}
-                    </option>
-                    {% endfor %}
-                </select>
+            <!-- Month Selector Dropdown & Data Sharing Shortcut -->
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <div class="bg-white/10 backdrop-blur-md p-2.5 rounded-2xl border border-white/15 flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-days text-[#D97706] text-sm"></i>
+                    <select id="prepMonthSelect" onchange="window.location.href='?site_id={{ site.id }}&month=' + this.value" class="bg-white text-[#163F37] font-black text-xs sm:text-sm rounded-xl px-3 py-1.5 border-0 shadow-sm cursor-pointer focus:ring-2 focus:ring-[#D97706]">
+                        {% for m in months_list %}
+                        <option value="{{ m.key }}" {% if m.key == selected_month %}selected{% endif %}>
+                            {{ m.label }} {% if m.is_current %}⭐ (Current){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <a href="/data-sharing?site_id={{ site.id }}" class="px-3 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Exchange Documents, Estimates, MB & Photos for this site">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span class="hidden sm:inline">Data Sharing</span>
+                </a>
             </div>
         </div>
 

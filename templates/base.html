@@ -240,6 +240,17 @@
                 </div>
                 {% endif %}
 
+                <!-- SEGMENT: DATA SHARING (For Supervisor, Staff & Owner to exchange PDF, Excel, Word, Images, Docs) -->
+                <div class="pt-1">
+                    <a href="/data-sharing" class="folder-toggle-btn w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-[#1C4840] hover:bg-[#23534A] active:bg-[#23534A] text-[#7EA79E] hover:text-white border border-[#23534A]/60 transition cursor-pointer {% if request.path in ['/data-sharing', '/shared-docs'] %}active-sidebar-pill{% endif %}">
+                        <div class="flex items-center gap-2 text-[#A8C5BF]">
+                            <i class="fa-solid fa-folder-open text-xs text-[#D97706]"></i>
+                            <span class="sidebar-text" data-i18n="seg_data_sharing">Data Sharing</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-[#D97706] text-slate-950 uppercase tracking-tighter">DOCS</span>
+                    </a>
+                </div>
+
                 <!-- OWNER-ONLY SEGMENTS (Progress, Letters, Reports, Master) -->
                 {% if session.get('is_owner') or user_role == 'owner' %}
                 <!-- 5. SEGMENT: PROGRESS (Solid pista green #93C572 background, text & icon #14300A, arrow #14300A) -->
