@@ -253,11 +253,23 @@
                                 <div class="text-[10px] text-slate-500 font-medium">
                                     {{ item.latest_bill.bill_type }}
                                 </div>
-                                {% if item.latest_bill.period_from and item.latest_bill.period_to %}
-                                <div class="text-[10px] text-slate-400 mt-0.5">
-                                    {{ item.latest_bill.period_from }} to {{ item.latest_bill.period_to }}
+                                <!-- Bill Month: Shown first instance, complete period on cursor hover -->
+                                <div class="mt-1 relative group inline-block cursor-help" title="Full Period: {{ item.latest_bill.complete_period }}">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-[#163F37] bg-[#EAF5EF] hover:bg-[#D6ECE0] border border-[#C3E3D2] px-2 py-0.5 rounded-md transition shadow-2xs">
+                                        <i class="fa-regular fa-calendar text-[#D97706] text-[9px]"></i>
+                                        <span>{{ item.latest_bill.bill_month }}</span>
+                                    </span>
+                                    <!-- Tooltip on hover -->
+                                    <div class="absolute bottom-full left-0 mb-1.5 hidden group-hover:block z-40 bg-slate-900 text-white text-[11px] py-1.5 px-2.5 rounded-xl whitespace-nowrap shadow-xl border border-slate-700 pointer-events-none">
+                                        <div class="text-[10px] font-semibold text-amber-300 flex items-center gap-1">
+                                            <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Complete Billing Period:
+                                        </div>
+                                        <div class="text-white font-mono font-medium text-xs mt-0.5">
+                                            {{ item.latest_bill.complete_period }}
+                                        </div>
+                                        <div class="w-2 h-2 bg-slate-900 rotate-45 absolute -bottom-1 left-3 border-r border-b border-slate-700"></div>
+                                    </div>
                                 </div>
-                                {% endif %}
                                 {% else %}
                                 <span class="text-xs text-slate-400 italic">No bill created yet</span>
                                 {% endif %}
@@ -410,7 +422,7 @@
                         <tr>
                             <th class="py-3.5 px-4">Bill No & Type</th>
                             <th class="py-3.5 px-4">Site</th>
-                            <th class="py-3.5 px-4">Billing Period</th>
+                            <th class="py-3.5 px-4">Bill Month</th>
                             <th class="py-3.5 px-4">Claimed (₹)</th>
                             <th class="py-3.5 px-4">Cleared (₹)</th>
                             <th class="py-3.5 px-4">Current Step</th>
@@ -431,8 +443,24 @@
                             <td class="py-3 px-4 font-semibold text-slate-800">
                                 {{ b.site_name }} <span class="text-[10px] text-slate-400">({{ b.site_code }})</span>
                             </td>
-                            <td class="py-3 px-4 text-slate-500">
-                                {{ b.period_from or '—' }} to {{ b.period_to or '—' }}
+                            <td class="py-3 px-4">
+                                <!-- Bill Month: Shown first instance, complete period on cursor hover -->
+                                <div class="relative group inline-block cursor-help" title="Full Period: {{ b.complete_period }}">
+                                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-[#163F37] bg-[#EAF5EF] hover:bg-[#D6ECE0] border border-[#C3E3D2] px-2.5 py-1 rounded-lg transition shadow-2xs">
+                                        <i class="fa-regular fa-calendar-days text-[#D97706] text-xs"></i>
+                                        <span>{{ b.bill_month }}</span>
+                                    </span>
+                                    <!-- Tooltip on hover -->
+                                    <div class="absolute bottom-full left-0 mb-1.5 hidden group-hover:block z-40 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-xl whitespace-nowrap shadow-xl border border-slate-700 pointer-events-none">
+                                        <div class="text-[10px] font-semibold text-amber-300 flex items-center gap-1">
+                                            <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Complete Billing Period:
+                                        </div>
+                                        <div class="text-white font-mono font-medium mt-0.5">
+                                            {{ b.complete_period }}
+                                        </div>
+                                        <div class="w-2 h-2 bg-slate-900 rotate-45 absolute -bottom-1 left-4 border-r border-b border-slate-700"></div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="py-3 px-4 font-black text-slate-900">
                                 ₹ {{ "{:,.0f}".format(b.bill_amount) }}

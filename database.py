@@ -3221,6 +3221,51 @@ def init_site_bills_table():
     conn.commit()
     conn.close()
 
+def format_bill_period_info(p_from, p_to, fallback_date=None):
+    """
+    Formats the billing period to show ONLY the Bill Month initially (e.g. 'Aug 2026'),
+    and the complete date range on hover (e.g. '01-Aug-2026 to 31-Aug-2026').
+    """
+    import datetime
+    d_from = None
+    d_to = None
+    if p_from:
+        try: d_from = datetime.datetime.strptime(str(p_from).strip()[:10], '%Y-%m-%d')
+        except Exception: pass
+    if p_to:
+        try: d_to = datetime.datetime.strptime(str(p_to).strip()[:10], '%Y-%m-%d')
+        except Exception: pass
+        
+    if d_from and d_to:
+        if d_from.year == d_to.year:
+            if d_from.month == d_to.month:
+                bill_month = d_to.strftime('%b %Y') # e.g. "Aug 2026"
+            else:
+                bill_month = f"{d_from.strftime('%b')} - {d_to.strftime('%b %Y')}"
+        else:
+            bill_month = f"{d_from.strftime('%b %Y')} - {d_to.strftime('%b %Y')}"
+        complete_period = f"{d_from.strftime('%d-%b-%Y')} to {d_to.strftime('%d-%b-%Y')}"
+    elif d_to:
+        bill_month = d_to.strftime('%b %Y')
+        complete_period = f"Up to {d_to.strftime('%d-%b-%Y')}"
+    elif d_from:
+        bill_month = d_from.strftime('%b %Y')
+        complete_period = f"From {d_from.strftime('%d-%b-%Y')}"
+    else:
+        if fallback_date:
+            try:
+                fb = datetime.datetime.strptime(str(fallback_date).strip()[:10], '%Y-%m-%d')
+                bill_month = fb.strftime('%b %Y')
+                complete_period = f"Created: {fb.strftime('%d-%b-%Y')}"
+            except Exception:
+                bill_month = "Current"
+                complete_period = "Period not specified"
+        else:
+            bill_month = "Current"
+            complete_period = "Period not specified"
+            
+    return bill_month, complete_period
+
 @db_retry()
 def get_all_site_bills(site_id=None, step=None, sort_by=None, search=None):
     """Returns list of all bills joined with site info, with sorting and filtering."""
@@ -3282,6 +3327,9 @@ def get_all_site_bills(site_id=None, step=None, sort_by=None, search=None):
     for r in rows:
         st = r.get("current_step", 1)
         r["step_meta"] = BILL_CLEARANCE_STEPS.get(st, BILL_CLEARANCE_STEPS[1])
+        b_month, c_period = format_bill_period_info(r.get("period_from"), r.get("period_to"), r.get("step1_date") or r.get("created_at"))
+        r["bill_month"] = b_month
+        r["complete_period"] = c_period
     return rows
 
 @db_retry()
@@ -3306,6 +3354,9 @@ def get_site_bill_by_id(bill_id):
     if row:
         d = dict(row)
         d["step_meta"] = BILL_CLEARANCE_STEPS.get(d.get("current_step", 1), BILL_CLEARANCE_STEPS[1])
+        b_month, c_period = format_bill_period_info(d.get("period_from"), d.get("period_to"), d.get("step1_date") or d.get("created_at"))
+        d["bill_month"] = b_month
+        d["complete_period"] = c_period
         return d
     return None
 
