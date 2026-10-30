@@ -3495,8 +3495,9 @@ def delete_site_bill(bill_id):
 
 @db_retry()
 def get_bill_clearance_summary():
-    """Returns KPI metrics and breakdown across all 6 steps."""
+    """Returns KPI metrics and breakdown across all 9 unified steps."""
     init_site_bills_table()
+    init_bill_preparations_table()
     conn = get_db()
     cursor = conn.cursor()
     
@@ -3522,17 +3523,84 @@ def get_bill_clearance_summary():
         GROUP BY current_step
     """)
     step_rows = {r["current_step"]: dict(r) for r in cursor.fetchall()}
+    
+    cursor.execute("""
+        SELECT 
+            COALESCE(SUM(CASE WHEN step1_gps_photo = 1 THEN 1 ELSE 0 END), 0) as gps_count,
+            COALESCE(SUM(CASE WHEN step2_complain_reg = 1 THEN 1 ELSE 0 END), 0) as reg_count,
+            COALESCE(SUM(CASE WHEN step3_rough_est = 1 THEN 1 ELSE 0 END), 0) as est_count,
+            COALESCE(SUM(rough_estimate_amount), 0.0) as sum_rough_est
+        FROM site_bill_preparations
+    """)
+    prep_stats = dict(cursor.fetchone() or {})
     conn.close()
     
-    steps_summary = []
+    # 9-Step Unified Pipeline:
+    # 1. GPS Photo Printout (Supervisor)
+    # 2. Complain Register Maintained (Supervisor)
+    # 3. Rough Estimate of the Bill (Supervisor)
+    # 4. Bill Created (Step 1 of clearance)
+    # 5. Submitted to Head Clerk (Step 2)
+    # 6. Verified by J.E/S.D.O (Step 3)
+    # 7. Forwarded to Treasury (Step 4)
+    # 8. Bill Cleared (Step 5)
+    # 9. Payment Received (Step 6)
+    
+    steps_summary = [
+        {
+            "step": 1,
+            "clearance_step": 0,
+            "name": "GPS Photo Printout",
+            "name_hi": "जीपीएस फोटो प्रिंटआउट",
+            "short": "GPS Photo",
+            "icon": "fa-camera",
+            "color": "cyan",
+            "badge": "bg-cyan-50 text-cyan-800 border-cyan-300",
+            "count": prep_stats.get("gps_count", 0),
+            "percentage": 100,
+            "sum_amount": 0.0,
+            "passed_amount": 0.0
+        },
+        {
+            "step": 2,
+            "clearance_step": 0,
+            "name": "Complain Register Maintained",
+            "name_hi": "शिकायत रजिस्टर संधारण",
+            "short": "Complain Reg",
+            "icon": "fa-book-bookmark",
+            "color": "teal",
+            "badge": "bg-teal-50 text-teal-800 border-teal-300",
+            "count": prep_stats.get("reg_count", 0),
+            "percentage": 100,
+            "sum_amount": 0.0,
+            "passed_amount": 0.0
+        },
+        {
+            "step": 3,
+            "clearance_step": 0,
+            "name": "Rough Estimate of the Bill",
+            "name_hi": "बिल रफ एस्टीमेट",
+            "short": "Rough Estimate",
+            "icon": "fa-calculator",
+            "color": "amber",
+            "badge": "bg-amber-50 text-amber-800 border-amber-300",
+            "count": prep_stats.get("est_count", 0),
+            "percentage": 100,
+            "sum_amount": prep_stats.get("sum_rough_est", 0.0),
+            "passed_amount": 0.0
+        }
+    ]
+    
     total_bills = ov.get("total_bills", 0)
-    for step_num in range(1, 7):
-        st_meta = BILL_CLEARANCE_STEPS.get(step_num, {})
-        d = step_rows.get(step_num, {"bill_count": 0, "sum_bill_amount": 0.0, "sum_passed_amount": 0.0})
+    for c_step in range(1, 7):
+        st_meta = BILL_CLEARANCE_STEPS.get(c_step, {})
+        d = step_rows.get(c_step, {"bill_count": 0, "sum_bill_amount": 0.0, "sum_passed_amount": 0.0})
         cnt = d.get("bill_count", 0)
         pct = round((cnt / total_bills * 100), 1) if total_bills > 0 else 0
+        overall_num = c_step + 3
         steps_summary.append({
-            "step": step_num,
+            "step": overall_num,
+            "clearance_step": c_step,
             "name": st_meta.get("name"),
             "name_hi": st_meta.get("name_hi"),
             "short": st_meta.get("short"),
@@ -3545,18 +3613,18 @@ def get_bill_clearance_summary():
             "passed_amount": d.get("sum_passed_amount", 0.0)
         })
         
-    stage_office_count = sum(s["count"] for s in steps_summary if s["step"] in [1, 2])
-    stage_office_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [1, 2])
+    stage_office_count = sum(s["count"] for s in steps_summary if s["step"] in [4, 5])
+    stage_office_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [4, 5])
     
-    stage_technical_count = sum(s["count"] for s in steps_summary if s["step"] == 3)
-    stage_technical_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 3)
+    stage_technical_count = sum(s["count"] for s in steps_summary if s["step"] == 6)
+    stage_technical_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 6)
     
-    stage_treasury_count = sum(s["count"] for s in steps_summary if s["step"] == 4)
-    stage_treasury_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 4)
+    stage_treasury_count = sum(s["count"] for s in steps_summary if s["step"] == 7)
+    stage_treasury_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] == 7)
     
-    stage_completed_count = sum(s["count"] for s in steps_summary if s["step"] in [5, 6])
-    stage_completed_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [5, 6])
-    stage_received_amt = sum(s["passed_amount"] for s in steps_summary if s["step"] == 6)
+    stage_completed_count = sum(s["count"] for s in steps_summary if s["step"] in [8, 9])
+    stage_completed_amt = sum(s["sum_amount"] for s in steps_summary if s["step"] in [8, 9])
+    stage_received_amt = sum(s["passed_amount"] for s in steps_summary if s["step"] == 9)
     
     return {
         "overall": ov,
@@ -3600,23 +3668,73 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
         current_step = latest_bill.get("current_step", 0) if latest_bill else 0
         step_meta = BILL_CLEARANCE_STEPS.get(current_step, None) if current_step else None
         
-        step_status_list = []
+        p1_done = bool(prep.get("step1_gps_photo"))
+        p2_done = bool(prep.get("step2_complain_reg"))
+        p3_done = bool(prep.get("step3_rough_est"))
+        prep_all_done = (p1_done and p2_done and p3_done)
+        has_bill = (latest_bill is not None)
+
+        step_status_list = [
+            {
+                "step": 1,
+                "name": "GPS Photo Printout",
+                "name_hi": "जीपीएस फोटो प्रिंटआउट",
+                "short": "GPS Photo",
+                "icon": "fa-camera",
+                "is_completed": p1_done,
+                "is_current": (not p1_done),
+                "is_pending": (not p1_done),
+                "tooltip": "1. GPS Photo Printout: " + ("Completed (" + str(prep.get("gps_photo_count", 0)) + " Photos)" if p1_done else "Pending with Supervisor")
+            },
+            {
+                "step": 2,
+                "name": "Complain Register Maintained",
+                "name_hi": "शिकायत रजिस्टर संधारण",
+                "short": "Complain Reg",
+                "icon": "fa-book-bookmark",
+                "is_completed": p2_done,
+                "is_current": (p1_done and not p2_done),
+                "is_pending": (not p2_done),
+                "tooltip": "2. Complain Register: " + ("Maintained & Verified" if p2_done else "Pending with Supervisor")
+            },
+            {
+                "step": 3,
+                "name": "Rough Estimate of the Bill",
+                "name_hi": "बिल रफ एस्टीमेट",
+                "short": "Rough Estimate",
+                "icon": "fa-calculator",
+                "is_completed": p3_done,
+                "is_current": (p1_done and p2_done and not p3_done),
+                "is_pending": (not p3_done),
+                "tooltip": "3. Rough Estimate: " + ("Done (₹" + "{:,.0f}".format(prep.get("rough_estimate_amount", 0)) + ")" if p3_done else "Pending with Supervisor")
+            }
+        ]
+
         for sn in range(1, 7):
             meta = BILL_CLEARANCE_STEPS[sn]
-            is_completed = current_step > sn
-            is_current = current_step == sn
-            is_pending = (current_step < sn) or (current_step == 0)
+            overall_num = sn + 3
+            if has_bill:
+                is_completed = current_step > sn
+                is_current = (current_step == sn)
+                is_pending = (current_step < sn)
+            else:
+                is_completed = False
+                is_current = (prep_all_done and sn == 1)
+                is_pending = True
+
             step_status_list.append({
-                "step": sn,
+                "step": overall_num,
+                "clearance_step": sn,
                 "name": meta["name"],
                 "name_hi": meta["name_hi"],
                 "short": meta["short"],
                 "icon": meta["icon"],
                 "is_completed": is_completed,
                 "is_current": is_current,
-                "is_pending": is_pending
+                "is_pending": is_pending,
+                "tooltip": str(overall_num) + ". " + meta["name"] + " (" + meta["name_hi"] + "): " + ("Completed" if is_completed else ("In Progress" if is_current else "Pending"))
             })
-            
+        
         checklist.append({
             "site_id": sid,
             "site_name": s["name"],
@@ -3636,25 +3754,20 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
     if step_filter:
         try:
             s_val = int(step_filter)
-            checklist = [c for c in checklist if c["current_step"] == s_val]
-        except Exception:
+            if s_val == 1:
+                checklist = [c for c in checklist if c.get("prep", {}).get("step1_gps_photo") == 1]
+            elif s_val == 2:
+                checklist = [c for c in checklist if c.get("prep", {}).get("step2_complain_reg") == 1]
+            elif s_val == 3:
+                checklist = [c for c in checklist if c.get("prep", {}).get("step3_rough_est") == 1]
+            elif s_val in (4, 5, 6, 7, 8, 9):
+                c_step = s_val - 3
+                checklist = [c for c in checklist if c.get("current_step") == c_step]
+            elif s_val in (1, 2, 3, 4, 5, 6):
+                checklist = [c for c in checklist if c.get("current_step") == s_val]
+        except (ValueError, TypeError):
             pass
             
-    if search:
-        s_pat = str(search).lower().strip()
-        checklist = [
-            c for c in checklist if (
-                s_pat in c["site_name"].lower() or 
-                s_pat in c["site_code"].lower() or 
-                s_pat in (c["supervisor"] or "").lower() or
-                (c["latest_bill"] and s_pat in (c["latest_bill"].get("bill_no") or "").lower()) or
-                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step4_token") or "").lower()) or
-                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step3_officer") or "").lower()) or
-                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step2_ref") or "").lower()) or
-                (c["latest_bill"] and s_pat in (c["latest_bill"].get("step6_utr") or "").lower())
-            )
-        ]
-        
     if sort_by == "step_asc":
         checklist.sort(key=lambda x: (x["current_step"], x["site_name"]))
     elif sort_by == "step_desc":
@@ -3851,21 +3964,70 @@ def get_monthly_bills_data(selected_month=None):
             primary_bill = None
             current_step = 0
             
-        step_status_list = []
+        p1_done = bool(prep.get("step1_gps_photo"))
+        p2_done = bool(prep.get("step2_complain_reg"))
+        p3_done = bool(prep.get("step3_rough_est"))
+        prep_all_done = (p1_done and p2_done and p3_done)
+
+        step_status_list = [
+            {
+                "step": 1,
+                "name": "GPS Photo Printout",
+                "name_hi": "जीपीएस फोटो प्रिंटआउट",
+                "short": "GPS Photo",
+                "icon": "fa-camera",
+                "is_completed": p1_done,
+                "is_current": (not p1_done),
+                "is_pending": (not p1_done),
+                "tooltip": "1. GPS Photo: " + ("Completed" if p1_done else "Pending")
+            },
+            {
+                "step": 2,
+                "name": "Complain Register Maintained",
+                "name_hi": "शिकायत रजिस्टर संधारण",
+                "short": "Complain Reg",
+                "icon": "fa-book-bookmark",
+                "is_completed": p2_done,
+                "is_current": (p1_done and not p2_done),
+                "is_pending": (not p2_done),
+                "tooltip": "2. Complain Reg: " + ("Maintained" if p2_done else "Pending")
+            },
+            {
+                "step": 3,
+                "name": "Rough Estimate of the Bill",
+                "name_hi": "बिल रफ एस्टीमेट",
+                "short": "Rough Estimate",
+                "icon": "fa-calculator",
+                "is_completed": p3_done,
+                "is_current": (p1_done and p2_done and not p3_done),
+                "is_pending": (not p3_done),
+                "tooltip": "3. Rough Estimate: " + ("Done (₹" + "{:,.0f}".format(prep.get("rough_estimate_amount", 0)) + ")" if p3_done else "Pending")
+            }
+        ]
+
         for sn in range(1, 7):
             meta = BILL_CLEARANCE_STEPS[sn]
-            is_completed = current_step > sn
-            is_current = current_step == sn
-            is_pending = (current_step < sn) or (current_step == 0)
+            overall_num = sn + 3
+            if has_bill:
+                is_completed = current_step > sn
+                is_current = (current_step == sn)
+                is_pending = (current_step < sn)
+            else:
+                is_completed = False
+                is_current = (prep_all_done and sn == 1)
+                is_pending = True
+
             step_status_list.append({
-                "step": sn,
+                "step": overall_num,
+                "clearance_step": sn,
                 "name": meta["name"],
                 "name_hi": meta["name_hi"],
                 "short": meta["short"],
                 "icon": meta["icon"],
                 "is_completed": is_completed,
                 "is_current": is_current,
-                "is_pending": is_pending
+                "is_pending": is_pending,
+                "tooltip": str(overall_num) + ". " + meta["name"] + ": " + ("Completed" if is_completed else ("In Progress" if is_current else "Pending"))
             })
             
         sites_month_checklist.append({
