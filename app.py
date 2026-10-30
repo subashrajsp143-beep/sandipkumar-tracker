@@ -3286,7 +3286,8 @@ def bill_status_dashboard():
     site_filter = request.args.get("site_id")
     sort_by = request.args.get("sort", "step_desc")
     search_q = request.args.get("q", "").strip()
-    active_view = request.args.get("view", "checklist") # "checklist" or "bills"
+    active_view = request.args.get("view", "checklist") # "checklist", "month", or "bills"
+    month_filter = request.args.get("month")
     
     sites = database.get_all_sites()
     summary = database.get_bill_clearance_summary()
@@ -3297,6 +3298,7 @@ def bill_status_dashboard():
         sort_by=sort_by,
         search=search_q
     )
+    monthly_data = database.get_monthly_bills_data(selected_month=month_filter)
     
     return render_template(
         "bills.html",
@@ -3310,6 +3312,8 @@ def bill_status_dashboard():
         selected_sort=sort_by,
         search_query=search_q,
         active_view=active_view,
+        selected_month=month_filter,
+        monthly_data=monthly_data,
         is_owner=True
     )
 

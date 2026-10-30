@@ -3663,3 +3663,244 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
         checklist.sort(key=lambda x: (-x["current_step"], x["site_name"]))
         
     return checklist
+
+
+@db_retry()
+def get_monthly_bills_data(selected_month=None):
+    """
+    Returns data for the Month View segment:
+    - Dropdown menu of every month (rolling 15 months + DB months) with bill counts & amounts.
+    - Summary metrics for the selected month.
+    - 21 Sites checklist specifically for the selected month.
+    - Month-by-month comparative summary table.
+    """
+    import datetime
+    import calendar
+    
+    init_site_bills_table()
+    all_bills = get_all_site_bills()
+    all_sites = get_all_sites()
+    
+    now = datetime.datetime.now()
+    curr_key = now.strftime("%Y-%m")
+    
+    # Helper to get bill month key 'YYYY-MM'
+    def bill_m_key(b):
+        d_str = b.get("period_to") or b.get("period_from") or b.get("step1_date") or b.get("created_at")
+        if d_str:
+            return str(d_str).strip()[:7]
+        return "unknown"
+        
+    # Group bills by month key
+    bills_by_month = {}
+    for b in all_bills:
+        mk = bill_m_key(b)
+        if mk not in bills_by_month:
+            bills_by_month[mk] = []
+        bills_by_month[mk].append(b)
+        
+    # Build dropdown menu of EVERY MONTH (rolling next 2 months + current + past 15 months)
+    months_dropdown = []
+    seen_keys = set()
+    
+    for i in range(-2, 16): # -2 (2 months ahead), -1 (next month), 0 (current), 1..15 (past months)
+        m = now.month - i
+        y = now.year
+        while m <= 0:
+            m += 12
+            y -= 1
+        while m > 12:
+            m -= 12
+            y += 1
+        dt = datetime.datetime(y, m, 1)
+        k = dt.strftime("%Y-%m")
+        if k in seen_keys:
+            continue
+        seen_keys.add(k)
+        
+        m_bills = bills_by_month.get(k, [])
+        c_amt = sum(b.get("bill_amount", 0.0) for b in m_bills)
+        p_amt = sum(b.get("passed_amount", 0.0) for b in m_bills)
+        
+        months_dropdown.append({
+            "key": k,
+            "label": dt.strftime("%B %Y"),
+            "short_label": dt.strftime("%b %Y"),
+            "year": y,
+            "month_num": m,
+            "bills_count": len(m_bills),
+            "claimed_amount": c_amt,
+            "passed_amount": p_amt,
+            "is_current": (k == curr_key)
+        })
+        
+    # Also add any older months present in database
+    for k, blist in bills_by_month.items():
+        if k not in seen_keys and k != "unknown":
+            try:
+                y, m = map(int, k.split("-"))
+                dt = datetime.datetime(y, m, 1)
+                seen_keys.add(k)
+                months_dropdown.append({
+                    "key": k,
+                    "label": dt.strftime("%B %Y"),
+                    "short_label": dt.strftime("%b %Y"),
+                    "year": y,
+                    "month_num": m,
+                    "bills_count": len(blist),
+                    "claimed_amount": sum(b.get("bill_amount", 0.0) for b in blist),
+                    "passed_amount": sum(b.get("passed_amount", 0.0) for b in blist),
+                    "is_current": False
+                })
+            except Exception:
+                pass
+                
+    # Sort dropdown by year and month descending (newest first)
+    months_dropdown.sort(key=lambda x: (x["year"], x["month_num"]), reverse=True)
+    
+    # Determine active month
+    active_month = selected_month
+    if not active_month:
+        # Default to current month or latest month that has bills
+        if any(m["key"] == curr_key and m["bills_count"] > 0 for m in months_dropdown):
+            active_month = curr_key
+        else:
+            # Pick latest month that has bills
+            with_bills = [m for m in months_dropdown if m["bills_count"] > 0]
+            active_month = with_bills[0]["key"] if with_bills else curr_key
+            
+    is_all_months = (active_month == "all")
+    
+    # Active month label
+    if is_all_months:
+        active_label = "All Months (Combined Overview)"
+        active_bills = all_bills
+    else:
+        active_bills = bills_by_month.get(active_month, [])
+        try:
+            ay, am = map(int, active_month.split("-"))
+            active_dt = datetime.datetime(ay, am, 1)
+            active_label = active_dt.strftime("%B %Y")
+        except Exception:
+            active_label = active_month
+            
+    # Calculate month summary
+    m_total_bills = len(active_bills)
+    m_claimed = sum(b.get("bill_amount", 0.0) for b in active_bills)
+    m_passed = sum(b.get("passed_amount", 0.0) for b in active_bills)
+    m_pending = max(0.0, m_claimed - m_passed)
+    
+    step_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+    for b in active_bills:
+        st = b.get("current_step", 1)
+        if st in step_counts:
+            step_counts[st] += 1
+            
+    month_summary = {
+        "key": active_month,
+        "label": active_label,
+        "is_all": is_all_months,
+        "total_bills": m_total_bills,
+        "claimed_amount": m_claimed,
+        "passed_amount": m_passed,
+        "pending_amount": m_pending,
+        "clearance_percentage": round((m_passed / m_claimed * 100), 1) if m_claimed > 0 else 0.0,
+        "step_counts": step_counts
+    }
+    
+    # Build 21 sites checklist for this specific month
+    site_month_bills = {}
+    for b in active_bills:
+        sid = b["site_id"]
+        if sid not in site_month_bills:
+            site_month_bills[sid] = []
+        site_month_bills[sid].append(b)
+        
+    # Calculate default suggested dates for new bill in this month
+    suggested_from = None
+    suggested_to = None
+    if not is_all_months and "-" in active_month:
+        try:
+            sy, sm = map(int, active_month.split("-"))
+            num_days = calendar.monthrange(sy, sm)[1]
+            suggested_from = f"{sy:04d}-{sm:02d}-01"
+            suggested_to = f"{sy:04d}-{sm:02d}-{num_days:02d}"
+        except Exception:
+            pass
+            
+    sites_month_checklist = []
+    sites_with_bills = 0
+    
+    for s in all_sites:
+        sid = s["id"]
+        sbills = site_month_bills.get(sid, [])
+        has_bill = len(sbills) > 0
+        if has_bill:
+            sites_with_bills += 1
+            primary_bill = sbills[0]
+            current_step = primary_bill.get("current_step", 1)
+        else:
+            primary_bill = None
+            current_step = 0
+            
+        step_status_list = []
+        for sn in range(1, 7):
+            meta = BILL_CLEARANCE_STEPS[sn]
+            is_completed = current_step > sn
+            is_current = current_step == sn
+            is_pending = (current_step < sn) or (current_step == 0)
+            step_status_list.append({
+                "step": sn,
+                "name": meta["name"],
+                "name_hi": meta["name_hi"],
+                "short": meta["short"],
+                "icon": meta["icon"],
+                "is_completed": is_completed,
+                "is_current": is_current,
+                "is_pending": is_pending
+            })
+            
+        sites_month_checklist.append({
+            "site_id": sid,
+            "site_name": s["name"],
+            "site_code": s["code"],
+            "supervisor": s.get("supervisor", ""),
+            "contact": s.get("contact", ""),
+            "has_bill": has_bill,
+            "bills_count": len(sbills),
+            "bill": primary_bill,
+            "current_step": current_step,
+            "step_meta": BILL_CLEARANCE_STEPS.get(current_step) if current_step else None,
+            "checklist_steps": step_status_list,
+            "suggested_from": suggested_from,
+            "suggested_to": suggested_to
+        })
+        
+    month_summary["sites_with_bills"] = sites_with_bills
+    month_summary["sites_without_bills"] = len(all_sites) - sites_with_bills
+    
+    # Month comparison table (Months with bills)
+    comparison_table = []
+    for m in months_dropdown:
+        if m["bills_count"] > 0:
+            c_amt = m["claimed_amount"]
+            p_amt = m["passed_amount"]
+            pct = round((p_amt / c_amt * 100), 1) if c_amt > 0 else 0.0
+            comparison_table.append({
+                "key": m["key"],
+                "label": m["label"],
+                "short_label": m["short_label"],
+                "bills_count": m["bills_count"],
+                "claimed_amount": c_amt,
+                "passed_amount": p_amt,
+                "clearance_percentage": pct,
+                "is_active": (m["key"] == active_month)
+            })
+            
+    return {
+        "months_dropdown": months_dropdown,
+        "active_month": active_month,
+        "month_summary": month_summary,
+        "sites_checklist": sites_month_checklist,
+        "comparison_table": comparison_table
+    }

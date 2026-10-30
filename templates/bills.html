@@ -135,9 +135,9 @@
         </div>
     </div>
 
-    <!-- CONTROLS: STEP FILTER PILLS, SORTING DROPDOWN & SEARCH -->
+    <!-- CONTROLS: STEP FILTER PILLS, SEGMENT VIEW SWITCHER & EVERY MONTH DROPDOWN -->
     <div class="bg-white rounded-3xl p-4 sm:p-5 border border-[#E5ECE9] shadow-xs space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
             <!-- Step Filter Pills -->
             <div class="flex flex-wrap items-center gap-1.5">
@@ -152,11 +152,16 @@
                 {% endfor %}
             </div>
 
-            <!-- View Switcher -->
-            <div class="inline-flex items-center p-1 bg-[#F8FAF9] rounded-2xl border border-[#E5ECE9] self-start md:self-auto flex-shrink-0">
+            <!-- View Switcher: Checklist vs Month View vs All Bills Table -->
+            <div class="inline-flex items-center p-1 bg-[#F8FAF9] rounded-2xl border border-[#E5ECE9] self-start lg:self-auto flex-shrink-0">
                 <button type="button" onclick="switchView('checklist')" id="btnViewChecklist" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if active_view == 'checklist' %}bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]{% else %}text-slate-600 hover:text-slate-900{% endif %}">
                     <i class="fa-solid fa-list-check text-[#D97706]"></i>
                     <span>Sites Checklist (21)</span>
+                </button>
+                <button type="button" onclick="switchView('month')" id="btnViewMonth" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if active_view == 'month' %}bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                    <i class="fa-regular fa-calendar-days text-[#D97706]"></i>
+                    <span>Month View</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-[#D97706]/20 text-[#D97706]">MONTH</span>
                 </button>
                 <button type="button" onclick="switchView('bills')" id="btnViewBills" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if active_view == 'bills' %}bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]{% else %}text-slate-600 hover:text-slate-900{% endif %}">
                     <i class="fa-solid fa-table-list text-[#D97706]"></i>
@@ -165,25 +170,40 @@
             </div>
         </div>
 
-        <!-- Secondary Toolbar: Search + Sort Dropdown -->
-        <div class="pt-3 border-t border-[#E5ECE9] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <!-- Secondary Toolbar: Search + Every Month Dropdown Menu + Sort Dropdown -->
+        <div class="pt-3 border-t border-[#E5ECE9] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             <!-- Search -->
-            <div class="relative flex-1 max-w-md">
+            <div class="relative flex-1 max-w-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="billSearchInput" value="{{ search_query }}" oninput="debounceSearch(event)" placeholder="Search by site, bill no, diary no, SDO, token, UTR..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37]">
+                <input type="text" id="billSearchInput" value="{{ search_query }}" oninput="debounceSearch(event)" placeholder="Search site, bill no, diary no, token..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37]">
             </div>
 
-            <!-- Sorting Dropdown (Every Step Sorting as requested) -->
+            <!-- EVERY MONTH DROPDOWN MENU (As requested by user) -->
+            <div class="flex items-center gap-2">
+                <label for="globalMonthSelect" class="text-xs font-bold text-slate-600 whitespace-nowrap flex items-center gap-1">
+                    <i class="fa-regular fa-calendar-days text-[#D97706]"></i> Month:
+                </label>
+                <select id="globalMonthSelect" onchange="selectMonth(this.value)" class="px-3 py-2 text-xs font-bold text-[#163F37] rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37] cursor-pointer">
+                    <option value="all" {% if monthly_data.active_month == 'all' %}selected{% endif %}>📅 All Months (Combined)</option>
+                    {% for m in monthly_data.months_dropdown %}
+                    <option value="{{ m.key }}" {% if monthly_data.active_month == m.key %}selected{% endif %}>
+                        {{ m.label }}{% if m.bills_count > 0 %} ({{ m.bills_count }} Bills • ₹ {{ "{:,.0f}".format(m.claimed_amount) }}){% endif %}{% if m.is_current %} ★ Current{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Sorting Dropdown -->
             <div class="flex items-center gap-2">
                 <label for="billSortSelect" class="text-xs font-bold text-slate-500 whitespace-nowrap flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-down-short-wide text-[#D97706]"></i> Sort By:
+                    <i class="fa-solid fa-arrow-down-short-wide text-[#D97706]"></i> Sort:
                 </label>
                 <select id="billSortSelect" onchange="applySorting(this.value)" class="px-3 py-2 text-xs font-bold text-[#163F37] rounded-xl border border-[#E5ECE9] bg-[#F8FAF9] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#163F37] cursor-pointer">
-                    <option value="step_desc" {% if selected_sort == 'step_desc' %}selected{% endif %}>Step: Advanced First (Step 6 &rarr; 1)</option>
-                    <option value="step_asc" {% if selected_sort == 'step_asc' %}selected{% endif %}>Step: Initial First (Step 1 &rarr; 6)</option>
-                    <option value="amount_desc" {% if selected_sort == 'amount_desc' %}selected{% endif %}>Bill Amount: Highest First</option>
-                    <option value="amount_asc" {% if selected_sort == 'amount_asc' %}selected{% endif %}>Bill Amount: Lowest First</option>
-                    <option value="site_name" {% if selected_sort == 'site_name' %}selected{% endif %}>Site Name: Alphabetical (A-Z)</option>
+                    <option value="step_desc" {% if selected_sort == 'step_desc' %}selected{% endif %}>Step: Advanced First (6 &rarr; 1)</option>
+                    <option value="step_asc" {% if selected_sort == 'step_asc' %}selected{% endif %}>Step: Initial First (1 &rarr; 6)</option>
+                    <option value="amount_desc" {% if selected_sort == 'amount_desc' %}selected{% endif %}>Amount: Highest First</option>
+                    <option value="amount_asc" {% if selected_sort == 'amount_asc' %}selected{% endif %}>Amount: Lowest First</option>
+                    <option value="site_name" {% if selected_sort == 'site_name' %}selected{% endif %}>Site Name: (A-Z)</option>
                 </select>
             </div>
         </div>
@@ -193,7 +213,6 @@
     <!-- VIEW 1: 21 SITES BILL CLEARANCE CHECKLIST MATRIX        -->
     <!-- ======================================================== -->
     <div id="viewChecklistSection" class="{% if active_view != 'checklist' %}hidden{% endif %} space-y-4">
-        
         <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
             <div class="p-4 sm:p-5 border-b border-[#E5ECE9] flex items-center justify-between bg-[#F8FAF9]">
                 <div class="flex items-center gap-2">
@@ -297,23 +316,19 @@
                                     {% for step in item.checklist_steps %}
                                     <div class="relative group" title="{{ step.step }}. {{ step.name }} ({{ step.name_hi }})">
                                         {% if step.is_completed %}
-                                        <!-- Completed Step -->
                                         <div class="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 flex items-center justify-center text-[10px] font-black shadow-xs">
                                             <i class="fa-solid fa-check"></i>
                                         </div>
                                         {% elif step.is_current %}
-                                        <!-- Active Current Step (Pulsing Amber) -->
                                         <div class="w-6 h-6 rounded-full bg-[#D97706] text-slate-950 font-black flex items-center justify-center text-[10px] ring-2 ring-[#D97706]/40 animate-pulse shadow-sm">
                                             {{ step.step }}
                                         </div>
                                         {% else %}
-                                        <!-- Pending Step -->
                                         <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center text-[10px] font-bold">
                                             {{ step.step }}
                                         </div>
                                         {% endif %}
                                         
-                                        <!-- Tooltip -->
                                         <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-30 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg whitespace-nowrap shadow-lg">
                                             Step {{ step.step }}: {{ step.name }}
                                         </div>
@@ -333,7 +348,6 @@
                                     <span>Step {{ item.current_step }}: {{ item.step_meta.name }}</span>
                                 </div>
 
-                                <!-- Key Reference Info based on step -->
                                 <div class="text-[11px] text-slate-600 mt-1.5 space-y-0.5">
                                     {% if item.current_step == 1 %}
                                         <div><span class="text-slate-400">Created:</span> {{ item.latest_bill.step1_date or item.latest_bill.created_at[:10] }}</div>
@@ -367,7 +381,7 @@
                                 {% if item.latest_bill %}
                                 <div class="flex items-center justify-end gap-1.5">
                                     {% if item.current_step < 6 %}
-                                    <button type="button" onclick="openAdvanceStepModal({{ item.latest_bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.latest_bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer" title="Move to next step">
+                                    <button type="button" onclick="openAdvanceStepModal({{ item.latest_bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.latest_bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
                                         <i class="fa-solid fa-forward-step text-[#D97706]"></i>
                                         <span>Next Step</span>
                                     </button>
@@ -376,7 +390,7 @@
                                         <i class="fa-solid fa-circle-check text-emerald-600"></i> Done
                                     </span>
                                     {% endif %}
-                                    <button type="button" onclick="openEditBillModal({{ item.latest_bill.id }})" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer" title="Edit Bill">
+                                    <button type="button" onclick="openEditBillModal({{ item.latest_bill.id }})" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
                                     <button type="button" onclick="openNewBillModal({{ item.site_id }}, '{{ item.site_name }}')" class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition cursor-pointer" title="+ Add Another Bill for Site">
@@ -399,7 +413,363 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- VIEW 2: ALL INDIVIDUAL BILLS DETAILED REGISTER          -->
+    <!-- VIEW 2: DEDICATED MONTH VIEW SEGMENT (As requested)      -->
+    <!-- ======================================================== -->
+    <div id="viewMonthSection" class="{% if active_view != 'month' %}hidden{% endif %} space-y-6">
+        
+        <!-- Month Header Banner Card -->
+        <div class="bg-white rounded-3xl p-5 sm:p-6 border border-[#E5ECE9] shadow-xs">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-[#EAF5EF] border border-[#C3E3D2] flex items-center justify-center text-[#163F37] text-2xl flex-shrink-0">
+                        <i class="fa-regular fa-calendar-check text-[#D97706]"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-[#163F37] text-white">Month View</span>
+                            <span class="text-xs font-bold text-[#D97706]">{{ monthly_data.month_summary.label }}</span>
+                        </div>
+                        <h3 class="text-lg sm:text-xl font-black text-[#163F37] mt-1">{{ monthly_data.month_summary.label }} — Clearance Status</h3>
+                        <p class="text-xs text-slate-500">Track all 21 sites' bill progress specifically for {{ monthly_data.month_summary.label }}.</p>
+                    </div>
+                </div>
+
+                <!-- Dropdown Menu For Every Month + Navigation -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="inline-flex items-center bg-[#F8FAF9] p-1 rounded-2xl border border-[#E5ECE9]">
+                        <button type="button" onclick="navigateMonth(-1)" class="px-2.5 py-1.5 rounded-xl hover:bg-white text-slate-700 text-xs font-bold transition cursor-pointer" title="Previous Month">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <select id="monthViewDropdown" onchange="selectMonth(this.value)" class="bg-transparent font-black text-xs text-[#163F37] px-2 py-1.5 focus:outline-none cursor-pointer">
+                            <option value="all" {% if monthly_data.active_month == 'all' %}selected{% endif %}>📅 All Months</option>
+                            {% for m in monthly_data.months_dropdown %}
+                            <option value="{{ m.key }}" {% if monthly_data.active_month == m.key %}selected{% endif %}>
+                                {{ m.label }}{% if m.bills_count > 0 %} ({{ m.bills_count }} Bills • ₹ {{ "{:,.0f}".format(m.claimed_amount) }}){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" onclick="navigateMonth(1)" class="px-2.5 py-1.5 rounded-xl hover:bg-white text-slate-700 text-xs font-bold transition cursor-pointer" title="Next Month">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <button type="button" onclick="openNewBillModalWithDates(null, null, '{{ monthly_data.sites_checklist[0].suggested_from }}', '{{ monthly_data.sites_checklist[0].suggested_to }}')" class="px-3.5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus text-[#D97706]"></i>
+                        <span>+ Add Bill for this Month</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month Metric Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-[#E5ECE9]">
+                <div class="p-3.5 rounded-2xl bg-[#F8FAF9] border border-[#E5ECE9]">
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Total Month Bills</div>
+                    <div class="text-xl font-black text-[#163F37] mt-1">{{ monthly_data.month_summary.total_bills }} <span class="text-xs font-semibold text-slate-500">Bills</span></div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">{{ monthly_data.month_summary.sites_with_bills }} Sites Active &bull; {{ monthly_data.month_summary.sites_without_bills }} Sites Pending</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[#F8FAF9] border border-[#E5ECE9]">
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Total Claimed (₹)</div>
+                    <div class="text-xl font-black text-slate-900 mt-1">₹ {{ "{:,.0f}".format(monthly_data.month_summary.claimed_amount) }}</div>
+                    <div class="text-[10px] text-amber-700 font-semibold mt-0.5">Gross Billing Amount</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[#F8FAF9] border border-[#E5ECE9]">
+                    <div class="text-[10px] font-bold uppercase text-emerald-600">Cleared & Received (₹)</div>
+                    <div class="text-xl font-black text-emerald-700 mt-1">₹ {{ "{:,.0f}".format(monthly_data.month_summary.passed_amount) }}</div>
+                    <div class="text-[10px] text-emerald-800 font-bold mt-0.5">{{ monthly_data.month_summary.clearance_percentage }}% Cleared Rate</div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-[#F8FAF9] border border-[#E5ECE9]">
+                    <div class="text-[10px] font-bold uppercase text-amber-600">In Pipeline (₹)</div>
+                    <div class="text-xl font-black text-amber-800 mt-1">₹ {{ "{:,.0f}".format(monthly_data.month_summary.pending_amount) }}</div>
+                    <div class="text-[10px] text-amber-700 font-medium mt-0.5">Clerk / SDO / Treasury Stage</div>
+                </div>
+            </div>
+
+            <!-- Month Step Mini-Bar -->
+            <div class="mt-4 pt-4 border-t border-[#E5ECE9]">
+                <div class="text-[11px] font-bold text-slate-500 mb-2 flex items-center justify-between">
+                    <span>6-Step Clearance Breakdown for {{ monthly_data.month_summary.label }}:</span>
+                    <span>Total {{ monthly_data.month_summary.total_bills }} Bills</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    {% for sn in range(1, 7) %}
+                    {% set st = steps[sn] %}
+                    {% set scnt = monthly_data.month_summary.step_counts[sn] %}
+                    <div class="p-2 rounded-xl border border-slate-200 bg-[#F8FAF9] flex items-center justify-between">
+                        <div class="min-w-0">
+                            <span class="text-[10px] font-black text-[#163F37] truncate block">{{ sn }}. {{ st.short }}</span>
+                            <span class="text-[9px] text-slate-400 truncate block">{{ st.name_hi }}</span>
+                        </div>
+                        <span class="w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center {% if scnt > 0 %}bg-[#163F37] text-white shadow-xs{% else %}bg-slate-200 text-slate-500{% endif %}">
+                            {{ scnt }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 21 Sites Clearance Matrix for this Specific Month -->
+        <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
+            <div class="p-4 sm:p-5 border-b border-[#E5ECE9] flex items-center justify-between bg-[#F8FAF9]">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-[#EAF5EF] text-[#163F37] font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-sm text-[#163F37]">21 Sites Bill Status — {{ monthly_data.month_summary.label }}</h4>
+                        <p class="text-[11px] text-slate-500">Track each site's bill status and clearance for this specific month</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        ● {{ monthly_data.month_summary.sites_with_bills }} Sites Billed
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                        ○ {{ monthly_data.month_summary.sites_without_bills }} Pending
+                    </span>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-[#E5ECE9]">
+                        <tr>
+                            <th class="py-3.5 px-4">Site Name & Code</th>
+                            <th class="py-3.5 px-4">{{ monthly_data.month_summary.label }} Bill</th>
+                            <th class="py-3.5 px-4">Claimed (₹)</th>
+                            <th class="py-3.5 px-4">6-Step Clearance Stepper</th>
+                            <th class="py-3.5 px-4">Current Status & Details</th>
+                            <th class="py-3.5 px-4 text-right no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5ECE9]">
+                        {% for item in monthly_data.sites_checklist %}
+                        <tr class="hover:bg-[#F8FAF9]/80 transition">
+                            <!-- Site Info -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-black text-sm text-[#163F37] flex items-center gap-1.5">
+                                    <span>{{ item.site_name }}</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono font-bold">{{ item.site_code }}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-user-shield text-[10px] text-slate-400"></i>
+                                    <span>{{ item.supervisor or 'Supervisor Pending' }}</span>
+                                </div>
+                            </td>
+
+                            <!-- Bill for this month -->
+                            <td class="py-3.5 px-4 align-top">
+                                {% if item.has_bill %}
+                                <div class="font-bold text-xs text-[#163F37] flex items-center gap-1">
+                                    <i class="fa-solid fa-file-invoice text-[#D97706]"></i>
+                                    <span>{{ item.bill.bill_no }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 font-medium">
+                                    {{ item.bill.bill_type }}
+                                </div>
+                                <div class="mt-1 relative group inline-block cursor-help" title="Full Period: {{ item.bill.complete_period }}">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-[#163F37] bg-[#EAF5EF] border border-[#C3E3D2] px-2 py-0.5 rounded-md shadow-2xs">
+                                        <i class="fa-regular fa-calendar text-[#D97706] text-[9px]"></i>
+                                        <span>{{ item.bill.bill_month }}</span>
+                                    </span>
+                                </div>
+                                {% else %}
+                                <div class="text-xs text-slate-400 italic flex items-center gap-1">
+                                    <i class="fa-regular fa-circle text-slate-300"></i>
+                                    <span>No bill for this month</span>
+                                </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Claimed Amount -->
+                            <td class="py-3.5 px-4 align-top">
+                                {% if item.has_bill %}
+                                <div class="font-black text-xs text-slate-900">
+                                    ₹ {{ "{:,.0f}".format(item.bill.bill_amount) }}
+                                </div>
+                                {% if item.bill.passed_amount and item.bill.passed_amount > 0 %}
+                                <div class="text-[10px] font-bold text-emerald-700 mt-0.5">
+                                    Recd: ₹ {{ "{:,.0f}".format(item.bill.passed_amount) }}
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- 6-Step Stepper -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="flex items-center gap-1.5 py-1">
+                                    {% for step in item.checklist_steps %}
+                                    <div class="relative group" title="{{ step.step }}. {{ step.name }}">
+                                        {% if step.is_completed %}
+                                        <div class="w-6 h-6 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-700 flex items-center justify-center text-[10px] font-black shadow-xs">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                        {% elif step.is_current %}
+                                        <div class="w-6 h-6 rounded-full bg-[#D97706] text-slate-950 font-black flex items-center justify-center text-[10px] ring-2 ring-[#D97706]/40 animate-pulse shadow-sm">
+                                            {{ step.step }}
+                                        </div>
+                                        {% else %}
+                                        <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center text-[10px] font-bold">
+                                            {{ step.step }}
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-30 bg-slate-900 text-white text-[10px] py-1 px-2 rounded-lg whitespace-nowrap shadow-lg">
+                                            Step {{ step.step }}: {{ step.name }}
+                                        </div>
+                                    </div>
+                                    {% if not loop.last %}
+                                    <span class="w-2 sm:w-3 h-0.5 {% if step.is_completed %}bg-emerald-400{% else %}bg-slate-200{% endif %}"></span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+
+                            <!-- Current Status Details -->
+                            <td class="py-3.5 px-4 align-top max-w-xs">
+                                {% if item.has_bill and item.step_meta %}
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border {{ item.step_meta.badge }}">
+                                    <i class="fa-solid {{ item.step_meta.icon }}"></i>
+                                    <span>Step {{ item.current_step }}: {{ item.step_meta.name }}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-600 mt-1.5 space-y-0.5">
+                                    {% if item.current_step == 1 %}
+                                        <div><span class="text-slate-400">Created:</span> {{ item.bill.step1_date or item.bill.created_at[:10] }}</div>
+                                    {% elif item.current_step == 2 %}
+                                        <div><span class="text-slate-400">Submitted:</span> {{ item.bill.step2_date or '—' }}</div>
+                                        {% if item.bill.step2_ref %}<div><span class="text-slate-400">Diary Ref:</span> <strong class="text-slate-800">{{ item.bill.step2_ref }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 3 %}
+                                        <div><span class="text-slate-400">Verified:</span> {{ item.bill.step3_date or '—' }}</div>
+                                        {% if item.bill.step3_officer %}<div><span class="text-slate-400">Officer:</span> <strong class="text-slate-800">{{ item.bill.step3_officer }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 4 %}
+                                        <div><span class="text-slate-400">Forwarded:</span> {{ item.bill.step4_date or '—' }}</div>
+                                        {% if item.bill.step4_token %}<div><span class="text-slate-400">Token No:</span> <strong class="text-amber-800">{{ item.bill.step4_token }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 5 %}
+                                        <div><span class="text-slate-400">Cleared:</span> {{ item.bill.step5_date or '—' }}</div>
+                                        {% if item.bill.step5_voucher %}<div><span class="text-slate-400">Voucher:</span> <strong class="text-emerald-800">{{ item.bill.step5_voucher }}</strong></div>{% endif %}
+                                    {% elif item.current_step == 6 %}
+                                        <div><span class="text-slate-400">Credited:</span> {{ item.bill.step6_date or '—' }}</div>
+                                        {% if item.bill.step6_utr %}<div><span class="text-slate-400">UTR:</span> <strong class="text-teal-800">{{ item.bill.step6_utr }}</strong></div>{% endif %}
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    <span>Not Submitted Yet</span>
+                                </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="py-3.5 px-4 align-top text-right no-print whitespace-nowrap">
+                                {% if item.has_bill %}
+                                <div class="flex items-center justify-end gap-1.5">
+                                    {% if item.current_step < 6 %}
+                                    <button type="button" onclick="openAdvanceStepModal({{ item.bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
+                                        <i class="fa-solid fa-forward-step text-[#D97706]"></i>
+                                        <span>Next Step</span>
+                                    </button>
+                                    {% else %}
+                                    <span class="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center gap-1">
+                                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Done
+                                    </span>
+                                    {% endif %}
+                                    <button type="button" onclick="openEditBillModal({{ item.bill.id }})" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                </div>
+                                {% else %}
+                                <button type="button" onclick="openNewBillModalWithDates({{ item.site_id }}, '{{ item.site_name }}', '{{ item.suggested_from }}', '{{ item.suggested_to }}')" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span>Create Bill</span>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Month-by-Month Clearance Comparison Table -->
+        {% if monthly_data.comparison_table|length > 0 %}
+        <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
+            <div class="p-4 sm:p-5 border-b border-[#E5ECE9] flex items-center justify-between bg-[#F8FAF9]">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-50 text-[#D97706] font-bold flex items-center justify-center">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-sm text-[#163F37]">All Months Clearance Comparison</h4>
+                        <p class="text-[11px] text-slate-500">Summary comparison of billing and payments across all active months</p>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-[#E5ECE9]">
+                        <tr>
+                            <th class="py-3.5 px-4">Month</th>
+                            <th class="py-3.5 px-4">Bills Count</th>
+                            <th class="py-3.5 px-4">Claimed Amount (₹)</th>
+                            <th class="py-3.5 px-4">Cleared / Received (₹)</th>
+                            <th class="py-3.5 px-4">Clearance Rate</th>
+                            <th class="py-3.5 px-4 text-right no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#E5ECE9]">
+                        {% for cmp in monthly_data.comparison_table %}
+                        <tr class="hover:bg-[#F8FAF9]/80 transition {% if cmp.is_active %}bg-[#EAF5EF]/40 font-bold{% endif %}">
+                            <td class="py-3 px-4">
+                                <div class="font-black text-slate-900 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-calendar-days text-[#D97706]"></i>
+                                    <span>{{ cmp.label }}</span>
+                                    {% if cmp.is_active %}
+                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-black bg-[#163F37] text-white">VIEWING</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 font-bold text-slate-800">
+                                {{ cmp.bills_count }} Bills
+                            </td>
+                            <td class="py-3 px-4 font-black text-slate-900">
+                                ₹ {{ "{:,.0f}".format(cmp.claimed_amount) }}
+                            </td>
+                            <td class="py-3 px-4 font-bold text-emerald-700">
+                                ₹ {{ "{:,.0f}".format(cmp.passed_amount) }}
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-20 bg-slate-200 rounded-full h-2 overflow-hidden">
+                                        <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ cmp.clearance_percentage }}%"></div>
+                                    </div>
+                                    <span class="font-bold text-[11px] text-slate-700">{{ cmp.clearance_percentage }}%</span>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 text-right no-print">
+                                <button type="button" onclick="selectMonth('{{ cmp.key }}')" class="px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer {% if cmp.is_active %}bg-[#163F37] text-white{% else %}bg-slate-100 hover:bg-slate-200 text-slate-700{% endif %}">
+                                    View Month ➔
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 3: ALL INDIVIDUAL BILLS DETAILED REGISTER          -->
     <!-- ======================================================== -->
     <div id="viewBillsSection" class="{% if active_view != 'bills' %}hidden{% endif %} space-y-4">
         <div class="bg-white rounded-3xl border border-[#E5ECE9] overflow-hidden shadow-xs">
@@ -444,13 +814,11 @@
                                 {{ b.site_name }} <span class="text-[10px] text-slate-400">({{ b.site_code }})</span>
                             </td>
                             <td class="py-3 px-4">
-                                <!-- Bill Month: Shown first instance, complete period on cursor hover -->
                                 <div class="relative group inline-block cursor-help" title="Full Period: {{ b.complete_period }}">
                                     <span class="inline-flex items-center gap-1.5 text-xs font-bold text-[#163F37] bg-[#EAF5EF] hover:bg-[#D6ECE0] border border-[#C3E3D2] px-2.5 py-1 rounded-lg transition shadow-2xs">
                                         <i class="fa-regular fa-calendar-days text-[#D97706] text-xs"></i>
                                         <span>{{ b.bill_month }}</span>
                                     </span>
-                                    <!-- Tooltip on hover -->
                                     <div class="absolute bottom-full left-0 mb-1.5 hidden group-hover:block z-40 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-xl whitespace-nowrap shadow-xl border border-slate-700 pointer-events-none">
                                         <div class="text-[10px] font-semibold text-amber-300 flex items-center gap-1">
                                             <i class="fa-solid fa-clock-rotate-left text-[10px]"></i> Complete Billing Period:
@@ -813,6 +1181,7 @@
 <!-- ======================================================== -->
 <script>
 let currentSelectedStep = {{ selected_step or 'null' }};
+let currentSelectedMonth = "{{ monthly_data.active_month }}";
 
 function applyStepFilter(stepNum) {
     const url = new URL(window.location.href);
@@ -828,6 +1197,29 @@ function applySorting(sortVal) {
     const url = new URL(window.location.href);
     url.searchParams.set('sort', sortVal);
     window.location.href = url.toString();
+}
+
+function selectMonth(monthKey) {
+    const url = new URL(window.location.href);
+    if (monthKey && monthKey !== 'all') {
+        url.searchParams.set('month', monthKey);
+    } else {
+        url.searchParams.delete('month');
+    }
+    // Automatically switch to month view when month is explicitly selected
+    url.searchParams.set('view', 'month');
+    window.location.href = url.toString();
+}
+
+function navigateMonth(direction) {
+    const select = document.getElementById('monthViewDropdown');
+    if (!select) return;
+    const currentIndex = select.selectedIndex;
+    const newIndex = currentIndex - direction; // reversed because newest is at index 0
+    if (newIndex >= 0 && newIndex < select.options.length) {
+        select.selectedIndex = newIndex;
+        selectMonth(select.value);
+    }
 }
 
 let searchTimeout = null;
@@ -847,29 +1239,39 @@ function debounceSearch(e) {
 
 function switchView(viewName) {
     const checklistSec = document.getElementById('viewChecklistSection');
+    const monthSec = document.getElementById('viewMonthSection');
     const billsSec = document.getElementById('viewBillsSection');
     const btnChecklist = document.getElementById('btnViewChecklist');
+    const btnMonth = document.getElementById('btnViewMonth');
     const btnBills = document.getElementById('btnViewBills');
 
-    if (viewName === 'checklist') {
-        if (checklistSec) checklistSec.classList.remove('hidden');
-        if (billsSec) billsSec.classList.add('hidden');
-        if (btnChecklist) {
-            btnChecklist.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]';
-        }
-        if (btnBills) {
-            btnBills.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
-        }
-    } else {
-        if (checklistSec) checklistSec.classList.add('hidden');
+    // Hide all first
+    if (checklistSec) checklistSec.classList.add('hidden');
+    if (monthSec) monthSec.classList.add('hidden');
+    if (billsSec) billsSec.classList.add('hidden');
+
+    const activeBtnClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]';
+    const inactiveBtnClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
+
+    if (btnChecklist) btnChecklist.className = inactiveBtnClass;
+    if (btnMonth) btnMonth.className = inactiveBtnClass;
+    if (btnBills) btnBills.className = inactiveBtnClass;
+
+    if (viewName === 'month') {
+        if (monthSec) monthSec.classList.remove('hidden');
+        if (btnMonth) btnMonth.className = activeBtnClass;
+    } else if (viewName === 'bills') {
         if (billsSec) billsSec.classList.remove('hidden');
-        if (btnBills) {
-            btnBills.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer bg-white text-[#163F37] shadow-xs border border-[#E5ECE9]';
-        }
-        if (btnChecklist) {
-            btnChecklist.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900';
-        }
+        if (btnBills) btnBills.className = activeBtnClass;
+    } else {
+        if (checklistSec) checklistSec.classList.remove('hidden');
+        if (btnChecklist) btnChecklist.className = activeBtnClass;
     }
+
+    // Update URL param without full reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', viewName);
+    window.history.replaceState({}, '', url.toString());
 }
 
 // ADVANCE STEP MODAL
@@ -898,17 +1300,14 @@ function closeAdvanceStepModal() {
 }
 
 function handleStepSelectChange(stepNum) {
-    // Hide all contextual boxes
     ['2', '3', '4', '5', '6'].forEach(sn => {
         const box = document.getElementById('fieldBoxStep' + sn);
         if (box) box.classList.add('hidden');
     });
 
-    // Show contextual box for target step
     const targetBox = document.getElementById('fieldBoxStep' + stepNum);
     if (targetBox) targetBox.classList.remove('hidden');
 
-    // Highlight card
     document.querySelectorAll('.step-select-card').forEach(c => {
         c.classList.remove('bg-[#EAF5EF]', 'border-[#163F37]', 'ring-1', 'ring-[#163F37]');
     });
@@ -976,7 +1375,17 @@ function openNewBillModal(siteId, siteName) {
     if (siteId && sSelect) {
         sSelect.value = siteId;
     }
-    const today = new Date().toISOString().slice(0, 10);
+    const m = document.getElementById('newBillModal');
+    if (m) m.classList.remove('hidden');
+}
+
+function openNewBillModalWithDates(siteId, siteName, pFrom, pTo) {
+    const sSelect = document.getElementById('newBillSiteId');
+    if (siteId && sSelect) {
+        sSelect.value = siteId;
+    }
+    if (pFrom) document.getElementById('newPeriodFrom').value = pFrom;
+    if (pTo) document.getElementById('newPeriodTo').value = pTo;
     const m = document.getElementById('newBillModal');
     if (m) m.classList.remove('hidden');
 }
