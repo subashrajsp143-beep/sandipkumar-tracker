@@ -3668,11 +3668,22 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
         current_step = latest_bill.get("current_step", 0) if latest_bill else 0
         step_meta = BILL_CLEARANCE_STEPS.get(current_step, None) if current_step else None
         
+        b_obj = latest_bill
         p1_done = bool(prep.get("step1_gps_photo"))
         p2_done = bool(prep.get("step2_complain_reg"))
         p3_done = bool(prep.get("step3_rough_est"))
         prep_all_done = (p1_done and p2_done and p3_done)
-        has_bill = (latest_bill is not None)
+        has_bill = (b_obj is not None)
+
+        p1_date = prep.get("gps_photo_date") or ""
+        p1_details = (str(prep.get('gps_photo_count', 0)) + " Photos Printed" + (" (" + prep.get('gps_photo_remarks') + ")" if prep.get('gps_photo_remarks') else "")) if p1_done else "Pending with Supervisor"
+        
+        p2_date = prep.get("complain_reg_date") or ""
+        p2_details = ("Verified (" + str(prep.get('complain_reg_count', 0)) + " Resolved)" + (" • Ref: " + prep.get('complain_reg_remarks') if prep.get('complain_reg_remarks') else "")) if p2_done else "Pending with Supervisor"
+        
+        p3_date = prep.get("rough_estimate_date") or ""
+        p3_amt = prep.get("rough_estimate_amount", 0.0)
+        p3_details = ("Estimated: ₹" + "{:,.2f}".format(p3_amt) + (" (" + prep.get('rough_estimate_remarks') + ")" if prep.get('rough_estimate_remarks') else "")) if p3_done else "Pending with Supervisor"
 
         step_status_list = [
             {
@@ -3684,7 +3695,8 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
                 "is_completed": p1_done,
                 "is_current": (not p1_done),
                 "is_pending": (not p1_done),
-                "tooltip": "1. GPS Photo Printout: " + ("Completed (" + str(prep.get("gps_photo_count", 0)) + " Photos)" if p1_done else "Pending with Supervisor")
+                "action_date": p1_date,
+                "details": p1_details
             },
             {
                 "step": 2,
@@ -3695,7 +3707,8 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
                 "is_completed": p2_done,
                 "is_current": (p1_done and not p2_done),
                 "is_pending": (not p2_done),
-                "tooltip": "2. Complain Register: " + ("Maintained & Verified" if p2_done else "Pending with Supervisor")
+                "action_date": p2_date,
+                "details": p2_details
             },
             {
                 "step": 3,
@@ -3706,9 +3719,37 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
                 "is_completed": p3_done,
                 "is_current": (p1_done and p2_done and not p3_done),
                 "is_pending": (not p3_done),
-                "tooltip": "3. Rough Estimate: " + ("Done (₹" + "{:,.0f}".format(prep.get("rough_estimate_amount", 0)) + ")" if p3_done else "Pending with Supervisor")
+                "action_date": p3_date,
+                "details": p3_details
             }
         ]
+
+        step_action_meta = {
+            1: {
+                "date": b_obj.get("step1_date") or (str(b_obj.get("created_at"))[:10] if b_obj and b_obj.get("created_at") else "") if b_obj else "",
+                "details": ("Bill No: " + str(b_obj.get("bill_no")) + " • Claimed: ₹" + "{:,.2f}".format(b_obj.get("bill_amount", 0.0))) if b_obj else ""
+            },
+            2: {
+                "date": b_obj.get("step2_date") if b_obj else "",
+                "details": ("Memo/Ref: " + str(b_obj.get("step2_ref"))) if b_obj and b_obj.get("step2_ref") else "Submitted to Head Clerk"
+            },
+            3: {
+                "date": b_obj.get("step3_date") if b_obj else "",
+                "details": ("Officer: " + str(b_obj.get("step3_officer"))) if b_obj and b_obj.get("step3_officer") else "Verified by Engineer"
+            },
+            4: {
+                "date": b_obj.get("step4_date") if b_obj else "",
+                "details": ("Treasury Token: " + str(b_obj.get("step4_token"))) if b_obj and b_obj.get("step4_token") else "Forwarded to Treasury"
+            },
+            5: {
+                "date": b_obj.get("step5_date") if b_obj else "",
+                "details": ("Voucher: " + str(b_obj.get("step5_voucher")) + " • Passed: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("step5_voucher") else (("Passed: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("passed_amount") else "Bill Cleared / Order Passed")
+            },
+            6: {
+                "date": b_obj.get("step6_date") if b_obj else "",
+                "details": ("UTR: " + str(b_obj.get("step6_utr")) + " • Received: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("step6_utr") else (("Received: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("passed_amount") else "Payment Received in Bank")
+            }
+        }
 
         for sn in range(1, 7):
             meta = BILL_CLEARANCE_STEPS[sn]
@@ -3722,6 +3763,7 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
                 is_current = (prep_all_done and sn == 1)
                 is_pending = True
 
+            act_info = step_action_meta.get(sn, {})
             step_status_list.append({
                 "step": overall_num,
                 "clearance_step": sn,
@@ -3732,7 +3774,8 @@ def get_all_sites_bill_checklist(step_filter=None, sort_by=None, search=None):
                 "is_completed": is_completed,
                 "is_current": is_current,
                 "is_pending": is_pending,
-                "tooltip": str(overall_num) + ". " + meta["name"] + " (" + meta["name_hi"] + "): " + ("Completed" if is_completed else ("In Progress" if is_current else "Pending"))
+                "action_date": act_info.get("date") or "",
+                "details": act_info.get("details") or ""
             })
         
         checklist.append({
@@ -3964,10 +4007,22 @@ def get_monthly_bills_data(selected_month=None):
             primary_bill = None
             current_step = 0
             
+        b_obj = primary_bill
         p1_done = bool(prep.get("step1_gps_photo"))
         p2_done = bool(prep.get("step2_complain_reg"))
         p3_done = bool(prep.get("step3_rough_est"))
         prep_all_done = (p1_done and p2_done and p3_done)
+        has_bill = (b_obj is not None)
+
+        p1_date = prep.get("gps_photo_date") or ""
+        p1_details = (str(prep.get('gps_photo_count', 0)) + " Photos Printed" + (" (" + prep.get('gps_photo_remarks') + ")" if prep.get('gps_photo_remarks') else "")) if p1_done else "Pending with Supervisor"
+        
+        p2_date = prep.get("complain_reg_date") or ""
+        p2_details = ("Verified (" + str(prep.get('complain_reg_count', 0)) + " Resolved)" + (" • Ref: " + prep.get('complain_reg_remarks') if prep.get('complain_reg_remarks') else "")) if p2_done else "Pending with Supervisor"
+        
+        p3_date = prep.get("rough_estimate_date") or ""
+        p3_amt = prep.get("rough_estimate_amount", 0.0)
+        p3_details = ("Estimated: ₹" + "{:,.2f}".format(p3_amt) + (" (" + prep.get('rough_estimate_remarks') + ")" if prep.get('rough_estimate_remarks') else "")) if p3_done else "Pending with Supervisor"
 
         step_status_list = [
             {
@@ -3979,7 +4034,8 @@ def get_monthly_bills_data(selected_month=None):
                 "is_completed": p1_done,
                 "is_current": (not p1_done),
                 "is_pending": (not p1_done),
-                "tooltip": "1. GPS Photo: " + ("Completed" if p1_done else "Pending")
+                "action_date": p1_date,
+                "details": p1_details
             },
             {
                 "step": 2,
@@ -3990,7 +4046,8 @@ def get_monthly_bills_data(selected_month=None):
                 "is_completed": p2_done,
                 "is_current": (p1_done and not p2_done),
                 "is_pending": (not p2_done),
-                "tooltip": "2. Complain Reg: " + ("Maintained" if p2_done else "Pending")
+                "action_date": p2_date,
+                "details": p2_details
             },
             {
                 "step": 3,
@@ -4001,9 +4058,37 @@ def get_monthly_bills_data(selected_month=None):
                 "is_completed": p3_done,
                 "is_current": (p1_done and p2_done and not p3_done),
                 "is_pending": (not p3_done),
-                "tooltip": "3. Rough Estimate: " + ("Done (₹" + "{:,.0f}".format(prep.get("rough_estimate_amount", 0)) + ")" if p3_done else "Pending")
+                "action_date": p3_date,
+                "details": p3_details
             }
         ]
+
+        step_action_meta = {
+            1: {
+                "date": b_obj.get("step1_date") or (str(b_obj.get("created_at"))[:10] if b_obj and b_obj.get("created_at") else "") if b_obj else "",
+                "details": ("Bill No: " + str(b_obj.get("bill_no")) + " • Claimed: ₹" + "{:,.2f}".format(b_obj.get("bill_amount", 0.0))) if b_obj else ""
+            },
+            2: {
+                "date": b_obj.get("step2_date") if b_obj else "",
+                "details": ("Memo/Ref: " + str(b_obj.get("step2_ref"))) if b_obj and b_obj.get("step2_ref") else "Submitted to Head Clerk"
+            },
+            3: {
+                "date": b_obj.get("step3_date") if b_obj else "",
+                "details": ("Officer: " + str(b_obj.get("step3_officer"))) if b_obj and b_obj.get("step3_officer") else "Verified by Engineer"
+            },
+            4: {
+                "date": b_obj.get("step4_date") if b_obj else "",
+                "details": ("Treasury Token: " + str(b_obj.get("step4_token"))) if b_obj and b_obj.get("step4_token") else "Forwarded to Treasury"
+            },
+            5: {
+                "date": b_obj.get("step5_date") if b_obj else "",
+                "details": ("Voucher: " + str(b_obj.get("step5_voucher")) + " • Passed: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("step5_voucher") else (("Passed: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("passed_amount") else "Bill Cleared / Order Passed")
+            },
+            6: {
+                "date": b_obj.get("step6_date") if b_obj else "",
+                "details": ("UTR: " + str(b_obj.get("step6_utr")) + " • Received: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("step6_utr") else (("Received: ₹" + "{:,.2f}".format(b_obj.get("passed_amount", 0.0))) if b_obj and b_obj.get("passed_amount") else "Payment Received in Bank")
+            }
+        }
 
         for sn in range(1, 7):
             meta = BILL_CLEARANCE_STEPS[sn]
@@ -4017,6 +4102,7 @@ def get_monthly_bills_data(selected_month=None):
                 is_current = (prep_all_done and sn == 1)
                 is_pending = True
 
+            act_info = step_action_meta.get(sn, {})
             step_status_list.append({
                 "step": overall_num,
                 "clearance_step": sn,
@@ -4027,7 +4113,8 @@ def get_monthly_bills_data(selected_month=None):
                 "is_completed": is_completed,
                 "is_current": is_current,
                 "is_pending": is_pending,
-                "tooltip": str(overall_num) + ". " + meta["name"] + ": " + ("Completed" if is_completed else ("In Progress" if is_current else "Pending"))
+                "action_date": act_info.get("date") or "",
+                "details": act_info.get("details") or ""
             })
             
         sites_month_checklist.append({
