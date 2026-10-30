@@ -3286,8 +3286,9 @@ def bill_status_dashboard():
     site_filter = request.args.get("site_id")
     sort_by = request.args.get("sort", "step_desc")
     search_q = request.args.get("q", "").strip()
-    active_view = request.args.get("view", "checklist") # "checklist", "month", or "bills"
+    active_view = request.args.get("view", "checklist") # "checklist", "month", "fy_cleared", or "bills"
     month_filter = request.args.get("month")
+    fy_filter = request.args.get("fy")
     
     sites = database.get_all_sites()
     summary = database.get_bill_clearance_summary()
@@ -3299,6 +3300,7 @@ def bill_status_dashboard():
         search=search_q
     )
     monthly_data = database.get_monthly_bills_data(selected_month=month_filter)
+    fy_data = database.get_fy_cleared_bills_data(selected_fy=fy_filter)
     
     return render_template(
         "bills.html",
@@ -3314,8 +3316,23 @@ def bill_status_dashboard():
         active_view=active_view,
         selected_month=month_filter,
         monthly_data=monthly_data,
+        selected_fy=fy_filter,
+        fy_data=fy_data,
         is_owner=True
     )
+
+@app.route("/api/sites/<int:site_id>/initial-month", methods=["POST"])
+def api_update_site_initial_month(site_id):
+    """Update a site's Acquired / Initial Month (Owner Only)."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    initial_month = str(data.get("initial_month", "")).strip()
+    if not initial_month:
+        return jsonify({"success": False, "message": "initial_month is required (YYYY-MM format)"}), 400
+    database.update_site_initial_month(site_id, initial_month)
+    return jsonify({"success": True, "site_id": site_id, "initial_month": initial_month, "message": "Site acquired / initial month updated!"})
 
 @app.route("/api/bills", methods=["GET", "POST"])
 def api_bills_list_create():

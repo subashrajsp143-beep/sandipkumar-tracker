@@ -3904,3 +3904,315 @@ def get_monthly_bills_data(selected_month=None):
         "sites_checklist": sites_month_checklist,
         "comparison_table": comparison_table
     }
+
+
+@db_retry()
+def update_site_initial_month(site_id, initial_month):
+    """Updates initial_month (Acquisition / Handover month) for a site."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(sites)")
+    cols = [col[1] for col in cursor.fetchall()]
+    if "initial_month" not in cols:
+        cursor.execute("ALTER TABLE sites ADD COLUMN initial_month TEXT")
+    cursor.execute("UPDATE sites SET initial_month = ? WHERE id = ?", (initial_month.strip(), int(site_id)))
+    conn.commit()
+    conn.close()
+    return True
+
+
+@db_retry()
+def get_fy_cleared_bills_data(selected_fy=None):
+    """
+    Returns data for the FY Cleared Status segment:
+    - Dedicated view of all 21 sites month-wise across a specific Financial Year (Apr to Mar).
+    - Highlights CLEARED status (Step 5 & 6) with amounts and voucher/UTR details.
+    - Accurately marks Site Acquired / Initial Month and Pre-Acquisition months.
+    """
+    import datetime
+    import calendar
+    
+    init_site_bills_table()
+    
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("PRAGMA table_info(sites)")
+    cols = [col[1] for col in c.fetchall()]
+    if "initial_month" not in cols:
+        c.execute("ALTER TABLE sites ADD COLUMN initial_month TEXT")
+        conn.commit()
+        
+    all_sites = get_all_sites()
+    all_bills = get_all_site_bills()
+    
+    # Calculate earliest bill per site to backfill initial_month if empty
+    site_earliest_bill = {}
+    for b in all_bills:
+        sid = b["site_id"]
+        dt = b.get("period_from") or b.get("period_to") or b.get("step1_date") or b.get("created_at")
+        if dt:
+            mk = str(dt).strip()[:7]
+            if sid not in site_earliest_bill or mk < site_earliest_bill[sid]:
+                site_earliest_bill[sid] = mk
+                
+    # Update initial_month for sites if null
+    for s in all_sites:
+        sid = s["id"]
+        im = s.get("initial_month")
+        if not im:
+            im = site_earliest_bill.get(sid) or (str(s.get("created_at"))[:7] if s.get("created_at") else "2026-10")
+            c.execute("UPDATE sites SET initial_month = ? WHERE id = ?", (im, sid))
+            s["initial_month"] = im
+    conn.commit()
+    conn.close()
+    
+    # Reload sites with initial_month
+    all_sites = get_all_sites()
+    
+    # Determine Financial Year (FY)
+    # India FY: April 1 to March 31
+    now = datetime.datetime.now()
+    if now.month >= 4:
+        curr_fy_start = now.year
+    else:
+        curr_fy_start = now.year - 1
+    curr_fy_key = f"{curr_fy_start}-{curr_fy_start+1}"
+    
+    # Build list of available FYs
+    fy_options = []
+    for ys in range(curr_fy_start + 1, curr_fy_start - 3, -1):
+        k = f"{ys}-{ys+1}"
+        fy_options.append({
+            "key": k,
+            "label": f"FY {ys}-{str(ys+1)[2:]} (Apr {ys} – Mar {ys+1})",
+            "short_label": f"FY {ys}-{str(ys+1)[2:]}",
+            "start_year": ys,
+            "end_year": ys + 1,
+            "is_current": (k == curr_fy_key)
+        })
+        
+    active_fy = selected_fy if selected_fy else curr_fy_key
+    try:
+        fy_start_yr, fy_end_yr = map(int, active_fy.split("-"))
+    except Exception:
+        fy_start_yr, fy_end_yr = curr_fy_start, curr_fy_start + 1
+        active_fy = curr_fy_key
+        
+    # The 12 months of this FY: Apr(ys) to Mar(ys+1)
+    fy_months = []
+    # Apr to Dec of fy_start_yr (months 4..12)
+    for m in range(4, 13):
+        dt = datetime.datetime(fy_start_yr, m, 1)
+        fy_months.append({
+            "key": dt.strftime("%Y-%m"),
+            "month_num": m,
+            "year": fy_start_yr,
+            "name": dt.strftime("%B"),
+            "short": dt.strftime("%b"),
+            "full_label": dt.strftime("%b %Y"),
+            "col_index": m - 3
+        })
+    # Jan to Mar of fy_end_yr (months 1..3)
+    for m in range(1, 4):
+        dt = datetime.datetime(fy_end_yr, m, 1)
+        fy_months.append({
+            "key": dt.strftime("%Y-%m"),
+            "month_num": m,
+            "year": fy_end_yr,
+            "name": dt.strftime("%B"),
+            "short": dt.strftime("%b"),
+            "full_label": dt.strftime("%b %Y"),
+            "col_index": m + 9
+        })
+        
+    # Helper to get bill month key 'YYYY-MM'
+    def bill_m_key(b):
+        d_str = b.get("period_to") or b.get("period_from") or b.get("step1_date") or b.get("created_at")
+        if d_str:
+            return str(d_str).strip()[:7]
+        return "unknown"
+
+    # Index bills by (site_id, month_key)
+    bills_by_site_month = {}
+    for b in all_bills:
+        sid = b["site_id"]
+        mk = bill_m_key(b)
+        k = (sid, mk)
+        if k not in bills_by_site_month:
+            bills_by_site_month[k] = []
+        bills_by_site_month[k].append(b)
+        
+    # Build Matrix for every site
+    sites_matrix = []
+    monthly_column_totals = {m["key"]: {"cleared_amt": 0.0, "cleared_count": 0, "pipeline_amt": 0.0, "pipeline_count": 0} for m in fy_months}
+    
+    fy_grand_cleared = 0.0
+    fy_grand_claimed = 0.0
+    total_cleared_bills_count = 0
+    sites_with_cleared = 0
+    
+    for s in all_sites:
+        sid = s["id"]
+        s_initial_month = s.get("initial_month") or "2026-10"
+        
+        try:
+            iy, im = map(int, s_initial_month.split("-"))
+            s_initial_label = datetime.datetime(iy, im, 1).strftime("%b %Y")
+        except Exception:
+            s_initial_label = s_initial_month
+            
+        site_cleared_amt = 0.0
+        site_claimed_amt = 0.0
+        site_cleared_count = 0
+        site_pipeline_count = 0
+        site_active_months_count = 0
+        
+        month_cells = []
+        for m in fy_months:
+            mk = m["key"]
+            sbills = bills_by_site_month.get((sid, mk), [])
+            
+            is_pre_acq = (mk < s_initial_month)
+            is_initial_month = (mk == s_initial_month)
+            
+            if not is_pre_acq:
+                site_active_months_count += 1
+                
+            cleared_bill = None
+            pipeline_bill = None
+            
+            for b in sbills:
+                st = b.get("current_step", 1)
+                site_claimed_amt += b.get("bill_amount", 0.0)
+                if st in (5, 6):
+                    cleared_bill = b
+                else:
+                    pipeline_bill = b
+                    
+            if cleared_bill:
+                st = cleared_bill.get("current_step", 5)
+                amt = cleared_bill.get("passed_amount") or cleared_bill.get("bill_amount", 0.0)
+                site_cleared_amt += amt
+                site_cleared_count += 1
+                total_cleared_bills_count += 1
+                monthly_column_totals[mk]["cleared_amt"] += amt
+                monthly_column_totals[mk]["cleared_count"] += 1
+                
+                cell_data = {
+                    "month_key": mk,
+                    "month_short": m["short"],
+                    "month_label": m["full_label"],
+                    "status_type": "cleared",
+                    "current_step": st,
+                    "step_name": "Payment Received" if st == 6 else "Bill Cleared",
+                    "amount": amt,
+                    "claimed_amount": cleared_bill.get("bill_amount", 0.0),
+                    "bill_no": cleared_bill.get("bill_no"),
+                    "bill_id": cleared_bill.get("id"),
+                    "voucher_utr": cleared_bill.get("step6_utr") or cleared_bill.get("step5_voucher") or cleared_bill.get("step4_token") or "",
+                    "cleared_date": cleared_bill.get("step6_date") or cleared_bill.get("step5_date") or "",
+                    "is_initial_month": is_initial_month,
+                    "initial_label": s_initial_label,
+                    "is_pre_acq": False
+                }
+            elif pipeline_bill:
+                st = pipeline_bill.get("current_step", 1)
+                p_amt = pipeline_bill.get("bill_amount", 0.0)
+                site_pipeline_count += 1
+                monthly_column_totals[mk]["pipeline_amt"] += p_amt
+                monthly_column_totals[mk]["pipeline_count"] += 1
+                
+                cell_data = {
+                    "month_key": mk,
+                    "month_short": m["short"],
+                    "month_label": m["full_label"],
+                    "status_type": "pipeline",
+                    "current_step": st,
+                    "step_name": BILL_CLEARANCE_STEPS.get(st, {}).get("name", f"Step {st}"),
+                    "amount": p_amt,
+                    "claimed_amount": p_amt,
+                    "bill_no": pipeline_bill.get("bill_no"),
+                    "bill_id": pipeline_bill.get("id"),
+                    "is_initial_month": is_initial_month,
+                    "initial_label": s_initial_label,
+                    "is_pre_acq": False
+                }
+            elif is_initial_month:
+                cell_data = {
+                    "month_key": mk,
+                    "month_short": m["short"],
+                    "month_label": m["full_label"],
+                    "status_type": "initial_only",
+                    "is_initial_month": True,
+                    "initial_label": s_initial_label,
+                    "is_pre_acq": False
+                }
+            elif is_pre_acq:
+                cell_data = {
+                    "month_key": mk,
+                    "month_short": m["short"],
+                    "month_label": m["full_label"],
+                    "status_type": "pre_acq",
+                    "is_initial_month": False,
+                    "initial_label": s_initial_label,
+                    "is_pre_acq": True
+                }
+            else:
+                cell_data = {
+                    "month_key": mk,
+                    "month_short": m["short"],
+                    "month_label": m["full_label"],
+                    "status_type": "unbilled",
+                    "is_initial_month": False,
+                    "is_pre_acq": False
+                }
+                
+            month_cells.append(cell_data)
+            
+        if site_cleared_count > 0:
+            sites_with_cleared += 1
+            
+        fy_grand_cleared += site_cleared_amt
+        fy_grand_claimed += site_claimed_amt
+        
+        sites_matrix.append({
+            "site_id": sid,
+            "site_code": s["code"],
+            "site_name": s["name"],
+            "supervisor": s.get("supervisor", ""),
+            "contact": s.get("contact", ""),
+            "initial_month": s_initial_month,
+            "initial_label": s_initial_label,
+            "month_cells": month_cells,
+            "total_cleared_amt": site_cleared_amt,
+            "total_claimed_amt": site_claimed_amt,
+            "cleared_count": site_cleared_count,
+            "pipeline_count": site_pipeline_count,
+            "active_months_count": site_active_months_count
+        })
+        
+    sites_matrix.sort(key=lambda x: (x["site_code"] or f"{x['site_id']:02d}"))
+    
+    fy_grand_pipeline = max(0.0, fy_grand_claimed - fy_grand_cleared)
+    clearance_pct = round((fy_grand_cleared / fy_grand_claimed * 100), 1) if fy_grand_claimed > 0 else 0.0
+    
+    fy_summary = {
+        "active_fy": active_fy,
+        "fy_label": f"FY {active_fy.replace('-', '–')}",
+        "total_cleared_amt": fy_grand_cleared,
+        "total_claimed_amt": fy_grand_claimed,
+        "total_pipeline_amt": fy_grand_pipeline,
+        "clearance_rate": clearance_pct,
+        "cleared_bills_count": total_cleared_bills_count,
+        "sites_with_cleared": sites_with_cleared,
+        "total_sites": len(all_sites)
+    }
+    
+    return {
+        "fy_options": fy_options,
+        "active_fy": active_fy,
+        "fy_summary": fy_summary,
+        "fy_months": fy_months,
+        "sites_matrix": sites_matrix,
+        "monthly_column_totals": monthly_column_totals
+    }
