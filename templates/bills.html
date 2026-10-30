@@ -1679,6 +1679,178 @@
 </div>
 
 <!-- ======================================================== -->
+<!-- MODAL 4: SET / EDIT ACQUIRED MONTH MODAL                 -->
+<!-- ======================================================== -->
+<div id="acquiredMonthModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[9999] hidden flex items-center justify-center p-3 sm:p-4 no-print" onclick="if(event.target===this) closeAcquiredMonthModal()">
+    <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-[#E5ECE9] animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
+        <!-- Header -->
+        <div class="bg-[#163F37] text-white p-5 sm:p-6 border-b border-[#254E46] flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-[#D97706]/20 border border-[#D97706]/40 flex items-center justify-center text-[#D97706] text-xl flex-shrink-0">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        <span>Set / Edit Site Acquired Month</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">FY Matrix</span>
+                    </h3>
+                    <p class="text-xs text-[#A8C5BF] mt-0.5">साइट अधिग्रहण / शुरुआती माह सेट करें (Pre-Acquisition vs Active Months)</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAcquiredMonthModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8C5BF] hover:text-white flex items-center justify-center text-base transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="flex items-center border-b border-slate-200 bg-slate-50 px-5 pt-3 gap-3 flex-shrink-0">
+            <button type="button" id="tabAcqSingle" onclick="switchAcqModalTab('single')" class="pb-2.5 px-3 text-xs font-black border-b-2 border-[#163F37] text-[#163F37] flex items-center gap-1.5 transition cursor-pointer">
+                <i class="fa-solid fa-pen-to-square text-[#D97706]"></i>
+                <span>Single Site Edit</span>
+            </button>
+            <button type="button" id="tabAcqAll" onclick="switchAcqModalTab('all')" class="pb-2.5 px-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer">
+                <i class="fa-solid fa-table-list text-slate-400"></i>
+                <span>All 21 Sites Overview</span>
+            </button>
+        </div>
+
+        <!-- Content Area (Scrollable) -->
+        <div class="p-5 sm:p-6 overflow-y-auto space-y-5">
+            <!-- TAB 1: SINGLE SITE -->
+            <div id="panelAcqSingle" class="space-y-4">
+                <!-- Site Selector -->
+                <div>
+                    <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
+                        <i class="fa-solid fa-location-dot text-[#D97706] mr-1"></i> Select Site / साइट चुनें *
+                    </label>
+                    <select id="acqSiteSelect" onchange="onAcqSiteSelectChange(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition cursor-pointer">
+                        {% for s in fy_data.sites_matrix %}
+                        <option value="{{ s.site_id }}" data-initial="{{ s.initial_month }}" data-label="{{ s.initial_label }}">
+                            {{ s.site_code }} — {{ s.site_name }} (Current: 📍 {{ s.initial_label }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Acquired Month Input & Presets -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider">
+                            <i class="fa-regular fa-calendar-check text-[#D97706] mr-1"></i> Acquired / Initial Month (अधिग्रहण माह) *
+                        </label>
+                        <span id="acqCurrentBadge" class="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                            Current: 📍 Aug 2026
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="month" id="acqMonthInput" onchange="highlightMatchingPill(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition" value="2026-04">
+                    </div>
+                </div>
+
+                <!-- Quick Select Month Presets for FY 2026-27 -->
+                <div>
+                    <span class="block text-[11px] font-bold text-slate-600 mb-2">Quick Presets for FY (क्विक सेलेक्ट माह):</span>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                        {% for m in fy_data.fy_months %}
+                        <button type="button" onclick="setAcqMonthPreset('{{ m.key }}')" id="acqPill_{{ m.key }}" class="acq-pill px-2.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer text-center bg-slate-50 hover:bg-[#EAF5EF] text-slate-700 border-slate-200">
+                            {{ m.short }} {{ m.year }}
+                            {% if m.col_index == 1 %}<span class="block text-[9px] text-emerald-700 font-normal">FY Start</span>{% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Informational Help Box -->
+                <div class="bg-[#EAF5EF] border border-[#C3E3D2] rounded-2xl p-3.5 text-xs text-[#163F37] space-y-1">
+                    <div class="font-extrabold flex items-center gap-1.5 text-[#163F37]">
+                        <i class="fa-solid fa-circle-question text-[#D97706]"></i>
+                        <span>Acquired Month क्या है?</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                        • जिस माह साइट शुरू या हैंडओवर हुई है, उसे सेट करें।<br>
+                        • इस माह से <strong>पहले के महीनों</strong> पर <em>"Pre-Acquisition"</em> मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।<br>
+                        • इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो <strong>April 2026</strong> चुनें।
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB 2: ALL 21 SITES TABLE -->
+            <div id="panelAcqAll" class="hidden space-y-3">
+                <!-- Bulk Actions Toolbar -->
+                <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                    <div class="text-xs font-bold text-slate-700">
+                        <i class="fa-solid fa-bolt text-[#D97706] mr-1"></i> Bulk Action:
+                    </div>
+                    <button type="button" onclick="bulkSetAllSitesToFyStart()" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-black transition cursor-pointer shadow-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        <span>Set ALL 21 Sites to April 2026 (FY Start)</span>
+                    </button>
+                </div>
+
+                <!-- Sites Table -->
+                <div class="border border-slate-200 rounded-2xl overflow-hidden max-h-72 overflow-y-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-[#F8FAF9] text-[#163F37] font-black uppercase text-[10px] tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                            <tr>
+                                <th class="p-2.5">Site</th>
+                                <th class="p-2.5">Current Initial</th>
+                                <th class="p-2.5">Change To</th>
+                                <th class="p-2.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for s in fy_data.sites_matrix %}
+                            <tr class="hover:bg-slate-50 transition" id="rowSiteAcq_{{ s.site_id }}">
+                                <td class="p-2.5">
+                                    <div class="font-extrabold text-[#163F37]">{{ s.site_name }}</div>
+                                    <div class="text-[10px] text-slate-500 font-mono">{{ s.site_code }}</div>
+                                </td>
+                                <td class="p-2.5">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                        📍 {{ s.initial_label }}
+                                    </span>
+                                </td>
+                                <td class="p-2.5">
+                                    <select id="selectRowAcq_{{ s.site_id }}" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-[#163F37]">
+                                        {% for m in fy_data.fy_months %}
+                                        <option value="{{ m.key }}" {% if m.key == s.initial_month %}selected{% endif %}>
+                                            {{ m.short }} {{ m.year }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="p-2.5 text-right">
+                                    <button type="button" onclick="saveRowSiteAcquiredMonth({{ s.site_id }})" id="btnRowSave_{{ s.site_id }}" class="px-2.5 py-1 rounded-lg bg-[#163F37] hover:bg-[#1E4940] text-white text-[11px] font-bold transition cursor-pointer shadow-2xs">
+                                        Save
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between flex-shrink-0">
+            <button type="button" onclick="closeAcquiredMonthModal()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer">
+                Cancel / बंद करें
+            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="setAcqMonthPreset('2026-04')" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs transition cursor-pointer">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset to Apr 2026
+                </button>
+                <button type="button" id="btnSaveAcqMonth" onclick="saveAcquiredMonth(event)" class="px-5 py-2 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-save text-[#D97706]"></i>
+                    <span>Save Acquired Month</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================================================== -->
 <!-- BILL STATUS JAVASCRIPT LOGIC                             -->
 <!-- ======================================================== -->
 <script>
@@ -1827,13 +1999,43 @@ function changeFinancialYear(fyKey) {
     window.location.href = url.toString();
 }
 
-function openAcquiredMonthModal(siteId, siteName, currentMonth) {
-    if (siteId) {
-        document.getElementById('acqSiteSelect').value = siteId;
-        document.getElementById('acqMonthInput').value = currentMonth || '2026-10';
+// ACQUIRED MONTH MODAL JAVASCRIPT
+function switchAcqModalTab(tabName) {
+    const tabSingle = document.getElementById('tabAcqSingle');
+    const tabAll = document.getElementById('tabAcqAll');
+    const panelSingle = document.getElementById('panelAcqSingle');
+    const panelAll = document.getElementById('panelAcqAll');
+
+    if (!tabSingle || !tabAll || !panelSingle || !panelAll) return;
+
+    if (tabName === 'single') {
+        tabSingle.className = "pb-2.5 px-3 text-xs font-black border-b-2 border-[#163F37] text-[#163F37] flex items-center gap-1.5 transition cursor-pointer";
+        tabAll.className = "pb-2.5 px-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer";
+        panelSingle.classList.remove('hidden');
+        panelAll.classList.add('hidden');
+    } else {
+        tabAll.className = "pb-2.5 px-3 text-xs font-black border-b-2 border-[#163F37] text-[#163F37] flex items-center gap-1.5 transition cursor-pointer";
+        tabSingle.className = "pb-2.5 px-3 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer";
+        panelAll.classList.remove('hidden');
+        panelSingle.classList.add('hidden');
     }
+}
+
+function openAcquiredMonthModal(siteId, siteName, currentMonth) {
     const modal = document.getElementById('acquiredMonthModal');
-    if (modal) modal.classList.remove('hidden');
+    if (!modal) return;
+    
+    switchAcqModalTab('single');
+    const select = document.getElementById('acqSiteSelect');
+    
+    if (siteId && select) {
+        select.value = siteId;
+    }
+    
+    // Trigger update of month and current badge
+    onAcqSiteSelectChange(select ? select.value : null, currentMonth);
+    
+    modal.classList.remove('hidden');
 }
 
 function closeAcquiredMonthModal() {
@@ -1841,14 +2043,57 @@ function closeAcquiredMonthModal() {
     if (modal) modal.classList.add('hidden');
 }
 
+function onAcqSiteSelectChange(siteId, explicitMonth) {
+    const select = document.getElementById('acqSiteSelect');
+    if (!select) return;
+    const opt = select.options[select.selectedIndex];
+    if (!opt) return;
+    
+    const initialMonth = explicitMonth || opt.getAttribute('data-initial') || '2026-04';
+    const initialLabel = opt.getAttribute('data-label') || initialMonth;
+    
+    const monthInput = document.getElementById('acqMonthInput');
+    if (monthInput) monthInput.value = initialMonth;
+    
+    const badge = document.getElementById('acqCurrentBadge');
+    if (badge) badge.textContent = 'Current: 📍 ' + initialLabel;
+    
+    highlightMatchingPill(initialMonth);
+}
+
+function setAcqMonthPreset(monthKey) {
+    const monthInput = document.getElementById('acqMonthInput');
+    if (monthInput) monthInput.value = monthKey;
+    highlightMatchingPill(monthKey);
+}
+
+function highlightMatchingPill(monthKey) {
+    document.querySelectorAll('.acq-pill').forEach(pill => {
+        pill.classList.remove('bg-[#163F37]', 'text-white', 'border-[#163F37]', 'shadow-xs');
+        pill.classList.add('bg-slate-50', 'text-slate-700', 'border-slate-200');
+    });
+    const target = document.getElementById('acqPill_' + monthKey);
+    if (target) {
+        target.classList.remove('bg-slate-50', 'text-slate-700', 'border-slate-200');
+        target.classList.add('bg-[#163F37]', 'text-white', 'border-[#163F37]', 'shadow-xs');
+    }
+}
+
 async function saveAcquiredMonth(e) {
     if (e) e.preventDefault();
-    const siteId = document.getElementById('acqSiteSelect').value;
+    const siteSelect = document.getElementById('acqSiteSelect');
+    const siteId = siteSelect ? siteSelect.value : null;
     const initialMonth = document.getElementById('acqMonthInput').value;
 
     if (!siteId || !initialMonth) {
         alert('Please select both site and initial month.');
         return;
+    }
+
+    const btn = document.getElementById('btnSaveAcqMonth');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
     }
 
     try {
@@ -1864,6 +2109,74 @@ async function saveAcquiredMonth(e) {
             window.location.href = url.toString();
         } else {
             alert('Failed to update: ' + (res.message || 'Unknown error'));
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-save text-[#D97706]"></i> <span>Save Acquired Month</span>';
+            }
+        }
+    } catch (err) {
+        alert('Network Error: ' + err.message);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-save text-[#D97706]"></i> <span>Save Acquired Month</span>';
+        }
+    }
+}
+
+async function saveRowSiteAcquiredMonth(siteId) {
+    const sel = document.getElementById('selectRowAcq_' + siteId);
+    const btn = document.getElementById('btnRowSave_' + siteId);
+    if (!sel || !btn) return;
+    const newMonth = sel.value;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    
+    try {
+        const resp = await fetch(`/api/sites/${siteId}/initial-month`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initial_month: newMonth })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            btn.className = "px-2.5 py-1 rounded-lg bg-emerald-700 text-white text-[11px] font-bold shadow-2xs";
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+            setTimeout(() => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('view', 'fy_cleared');
+                window.location.href = url.toString();
+            }, 600);
+        } else {
+            alert('Error: ' + res.message);
+            btn.disabled = false;
+            btn.innerHTML = 'Save';
+        }
+    } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = 'Save';
+    }
+}
+
+async function bulkSetAllSitesToFyStart() {
+    if (!confirm('Are you sure you want to set ALL 21 SITES to April 2026 (FY Start)?\nThis will activate all 12 months for every site.')) {
+        return;
+    }
+    
+    try {
+        const resp = await fetch('/api/sites/batch-initial-month', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ all_sites_month: '2026-04' })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'fy_cleared');
+            window.location.href = url.toString();
+        } else {
+            alert('Error: ' + res.message);
         }
     } catch (err) {
         alert('Error: ' + err.message);

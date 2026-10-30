@@ -3391,6 +3391,29 @@ def api_update_site_initial_month(site_id):
     database.update_site_initial_month(site_id, initial_month)
     return jsonify({"success": True, "site_id": site_id, "initial_month": initial_month, "message": "Site acquired / initial month updated!"})
 
+@app.route("/api/sites/batch-initial-month", methods=["POST"])
+def api_batch_update_site_initial_month():
+    """Bulk update Acquired / Initial Month for multiple sites (Owner Only)."""
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    all_sites_month = data.get("all_sites_month")
+    if all_sites_month:
+        m = str(all_sites_month).strip()
+        all_sites = database.get_all_sites()
+        for s in all_sites:
+            database.update_site_initial_month(s["id"], m)
+        return jsonify({"success": True, "message": f"All {len(all_sites)} sites set to {m}!"})
+
+    updates = data.get("updates", [])
+    for item in updates:
+        sid = item.get("site_id")
+        im = str(item.get("initial_month", "")).strip()
+        if sid and im:
+            database.update_site_initial_month(int(sid), im)
+    return jsonify({"success": True, "message": f"Updated {len(updates)} sites successfully!"})
+
 @app.route("/api/bills", methods=["GET", "POST"])
 def api_bills_list_create():
     """API for bills: List all or Create new bill (Owner Only)."""
