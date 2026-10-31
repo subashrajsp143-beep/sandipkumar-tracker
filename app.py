@@ -249,13 +249,6 @@ def api_supervisor_login():
         name = data.get("name", "").strip()
         phone = str(data.get("phone", "")).strip()
 
-        if not site_id:
-            return jsonify({"success": False, "message": "Please select a work site."}), 400
-
-        site = database.get_site_by_id(site_id)
-        if not site:
-            return jsonify({"success": False, "message": "Selected site does not exist."}), 404
-
         def _clean_ph(p):
             if not p:
                 return ""
@@ -268,17 +261,7 @@ def api_supervisor_login():
         if phone == "Sandip@@12":
             norm_phone = "9835180075"
 
-        if not norm_phone or len(norm_phone) != 10:
-            return jsonify({
-                "success": False, 
-                "message": "Please enter a valid 10-digit registered mobile number."
-            }), 400
-
-        official_name = name
-        official_role = role
-        is_authorized = False
-
-        # Master phone number 9835180075 is Master Owner (Sandip Kumar)
+        # Master phone number 9835180075 is Master Owner (Sandip Kumar) - checked FIRST!
         if norm_phone == "9835180075":
             session.permanent = True
             session["role"] = "owner"
@@ -301,34 +284,51 @@ def api_supervisor_login():
                     "site_id": None
                 }
             })
+
+        if not site_id:
+            return jsonify({"success": False, "message": "Please select a work site."}), 400
+
+        site = database.get_site_by_id(site_id)
+        if not site:
+            return jsonify({"success": False, "message": "Selected site does not exist."}), 404
+
+        if not norm_phone or len(norm_phone) != 10:
+            return jsonify({
+                "success": False, 
+                "message": "Please enter a valid 10-digit registered mobile number."
+            }), 400
+
+        official_name = name
+        official_role = role
+        is_authorized = False
+
+        # Match against site's registered supervisor and incharge
+        site_sup_phone = _clean_ph(site.get("contact"))
+        site_inc_phone = _clean_ph(site.get("incharge_phone"))
+
+        if site_sup_phone and norm_phone == site_sup_phone:
+            is_authorized = True
+            official_name = site.get("supervisor") or name or "Supervisor"
+            official_role = "Supervisor"
+        elif site_inc_phone and norm_phone == site_inc_phone:
+            is_authorized = True
+            official_name = site.get("incharge") or name or "Site Incharge"
+            official_role = "Site Incharge"
         else:
-            # Match against site's registered supervisor and incharge
-            site_sup_phone = _clean_ph(site.get("contact"))
-            site_inc_phone = _clean_ph(site.get("incharge_phone"))
+            # Check if registered DEO (Data Entry Operator) in site_workers
+            workers = database.get_all_workers_for_site(site_id)
+            for w in workers:
+                if w.get("role") in ["DEO", "Data Entry"] and _clean_ph(w.get("phone")) == norm_phone and w.get("is_active", 1):
+                    is_authorized = True
+                    official_name = w.get("name") or name
+                    official_role = w.get("role") or role
+                    break
 
-            if site_sup_phone and norm_phone == site_sup_phone:
-                is_authorized = True
-                official_name = site.get("supervisor") or name or "Supervisor"
-                official_role = "Supervisor"
-            elif site_inc_phone and norm_phone == site_inc_phone:
-                is_authorized = True
-                official_name = site.get("incharge") or name or "Site Incharge"
-                official_role = "Site Incharge"
-            else:
-                # Check if registered DEO (Data Entry Operator) in site_workers
-                workers = database.get_all_workers_for_site(site_id)
-                for w in workers:
-                    if w.get("role") in ["DEO", "Data Entry"] and _clean_ph(w.get("phone")) == norm_phone and w.get("is_active", 1):
-                        is_authorized = True
-                        official_name = w.get("name") or name
-                        official_role = w.get("role") or role
-                        break
-
-            if not is_authorized:
-                return jsonify({
-                    "success": False,
-                    "message": "Not an authorized person"
-                }), 403
+        if not is_authorized:
+            return jsonify({
+                "success": False,
+                "message": "Not an authorized person"
+            }), 403
 
         # Create or fetch worker record with verified official name and role
         worker = database.get_or_create_worker(site_id, official_name, official_role, norm_phone)
@@ -2225,7 +2225,10 @@ def site_stock():
 
     stock_rows = database.get_site_stock_inventory(site_id=selected_site_id)
     all_overview = database.get_all_sites_stock_overview()
-    overview = [o for o in all_overview if o["id"] == int(user_site_id)] if user_site_id else all_overview
+    if user_site_id:
+        overview = [o for o in all_overview.get("site_cards", []) if o.get("id") == int(user_site_id)]
+    else:
+        overview = all_overview.get("site_cards", [])
 
     total_inward_sum = sum(r["total_inward"] for r in stock_rows)
     total_consumed_sum = sum(r["total_consumed"] for r in stock_rows)
@@ -3879,3 +3882,23 @@ def api_delete_shared_doc(doc_id):
             
     database.delete_shared_document(doc_id)
     return jsonify({"success": True, "message": "Document deleted successfully."})
+
+# ==========================================
+# GLOBAL ERROR HANDLERS (500 & 404)
+# ==========================================
+@app.errorhandler(500)
+def handle_500_error(e):
+    import traceback
+    err_trace = traceback.format_exc()
+    print("="*60, file=sys.stderr)
+    print(f"CRITICAL 500 SERVER ERROR on {request.path}:", file=sys.stderr)
+    print(err_trace, file=sys.stderr)
+    print("="*60, file=sys.stderr)
+    return render_template("500.html", error=str(e)), 500
+
+@app.errorhandler(404)
+def handle_404_error(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Endpoint not found", "path": request.path}), 404
+    return redirect(url_for("home_index"))
+
