@@ -249,6 +249,13 @@ def api_supervisor_login():
         name = data.get("name", "").strip()
         phone = str(data.get("phone", "")).strip()
 
+        if not site_id:
+            return jsonify({"success": False, "message": "Please select a work site."}), 400
+
+        site = database.get_site_by_id(site_id)
+        if not site:
+            return jsonify({"success": False, "message": "Selected site does not exist."}), 404
+
         def _clean_ph(p):
             if not p:
                 return ""
@@ -261,37 +268,6 @@ def api_supervisor_login():
         if phone == "Sandip@@12":
             norm_phone = "9835180075"
 
-        # Master phone number 9835180075 is Master Owner (Sandip Kumar) - checked FIRST!
-        if norm_phone == "9835180075":
-            session.permanent = True
-            session["role"] = "owner"
-            session["is_owner"] = True
-            session["worker_name"] = "Sandip Kumar"
-            session["worker_role"] = "Owner"
-            session["worker_phone"] = "9835180075"
-            session["site_id"] = None
-            session["site_name"] = "All Sites (Master Owner)"
-            return jsonify({
-                "success": True,
-                "is_owner": True,
-                "redirect": "/dashboard",
-                "message": "Welcome Sandip Kumar! Master Owner Access Granted.",
-                "worker": {
-                    "id": 1,
-                    "name": "Sandip Kumar",
-                    "role": "Owner",
-                    "phone": "9835180075",
-                    "site_id": None
-                }
-            })
-
-        if not site_id:
-            return jsonify({"success": False, "message": "Please select a work site."}), 400
-
-        site = database.get_site_by_id(site_id)
-        if not site:
-            return jsonify({"success": False, "message": "Selected site does not exist."}), 404
-
         if not norm_phone or len(norm_phone) != 10:
             return jsonify({
                 "success": False, 
@@ -302,46 +278,53 @@ def api_supervisor_login():
         official_role = role
         is_authorized = False
 
-        # Match against site's registered supervisor and incharge
-        site_sup_phone = _clean_ph(site.get("contact"))
-        site_inc_phone = _clean_ph(site.get("incharge_phone"))
-
-        if site_sup_phone and norm_phone == site_sup_phone:
+        # If phone is 9835180075 (Sandip Kumar), grant supervisor access to the SELECTED SITE in Supervisor Mode!
+        if norm_phone == "9835180075":
             is_authorized = True
-            official_name = site.get("supervisor") or name or "Supervisor"
+            official_name = f"Sandip Kumar ({site['name']})"
             official_role = "Supervisor"
-        elif site_inc_phone and norm_phone == site_inc_phone:
-            is_authorized = True
-            official_name = site.get("incharge") or name or "Site Incharge"
-            official_role = "Site Incharge"
         else:
-            # Check if registered DEO (Data Entry Operator) in site_workers
-            workers = database.get_all_workers_for_site(site_id)
-            for w in workers:
-                if w.get("role") in ["DEO", "Data Entry"] and _clean_ph(w.get("phone")) == norm_phone and w.get("is_active", 1):
-                    is_authorized = True
-                    official_name = w.get("name") or name
-                    official_role = w.get("role") or role
-                    break
+            # Match against site's registered supervisor and incharge
+            site_sup_phone = _clean_ph(site.get("contact"))
+            site_inc_phone = _clean_ph(site.get("incharge_phone"))
+
+            if site_sup_phone and norm_phone == site_sup_phone:
+                is_authorized = True
+                official_name = site.get("supervisor") or name or "Supervisor"
+                official_role = "Supervisor"
+            elif site_inc_phone and norm_phone == site_inc_phone:
+                is_authorized = True
+                official_name = site.get("incharge") or name or "Site Incharge"
+                official_role = "Site Incharge"
+            else:
+                # Check if registered DEO (Data Entry Operator) in site_workers
+                workers = database.get_all_workers_for_site(site_id)
+                for w in workers:
+                    if w.get("role") in ["DEO", "Data Entry"] and _clean_ph(w.get("phone")) == norm_phone and w.get("is_active", 1):
+                        is_authorized = True
+                        official_name = w.get("name") or name
+                        official_role = w.get("role") or role
+                        break
 
         if not is_authorized:
             return jsonify({
                 "success": False,
-                "message": "Not an authorized person"
+                "message": f"Not an authorized supervisor for {site['name']}"
             }), 403
 
         # Create or fetch worker record with verified official name and role
         worker = database.get_or_create_worker(site_id, official_name, official_role, norm_phone)
         session.permanent = True
         session["role"] = "supervisor"
-        session["is_owner"] = False
+        session["is_owner"] = False  # Strictly Supervisor Mode (Single Site View)!
         session["worker_id"] = worker["id"]
         session["worker_token"] = worker["worker_token"]
         session["worker_name"] = official_name
         session["worker_role"] = official_role
         session["worker_phone"] = norm_phone
-        session["site_id"] = worker["site_id"]
-        session["site_name"] = worker["site_name"]
+        session["site_id"] = site["id"]
+        session["site_name"] = site["name"]
+        session["locked_site_id"] = site["id"]
 
         # Capture & Process Live GPS Location during Login
         lat = data.get("latitude")
@@ -382,7 +365,9 @@ def api_supervisor_login():
                 pass
 
         return jsonify({
-            "success": True, 
+            "success": True,
+            "is_owner": False,
+            "redirect": f"/stock?site_id={site_id}",
             "worker": worker,
             "location_status": location_status,
             "distance_m": distance_m
@@ -436,10 +421,14 @@ def logout_user():
 @app.route("/dashboard")
 @app.route("/portal")
 def dashboard():
-    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
     user_site_id = session.get("site_id")
-    if not is_owner and user_site_id:
-        return redirect(url_for("site_stock"))
+    # If in Supervisor Mode (locked to a specific site), never show all-sites owner dashboard
+    if user_site_id:
+        return redirect(url_for("site_stock", site_id=user_site_id))
+
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
+    if not is_owner:
+        return redirect(url_for("login_page"))
 
     stats = database.get_dashboard_stats()
     sites = database.get_all_sites()

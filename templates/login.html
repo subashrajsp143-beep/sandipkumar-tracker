@@ -293,16 +293,12 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    if (data.is_owner || phone.includes('9835180075')) {
-                        localStorage.setItem('sandip_user_role', 'owner');
-                        window.location.href = data.redirect || '/dashboard';
-                        return;
-                    }
                     localStorage.setItem('sandip_user_role', 'supervisor');
+                    localStorage.setItem('sandip_site_id', siteId);
                     if (data.worker && data.worker.worker_token) {
                         localStorage.setItem('sandip_worker_token', data.worker.worker_token);
                     }
-                    window.location.href = '/stock?site_id=' + siteId;
+                    window.location.href = data.redirect || ('/stock?site_id=' + siteId);
                 } else {
                     if (errBox) {
                         errBox.innerText = data.message;
