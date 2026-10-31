@@ -4176,6 +4176,7 @@ def update_site_initial_month(site_id, initial_month):
     cursor.execute("UPDATE sites SET initial_month = ? WHERE id = ?", (initial_month.strip(), int(site_id)))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return True
 
 
@@ -4218,7 +4219,7 @@ def get_fy_cleared_bills_data(selected_fy=None):
         sid = s["id"]
         im = s.get("initial_month")
         if not im:
-            im = site_earliest_bill.get(sid) or (str(s.get("created_at"))[:7] if s.get("created_at") else "2026-10")
+            im = site_earliest_bill.get(sid) or "2026-04"
             c.execute("UPDATE sites SET initial_month = ? WHERE id = ?", (im, sid))
             s["initial_month"] = im
     conn.commit()
@@ -4311,7 +4312,7 @@ def get_fy_cleared_bills_data(selected_fy=None):
     
     for s in all_sites:
         sid = s["id"]
-        s_initial_month = s.get("initial_month") or "2026-10"
+        s_initial_month = s.get("initial_month") or "2026-04"
         
         try:
             iy, im = map(int, s_initial_month.split("-"))
@@ -4729,6 +4730,7 @@ def save_site_bill_prep(site_id, month_key, data, is_supervisor=True, user_name=
         
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return {
         "success": True,
         "prep_id": prep_id,
@@ -4754,6 +4756,7 @@ def request_bill_prep_amendment(prep_id, reason, supervisor_name=None):
     """, (reason.strip(), now_str, now_str, int(prep_id)))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return {"success": True, "message": "Amendment request successfully sent to Owner for approval."}
 
 
@@ -4776,6 +4779,7 @@ def approve_bill_prep_amendment(prep_id, approved_by="Sandip Kumar"):
     """, (now_str, approved_by, now_str, int(prep_id)))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return {"success": True, "message": "Amendment approved. Record unlocked for supervisor to edit."}
 
 
@@ -4799,6 +4803,7 @@ def reject_bill_prep_amendment(prep_id, notes="", rejected_by="Sandip Kumar"):
     """, (now_str, rejected_by, notes.strip(), now_str, int(prep_id)))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return {"success": True, "message": "Amendment request rejected. Record remains locked."}
 
 
@@ -4894,6 +4899,7 @@ def add_shared_document(title, category, site_id, filename, original_filename,
     doc_id = c.lastrowid
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return doc_id
 
 
@@ -4952,6 +4958,7 @@ def delete_shared_document(doc_id):
     c.execute("DELETE FROM shared_documents WHERE id = ?", (int(doc_id),))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return True
 
 

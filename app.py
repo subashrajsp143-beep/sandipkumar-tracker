@@ -3407,6 +3407,7 @@ def api_batch_update_site_initial_month():
         all_sites = database.get_all_sites()
         for s in all_sites:
             database.update_site_initial_month(s["id"], m)
+        database._notify_cloud_backup()
         return jsonify({"success": True, "message": f"All {len(all_sites)} sites set to {m}!"})
 
     updates = data.get("updates", [])
