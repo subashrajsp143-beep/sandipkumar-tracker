@@ -202,6 +202,23 @@ def api_worker_login():
         name = data.get("name", "").strip()
         phone = data.get("phone", "").strip()
 
+        norm_phone = re.sub(r"\D", "", str(phone))
+        if norm_phone[-10:] == "9835180075":
+            session.permanent = True
+            session["role"] = "owner"
+            session["is_owner"] = True
+            session["worker_name"] = "Sandip Kumar"
+            session["worker_role"] = "Owner"
+            session["worker_phone"] = "9835180075"
+            session["site_id"] = None
+            session["site_name"] = "All Sites (Master Owner)"
+            return jsonify({
+                "success": True,
+                "is_owner": True,
+                "redirect": "/dashboard",
+                "message": "Welcome Sandip Kumar! Master Owner Access Granted."
+            })
+
         if not site_id or not name:
             return jsonify({"success": False, "message": "Site and Name are required."}), 400
 
@@ -261,12 +278,29 @@ def api_supervisor_login():
         official_role = role
         is_authorized = False
 
-        # Master phone number 9835180075 can login to EVERY site as supervisor
+        # Master phone number 9835180075 is Master Owner (Sandip Kumar)
         if norm_phone == "9835180075":
-            is_authorized = True
-            official_name = "Sandip Kumar"
-            official_role = "Supervisor"
-            norm_phone = "9835180075"
+            session.permanent = True
+            session["role"] = "owner"
+            session["is_owner"] = True
+            session["worker_name"] = "Sandip Kumar"
+            session["worker_role"] = "Owner"
+            session["worker_phone"] = "9835180075"
+            session["site_id"] = None
+            session["site_name"] = "All Sites (Master Owner)"
+            return jsonify({
+                "success": True,
+                "is_owner": True,
+                "redirect": "/dashboard",
+                "message": "Welcome Sandip Kumar! Master Owner Access Granted.",
+                "worker": {
+                    "id": 1,
+                    "name": "Sandip Kumar",
+                    "role": "Owner",
+                    "phone": "9835180075",
+                    "site_id": None
+                }
+            })
         else:
             # Match against site's registered supervisor and incharge
             site_sup_phone = _clean_ph(site.get("contact"))
@@ -402,7 +436,7 @@ def logout_user():
 @app.route("/dashboard")
 @app.route("/portal")
 def dashboard():
-    is_owner = session.get("is_owner", False)
+    is_owner = (session.get("is_owner", False) or session.get("role") == "owner" or session.get("worker_phone") == "9835180075")
     user_site_id = session.get("site_id")
     if not is_owner and user_site_id:
         return redirect(url_for("site_stock"))
@@ -1670,7 +1704,7 @@ def owner_login_api():
         return "", 200
     data = request.get_json(silent=True) or {}
     pin = str(data.get("pin", "")).strip()
-    if pin in ["Sandip@@12"]:
+    if pin in ["Sandip@@12", "9835180075"]:
         session.permanent = True
         session["is_owner"] = True
         session["role"] = "owner"

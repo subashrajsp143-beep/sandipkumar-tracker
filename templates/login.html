@@ -211,6 +211,11 @@
                 });
                 const data = await res.json();
                 if (data.success) {
+                    if (data.is_owner || phone.includes('9835180075')) {
+                        localStorage.setItem('sandip_user_role', 'owner');
+                        window.location.href = data.redirect || '/dashboard';
+                        return;
+                    }
                     localStorage.setItem('sandip_user_role', 'worker');
                     localStorage.setItem('sandip_worker_token', data.worker.worker_token);
                     window.location.href = '/my-attendance';
@@ -288,6 +293,11 @@
                 });
                 const data = await res.json();
                 if (data.success) {
+                    if (data.is_owner || phone.includes('9835180075')) {
+                        localStorage.setItem('sandip_user_role', 'owner');
+                        window.location.href = data.redirect || '/dashboard';
+                        return;
+                    }
                     localStorage.setItem('sandip_user_role', 'supervisor');
                     if (data.worker && data.worker.worker_token) {
                         localStorage.setItem('sandip_worker_token', data.worker.worker_token);
