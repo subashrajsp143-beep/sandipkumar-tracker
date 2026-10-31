@@ -5,96 +5,119 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Top Header Banner (HRMS Theme: #163F37 / #166534 with golden amber accents) -->
-    <div class="bg-[#163F37] text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#254E46] relative overflow-hidden">
+    <!-- Top Header Banner (High-Contrast Executive Dark Pine #163F37 Theme) -->
+    <div style="background-color: #163F37 !important;" class="rounded-3xl p-6 sm:p-8 shadow-md border border-[#254E46] relative overflow-hidden">
         <div class="absolute -right-12 -top-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <!-- Progress Sub-Sections Nav Pill Bar (Owner Profile Only) -->
-        <div class="inline-flex items-center p-1 bg-black/25 backdrop-blur rounded-2xl border border-white/10 mb-4">
-            <a href="/dpr" class="px-4 py-2 rounded-xl text-xs font-semibold text-white/80 hover:text-white hover:bg-white/10 transition flex items-center gap-2">
-                <i class="fa-solid fa-faucet-drip text-emerald-300"></i>
-                <span>Daily Progress (DPR)</span>
+        <div class="inline-flex items-center p-1 bg-black/40 backdrop-blur rounded-2xl border border-white/20 mb-4">
+            <a href="/dpr" style="color: #E2E8F0 !important;" class="px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/15 transition flex items-center gap-2">
+                <i class="fa-solid fa-faucet-drip text-emerald-400"></i>
+                <span style="color: #E2E8F0 !important;">Daily Progress (DPR)</span>
             </a>
-            <a href="/bills" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-[#163F37] shadow-sm flex items-center gap-2">
+            <a href="/bills" style="background-color: #FFFFFF !important; color: #163F37 !important;" class="px-4 py-2 rounded-xl text-xs font-black shadow-sm flex items-center gap-2">
                 <i class="fa-solid fa-file-invoice-dollar text-[#D97706]"></i>
-                <span>Bill Status & Clearance</span>
+                <span style="color: #163F37 !important; font-weight: 900 !important;">Bill Status & Clearance</span>
                 <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-[#D97706] text-slate-950">OWNER ONLY</span>
             </a>
         </div>
 
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-2">
+                <!-- Confidential Owner Badge -->
+                <div style="background-color: rgba(217, 119, 6, 0.25) !important; border: 1px solid rgba(245, 158, 11, 0.5) !important;" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black mb-2">
                     <i class="fa-solid fa-shield-halved text-amber-400"></i>
-                    <span>Confidential Owner Profile &bull; 21 Sites Clearance Pipeline</span>
+                    <span style="color: #FDE68A !important; font-weight: 800 !important;">Confidential Owner Profile &bull; 21 Sites Clearance Pipeline</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                <!-- Main Header Title (PURE CRISP WHITE) -->
+                <h1 style="color: #FFFFFF !important;" class="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-3">
                     <i class="fa-solid fa-money-bill-transfer text-[#D97706]"></i>
-                    <span>Bill Status & Clearance Tracker</span>
+                    <span style="color: #FFFFFF !important; font-weight: 900 !important;">Bill Status & Clearance Tracker</span>
                 </h1>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                    Track the 6-stage clearance cycle: <strong>Bill Created &rarr; Head Clerk &rarr; J.E/S.D.O Verification &rarr; Treasury &rarr; Bill Cleared &rarr; Payment Received</strong>.
+                <!-- Subtitle (HIGH CONTRAST) -->
+                <p style="color: #E2E8F0 !important;" class="text-xs sm:text-sm mt-1.5 max-w-2xl leading-relaxed">
+                    Track the 6-stage clearance cycle: <strong style="color: #FDE68A !important; font-weight: 800 !important;">Bill Created &rarr; Head Clerk &rarr; J.E/S.D.O Verification &rarr; Treasury &rarr; Bill Cleared &rarr; Payment Received</strong>.
                 </p>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="openNewBillModal()" class="px-4 py-2.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-circle-plus"></i>
-                    <span>+ Naya Bill Add Karein</span>
+                <button type="button" onclick="openNewBillModal()" style="background-color: #D97706 !important; color: #020617 !important;" class="px-4 py-2.5 rounded-xl hover:bg-[#B45309] font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-circle-plus text-slate-950"></i>
+                    <span style="color: #020617 !important; font-weight: 900 !important;">+ Naya Bill Add Karein</span>
                 </button>
-                <button type="button" onclick="window.print()" class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-1.5 cursor-pointer no-print">
-                    <i class="fa-solid fa-print"></i>
-                    <span>Print Report</span>
+                <button type="button" onclick="window.print()" style="background-color: rgba(255,255,255,0.15) !important; color: #FFFFFF !important; border: 1px solid rgba(255,255,255,0.3) !important;" class="px-3.5 py-2.5 rounded-xl hover:bg-white/25 font-bold text-xs sm:text-sm transition flex items-center gap-1.5 cursor-pointer no-print">
+                    <i class="fa-solid fa-print text-white"></i>
+                    <span style="color: #FFFFFF !important; font-weight: 700 !important;">Print Report</span>
                 </button>
             </div>
         </div>
 
-        <!-- 5 Essential Executive KPI Summary Cards -->
+        <!-- 5 Essential Executive KPI Summary Cards (CRISP WHITE CARDS WITH DARK, HIGH-CONTRAST TEXT) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
             <!-- 1. Total Bills & Value -->
-            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
-                <div class="text-[11px] font-bold uppercase text-slate-300 flex items-center gap-1">
-                    <i class="fa-solid fa-file-invoice text-sky-400"></i> Total Bills Tracked
+            <div style="background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;" class="rounded-2xl p-4 shadow-sm">
+                <div style="color: #0369A1 !important;" class="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-invoice text-sky-600 text-xs"></i> TOTAL BILLS TRACKED
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-white mt-1">{{ summary.overall.total_bills }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
-                <div class="text-[11px] text-amber-300 font-bold mt-1">₹ {{ "{:,.0f}".format(summary.overall.total_bill_amount) }} <span class="text-[9px] text-slate-300 font-normal">Claimed</span></div>
+                <div style="color: #0F172A !important;" class="text-2xl sm:text-3xl font-black mt-1">
+                    {{ summary.overall.total_bills }} <span style="color: #64748B !important;" class="text-xs font-bold">Bills</span>
+                </div>
+                <div style="color: #B45309 !important;" class="text-xs font-black mt-1">
+                    ₹ {{ "{:,.0f}".format(summary.overall.total_bill_amount) }} <span style="color: #64748B !important;" class="text-[10px] font-bold uppercase tracking-wider">Claimed</span>
+                </div>
             </div>
 
             <!-- 2. Office & Head Clerk (Steps 1 & 2) -->
-            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
-                <div class="text-[11px] font-bold uppercase text-sky-300 flex items-center gap-1">
-                    <i class="fa-solid fa-user-tie text-sky-400"></i> 1 & 2. Head Clerk Stage
+            <div style="background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;" class="rounded-2xl p-4 shadow-sm">
+                <div style="color: #0284C7 !important;" class="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-tie text-sky-600 text-xs"></i> 1 & 2. HEAD CLERK STAGE
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-sky-300 mt-1">{{ summary.stages.office.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
-                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.office.amount) }} <span class="text-[9px] text-slate-400 font-normal">Under Scrutiny</span></div>
+                <div style="color: #0284C7 !important;" class="text-2xl sm:text-3xl font-black mt-1">
+                    {{ summary.stages.office.count }} <span style="color: #64748B !important;" class="text-xs font-bold">Bills</span>
+                </div>
+                <div style="color: #334155 !important;" class="text-xs font-bold mt-1">
+                    ₹ {{ "{:,.0f}".format(summary.stages.office.amount) }} <span style="color: #64748B !important;" class="text-[10px] font-medium">Under Scrutiny</span>
+                </div>
             </div>
 
             <!-- 3. Technical Verification (Step 3: JE/SDO) -->
-            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
-                <div class="text-[11px] font-bold uppercase text-indigo-300 flex items-center gap-1">
-                    <i class="fa-solid fa-clipboard-check text-indigo-400"></i> 3. With J.E / S.D.O
+            <div style="background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;" class="rounded-2xl p-4 shadow-sm">
+                <div style="color: #4338CA !important;" class="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-clipboard-check text-indigo-600 text-xs"></i> 3. WITH J.E / S.D.O
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-indigo-300 mt-1">{{ summary.stages.technical.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
-                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.technical.amount) }} <span class="text-[9px] text-slate-400 font-normal">MB Verification</span></div>
+                <div style="color: #4338CA !important;" class="text-2xl sm:text-3xl font-black mt-1">
+                    {{ summary.stages.technical.count }} <span style="color: #64748B !important;" class="text-xs font-bold">Bills</span>
+                </div>
+                <div style="color: #334155 !important;" class="text-xs font-bold mt-1">
+                    ₹ {{ "{:,.0f}".format(summary.stages.technical.amount) }} <span style="color: #64748B !important;" class="text-[10px] font-medium">MB Verification</span>
+                </div>
             </div>
 
             <!-- 4. Treasury (Step 4) -->
-            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
-                <div class="text-[11px] font-bold uppercase text-amber-300 flex items-center gap-1">
-                    <i class="fa-solid fa-building-columns text-amber-400"></i> 4. In Treasury
+            <div style="background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;" class="rounded-2xl p-4 shadow-sm">
+                <div style="color: #B45309 !important;" class="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-building-columns text-amber-600 text-xs"></i> 4. IN TREASURY
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-amber-300 mt-1">{{ summary.stages.treasury.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
-                <div class="text-[11px] text-slate-300 mt-1">₹ {{ "{:,.0f}".format(summary.stages.treasury.amount) }} <span class="text-[9px] text-slate-400 font-normal">Pending Token</span></div>
+                <div style="color: #D97706 !important;" class="text-2xl sm:text-3xl font-black mt-1">
+                    {{ summary.stages.treasury.count }} <span style="color: #64748B !important;" class="text-xs font-bold">Bills</span>
+                </div>
+                <div style="color: #334155 !important;" class="text-xs font-bold mt-1">
+                    ₹ {{ "{:,.0f}".format(summary.stages.treasury.amount) }} <span style="color: #64748B !important;" class="text-[10px] font-medium">Pending Token</span>
+                </div>
             </div>
 
             <!-- 5. Cleared & Received (Steps 5 & 6) -->
-            <div class="bg-black/25 backdrop-blur rounded-2xl p-4 border border-white/10">
-                <div class="text-[11px] font-bold uppercase text-emerald-300 flex items-center gap-1">
-                    <i class="fa-solid fa-sack-dollar text-emerald-400"></i> 5 & 6. Cleared / Recd
+            <div style="background-color: #FFFFFF !important; border: 1px solid #CBD5E1 !important;" class="rounded-2xl p-4 shadow-sm">
+                <div style="color: #047857 !important;" class="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-sack-dollar text-emerald-600 text-xs"></i> 5 & 6. CLEARED / RECD
                 </div>
-                <div class="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{{ summary.stages.completed.count }} <span class="text-xs font-semibold text-slate-300">Bills</span></div>
-                <div class="text-[11px] text-emerald-300 font-bold mt-1">₹ {{ "{:,.0f}".format(summary.stages.completed.received_amount) }} <span class="text-[9px] text-slate-300 font-normal">Received</span></div>
+                <div style="color: #047857 !important;" class="text-2xl sm:text-3xl font-black mt-1">
+                    {{ summary.stages.completed.count }} <span style="color: #64748B !important;" class="text-xs font-bold">Bills</span>
+                </div>
+                <div style="color: #047857 !important;" class="text-xs font-black mt-1">
+                    ₹ {{ "{:,.0f}".format(summary.stages.completed.received_amount) }} <span style="color: #047857 !important;" class="text-[10px] font-bold">Received (Credited)</span>
+                </div>
             </div>
         </div>
     </div>
@@ -950,7 +973,7 @@
                         <span>Financial Year Clearance Audit</span>
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                    <h2 style="color: #FFFFFF !important;" class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
                         <span>🏛️ FY Month-Wise Cleared Bill Matrix</span>
                     </h2>
                     <p class="text-xs sm:text-sm text-[#EAF5EF]/80 font-medium leading-relaxed">

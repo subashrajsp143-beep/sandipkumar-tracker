@@ -105,22 +105,16 @@ main,
    Pure crisp white #FFFFFF with subtle 1px border #E5ECE9 and rounded-2xl.
    ========================================================================== */
 .card-theme,
-.bg-white,
-[class*="bg-white"],
-.rounded-xl,
-.rounded-2xl {
-    background-color: var(--card) !important;
-    border-color: var(--card-border) !important;
-    color: var(--text-primary) !important;
+.bg-white {
+    background-color: var(--card);
+    border-color: var(--card-border);
 }
 
 .card-theme,
-main .bg-white,
-main .rounded-xl,
-main .rounded-2xl {
-    border: 1px solid var(--card-border) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+main > .bg-white {
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
 }
 
 .card-theme h1, .card-theme h2, .card-theme h3, .card-theme h4,
@@ -146,12 +140,28 @@ input:focus, select:focus, textarea:focus {
    3. TYPOGRAPHY
    ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text-primary) !important;
-    letter-spacing: -0.015em !important;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
 }
 
-p, span, div, td, th, li, a, strong, b, em {
-    color: var(--text-primary);
+p, span, td, th, li, strong, b, em {
+    color: inherit;
+}
+
+/* Ensure dark backgrounds, hero banners and text-white elements always keep pure crisp white contrast */
+.text-white,
+[class*="text-white"],
+[class*="bg-[#163F37]"] h1,
+[class*="bg-[#163F37]"] h2,
+[class*="bg-[#163F37]"] h3,
+[class*="bg-[#163F37]"] h4,
+[class*="bg-[#166534]"] h1,
+[class*="bg-[#166534]"] h2,
+[class*="bg-[#166534]"] h3,
+[class*="bg-gradient-to-r"] h1,
+[class*="bg-gradient-to-r"] h2,
+[class*="bg-gradient-to-r"] h3 {
+    color: #FFFFFF !important;
 }
 
 /* Small Subtitles & Field Labels (e.g. PAYROLL, STATUS, Skill Category in screenshot) */
