@@ -1329,6 +1329,31 @@ def init_gps_tables():
     );
     """)
 
+    # 7.1 Detailed DPR Work Entries (Excel-format table matching JJM register)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS dpr_entries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        report_date TEXT NOT NULL,
+        ward_no TEXT,
+        work_details TEXT,
+        work_location TEXT,
+        workmen_name TEXT,
+        mobile_no TEXT,
+        work_area TEXT,
+        sub_ward_no TEXT,
+        work_activity TEXT,
+        remark TEXT,
+        supervisor_name TEXT,
+        supervisor_phone TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(site_id) REFERENCES sites(id) ON DELETE CASCADE
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_dpr_entries_site_date ON dpr_entries(site_id, report_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_dpr_entries_date ON dpr_entries(report_date);")
+
     # 8. Silent Supervisor & Site Incharge Location Tracking Logs
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS supervisor_location_logs (
@@ -1822,6 +1847,165 @@ def get_dpr_summary_stats(report_date=None):
         "overall": overall,
         "today": today_stats
     }
+
+
+# ==========================================
+# 7.1 DETAILED DPR WORK ENTRIES (EXCEL-FORMAT)
+# ==========================================
+
+def add_dpr_entry(site_id, report_date, ward_no="", work_details="", work_location="",
+                  workmen_name="", mobile_no="", work_area="", sub_ward_no="",
+                  work_activity="", remark="", supervisor_name="", supervisor_phone=""):
+    """Adds a new line-item in the DPR work register."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO dpr_entries (
+            site_id, report_date, ward_no, work_details, work_location,
+            workmen_name, mobile_no, work_area, sub_ward_no, work_activity,
+            remark, supervisor_name, supervisor_phone, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    """, (
+        int(site_id), str(report_date), str(ward_no or "").strip(),
+        str(work_details or "").strip(), str(work_location or "").strip(),
+        str(workmen_name or "").strip(), str(mobile_no or "").strip(),
+        str(work_area or "").strip(), str(sub_ward_no or ward_no or "").strip(),
+        str(work_activity or "").strip(), str(remark or "").strip(),
+        str(supervisor_name or "").strip(), str(supervisor_phone or "").strip()
+    ))
+    entry_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return get_dpr_entry_by_id(entry_id)
+
+
+def update_dpr_entry(entry_id, ward_no="", work_details="", work_location="",
+                     workmen_name="", mobile_no="", work_area="", sub_ward_no="",
+                     work_activity="", remark="", supervisor_name="", supervisor_phone=""):
+    """Updates an existing DPR line item."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE dpr_entries SET
+            ward_no = ?,
+            work_details = ?,
+            work_location = ?,
+            workmen_name = ?,
+            mobile_no = ?,
+            work_area = ?,
+            sub_ward_no = ?,
+            work_activity = ?,
+            remark = ?,
+            supervisor_name = COALESCE(NULLIF(?, ''), supervisor_name),
+            supervisor_phone = COALESCE(NULLIF(?, ''), supervisor_phone),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (
+        str(ward_no or "").strip(), str(work_details or "").strip(),
+        str(work_location or "").strip(), str(workmen_name or "").strip(),
+        str(mobile_no or "").strip(), str(work_area or "").strip(),
+        str(sub_ward_no or ward_no or "").strip(), str(work_activity or "").strip(),
+        str(remark or "").strip(), str(supervisor_name or "").strip(),
+        str(supervisor_phone or "").strip(), int(entry_id)
+    ))
+    conn.commit()
+    conn.close()
+    return get_dpr_entry_by_id(entry_id)
+
+
+def delete_dpr_entry(entry_id):
+    """Deletes a DPR line item."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM dpr_entries WHERE id = ?", (int(entry_id),))
+    affected = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return affected > 0
+
+
+def get_dpr_entry_by_id(entry_id):
+    """Fetches single DPR entry by ID with site info."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT e.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM dpr_entries e
+        JOIN sites s ON e.site_id = s.id
+        WHERE e.id = ?
+    """, (int(entry_id),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_dpr_entries(site_id=None, report_date=None, search=None, limit=500):
+    """
+    Returns list of DPR work entries with site and date filtering and keyword search.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+        SELECT e.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM dpr_entries e
+        JOIN sites s ON e.site_id = s.id
+        WHERE 1=1
+    """
+    params = []
+    if site_id:
+        query += " AND e.site_id = ?"
+        params.append(int(site_id))
+    if report_date:
+        query += " AND e.report_date = ?"
+        params.append(str(report_date))
+    if search:
+        kw = f"%{search.strip().lower()}%"
+        query += """ AND (
+            LOWER(e.ward_no) LIKE ? OR
+            LOWER(e.work_details) LIKE ? OR
+            LOWER(e.work_location) LIKE ? OR
+            LOWER(e.workmen_name) LIKE ? OR
+            LOWER(e.mobile_no) LIKE ? OR
+            LOWER(e.work_area) LIKE ? OR
+            LOWER(e.work_activity) LIKE ? OR
+            LOWER(e.remark) LIKE ? OR
+            LOWER(s.name) LIKE ?
+        )"""
+        params.extend([kw] * 9)
+
+    query += " ORDER BY e.report_date DESC, e.site_id ASC, e.id ASC LIMIT ?"
+    params.append(limit)
+
+    cursor.execute(query, params)
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def get_dpr_stats(report_date=None, site_id=None):
+    """Returns aggregated stats for DPR dashboard."""
+    conn = get_db()
+    cursor = conn.cursor()
+    query = """
+        SELECT 
+            COUNT(*) as total_entries,
+            COUNT(DISTINCT workmen_name) as total_workmen,
+            COUNT(DISTINCT ward_no) as total_wards,
+            COUNT(DISTINCT site_id) as total_sites
+        FROM dpr_entries
+        WHERE 1=1
+    """
+    params = []
+    if report_date:
+        query += " AND report_date = ?"
+        params.append(str(report_date))
+    if site_id:
+        query += " AND site_id = ?"
+        params.append(int(site_id))
+    cursor.execute(query, params)
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else {"total_entries": 0, "total_workmen": 0, "total_wards": 0, "total_sites": 0}
 
 
 def calculate_worker_site_proximity(site_id, lat, lng, default_site_lat=None, default_site_lng=None, default_radius=1000, work_date=None):

@@ -1127,3 +1127,115 @@ def generate_letters_pdf(letters, fy=None):
     buf.seek(0)
     return buf
 
+
+
+# ==========================================
+# 11. DPR (DAILY PROGRESS REPORT) EXCEL EXPORTER
+# Matching M/S Sandip Kumar's Government Excel Format:
+# Col A: वार्ड संख्या / Ward No.
+# Col B: कार्य कि विवरणी / Work Details
+# Col C: कार्यस्थल एवं पता के साथ / Work location with Address
+# Col D: WORKMEN NAME (कारीगरों के नाम)
+# Col E: MOB. NO (मोबाइल नंबर)
+# Col F: WORK AREA (कार्य क्षेत्र)
+# Col G: WARD NO (वार्ड नंबर)
+# Col H: WORK ACTIVITY (कार्य गतिविधि)
+# Col I: REMARK
+# ==========================================
+def generate_dpr_excel(site_name, report_date, entries):
+    """
+    Generates exact bilingual Excel sheet matching M/S Sandip Kumar's official DPR register:
+    """
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "DPR Work Register"
+    ws.views.sheetView[0].showGridLines = True
+
+    # Row 1: Agency Title Banner
+    ws.merge_cells("A1:I1")
+    cell_a1 = ws["A1"]
+    cell_a1.value = "M/S SANDIP KUMAR — DAILY PROGRESS REPORT (DPR)"
+    cell_a1.font = Font(name="Calibri", size=13, bold=True, color="FFFFFF")
+    cell_a1.alignment = Alignment(horizontal="center", vertical="center")
+    cell_a1.fill = PatternFill(start_color="166534", end_color="166534", fill_type="solid")
+    ws.row_dimensions[1].height = 28
+
+    # Row 2: Subtitle Banner
+    ws.merge_cells("A2:I2")
+    cell_a2 = ws["A2"]
+    site_label = site_name if site_name else "All 21 Water Supply Sites"
+    cell_a2.value = f"JAL JEEVAN MISSION, BIHAR   |   Site: {site_label}   |   Date: {report_date}"
+    cell_a2.font = Font(name="Calibri", size=10, bold=True, color="064E3B")
+    cell_a2.alignment = Alignment(horizontal="center", vertical="center")
+    cell_a2.fill = PatternFill(start_color="EAF5EF", end_color="EAF5EF", fill_type="solid")
+    ws.row_dimensions[2].height = 20
+
+    # Row 3: Bilingual Headers matching user's Excel sheet exactly
+    headers = [
+        ("वार्ड संख्या\nWard No.", 14),
+        ("कार्य कि विवरणी\nWork Details", 32),
+        ("कार्यस्थल एवं पता के साथ\nWork location with Address", 34),
+        ("WORKMEN NAME\n(कारीगरों के नाम)", 24),
+        ("MOB. NO\n(मोबाइल नंबर)", 18),
+        ("WORK AREA\n(कार्य क्षेत्र)", 20),
+        ("WARD NO\n(वार्ड नंबर)", 14),
+        ("WORK ACTIVITY\n(कार्य गतिविधि)", 24),
+        ("REMARK\n(टिप्पणी)", 20)
+    ]
+
+    header_font = Font(name="Calibri", size=10, bold=True, color="000000")
+    header_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left_align = Alignment(horizontal="left", vertical="center", wrap_text=True)
+    thin_black_border = Border(
+        left=Side(style="thin", color="000000"),
+        right=Side(style="thin", color="000000"),
+        top=Side(style="thin", color="000000"),
+        bottom=Side(style="thin", color="000000")
+    )
+
+    ws.row_dimensions[3].height = 42
+    for col_idx, (hdr_text, col_w) in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=hdr_text)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = thin_black_border
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = col_w
+
+    # Data Rows
+    current_row = 4
+    for idx, e in enumerate(entries, start=1):
+        ws.row_dimensions[current_row].height = 26
+        row_vals = [
+            (e.get("ward_no") or "", center_align),
+            (e.get("work_details") or "", left_align),
+            (e.get("work_location") or "", left_align),
+            (e.get("workmen_name") or "", left_align),
+            (e.get("mobile_no") or "", center_align),
+            (e.get("work_area") or "", left_align),
+            (e.get("sub_ward_no") or e.get("ward_no") or "", center_align),
+            (e.get("work_activity") or "", left_align),
+            (e.get("remark") or "", left_align),
+        ]
+        for col_idx, (val, align) in enumerate(row_vals, start=1):
+            c = ws.cell(row=current_row, column=col_idx, value=val)
+            c.font = Font(name="Calibri", size=10, bold=False, color="000000")
+            c.alignment = align
+            c.border = thin_black_border
+        current_row += 1
+
+    # Add empty grid lines up to 21 rows matching the Excel sheet template
+    if len(entries) < 21:
+        for _ in range(21 - len(entries)):
+            ws.row_dimensions[current_row].height = 24
+            for col_idx in range(1, 10):
+                c = ws.cell(row=current_row, column=col_idx, value="")
+                c.border = thin_black_border
+            current_row += 1
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf

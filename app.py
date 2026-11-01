@@ -3094,11 +3094,15 @@ def site_active_wards_api(site_id):
 @app.route("/dpr")
 def dpr_dashboard():
     """Jal Jeevan Mission DPR (Daily Progress Report) Dashboard."""
-    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     selected_site = request.args.get("site_id")
+    search_query = request.args.get("search", "").strip()
 
-    is_owner = session.get("is_owner", False)
+    is_owner = (session.get("is_owner", False) or 
+                session.get("role") == "owner" or 
+                session.get("worker_phone") == "9835180075")
     user_site_id = session.get("site_id")
     if not is_owner and user_site_id:
         selected_site = int(user_site_id)
@@ -3107,16 +3111,32 @@ def dpr_dashboard():
     if not is_owner and user_site_id:
         sites = [s for s in sites if s["id"] == int(user_site_id)]
 
-    dpr_list = database.get_dpr_list(site_id=int(selected_site) if selected_site else None, date_from=selected_date, date_to=selected_date)
-    stats = database.get_dpr_summary_stats(selected_date)
+    dpr_entries = database.get_dpr_entries(
+        site_id=int(selected_site) if selected_site else None,
+        report_date=selected_date,
+        search=search_query if search_query else None
+    )
+    stats = database.get_dpr_stats(
+        report_date=selected_date,
+        site_id=int(selected_site) if selected_site else None
+    )
+
+    selected_site_obj = None
+    if selected_site:
+        for s in sites:
+            if s["id"] == int(selected_site):
+                selected_site_obj = s
+                break
 
     return render_template(
         "dpr.html",
         sites=sites,
-        dpr_list=dpr_list,
+        dpr_entries=dpr_entries,
         stats=stats,
         selected_date=selected_date,
         selected_site_id=int(selected_site) if selected_site else None,
+        selected_site_obj=selected_site_obj,
+        search_query=search_query,
         is_owner=is_owner,
         user_site_id=user_site_id
     )
@@ -3124,29 +3144,41 @@ def dpr_dashboard():
 
 @app.route("/api/dpr", methods=["GET", "POST", "OPTIONS"])
 def dpr_api():
-    """API for DPR (Daily Progress Report) - Read & Write."""
+    """API for DPR (Daily Progress Report) - Read & Create."""
     if request.method == "OPTIONS":
         return "", 200
-    ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     today = ist_now.strftime("%Y-%m-%d")
 
     if request.method == "GET":
         site_id = request.args.get("site_id")
         date_str = request.args.get("date") or today
-        dpr = database.get_dpr(int(site_id), date_str) if site_id else None
-        dpr_list = database.get_dpr_list(site_id=int(site_id) if site_id else None, date_from=date_str, date_to=date_str)
-        stats = database.get_dpr_summary_stats(date_str)
-        return jsonify({"success": True, "dpr": dpr, "dpr_list": dpr_list, "stats": stats})
+        search = request.args.get("search")
+        entries = database.get_dpr_entries(
+            site_id=int(site_id) if site_id else None,
+            report_date=date_str,
+            search=search
+        )
+        stats = database.get_dpr_stats(
+            report_date=date_str,
+            site_id=int(site_id) if site_id else None
+        )
+        return jsonify({"success": True, "entries": entries, "stats": stats})
 
+    # POST: Add new DPR work entry
     try:
         data = request.get_json(silent=True) or request.form
-        site_id = int(data.get("site_id", 0))
+        site_id = int(data.get("site_id", 0) or session.get("site_id", 0) or 0)
         report_date = data.get("report_date") or today
 
         if not site_id:
-            return jsonify({"success": False, "message": "Site ID zaruri hai."}), 400
+            return jsonify({"success": False, "message": "Site selection is required."}), 400
 
-        is_owner = session.get("is_owner", False) or (str(data.get("pin", "")).strip() in ["Sandip@@12"])
+        is_owner = (session.get("is_owner", False) or 
+                    session.get("role") == "owner" or 
+                    session.get("worker_phone") == "9835180075" or 
+                    str(data.get("pin", "")).strip() in ["Sandip@@12"])
         is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
         if not (is_owner or is_supervisor):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can submit DPR."}), 403
@@ -3154,22 +3186,112 @@ def dpr_api():
         supervisor_name = data.get("supervisor_name") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
         supervisor_phone = data.get("supervisor_phone") or session.get("worker_phone") or ""
 
-        database.save_dpr(
+        ward_no = str(data.get("ward_no", "")).strip()
+        work_details = str(data.get("work_details", "")).strip()
+        work_location = str(data.get("work_location", "")).strip()
+        workmen_name = str(data.get("workmen_name", "")).strip()
+        mobile_no = str(data.get("mobile_no", "")).strip()
+        work_area = str(data.get("work_area", "")).strip()
+        sub_ward_no = str(data.get("sub_ward_no", "")).strip() or ward_no
+        work_activity = str(data.get("work_activity", "")).strip()
+        remark = str(data.get("remark", "")).strip()
+
+        if not ward_no:
+            return jsonify({"success": False, "message": "Ward No is required."}), 400
+        if not work_details:
+            return jsonify({"success": False, "message": "Work Details is required."}), 400
+
+        res = database.add_dpr_entry(
             site_id=site_id,
             report_date=report_date,
-            ward_no=data.get("ward_no", ""),
-            pipe_laying_meters=float(data.get("pipe_laying_meters", 0) or 0),
-            fhtc_connections=int(data.get("fhtc_connections", 0) or 0),
-            boring_depth_feet=float(data.get("boring_depth_feet", 0) or 0),
-            road_restoration_meters=float(data.get("road_restoration_meters", 0) or 0),
-            civil_stage=data.get("civil_stage", ""),
-            work_description=data.get("work_description", ""),
+            ward_no=ward_no,
+            work_details=work_details,
+            work_location=work_location,
+            workmen_name=workmen_name,
+            mobile_no=mobile_no,
+            work_area=work_area,
+            sub_ward_no=sub_ward_no,
+            work_activity=work_activity,
+            remark=remark,
             supervisor_name=supervisor_name,
             supervisor_phone=supervisor_phone
         )
-        return jsonify({"success": True, "message": f"✅ DPR (Daily Progress Report) for {report_date} saved successfully!"})
+        return jsonify({"success": True, "message": "✅ DPR work entry recorded successfully!", "entry": res})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/api/dpr/<int:entry_id>", methods=["GET", "POST", "PUT", "DELETE"])
+def dpr_entry_detail_api(entry_id):
+    """Manage specific DPR entry: Get, Update, or Delete."""
+    if request.method == "GET":
+        entry = database.get_dpr_entry_by_id(entry_id)
+        if not entry:
+            return jsonify({"success": False, "message": "DPR entry not found"}), 404
+        return jsonify({"success": True, "entry": entry})
+
+    if request.method == "DELETE":
+        ok = database.delete_dpr_entry(entry_id)
+        return jsonify({"success": ok, "message": "DPR entry deleted successfully" if ok else "Entry not found"})
+
+    # POST or PUT: Update
+    try:
+        data = request.get_json(silent=True) or request.form
+        ward_no = str(data.get("ward_no", "")).strip()
+        work_details = str(data.get("work_details", "")).strip()
+        work_location = str(data.get("work_location", "")).strip()
+        workmen_name = str(data.get("workmen_name", "")).strip()
+        mobile_no = str(data.get("mobile_no", "")).strip()
+        work_area = str(data.get("work_area", "")).strip()
+        sub_ward_no = str(data.get("sub_ward_no", "")).strip() or ward_no
+        work_activity = str(data.get("work_activity", "")).strip()
+        remark = str(data.get("remark", "")).strip()
+
+        res = database.update_dpr_entry(
+            entry_id=entry_id,
+            ward_no=ward_no,
+            work_details=work_details,
+            work_location=work_location,
+            workmen_name=workmen_name,
+            mobile_no=mobile_no,
+            work_area=work_area,
+            sub_ward_no=sub_ward_no,
+            work_activity=work_activity,
+            remark=remark
+        )
+        return jsonify({"success": True, "message": "✅ DPR work entry updated successfully!", "entry": res})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/export/dpr-excel")
+def export_dpr_excel():
+    """Export DPR work register in official bilingual format matching M/S Sandip Kumar's Excel."""
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    selected_site = request.args.get("site_id")
+
+    site_name = "All Sites"
+    if selected_site and selected_site.isdigit():
+        s = database.get_site_by_id(int(selected_site))
+        if s:
+            site_name = f"{s['code']} - {s['name']}"
+
+    entries = database.get_dpr_entries(
+        site_id=int(selected_site) if (selected_site and selected_site.isdigit()) else None,
+        report_date=selected_date
+    )
+
+    buf = exporter.generate_dpr_excel(site_name, selected_date, entries)
+    clean_site = site_name.replace(" ", "_").replace("/", "_")
+    filename = f"DPR_{clean_site}_{selected_date}.xlsx"
+    return send_file(
+        buf,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 if __name__ == "__main__":
