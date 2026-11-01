@@ -28,344 +28,72 @@
     <!-- ======================================================== -->
     <!-- 2. 6 INFORMATION TILES (Interactive with Click to View)  -->
     <!-- ======================================================== -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         
         <!-- Tile 1: Project Sites (Clickable Modal) -->
-        <div onclick="openSitesModal()" class="cursor-pointer bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 hover:shadow-md transition active:scale-[0.99] group">
+        <div onclick="openSitesModal()" class="cursor-pointer bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 hover:shadow-md transition active:scale-[0.99] group">
             <div class="flex items-center justify-between">
                 <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_sites">Sites</div>
-                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition">View All ↗</span>
+                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white transition">View All ↗</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_sites_val">21 Sites</div>
-            <div class="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1">
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2" data-i18n="tile_sites_val">21 Sites</div>
+            <div class="text-xs text-emerald-700 font-bold mt-2 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Click to View Site List
             </div>
         </div>
 
         <!-- Tile 2: Manpower on Duty (Clickable Modal) -->
-        <div onclick="openAttendanceModal()" class="cursor-pointer bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 hover:shadow-md transition active:scale-[0.99] group">
+        <div onclick="openAttendanceModal()" class="cursor-pointer bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 hover:shadow-md transition active:scale-[0.99] group">
             <div class="flex items-center justify-between">
                 <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_workers">Workers</div>
-                <span class="text-[10px] font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 group-hover:bg-indigo-600 group-hover:text-white transition">Breakdown ↗</span>
+                <span class="text-[10px] font-bold text-indigo-800 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200 group-hover:bg-indigo-600 group-hover:text-white transition">Breakdown ↗</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1" data-i18n="tile_workers_val">Daily Attendance</div>
-            <div class="text-xs text-indigo-700 font-bold mt-1 flex items-center gap-1">
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2" data-i18n="tile_workers_val">Daily Attendance</div>
+            <div class="text-xs text-indigo-700 font-bold mt-2 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Click for Manpower Details
             </div>
         </div>
 
         <!-- Tile 3: Usage Entries -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_logs">Usage</div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">Entries</span></div>
-            <div class="text-xs text-teal-700 font-bold mt-1" data-i18n="tile_logs_sub">Total Material Entries</div>
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">{{ stats.total_logs }} <span class="text-base font-bold text-slate-500" data-i18n="tile_logs_sub">Entries</span></div>
+            <div class="text-xs text-teal-700 font-bold mt-2 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-teal-500"></span> Total Material Entries
+            </div>
         </div>
 
         <!-- Tile 4: Total Consumption Value -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-600 transition">
             <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_cost">Cost</div>
-            <div class="text-2xl sm:text-3xl font-black text-emerald-800 mt-1">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
-            <div class="text-xs text-amber-700 font-bold mt-1" data-i18n="tile_cost_sub">Total Material Cost</div>
+            <div class="text-2xl sm:text-3xl font-black text-emerald-800 mt-2">₹{{ "{:,.0f}".format(stats.total_cost) }}</div>
+            <div class="text-xs text-amber-700 font-bold mt-2 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Total Material Cost
+            </div>
         </div>
 
         <!-- Tile 5: Next Letter Reference Number (Clickable Modal) -->
-        <div onclick="openRefModal()" class="cursor-pointer bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 hover:shadow-md transition active:scale-[0.99] group">
+        <div onclick="openRefModal()" class="cursor-pointer bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-blue-500 hover:shadow-md transition active:scale-[0.99] group">
             <div class="flex items-center justify-between">
                 <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_ref">Ref No</div>
-                <span class="text-[10px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Details ↗</span>
+                <span class="text-[10px] font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition">Details ↗</span>
             </div>
-            <div class="text-xl sm:text-2xl font-mono font-black text-blue-900 mt-1 truncate">{{ next_letter_info.ref_no }}</div>
-            <div class="text-xs text-blue-700 font-bold mt-1 flex items-center gap-1">
+            <div class="text-xl sm:text-2xl font-mono font-black text-blue-900 mt-2 truncate">{{ next_letter_info.ref_no }}</div>
+            <div class="text-xs text-blue-700 font-bold mt-2 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-blue-500"></span> Click for Ref No & Dispatch
             </div>
         </div>
 
         <!-- Tile 6: Material Store Catalog (Clickable Modal) -->
-        <div onclick="openMaterialsModal()" class="cursor-pointer bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 hover:shadow-md transition active:scale-[0.99] group">
+        <div onclick="openMaterialsModal()" class="cursor-pointer bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 hover:shadow-md transition active:scale-[0.99] group">
             <div class="flex items-center justify-between">
                 <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider" data-i18n="tile_items">Material</div>
-                <span class="text-[10px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200 group-hover:bg-teal-600 group-hover:text-white transition">Catalog ↗</span>
+                <span class="text-[10px] font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200 group-hover:bg-teal-600 group-hover:text-white transition">Catalog ↗</span>
             </div>
-            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">Items</span></div>
-            <div class="text-xs text-teal-700 font-bold mt-1 flex items-center gap-1">
+            <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">{{ stats.total_materials }} <span class="text-base font-bold text-slate-500" data-i18n="tile_items_sub">Items</span></div>
+            <div class="text-xs text-teal-700 font-bold mt-2 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-teal-500"></span> Click to View 271 Materials
             </div>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- 3. SEGREGATED CORE SEGMENTS: Solid White Action Cards -->
-    <!-- ======================================================== -->
-    <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-1">
-        
-        <!-- Segment 1: Attendance & HR Console -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-emerald-500 transition">
-            <div>
-                <div class="w-11 h-11 rounded-lg icon-box-emerald flex items-center justify-center text-xl mb-3 shadow-2xs">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_attendance">Attendance</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_att_desc">Manual & GPS Attendance</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-                <a href="{{ url_for('attendance_view') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_open">Attendance</span> &rarr;
-                </a>
-                <a href="/geo-attendance" class="btn-secondary-sm" title="GPS Attendance">
-                    GPS
-                </a>
-            </div>
-        </div>
-
-        <!-- Segment 2: Material & Stock Register -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-teal-500 transition">
-            <div>
-                <div class="w-11 h-11 rounded-lg icon-box-teal flex items-center justify-center text-xl mb-3 shadow-2xs">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_material">Material</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_mat_desc">Stock & Usage Entry</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-                <a href="{{ url_for('site_stock') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_stock">Stock</span> &rarr;
-                </a>
-                <a href="{{ url_for('daily_entry') }}" class="btn-secondary-sm" title="Daily Entry">
-                    + Entry
-                </a>
-            </div>
-        </div>
-
-        <!-- Segment 3: DPR & Site Photos -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-sky-500 transition">
-            <div>
-                <div class="w-11 h-11 rounded-lg icon-box-sky flex items-center justify-center text-xl mb-3 shadow-2xs">
-                    <i class="fa-solid fa-trowel-bricks"></i>
-                </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_progress">Progress</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_prog_desc">DPR & Site Photos</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-                <a href="/dpr" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_dpr">DPR</span> &rarr;
-                </a>
-                <a href="/site-photos" class="btn-secondary-sm" title="Photo Album">
-                    Album
-                </a>
-            </div>
-        </div>
-
-        <!-- Segment 4: Reports & Ledgers -->
-        <div class="bg-white rounded-xl p-3 sm:p-5 border border-slate-200 shadow-2xs flex flex-col justify-between hover:border-indigo-500 transition">
-            <div>
-                <div class="w-11 h-11 rounded-lg icon-box-indigo flex items-center justify-center text-xl mb-3 shadow-2xs">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
-                <h3 class="font-black text-slate-900 text-base" data-i18n="mod_reports">Reports</h3>
-                <p class="text-xs text-slate-600 mt-1" data-i18n="mod_rep_desc">Daily & Monthly Ledger</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
-                <a href="{{ url_for('reports_hub') }}" class="flex-1 btn-primary-sm text-center">
-                    <span data-i18n="btn_reports">Reports</span> &rarr;
-                </a>
-                <a href="{{ url_for('reports_hub', tab='monthly') }}" class="btn-secondary-sm" title="Monthly">
-                    Monthly
-                </a>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- 4. OUTGOING LETTERS REGISTER -->
-    <!-- ======================================================== -->
-    <div id="letters" class="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-2xs scroll-mt-20">
-        
-        <!-- Header with Title, FY Badges and Actions -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-            <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-300">
-                        <i class="fa-solid fa-stamp text-emerald-700"></i> Letters Register
-                    </span>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-300">
-                        Financial Year: {{ next_letter_info.fy }}
-                    </span>
-                    <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 text-[11px] font-black border border-amber-300 flex items-center gap-1">
-                        <i class="fa-solid fa-hashtag text-amber-600"></i> Next Ref No: <code class="font-mono text-indigo-800 bg-white px-2 py-0.5 rounded border border-amber-300 font-bold" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</code>
-                    </span>
-                </div>
-                <h2 class="text-lg sm:text-xl font-black text-slate-900 mt-2.5 flex items-center gap-2">
-                    <span>📑 Outgoing Letters Reference Register</span>
-                </h2>
-                <p class="text-xs text-slate-600 mt-1">
-                    Sequential reference numbers (SK/YYYY-YY/0001) and dispatch records of letters sent to PHED, RWD, DWSM, Banks, and other departments.
-                </p>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" onclick="openNewLetterModal()" class="btn-cta">
-                    <i class="fa-solid fa-circle-plus text-white"></i> <span>+ <span data-i18n="btn_new_letter">New Letter</span></span>
-                </button>
-                <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="btn-secondary" title="Download Excel">
-                    <i class="fa-solid fa-file-excel text-emerald-700"></i> <span>Excel</span>
-                </a>
-                <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="btn-secondary" title="Download PDF">
-                    <i class="fa-solid fa-file-pdf text-[#166534]"></i> <span>PDF</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Filter & Search Bar -->
-        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="relative w-full sm:w-96">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="Search by department, place, reference no, or purpose..." class="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
-            </div>
-
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span class="text-xs text-slate-600 font-bold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> Financial Year:</span>
-                <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <option value="">All Financial Years (All)</option>
-                    {% for fy in letter_fys %}
-                    <option value="{{ fy }}" {% if fy == next_letter_info.fy %}selected{% endif %}>FY {{ fy }}</option>
-                    {% endfor %}
-                </select>
-                <span id="lettersCountBadge" class="text-xs px-3 py-2 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-300 whitespace-nowrap">
-                    Total: {{ outgoing_letters|length }} Letters
-                </span>
-            </div>
-        </div>
-
-        <!-- Table View -->
-        <div class="mt-4 overflow-x-auto border border-slate-200 rounded-xl shadow-2xs">
-            <table class="w-full text-left text-xs border-collapse" id="lettersTable">
-                <thead>
-                    <tr class="bg-[#166534] text-white uppercase text-[11px] tracking-wider font-bold">
-                        <th class="py-3.5 px-3 text-center w-14" data-i18n="col_sr">Sr.</th>
-                        <th class="py-3.5 px-3 text-center whitespace-nowrap" data-i18n="col_date">Date</th>
-                        <th class="py-3.5 px-3.5 text-center whitespace-nowrap" data-i18n="col_ref">Ref No</th>
-                        <th class="py-3.5 px-3.5 min-w-[200px]" data-i18n="col_dept">Department</th>
-                        <th class="py-3.5 px-3 whitespace-nowrap" data-i18n="col_place">Place</th>
-                        <th class="py-3.5 px-4 min-w-[280px]" data-i18n="col_purpose">Purpose</th>
-                        <th class="py-3.5 px-3 min-w-[160px]" data-i18n="col_remarks">Remarks</th>
-                        <th class="py-3.5 px-3 text-center w-20" data-i18n="col_action">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 text-slate-800 bg-white" id="lettersTableBody">
-                    {% for letter in outgoing_letters %}
-                    <tr class="hover:bg-slate-50 transition letter-row" data-fy="{{ letter.fy }}" data-search="{{ (letter.ref_no ~ ' ' ~ letter.department ~ ' ' ~ letter.place ~ ' ' ~ letter.purpose ~ ' ' ~ letter.remarks)|lower }}">
-                        <td class="py-3 px-3 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
-                        <td class="py-3 px-3 text-center font-mono text-slate-700 whitespace-nowrap">
-                            <span class="inline-block px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-medium">
-                                {{ letter.letter_date }}
-                            </span>
-                        </td>
-                        <td class="py-3 px-3.5 text-center whitespace-nowrap">
-                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#C7E6D1]">
-                                <span class="font-mono font-normal text-[#052E16] text-[12px] tracking-wide">{{ letter.ref_no }}</span>
-                                <button type="button" onclick="copyRefNo('{{ letter.ref_no }}', this)" title="Copy Reference No" class="text-blue-500 hover:text-blue-800 transition p-0.5">
-                                    <i class="fa-regular fa-copy text-[11px]"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td class="py-3 px-3.5 font-bold text-[#052E16] leading-snug">
-                            {{ letter.department }}
-                        </td>
-                        <td class="py-3 px-3 text-slate-700 font-medium whitespace-nowrap">
-                            <span class="inline-flex items-center gap-1 text-slate-600">
-                                <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> {{ letter.place }}
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-slate-800 leading-relaxed font-medium">
-                            {{ letter.purpose }}
-                        </td>
-                        <td class="py-3 px-3 text-slate-500 text-[11px]">
-                            {{ letter.remarks or '-' }}
-                        </td>
-                        <td class="py-3 px-3 text-center whitespace-nowrap">
-                            <div class="flex items-center justify-center gap-1">
-                                <button type="button" onclick="openEditLetterModal({{ letter|tojson }})" title="Edit Letter" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-pen text-[10px]"></i>
-                                </button>
-                                <button type="button" onclick="deleteLetter({{ letter.id }}, '{{ letter.ref_no }}')" title="Delete Letter" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-trash text-[10px]"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr id="lettersEmptyRow">
-                        <td colspan="8" class="py-10 text-center text-[#4B6B57]">
-                            <div class="max-w-sm mx-auto flex flex-col items-center">
-                                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#4B6B57] flex items-center justify-center text-xl mb-2.5 border border-emerald-200">
-                                    <i class="fa-solid fa-envelope-open-text"></i>
-                                </div>
-                                <p class="text-sm font-bold text-slate-700">No outgoing letters recorded yet.</p>
-                                <p class="text-xs text-[#4B6B57] mt-0.5">Click below to register the first official letter reference.</p>
-                                <button type="button" onclick="openNewLetterModal()" class="mt-3.5 px-4 py-2 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-plus"></i> Record First Letter ({{ next_letter_info.ref_no }})
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- 5. RECENT USAGE ENTRIES -->
-    <!-- ======================================================== -->
-    <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-base font-bold text-[#052E16] flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left text-[#4B6B57]"></i>
-                    <span data-i18n="logs_heading">Recent Usage Logs</span>
-                </h2>
-                <p class="text-xs text-slate-500 mt-0.5"><span data-i18n="logs_sub">Latest material usage entries</span></p>
-            </div>
-            <a href="{{ url_for('reports_hub', tab='daily') }}" class="text-xs font-bold text-[#4B6B57] hover:text-emerald-950 flex items-center gap-1">
-                <span data-i18n="view_daily">Daily Report</span> <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200/90 rounded-xl">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                        <th class="py-2.5 px-3" data-i18n="col_date">Date</th>
-                        <th class="py-2.5 px-3" data-i18n="col_site">Site</th>
-                        <th class="py-2.5 px-3" data-i18n="col_item">Material</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_qty">Quantity</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_rate">Rate</th>
-                        <th class="py-2.5 px-3 text-right" data-i18n="col_val">Cost (₹)</th>
-                        <th class="py-2.5 px-3" data-i18n="col_desc">Details</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[#C7E6D1] text-[#052E16]">
-                    {% for entry in stats.recent_entries %}
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-2.5 px-3 font-mono font-medium text-slate-600 whitespace-nowrap">{{ entry.usage_date }}</td>
-                        <td class="py-2.5 px-3 font-bold text-[#052E16] whitespace-nowrap">{{ entry.site_name }}</td>
-                        <td class="py-2.5 px-3 font-medium text-slate-800">{{ entry.material_name }}</td>
-                        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800 whitespace-nowrap">
-                            {{ entry.quantity }} <span class="text-[10px] text-slate-500 font-normal">{{ entry.material_unit }}</span>
-                        </td>
-                        <td class="py-2.5 px-3 text-right font-mono text-slate-500 whitespace-nowrap">₹{{ entry.rate }}</td>
-                        <td class="py-2.5 px-3 text-right font-mono font-bold text-[#4B6B57] whitespace-nowrap">₹{{ "{:,.2f}".format(entry.total_amount) }}</td>
-                        <td class="py-2.5 px-3 text-slate-500 max-w-xs truncate">{{ entry.purpose or '-' }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="7" class="py-8 text-center text-[#4B6B57]">No entries found. Record a new entry.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -597,10 +325,10 @@
 </div>
 
 <!-- ======================================================== -->
-<!-- MODAL 3: OUTGOING LETTERS / REF NO MODAL -->
+<!-- MODAL 3: OUTGOING LETTERS / REF NO REGISTER MODAL -->
 <!-- ======================================================== -->
 <div id="refModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
-    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+    <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
         
         <!-- Modal Header -->
         <div class="bg-[#0A261F] p-4 sm:p-5 text-white flex items-center justify-between border-b border-[#12382E] shrink-0">
@@ -623,68 +351,129 @@
         <!-- Body -->
         <div class="p-4 sm:p-6 overflow-y-auto space-y-4">
             
-            <!-- Big Next Ref No Card -->
-            <div class="bg-blue-50/60 rounded-2xl p-4 sm:p-5 border border-blue-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <!-- Top Summary & Actions -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-50/60 border border-blue-200">
                 <div>
                     <div class="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Next Auto Reference Number</div>
-                    <div class="text-2xl sm:text-3xl font-mono font-black text-blue-900 mt-1">
-                        {{ next_letter_info.ref_no }}
-                    </div>
-                    <div class="text-xs text-slate-500 mt-1">Financial Year: <span class="font-bold text-slate-700">FY {{ next_letter_info.fy }}</span></div>
-                </div>
-                <button type="button" onclick="copyRefNo('{{ next_letter_info.ref_no }}', this)" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                    <i class="fa-regular fa-copy"></i>
-                    <span>Copy Ref No</span>
-                </button>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase">Total Letters Issued</div>
-                    <div class="text-2xl font-black text-slate-900 mt-1">{{ letters_stats.total_count }}</div>
-                    <div class="text-[10px] text-slate-500 mt-0.5">Across all financial years</div>
-                </div>
-                <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                    <div class="text-[10px] font-bold text-slate-500 uppercase">Current FY Letters</div>
-                    <div class="text-2xl font-black text-emerald-700 mt-1">{{ letters_stats.fy_count }}</div>
-                    <div class="text-[10px] text-slate-500 mt-0.5">FY {{ next_letter_info.fy }}</div>
-                </div>
-            </div>
-
-            <!-- Action CTA -->
-            <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                <button type="button" onclick="closeRefModal(); openNewLetterModal();" class="flex-1 btn-cta text-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-circle-plus text-white"></i>
-                    <span>+ Record New Letter Reference</span>
-                </button>
-                <a href="#letters" onclick="closeRefModal();" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition flex items-center justify-center gap-1.5 text-center">
-                    <span>View Letters Table &darr;</span>
-                </a>
-            </div>
-
-            <!-- Recent Letters Preview -->
-            {% if outgoing_letters %}
-            <div class="pt-2 border-t border-slate-200">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Recent Dispatched Letters</h4>
-                <div class="space-y-2">
-                    {% for l in outgoing_letters[:3] %}
-                    <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-2">
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <span class="font-mono font-bold text-blue-900">{{ l.ref_no }}</span>
-                                <span class="text-[10px] text-slate-500 font-mono">{{ l.letter_date }}</span>
-                            </div>
-                            <div class="text-slate-800 font-medium truncate mt-0.5">{{ l.department }} &bull; <span class="text-slate-600">{{ l.place }}</span></div>
-                        </div>
-                        <button type="button" onclick="copyRefNo('{{ l.ref_no }}', this)" title="Copy Ref No" class="text-blue-600 hover:text-blue-800 p-1">
-                            <i class="fa-regular fa-copy"></i>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-2xl sm:text-3xl font-mono font-black text-blue-900" id="badgeNextRefNo">{{ next_letter_info.ref_no }}</span>
+                        <button type="button" onclick="copyRefNo('{{ next_letter_info.ref_no }}', this)" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Copy
                         </button>
                     </div>
-                    {% endfor %}
+                    <div class="text-xs text-slate-500 mt-1">Financial Year: <span class="font-bold text-slate-700">FY {{ next_letter_info.fy }}</span> &bull; Total: <span class="font-bold text-slate-700">{{ letters_stats.total_count }} Letters</span></div>
+                </div>
+
+                <!-- Export & New Letter CTA -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="openNewLetterModal()" class="btn-cta text-xs">
+                        <i class="fa-solid fa-circle-plus text-white"></i> <span>+ New Letter</span>
+                    </button>
+                    <a href="{{ url_for('export_letters_excel') }}" id="btnExportLettersExcel" class="btn-secondary text-xs" title="Download Excel">
+                        <i class="fa-solid fa-file-excel text-emerald-700"></i> <span>Excel</span>
+                    </a>
+                    <a href="{{ url_for('export_letters_pdf') }}" id="btnExportLettersPdf" class="btn-secondary text-xs" title="Download PDF">
+                        <i class="fa-solid fa-file-pdf text-[#166534]"></i> <span>PDF</span>
+                    </a>
                 </div>
             </div>
-            {% endif %}
+
+            <!-- Search & Filter Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="letterSearchInput" oninput="filterLettersTable()" placeholder="Search department, place, ref no, or purpose..." class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
+                </div>
+
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <span class="text-xs text-slate-600 font-bold whitespace-nowrap"><i class="fa-solid fa-filter text-slate-400"></i> FY:</span>
+                    <select id="letterFyFilter" onchange="filterLettersByFy()" class="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                        <option value="">All FY</option>
+                        {% for fy in letter_fys %}
+                        <option value="{{ fy }}" {% if fy == next_letter_info.fy %}selected{% endif %}>FY {{ fy }}</option>
+                        {% endfor %}
+                    </select>
+                    <span id="lettersCountBadge" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-300 whitespace-nowrap">
+                        {{ outgoing_letters|length }} Letters
+                    </span>
+                </div>
+            </div>
+
+            <!-- Letters Register Table -->
+            <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-2xs">
+                <table class="w-full text-left text-xs border-collapse" id="lettersTable">
+                    <thead>
+                        <tr class="bg-[#166534] text-white uppercase text-[10px] tracking-wider font-bold">
+                            <th class="py-2.5 px-2.5 text-center w-12">Sr.</th>
+                            <th class="py-2.5 px-2.5 text-center whitespace-nowrap">Date</th>
+                            <th class="py-2.5 px-3 text-center whitespace-nowrap">Ref No</th>
+                            <th class="py-2.5 px-3 min-w-[180px]">Department</th>
+                            <th class="py-2.5 px-2.5 whitespace-nowrap">Place</th>
+                            <th class="py-2.5 px-3 min-w-[220px]">Purpose</th>
+                            <th class="py-2.5 px-2.5 min-w-[140px]">Remarks</th>
+                            <th class="py-2.5 px-2.5 text-center w-16">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-800 bg-white" id="lettersTableBody">
+                        {% for letter in outgoing_letters %}
+                        <tr class="hover:bg-slate-50 transition letter-row" data-fy="{{ letter.fy }}" data-search="{{ (letter.ref_no ~ ' ' ~ letter.department ~ ' ' ~ letter.place ~ ' ' ~ letter.purpose ~ ' ' ~ letter.remarks)|lower }}">
+                            <td class="py-2.5 px-2.5 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
+                            <td class="py-2.5 px-2.5 text-center font-mono text-slate-700 whitespace-nowrap">
+                                <span class="inline-block px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-medium text-[11px]">
+                                    {{ letter.letter_date }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#C7E6D1]">
+                                    <span class="font-mono text-[#052E16] text-[11px] font-bold">{{ letter.ref_no }}</span>
+                                    <button type="button" onclick="copyRefNo('{{ letter.ref_no }}', this)" title="Copy Reference No" class="text-blue-500 hover:text-blue-800 transition p-0.5">
+                                        <i class="fa-regular fa-copy text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-3 font-bold text-[#052E16] leading-snug">
+                                {{ letter.department }}
+                            </td>
+                            <td class="py-2.5 px-2.5 text-slate-700 font-medium whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1 text-slate-600">
+                                    <i class="fa-solid fa-location-dot text-rose-500 text-[10px]"></i> {{ letter.place }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 text-slate-800 leading-relaxed font-medium">
+                                {{ letter.purpose }}
+                            </td>
+                            <td class="py-2.5 px-2.5 text-slate-500 text-[11px]">
+                                {{ letter.remarks or '-' }}
+                            </td>
+                            <td class="py-2.5 px-2.5 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button type="button" onclick="openEditLetterModal({{ letter|tojson }})" title="Edit Letter" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition">
+                                        <i class="fa-solid fa-pen text-[9px]"></i>
+                                    </button>
+                                    <button type="button" onclick="deleteLetter({{ letter.id }}, '{{ letter.ref_no }}')" title="Delete Letter" class="w-6 h-6 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
+                                        <i class="fa-solid fa-trash text-[9px]"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="lettersEmptyRow">
+                            <td colspan="8" class="py-8 text-center text-[#4B6B57]">
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-[#4B6B57] flex items-center justify-center text-lg mb-2 border border-emerald-200">
+                                        <i class="fa-solid fa-envelope-open-text"></i>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-700">No outgoing letters recorded yet.</p>
+                                    <button type="button" onclick="openNewLetterModal()" class="mt-2.5 px-3 py-1.5 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5">
+                                        <i class="fa-solid fa-plus"></i> Record First Letter ({{ next_letter_info.ref_no }})
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
         </div>
 
@@ -932,6 +721,10 @@
     function openRefModal() {
         document.getElementById('refModal').classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+        setTimeout(() => {
+            const input = document.getElementById('letterSearchInput');
+            if (input) input.focus();
+        }, 100);
     }
     function closeRefModal() {
         document.getElementById('refModal').classList.add('hidden');
@@ -1019,6 +812,13 @@
         }
     });
 
+    // Auto-open Ref Modal if URL hash is #letters
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash === '#letters') {
+            openRefModal();
+        }
+    });
+
     // --- OUTGOING LETTERS REGISTER JS ---
     let currentNextRefNo = "{{ next_letter_info.ref_no }}";
     let currentNextSeq = {{ next_letter_info.seq_num }};
@@ -1097,7 +897,11 @@
 
     function closeLetterModal() {
         document.getElementById('letterModal').classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+        // Do not remove overflow-hidden if refModal is still open underneath
+        const refModal = document.getElementById('refModal');
+        if (!refModal || refModal.classList.contains('hidden')) {
+            document.body.classList.remove('overflow-hidden');
+        }
     }
 
     async function submitLetterForm(e) {
@@ -1216,7 +1020,7 @@
             }
         });
 
-        document.getElementById('lettersCountBadge').innerText = 'Total: ' + visibleCount + ' Letters';
+        document.getElementById('lettersCountBadge').innerText = visibleCount + ' Letters';
         updateExportLinks(selectedFy, q);
     }
 
