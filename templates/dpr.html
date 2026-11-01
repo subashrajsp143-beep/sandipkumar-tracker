@@ -18,17 +18,33 @@
                         <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
                         <span>Cloud Auto-Sync Active</span>
                     </span>
+                    {% if not is_owner and user_site_id %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-800 text-white border border-emerald-400/50">
+                        <i class="fa-solid fa-user-shield text-amber-300"></i>
+                        <span>Supervisor Mode: {{ selected_site_obj.code if selected_site_obj else 'Site' }}</span>
+                    </span>
+                    {% endif %}
                 </div>
+
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
                     <i class="fa-solid fa-clipboard-check text-amber-400"></i>
-                    <span>DPR (Daily Progress Report)</span>
+                    {% if is_owner %}
+                    <span>Office DPR Monitor — All 21 Water Supply Sites</span>
+                    {% else %}
+                    <span>{{ selected_site_obj.code if selected_site_obj else 'Site' }} — Daily DPR Entry</span>
+                    {% endif %}
                 </h1>
+
                 <p class="text-emerald-100 text-xs sm:text-sm mt-1 max-w-2xl">
-                    कार्य प्रगति विवरणी — वार्ड संख्या, कार्य विवरणी, कार्यस्थल पता, कारीगरों के नाम, मोबाइल नंबर, कार्य क्षेत्र व गतिविधि का दैनिक रजिस्टर।
+                    {% if is_owner %}
+                    कार्यालय कार्य प्रगति मॉनिटरिंग — सभी 21 साइटों की दैनिक रिपोर्ट, वार्ड अनुसार विवरणी, कारीगर, मोबाइल नंबर, कार्य क्षेत्र व गतिविधियों का मास्टर रजिस्टर।
+                    {% else %}
+                    {{ selected_site_obj.name if selected_site_obj else 'Assigned Site' }} — आज का दैनिक कार्य, वार्ड संख्या, कारीगरों के नाम, मोबाइल नंबर, कार्य क्षेत्र व गतिविधि दर्ज करें।
+                    {% endif %}
                 </p>
             </div>
 
-            <!-- Action Buttons: Print, PDF, Excel & WhatsApp -->
+            <!-- Action Buttons: Add Entry, Print, PDF, Excel & WhatsApp -->
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" onclick="openNewDprModal()" class="btn-cta text-xs sm:text-sm shadow-md cursor-pointer">
                     <i class="fa-solid fa-circle-plus text-white"></i>
@@ -38,7 +54,7 @@
                     <i class="fa-solid fa-print text-indigo-700"></i>
                     <span>Print / Printout</span>
                 </a>
-                <a href="/export/dpr-pdf?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download PDF">
+                <a href="/export/dpr-pdf?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download Landscape A4 PDF">
                     <i class="fa-solid fa-file-pdf text-rose-600"></i>
                     <span>PDF</span>
                 </a>
@@ -53,7 +69,7 @@
             </div>
         </div>
 
-        <!-- 4 Summary Stat Pills -->
+        <!-- Summary Stat Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-white/15">
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
                 <div class="text-[10px] font-bold uppercase text-emerald-200">Total Work Entries</div>
@@ -71,59 +87,321 @@
                 <div class="text-[10px] text-emerald-300">Active working wards</div>
             </div>
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
-                <div class="text-[10px] font-bold uppercase text-emerald-200">Active Sites</div>
-                <div class="text-2xl font-black text-emerald-300 mt-1">{{ stats.total_sites }} / {{ sites|length }}</div>
-                <div class="text-[10px] text-emerald-300">Reporting sites today</div>
+                <div class="text-[10px] font-bold uppercase text-emerald-200">
+                    {% if is_owner %}Sites Reported / Total{% else %}Assigned Site Status{% endif %}
+                </div>
+                <div class="text-2xl font-black text-emerald-300 mt-1">
+                    {% if is_owner %}
+                    {{ reported_sites_count }} / {{ sites|length }}
+                    {% else %}
+                    {% if stats.total_entries > 0 %}Submitted{% else %}Pending{% endif %}
+                    {% endif %}
+                </div>
+                <div class="text-[10px] text-emerald-300">
+                    {% if is_owner %}{{ pending_sites_count }} sites pending today{% else %}{{ selected_site_obj.name if selected_site_obj else 'Site' }}{% endif %}
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Date & Site Filter Bar -->
+    <!-- Filter Bar & View Toggle -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
-        <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto" id="dprFilterForm">
+            <input type="hidden" name="view" id="filterViewMode" value="{{ view_mode }}">
+
             <div class="flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-600"><i class="fa-regular fa-calendar text-emerald-700"></i> Date:</label>
                 <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
             </div>
 
-            {% if is_owner and sites|length > 1 %}
+            {% if is_owner and all_sites|length > 1 %}
             <div class="flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-600"><i class="fa-solid fa-location-dot text-rose-500"></i> Site:</label>
                 <select name="site_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
                     <option value="">-- All 21 Water Supply Sites --</option>
-                    {% for s in sites %}
+                    {% for s in all_sites %}
                     <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             {% elif user_site_id %}
             <div class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
-                <i class="fa-solid fa-lock text-emerald-700"></i>
-                <span>{{ sites[0].code if sites else 'SITE' }} - {{ sites[0].name if sites else 'Assigned Site' }}</span>
+                <i class="fa-solid fa-location-pin text-emerald-700"></i>
+                <span>{{ selected_site_obj.code if selected_site_obj else 'SITE' }} - {{ selected_site_obj.name if selected_site_obj else 'Assigned Site' }}</span>
             </div>
             {% endif %}
 
             <button type="submit" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
                 <i class="fa-solid fa-filter"></i> Apply
             </button>
+
+            {% if selected_site_id or search_query or selected_ward %}
+            <a href="/dpr?date={{ selected_date }}" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition">
+                <i class="fa-solid fa-xmark"></i> Clear Filters
+            </a>
+            {% endif %}
         </form>
 
-        <!-- Search Bar -->
-        <div class="relative w-full md:w-72">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-            <input type="text" id="dprSearchInput" oninput="filterDprTable()" placeholder="Search ward, workman, work, mobile..." class="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
+        <!-- Right Side: View Switcher & Live Search -->
+        <div class="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+            
+            <!-- View Mode Switcher -->
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200">
+                <button type="button" onclick="switchView('sitewise')" id="btnViewSitewise" class="px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 {% if view_mode != 'table' %}bg-white text-emerald-950 shadow-xs border border-slate-200{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                    <i class="fa-solid fa-sitemap text-emerald-700"></i>
+                    <span>Site & Ward View</span>
+                </button>
+                <button type="button" onclick="switchView('table')" id="btnViewTable" class="px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 {% if view_mode == 'table' %}bg-white text-emerald-950 shadow-xs border border-slate-200{% else %}text-slate-600 hover:text-slate-900{% endif %}">
+                    <i class="fa-solid fa-table text-indigo-700"></i>
+                    <span>Master 9-Col Table</span>
+                </button>
+            </div>
+
+            <!-- Instant Search -->
+            <div class="relative w-48 sm:w-60">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="dprSearchInput" oninput="handleUniversalDprSearch()" placeholder="Search site, ward, work, mobile..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
+            </div>
         </div>
     </div>
 
-    <!-- DPR Table Card: Matching User's Excel Template -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+    <!-- ============================================================ -->
+    <!-- VIEW MODE 1: SITE-WISE & WARD BREAKDOWN (मुख्य साइट व वार्ड व्यू) -->
+    <!-- ============================================================ -->
+    <div id="sitewiseContainer" class="space-y-4 {% if view_mode == 'table' %}hidden{% endif %}">
         
-        <!-- Table Top Header -->
+        <!-- Office Status Control Bar -->
+        {% if is_owner %}
+        <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3 text-xs font-bold text-emerald-950">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                    <i class="fa-solid fa-building-circle-check"></i>
+                    <span>{{ reported_sites_count }} Reported Today</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg {% if pending_sites_count > 0 %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-200 text-slate-700{% endif %} font-black text-xs">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>{{ pending_sites_count }} Pending Sites</span>
+                </span>
+                <span class="text-slate-600 hidden sm:inline">&bull; क्लिक करके साइट के अंदर वार्ड और काम देखें</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="expandAllSites()" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300 transition">
+                    <i class="fa-solid fa-angles-down text-emerald-700"></i> Expand All
+                </button>
+                <button type="button" onclick="collapseAllSites()" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300 transition">
+                    <i class="fa-solid fa-angles-up text-slate-600"></i> Collapse All
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Site Cards Loop -->
+        {% for item in site_wise_data %}
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden site-card-wrapper transition-all duration-200"
+             id="siteCard_{{ item.site.id }}"
+             data-site-id="{{ item.site.id }}"
+             data-site-name="{{ item.site.name|lower }}"
+             data-site-code="{{ item.site.code|lower }}"
+             data-has-reported="{{ 'yes' if item.has_reported else 'no' }}">
+
+            <!-- Site Card Header (Clickable Accordion) -->
+            <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer bg-slate-50/80 hover:bg-slate-100/90 border-b border-slate-200 select-none"
+                 onclick="toggleSiteCard('{{ item.site.id }}')">
+                
+                <div class="flex items-start sm:items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-black text-sm flex-shrink-0 shadow-2xs {% if item.has_reported %}bg-[#166534] text-white{% else %}bg-slate-200 text-slate-600{% endif %}">
+                        {{ item.site.code.replace('SITE-', '') if 'SITE-' in item.site.code else loop.index }}
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                                {{ item.site.code }} &mdash; {{ item.site.name }}
+                            </h3>
+                            {% if item.has_reported %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                <span>{{ item.ward_count }} Wards &bull; {{ item.entry_count }} Activities</span>
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                <i class="fa-solid fa-clock text-amber-600"></i>
+                                <span>Report Pending</span>
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-xs text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
+                            <span><i class="fa-solid fa-location-dot text-rose-500"></i> {{ item.site.location or 'Water Supply Site' }}</span>
+                            {% if item.site.supervisor %}
+                            <span><i class="fa-solid fa-user-tie text-emerald-700"></i> <strong>{{ item.site.supervisor }}</strong></span>
+                            {% endif %}
+                            {% if item.site.supervisor_phone %}
+                            <a href="tel:{{ item.site.supervisor_phone }}" onclick="event.stopPropagation()" class="text-emerald-700 font-bold hover:underline">
+                                <i class="fa-solid fa-phone"></i> {{ item.site.supervisor_phone }}
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Action Buttons inside Site Header -->
+                <div class="flex items-center gap-2 self-end sm:self-auto" onclick="event.stopPropagation()">
+                    <button type="button" onclick="openNewDprModal('{{ item.site.id }}', '{{ item.site.code }} - {{ item.site.name }}')" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer" title="Add Work Entry for this Site">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>+ Add Entry</span>
+                    </button>
+                    
+                    {% if item.has_reported %}
+                    <a href="/dpr/print?date={{ selected_date }}&site_id={{ item.site.id }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold shadow-2xs transition flex items-center gap-1" title="Print this Site DPR">
+                        <i class="fa-solid fa-print text-indigo-700"></i>
+                    </a>
+                    <a href="/export/dpr-pdf?date={{ selected_date }}&site_id={{ item.site.id }}" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold shadow-2xs transition flex items-center gap-1" title="Download this Site PDF">
+                        <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                    </a>
+                    {% endif %}
+
+                    <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 transition-transform duration-200 cursor-pointer" id="siteChevron_{{ item.site.id }}">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Site Body: Ward-by-Ward Details ("uske andar ward aur sab dikhaye") -->
+            <div id="siteBody_{{ item.site.id }}" class="p-4 sm:p-5 space-y-4">
+                
+                {% if item.has_reported %}
+                    
+                    <!-- Loop through Wards in this Site -->
+                    {% for ward_name, ward_entries in item.ward_groups.items() %}
+                    <div class="rounded-xl border border-slate-200 overflow-hidden bg-slate-50/50 ward-container" data-ward-name="{{ ward_name|lower }}">
+                        
+                        <!-- Ward Banner -->
+                        <div class="px-4 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                                <h4 class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wide">
+                                    {{ ward_name }} &bull; वार्ड विवरण
+                                </h4>
+                                <span class="text-[11px] font-bold text-slate-500">({{ ward_entries|length }} कार्य गतिविधियां)</span>
+                            </div>
+                            <span class="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
+                                JAL JEEVAN MISSION
+                            </span>
+                        </div>
+
+                        <!-- Ward Entries Table with all 9 Government Columns -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-white text-slate-700 font-black border-b border-slate-200 text-[11px]">
+                                        <th class="py-2.5 px-3 w-10 text-center">Sr.</th>
+                                        <th class="py-2.5 px-3 min-w-[180px]">कार्य कि विवरणी (Work Details)</th>
+                                        <th class="py-2.5 px-3 min-w-[180px]">कार्यस्थल एवं पता (Location)</th>
+                                        <th class="py-2.5 px-3 min-w-[150px]">WORKMEN NAME (कारीगर)</th>
+                                        <th class="py-2.5 px-3 min-w-[110px]">MOB. NO</th>
+                                        <th class="py-2.5 px-3 min-w-[120px]">WORK AREA</th>
+                                        <th class="py-2.5 px-3 min-w-[140px]">WORK ACTIVITY</th>
+                                        <th class="py-2.5 px-3 min-w-[140px]">REMARK</th>
+                                        <th class="py-2.5 px-2 w-16 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 bg-white text-slate-800">
+                                    {% for row in ward_entries %}
+                                    <tr class="hover:bg-emerald-50/40 transition entry-row"
+                                        data-search="{{ (row.ward_no ~ ' ' ~ row.work_details ~ ' ' ~ (row.work_location or '') ~ ' ' ~ (row.workmen_name or '') ~ ' ' ~ (row.mobile_no or '') ~ ' ' ~ (row.work_area or '') ~ ' ' ~ (row.work_activity or '') ~ ' ' ~ (row.remark or '') ~ ' ' ~ row.site_name)|lower }}">
+                                        
+                                        <td class="py-2 px-3 text-center font-mono font-bold text-slate-400">{{ loop.index }}</td>
+                                        
+                                        <!-- Work Details -->
+                                        <td class="py-2 px-3 font-bold text-slate-900 leading-snug">
+                                            {{ row.work_details }}
+                                        </td>
+
+                                        <!-- Work Location with Address -->
+                                        <td class="py-2 px-3 text-slate-700">
+                                            {{ row.work_location or '-' }}
+                                        </td>
+
+                                        <!-- Workmen Name -->
+                                        <td class="py-2 px-3 font-semibold text-slate-900">
+                                            <i class="fa-solid fa-person-digging text-emerald-700 text-[10px] mr-1"></i>
+                                            {{ row.workmen_name or '-' }}
+                                        </td>
+
+                                        <!-- Mobile No -->
+                                        <td class="py-2 px-3 font-mono text-slate-700">
+                                            {% if row.mobile_no %}
+                                            <a href="tel:{{ row.mobile_no }}" class="hover:text-emerald-700 hover:underline">
+                                                {{ row.mobile_no }}
+                                            </a>
+                                            {% else %}-{% endif %}
+                                        </td>
+
+                                        <!-- Work Area -->
+                                        <td class="py-2 px-3 text-slate-600">
+                                            {{ row.work_area or '-' }}
+                                        </td>
+
+                                        <!-- Work Activity -->
+                                        <td class="py-2 px-3 text-slate-700 font-medium">
+                                            {{ row.work_activity or '-' }}
+                                        </td>
+
+                                        <!-- Remark -->
+                                        <td class="py-2 px-3 text-slate-600 italic">
+                                            {{ row.remark or '-' }}
+                                        </td>
+
+                                        <!-- Actions -->
+                                        <td class="py-2 px-2 text-center">
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button type="button" onclick='openEditDprModal({{ row|tojson }})' class="p-1 rounded text-slate-500 hover:text-emerald-700 hover:bg-slate-100 transition" title="Edit">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button type="button" onclick="deleteDprEntry({{ row.id }})" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition" title="Delete">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                {% else %}
+                    <!-- Site Has Not Reported Yet -->
+                    <div class="text-center py-6 px-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <div class="text-slate-400 text-2xl mb-1.5"><i class="fa-solid fa-clipboard-question"></i></div>
+                        <div class="text-xs font-bold text-slate-700">आज ({{ selected_date }}) को इस साइट से अभी कोई कार्य विवरणी दर्ज नहीं हुई है।</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5 mb-3">सुपरवाइजर द्वारा एंट्री किए जाने पर यहां वार्ड अनुसार तुरंत अपडेट दिखेगा।</div>
+                        <button type="button" onclick="openNewDprModal('{{ item.site.id }}', '{{ item.site.code }} - {{ item.site.name }}')" class="px-3.5 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-bold shadow-xs transition">
+                            <i class="fa-solid fa-circle-plus"></i> + इस साइट का कार्य दर्ज करें
+                        </button>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- VIEW MODE 2: MASTER 9-COLUMN GOVERNMENT TABLE (सरकारी टेबल व्यू) -->
+    <!-- ============================================================ -->
+    <div id="tableViewContainer" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden {% if view_mode != 'table' %}hidden{% endif %}">
+        
         <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
                     <i class="fa-solid fa-table text-emerald-700"></i>
-                    <span>दैनिक कार्य प्रगति विवरणी (DPR Register)</span>
+                    <span>दैनिक कार्य प्रगति विवरणी (Master 9-Column Government Register)</span>
                 </h3>
                 <p class="text-xs text-slate-500 mt-0.5">
                     {% if selected_site_obj %}Site: <strong>{{ selected_site_obj.code }} - {{ selected_site_obj.name }}</strong> &bull; {% endif %}Date: <strong>{{ selected_date }}</strong>
@@ -178,80 +456,64 @@
                     <tr class="hover:bg-slate-50 transition dpr-row divide-x divide-slate-200"
                         data-search="{{ (row.ward_no ~ ' ' ~ row.work_details ~ ' ' ~ (row.work_location or '') ~ ' ' ~ (row.workmen_name or '') ~ ' ' ~ (row.mobile_no or '') ~ ' ' ~ (row.work_area or '') ~ ' ' ~ (row.work_activity or '') ~ ' ' ~ (row.remark or '') ~ ' ' ~ row.site_name)|lower }}">
                         
-                        <!-- Sr. No -->
                         <td class="py-2.5 px-2 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
 
                         {% if not selected_site_id %}
-                        <!-- Site Code & Name -->
                         <td class="py-2.5 px-3">
                             <span class="font-bold text-slate-900 block truncate">{{ row.site_name }}</span>
                             <span class="text-[10px] font-mono text-slate-500">{{ row.site_code }}</span>
                         </td>
                         {% endif %}
 
-                        <!-- Col A: Ward No. -->
                         <td class="py-2.5 px-3 text-center">
                             <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-bold font-mono text-xs border border-emerald-200">
                                 {{ row.ward_no }}
                             </span>
                         </td>
 
-                        <!-- Col B: Work Details -->
                         <td class="py-2.5 px-4 font-bold text-slate-900 leading-snug">
                             {{ row.work_details }}
                         </td>
 
-                        <!-- Col C: Work Location with Address -->
-                        <td class="py-2.5 px-4 text-slate-700 font-medium">
+                        <td class="py-2.5 px-4 text-slate-700">
                             {{ row.work_location or '-' }}
                         </td>
 
-                        <!-- Col D: Workmen Name -->
-                        <td class="py-2.5 px-3 font-semibold text-slate-800">
+                        <td class="py-2.5 px-3 font-semibold text-slate-900">
                             {{ row.workmen_name or '-' }}
                         </td>
 
-                        <!-- Col E: Mobile No. -->
-                        <td class="py-2.5 px-3 text-center font-mono text-slate-700 whitespace-nowrap">
+                        <td class="py-2.5 px-3 font-mono text-center text-slate-700">
                             {% if row.mobile_no %}
                             <a href="tel:{{ row.mobile_no }}" class="hover:text-emerald-700 hover:underline">
                                 {{ row.mobile_no }}
                             </a>
-                            {% else %}
-                            -
-                            {% endif %}
+                            {% else %}-{% endif %}
                         </td>
 
-                        <!-- Col F: Work Area -->
                         <td class="py-2.5 px-3 text-slate-700">
                             {{ row.work_area or '-' }}
                         </td>
 
-                        <!-- Col G: Ward No (Sub) -->
-                        <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700">
-                            {{ row.sub_ward_no or row.ward_no }}
+                        <td class="py-2.5 px-3 font-mono text-center text-slate-700">
+                            {{ row.sub_ward_no or row.ward_no or '-' }}
                         </td>
 
-                        <!-- Col H: Work Activity -->
-                        <td class="py-2.5 px-3 text-slate-800">
-                            <span class="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
-                                {{ row.work_activity or '-' }}
-                            </span>
+                        <td class="py-2.5 px-3 text-slate-700 font-medium">
+                            {{ row.work_activity or '-' }}
                         </td>
 
-                        <!-- Col I: Remark -->
-                        <td class="py-2.5 px-3 text-slate-600 text-[11px]">
+                        <td class="py-2.5 px-3 text-slate-600 italic">
                             {{ row.remark or '-' }}
                         </td>
 
-                        <!-- Action -->
-                        <td class="py-2.5 px-2 text-center whitespace-nowrap">
-                            <div class="flex items-center justify-center gap-1">
-                                <button type="button" onclick="openEditDprModal({{ row|tojson }})" title="Edit Entry" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-pen text-[9px]"></i>
+                        <td class="py-2.5 px-2 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button" onclick='openEditDprModal({{ row|tojson }})' class="p-1 rounded text-slate-500 hover:text-emerald-700 hover:bg-slate-100 transition" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button type="button" onclick="deleteDprEntry({{ row.id }})" title="Delete Entry" class="w-6 h-6 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
-                                    <i class="fa-solid fa-trash text-[9px]"></i>
+                                <button type="button" onclick="deleteDprEntry({{ row.id }})" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition" title="Delete">
+                                    <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
                         </td>
@@ -265,27 +527,25 @@
 
 </div>
 
-<!-- ======================================================== -->
-<!-- MODAL: ADD / EDIT DPR WORK ENTRY -->
-<!-- ======================================================== -->
-<div id="dprModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-scaleIn">
+<!-- ============================================================ -->
+<!-- ADD / EDIT DPR WORK ENTRY MODAL (9 COLUMNS BILINGUAL) -->
+<!-- ============================================================ -->
+<div id="dprModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 transform transition-all my-8 animate-in fade-in zoom-in-95 duration-150">
         
         <!-- Modal Header -->
-        <div class="bg-[#0A261F] p-4 sm:p-5 text-white flex items-center justify-between border-b border-[#12382E]">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg">
-                    <i class="fa-solid fa-clipboard-check"></i>
+        <div class="p-5 sm:p-6 bg-[#166534] text-white flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-clipboard-list text-amber-300"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
-                        <i class="fa-solid fa-file-pen"></i> Daily Progress Report (DPR)
-                    </span>
-                    <h3 id="dprModalTitle" class="text-base sm:text-lg font-black text-white">Record Work Entry</h3>
+                    <h3 class="text-base sm:text-lg font-black text-white" id="dprModalTitle">Record Daily Work Entry</h3>
+                    <p class="text-[11px] text-emerald-100">Jal Jeevan Mission Government Format &bull; 9 Columns</p>
                 </div>
             </div>
-            <button type="button" onclick="closeDprModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
-                <i class="fa-solid fa-xmark text-sm"></i>
+            <button type="button" onclick="closeDprModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
@@ -302,12 +562,12 @@
                     {% if user_site_id and not is_owner %}
                     <input type="hidden" id="dprSiteId" value="{{ user_site_id }}">
                     <div class="py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800">
-                        {{ sites[0].code if sites else 'SITE' }} - {{ sites[0].name if sites else 'Your Assigned Site' }}
+                        {{ selected_site_obj.code if selected_site_obj else 'SITE' }} - {{ selected_site_obj.name if selected_site_obj else 'Your Assigned Site' }}
                     </div>
                     {% else %}
                     <select id="dprSiteId" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
                         <option value="">-- Select Project Site --</option>
-                        {% for s in sites %}
+                        {% for s in all_sites %}
                         <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }} ({{ s.location or 'Site' }})</option>
                         {% endfor %}
                     </select>
@@ -441,10 +701,63 @@
 
 {% block scripts %}
 <script>
-    function openNewDprModal() {
-        document.getElementById('dprModalTitle').innerText = 'Record Daily Work Entry';
+    function switchView(mode) {
+        const sitewiseContainer = document.getElementById('sitewiseContainer');
+        const tableViewContainer = document.getElementById('tableViewContainer');
+        const btnSitewise = document.getElementById('btnViewSitewise');
+        const btnTable = document.getElementById('btnViewTable');
+        const filterInput = document.getElementById('filterViewMode');
+
+        if (mode === 'table') {
+            sitewiseContainer.classList.add('hidden');
+            tableViewContainer.classList.remove('hidden');
+
+            btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-emerald-950 shadow-xs border border-slate-200';
+            btnSitewise.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+            if (filterInput) filterInput.value = 'table';
+        } else {
+            tableViewContainer.classList.add('hidden');
+            sitewiseContainer.classList.remove('hidden');
+
+            btnSitewise.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-emerald-950 shadow-xs border border-slate-200';
+            btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+            if (filterInput) filterInput.value = 'sitewise';
+        }
+    }
+
+    function toggleSiteCard(siteId) {
+        const body = document.getElementById('siteBody_' + siteId);
+        const chevron = document.getElementById('siteChevron_' + siteId);
+        if (!body) return;
+
+        if (body.classList.contains('hidden')) {
+            body.classList.remove('hidden');
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+        } else {
+            body.classList.add('hidden');
+            if (chevron) chevron.style.transform = 'rotate(-90deg)';
+        }
+    }
+
+    function expandAllSites() {
+        document.querySelectorAll('[id^="siteBody_"]').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('[id^="siteChevron_"]').forEach(el => el.style.transform = 'rotate(0deg)');
+    }
+
+    function collapseAllSites() {
+        document.querySelectorAll('[id^="siteBody_"]').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('[id^="siteChevron_"]').forEach(el => el.style.transform = 'rotate(-90deg)');
+    }
+
+    function openNewDprModal(presetSiteId, presetSiteName) {
+        document.getElementById('dprModalTitle').innerText = presetSiteName ? ('Record Work Entry — ' + presetSiteName) : 'Record Daily Work Entry';
         document.getElementById('btnSaveDprText').innerText = 'Save Work Entry';
         document.getElementById('dprEditId').value = '';
+
+        const siteSelect = document.getElementById('dprSiteId');
+        if (siteSelect && presetSiteId) {
+            siteSelect.value = presetSiteId;
+        }
 
         document.getElementById('dprWardNo').value = '';
         document.getElementById('dprWorkDetails').value = '';
@@ -535,10 +848,11 @@
         };
 
         const url = editId ? `/api/dpr/${editId}` : '/api/dpr';
+        const method = editId ? 'PUT' : 'POST';
 
         try {
             const resp = await fetch(url, {
-                method: 'POST',
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
@@ -577,25 +891,66 @@
         }
     }
 
-    function filterDprTable() {
+    function handleUniversalDprSearch() {
         const q = (document.getElementById('dprSearchInput').value || '').trim().toLowerCase();
-        const rows = document.querySelectorAll('#dprTableBody tr.dpr-row');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
+        
+        // 1. Filter Master Table Rows
+        const tableRows = document.querySelectorAll('#dprTableBody tr.dpr-row');
+        let tableVisibleCount = 0;
+        tableRows.forEach(row => {
             const rowSearch = row.getAttribute('data-search') || '';
             if (!q || rowSearch.includes(q)) {
                 row.style.display = '';
-                visibleCount++;
+                tableVisibleCount++;
                 const snCell = row.querySelector('.row-serial-no');
-                if (snCell) snCell.innerText = visibleCount;
+                if (snCell) snCell.innerText = tableVisibleCount;
             } else {
                 row.style.display = 'none';
             }
         });
-
         const badge = document.getElementById('dprTableCountBadge');
-        if (badge) badge.innerText = `Showing ${visibleCount} Work Entries`;
+        if (badge) badge.innerText = `Showing ${tableVisibleCount} Work Entries`;
+
+        // 2. Filter Site Cards in Site-wise View
+        const siteCards = document.querySelectorAll('.site-card-wrapper');
+        siteCards.forEach(card => {
+            const siteName = card.getAttribute('data-site-name') || '';
+            const siteCode = card.getAttribute('data-site-code') || '';
+            
+            // Check inside rows of this site card
+            const entryRows = card.querySelectorAll('.entry-row');
+            let hasMatchingEntry = false;
+            entryRows.forEach(er => {
+                const searchVal = er.getAttribute('data-search') || '';
+                if (!q || searchVal.includes(q)) {
+                    er.style.display = '';
+                    hasMatchingEntry = true;
+                } else {
+                    er.style.display = 'none';
+                }
+            });
+
+            // Also check ward headers
+            const wardContainers = card.querySelectorAll('.ward-container');
+            wardContainers.forEach(wc => {
+                const visibleEntries = wc.querySelectorAll('.entry-row:not([style*="display: none"])');
+                if (visibleEntries.length === 0 && q) {
+                    wc.style.display = 'none';
+                } else {
+                    wc.style.display = '';
+                }
+            });
+
+            if (!q || siteName.includes(q) || siteCode.includes(q) || hasMatchingEntry) {
+                card.style.display = '';
+                if (q && hasMatchingEntry) {
+                    const body = card.querySelector('[id^="siteBody_"]');
+                    if (body) body.classList.remove('hidden');
+                }
+            } else {
+                card.style.display = 'none';
+            }
+        });
     }
 
     function shareDprWhatsApp() {
@@ -606,10 +961,14 @@
             return;
         }
 
-        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT (DPR)*\n`;
-        text += `*Jal Jeevan Mission, Bihar*\n`;
-        text += `*Date:* ${date}\n`;
-        text += `-----------------------------------\n`;
+        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT (DPR)*
+`;
+        text += `*Jal Jeevan Mission, Bihar*
+`;
+        text += `*Date:* ${date}
+`;
+        text += `-----------------------------------
+`;
 
         rows.forEach((row, idx) => {
             if (row.style.display !== 'none') {
@@ -620,15 +979,21 @@
                 const workmen = cells[4] ? cells[4].innerText.trim() : '';
                 const remark = cells[8] ? cells[8].innerText.trim() : '';
 
-                text += `*${idx + 1}. ${ward}* | ${work}\n`;
-                if (loc && loc !== '-') text += `   _Location:_ ${loc}\n`;
-                if (workmen && workmen !== '-') text += `   _Workmen:_ ${workmen}\n`;
-                if (remark && remark !== '-') text += `   _Remark:_ ${remark}\n`;
-                text += `\n`;
+                text += `*${idx + 1}. ${ward}* | ${work}
+`;
+                if (loc && loc !== '-') text += `   _Location:_ ${loc}
+`;
+                if (workmen && workmen !== '-') text += `   _Workmen:_ ${workmen}
+`;
+                if (remark && remark !== '-') text += `   _Remark:_ ${remark}
+`;
+                text += `
+`;
             }
         });
 
-        text += `-----------------------------------\n`;
+        text += `-----------------------------------
+`;
         text += `_Report generated via M/S Sandip Kumar Portal_`;
 
         const waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);

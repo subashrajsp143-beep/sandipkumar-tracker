@@ -3094,11 +3094,14 @@ def site_active_wards_api(site_id):
 @app.route("/dpr")
 def dpr_dashboard():
     """Jal Jeevan Mission DPR (Daily Progress Report) Dashboard."""
+    import collections
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     selected_site = request.args.get("site_id")
+    selected_ward = request.args.get("ward", "").strip()
     search_query = request.args.get("search", "").strip()
+    view_mode = request.args.get("view", "sitewise")  # 'sitewise' or 'table'
 
     is_owner = (session.get("is_owner", False) or 
                 session.get("role") == "owner" or 
@@ -3107,15 +3110,20 @@ def dpr_dashboard():
     if not is_owner and user_site_id:
         selected_site = int(user_site_id)
 
-    sites = database.get_all_sites()
+    all_sites = database.get_all_sites()
+    sites = all_sites
     if not is_owner and user_site_id:
-        sites = [s for s in sites if s["id"] == int(user_site_id)]
+        sites = [s for s in all_sites if s["id"] == int(user_site_id)]
 
     dpr_entries = database.get_dpr_entries(
         site_id=int(selected_site) if selected_site else None,
         report_date=selected_date,
         search=search_query if search_query else None
     )
+
+    if selected_ward:
+        dpr_entries = [e for e in dpr_entries if e.get("ward_no", "").strip().lower() == selected_ward.lower()]
+
     stats = database.get_dpr_stats(
         report_date=selected_date,
         site_id=int(selected_site) if selected_site else None
@@ -3123,20 +3131,58 @@ def dpr_dashboard():
 
     selected_site_obj = None
     if selected_site:
-        for s in sites:
+        for s in all_sites:
             if s["id"] == int(selected_site):
                 selected_site_obj = s
                 break
 
+    # Group entries by site and within site by ward
+    site_entries_map = collections.defaultdict(list)
+    for entry in dpr_entries:
+        site_entries_map[entry["site_id"]].append(entry)
+
+    target_sites = [selected_site_obj] if selected_site_obj else sites
+
+    site_wise_data = []
+    for s in target_sites:
+        s_id = s["id"]
+        entries_for_site = site_entries_map.get(s_id, [])
+
+        ward_groups = collections.defaultdict(list)
+        for e in entries_for_site:
+            ward_key = (e.get("ward_no") or "").strip() or "General"
+            ward_groups[ward_key].append(e)
+
+        workmen_set = set(e.get("workmen_name", "").strip() for e in entries_for_site if e.get("workmen_name"))
+
+        site_wise_data.append({
+            "site": s,
+            "entries": entries_for_site,
+            "ward_groups": dict(ward_groups),
+            "entry_count": len(entries_for_site),
+            "ward_count": len(ward_groups),
+            "workmen_count": len(workmen_set),
+            "has_reported": len(entries_for_site) > 0
+        })
+
+    reported_sites_count = sum(1 for item in site_wise_data if item["has_reported"])
+    pending_sites_count = len(site_wise_data) - reported_sites_count
+
     return render_template(
         "dpr.html",
         sites=sites,
+        all_sites=all_sites,
         dpr_entries=dpr_entries,
+        site_wise_data=site_wise_data,
         stats=stats,
+        reported_sites_count=reported_sites_count,
+        pending_sites_count=pending_sites_count,
         selected_date=selected_date,
         selected_site_id=int(selected_site) if selected_site else None,
         selected_site_obj=selected_site_obj,
+        selected_ward=selected_ward,
         search_query=search_query,
+        view_mode=view_mode,
         is_owner=is_owner,
         user_site_id=user_site_id
     )
@@ -3170,7 +3216,7 @@ def dpr_api():
     try:
         data = request.get_json(silent=True) or request.form
         site_id = int(data.get("site_id", 0) or session.get("site_id", 0) or 0)
-        report_date = data.get("report_date") or today
+        report_date = data.get("report_date") or data.get("date") or today
 
         if not site_id:
             return jsonify({"success": False, "message": "Site selection is required."}), 400
