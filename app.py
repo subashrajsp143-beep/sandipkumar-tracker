@@ -72,7 +72,7 @@ def ensure_canonical_and_auth():
     if (path.startswith("/static") or 
         path.startswith("/uploads") or 
         path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
-                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website", "/download-apk"] or
+                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website", "/download-apk", "/download/html-templates"] or
         path.startswith("/worker/") or 
         path == "/api/worker/ping"):
         return None
@@ -600,6 +600,30 @@ exit
         mimetype="application/x-bat",
         as_attachment=True,
         download_name="OPEN_SANDIP_KUMAR_APP.bat"
+    )
+
+# 1.2 Download All HTML Templates ZIP Bundle
+@app.route("/download/html-templates")
+def download_html_templates():
+    zip_path = os.path.join(app.root_path, "MS_Sandip_Kumar_HTML_Templates.zip")
+    if not os.path.exists(zip_path):
+        import zipfile
+        templates_dir = os.path.join(app.root_path, "templates")
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(templates_dir):
+                for file in files:
+                    if file.endswith('.html'):
+                        fp = os.path.join(root, file)
+                        arcname = os.path.relpath(fp, app.root_path)
+                        zipf.write(fp, arcname)
+            extra_html = os.path.join(app.root_path, "growth_green_ui.html")
+            if os.path.exists(extra_html):
+                zipf.write(extra_html, "growth_green_ui.html")
+    return send_file(
+        zip_path,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name="MS_Sandip_Kumar_HTML_Templates.zip"
     )
 
 # 2. Daily Material Usage Entry
