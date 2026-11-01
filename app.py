@@ -3093,30 +3093,44 @@ def site_active_wards_api(site_id):
 # ==========================================
 @app.route("/dpr")
 def dpr_dashboard():
-    """Jal Jeevan Mission DPR (Daily Progress Report) Dashboard."""
+    """Jal Jeevan Mission DPR (Daily Progress Report) Dashboard with STRICT Site Isolation."""
     import collections
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
-    selected_site = request.args.get("site_id")
     selected_ward = request.args.get("ward", "").strip()
     search_query = request.args.get("search", "").strip()
-    view_mode = request.args.get("view", "sitewise")  # 'sitewise' or 'table'
+    view_mode = request.args.get("view", "sitewise")
 
-    is_owner = (session.get("is_owner", False) or 
-                session.get("role") == "owner" or 
-                session.get("worker_phone") == "9835180075")
-    user_site_id = session.get("site_id")
-    if not is_owner and user_site_id:
-        selected_site = int(user_site_id)
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
 
-    all_sites = database.get_all_sites()
-    sites = all_sites
-    if not is_owner and user_site_id:
-        sites = [s for s in all_sites if s["id"] == int(user_site_id)]
+    # STRICT SUPERVISOR ISOLATION:
+    # If logged in as supervisor (or locked to a site), force Supervisor Mode!
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        is_owner = False
+        selected_site_id = int(user_site_id)
+        site_obj = database.get_site_by_id(selected_site_id)
+        sites = [site_obj] if site_obj else []
+        all_sites = sites  # Pass ONLY their site to template - zero leaking of other sites!
+        selected_site_obj = site_obj
+    else:
+        is_owner = (session.get("is_owner", False) or user_role == "owner") and not user_site_id
+        all_sites = database.get_all_sites()
+        raw_site_id = request.args.get("site_id")
+        if raw_site_id and raw_site_id.isdigit():
+            selected_site_id = int(raw_site_id)
+            selected_site_obj = database.get_site_by_id(selected_site_id)
+            sites = [selected_site_obj] if selected_site_obj else all_sites
+        else:
+            selected_site_id = None
+            selected_site_obj = None
+            sites = all_sites
 
     dpr_entries = database.get_dpr_entries(
-        site_id=int(selected_site) if selected_site else None,
+        site_id=selected_site_id,
         report_date=selected_date,
         search=search_query if search_query else None
     )
@@ -3126,22 +3140,15 @@ def dpr_dashboard():
 
     stats = database.get_dpr_stats(
         report_date=selected_date,
-        site_id=int(selected_site) if selected_site else None
+        site_id=selected_site_id
     )
-
-    selected_site_obj = None
-    if selected_site:
-        for s in all_sites:
-            if s["id"] == int(selected_site):
-                selected_site_obj = s
-                break
 
     # Group entries by site and within site by ward
     site_entries_map = collections.defaultdict(list)
     for entry in dpr_entries:
         site_entries_map[entry["site_id"]].append(entry)
 
-    target_sites = [selected_site_obj] if selected_site_obj else sites
+    target_sites = [selected_site_obj] if (selected_site_obj and not is_supervisor_mode) else sites
 
     site_wise_data = []
     for s in target_sites:
@@ -3178,27 +3185,35 @@ def dpr_dashboard():
         reported_sites_count=reported_sites_count,
         pending_sites_count=pending_sites_count,
         selected_date=selected_date,
-        selected_site_id=int(selected_site) if selected_site else None,
+        selected_site_id=selected_site_id,
         selected_site_obj=selected_site_obj,
         selected_ward=selected_ward,
         search_query=search_query,
         view_mode=view_mode,
         is_owner=is_owner,
+        is_supervisor_mode=is_supervisor_mode,
         user_site_id=user_site_id
     )
 
 
 @app.route("/api/dpr", methods=["GET", "POST", "OPTIONS"])
 def dpr_api():
-    """API for DPR (Daily Progress Report) - Read & Create."""
+    """API for DPR (Daily Progress Report) - Read & Create with Strict Isolation."""
     if request.method == "OPTIONS":
         return "", 200
     now_utc = datetime.datetime.now(datetime.timezone.utc)
     ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     today = ist_now.strftime("%Y-%m-%d")
 
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
     if request.method == "GET":
         site_id = request.args.get("site_id")
+        if is_supervisor_mode:
+            site_id = str(user_site_id)
+
         date_str = request.args.get("date") or today
         search = request.args.get("search")
         entries = database.get_dpr_entries(
@@ -3215,21 +3230,25 @@ def dpr_api():
     # POST: Add new DPR work entry
     try:
         data = request.get_json(silent=True) or request.form
-        site_id = int(data.get("site_id", 0) or session.get("site_id", 0) or 0)
+
+        # STRICT ISOLATION: A supervisor is HARD-LOCKED to their assigned site
+        if is_supervisor_mode:
+            site_id = int(user_site_id)
+        else:
+            site_id = int(data.get("site_id", 0) or 0)
+
         report_date = data.get("report_date") or data.get("date") or today
 
         if not site_id:
             return jsonify({"success": False, "message": "Site selection is required."}), 400
 
-        is_owner = (session.get("is_owner", False) or 
-                    session.get("role") == "owner" or 
-                    session.get("worker_phone") == "9835180075" or 
-                    str(data.get("pin", "")).strip() in ["Sandip@@12"])
-        is_supervisor = (session.get("role") == "supervisor" and int(session.get("site_id", 0)) == site_id)
-        if not (is_owner or is_supervisor):
+        is_owner = (session.get("is_owner", False) or user_role == "owner") and not user_site_id
+        is_supervisor = (user_role == "supervisor" and int(session.get("site_id", 0)) == site_id)
+
+        if not (is_owner or is_supervisor or is_supervisor_mode):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can submit DPR."}), 403
 
-        supervisor_name = data.get("supervisor_name") or session.get("worker_name") or session.get("supervisor_name") or "Staff"
+        supervisor_name = data.get("supervisor_name") or session.get("worker_name") or session.get("supervisor_name") or "Supervisor"
         supervisor_phone = data.get("supervisor_phone") or session.get("worker_phone") or ""
 
         ward_no = str(data.get("ward_no", "")).strip()
@@ -3269,11 +3288,21 @@ def dpr_api():
 
 @app.route("/api/dpr/<int:entry_id>", methods=["GET", "POST", "PUT", "DELETE"])
 def dpr_entry_detail_api(entry_id):
-    """Manage specific DPR entry: Get, Update, or Delete."""
+    """Manage specific DPR entry: Get, Update, or Delete with Strict Authorization."""
+    entry = database.get_dpr_entry_by_id(entry_id)
+    if not entry:
+        return jsonify({"success": False, "message": "DPR entry not found"}), 404
+
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    # STRICT ISOLATION: If supervisor, verify they own this entry
+    if is_supervisor_mode:
+        if not user_site_id or int(entry["site_id"]) != int(user_site_id):
+            return jsonify({"success": False, "message": "❌ Unauthorized: You cannot view or modify DPR of another site."}), 403
+
     if request.method == "GET":
-        entry = database.get_dpr_entry_by_id(entry_id)
-        if not entry:
-            return jsonify({"success": False, "message": "DPR entry not found"}), 404
         return jsonify({"success": True, "entry": entry})
 
     if request.method == "DELETE":
@@ -3318,6 +3347,13 @@ def export_dpr_excel():
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     selected_site = request.args.get("site_id")
 
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        selected_site = str(user_site_id)
+
     site_name = "All Sites"
     if selected_site and selected_site.isdigit():
         s = database.get_site_by_id(int(selected_site))
@@ -3348,6 +3384,13 @@ def export_dpr_pdf():
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     selected_site = request.args.get("site_id")
 
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        selected_site = str(user_site_id)
+
     site_name = "All Sites"
     if selected_site and selected_site.isdigit():
         s = database.get_site_by_id(int(selected_site))
@@ -3377,6 +3420,13 @@ def dpr_print_view():
     ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
     selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
     selected_site = request.args.get("site_id")
+
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        selected_site = str(user_site_id)
 
     site_obj = None
     if selected_site and selected_site.isdigit():
