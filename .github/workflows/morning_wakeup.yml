@@ -1,20 +1,24 @@
-name: Morning Server Wakeup (6:00 AM IST)
+name: Daytime Keep-Alive & Morning Wakeup (05:30 AM to 11:30 PM IST)
 
 on:
   schedule:
-    # 00:30 UTC = 06:00 AM IST (Wakes up Render server before supervisors reach site)
-    - cron: '30 0 * * *'
-    # 00:45 UTC = 06:15 AM IST (Backup wakeup trigger)
-    - cron: '45 0 * * *'
+    # 00:00 to 18:00 UTC = 05:30 AM to 11:30 PM IST (Daytime working hours)
+    # Ping every 10 minutes from external GitHub runners so Render NEVER enters idle sleep mode!
+    - cron: '*/10 0-18 * * *'
   workflow_dispatch:
 
 jobs:
-  wakeup:
-    name: Wakeup Render Server for Daytime Work
+  keepalive:
+    name: Ping Render Live Service
     runs-on: ubuntu-latest
     steps:
       - name: Ping Live Service
         run: |
-          echo "Waking up M/S Sandip Kumar Tracker on Render..."
-          curl -s -m 60 "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status" || true
-          echo "Morning wakeup ping dispatched successfully."
+          echo "Pinging M/S Sandip Kumar Tracker on Render..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 60 "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status" || echo "FAIL")
+          echo "Target response HTTP code: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "SUCCESS: Server is warm and responsive."
+          else
+            echo "NOTICE: Wakeup signal dispatched (HTTP $STATUS)."
+          fi

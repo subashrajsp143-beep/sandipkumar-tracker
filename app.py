@@ -115,16 +115,19 @@ def _start_keep_alive_daemon():
                 ist_now = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
                 current_hour = ist_now.hour
 
-                # 1. Active Working Window: 06:00 AM to 11:59 PM IST (hours 6 through 23)
+                # 1. Active Working Window: 05:00 AM to 11:59 PM IST (hours 5 through 23)
                 # Keep server warm and awake so supervisors NEVER see a loading/sleep screen!
-                # Between 12:00 AM (midnight) and 06:00 AM, pings stop completely so Render sleeps safely.
-                if 6 <= current_hour < 24:
+                if 5 <= current_hour < 24:
                     try:
+                        import ssl
+                        ssl_ctx = ssl.create_default_context()
+                        ssl_ctx.check_hostname = False
+                        ssl_ctx.verify_mode = ssl.CERT_NONE
                         req = urllib.request.Request(
                             live_url,
                             headers={"User-Agent": "SandipTracker-KeepAlive/2.0"}
                         )
-                        urllib.request.urlopen(req, timeout=12)
+                        urllib.request.urlopen(req, timeout=15, context=ssl_ctx)
                     except Exception:
                         pass
 
@@ -137,8 +140,8 @@ def _start_keep_alive_daemon():
             except Exception as e:
                 print(f"Auto-sync worker notice: {e}")
 
-            # Ping every 10 minutes (600s) during the day (Render idles after 15m, so 10m keeps it awake)
-            time.sleep(600)
+            # Ping every 6 minutes (360s) during daytime (Render idles after 15m; 6m guarantees active state)
+            time.sleep(360)
 
     try:
         import threading
