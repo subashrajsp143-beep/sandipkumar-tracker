@@ -1239,3 +1239,142 @@ def generate_dpr_excel(site_name, report_date, entries):
     wb.save(buf)
     buf.seek(0)
     return buf
+
+
+def generate_dpr_pdf(site_name, report_date, entries):
+    """
+    Generates a clean, professional landscape A4 PDF for DPR (Daily Progress Report)
+    matching M/S Sandip Kumar's government format.
+    """
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.pdfgen import canvas
+    import datetime as dt
+
+    buf = io.BytesIO()
+
+    class NumberedDprCanvas(canvas.Canvas):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._saved_page_states = []
+
+        def showPage(self):
+            self._saved_page_states.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            num_pages = len(self._saved_page_states)
+            for state in self._saved_page_states:
+                self.__dict__.update(state)
+                self.draw_page_decorations(num_pages)
+                super().showPage()
+            super().save()
+
+        def draw_page_decorations(self, total_pages):
+            self.saveState()
+            self.setFont("Helvetica", 7.5)
+            self.setFillColor(colors.HexColor('#64748B'))
+            self.drawString(20, 12, "M/S SANDIP KUMAR — Jal Jeevan Mission Bihar | Daily Progress Report (DPR)")
+            page_text = f"Page {self._pageNumber} of {total_pages}"
+            self.drawRightString(822, 12, page_text)
+            self.restoreState()
+
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=landscape(A4),
+        leftMargin=16,
+        rightMargin=16,
+        topMargin=14,
+        bottomMargin=20
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('DprTitle', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=12, leading=14, textColor=colors.HexColor('#0F172A'), alignment=1)
+    sub_style = ParagraphStyle('DprSub', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=9, leading=11, textColor=colors.HexColor('#166534'), alignment=1)
+    stat_style = ParagraphStyle('DprStat', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10, textColor=colors.HexColor('#475569'), alignment=1)
+
+    th_style = ParagraphStyle('DprTH', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.5, leading=9, textColor=colors.white, alignment=1)
+    cell_center = ParagraphStyle('CellCenter', parent=styles['Normal'], fontName='Helvetica', fontSize=7, leading=8.5, alignment=1)
+    cell_bold_center = ParagraphStyle('CellBoldCenter', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7, leading=8.5, alignment=1)
+    cell_left = ParagraphStyle('CellLeft', parent=styles['Normal'], fontName='Helvetica', fontSize=7, leading=8.5, alignment=0)
+    cell_bold_left = ParagraphStyle('CellBoldLeft', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7, leading=8.5, alignment=0)
+
+    site_label = site_name if site_name else "All 21 Water Supply Sites"
+
+    elements = [
+        Paragraph('M/S SANDIP KUMAR &mdash; GOVERNMENT CONTRACTOR &amp; WATER SUPPLY WORKS', title_style),
+        Spacer(1, 2),
+        Paragraph('DAILY PROGRESS REPORT (DPR) &mdash; JAL JEEVAN MISSION, BIHAR', sub_style),
+        Spacer(1, 2),
+        Paragraph(f'<b>SITE:</b> {site_label} &nbsp;&nbsp;|&nbsp;&nbsp; <b>DATE:</b> {report_date} &nbsp;&nbsp;|&nbsp;&nbsp; <b>TOTAL ENTRIES:</b> {len(entries)}', stat_style),
+        Spacer(1, 5)
+    ]
+
+    col_widths = [20, 45, 140, 130, 100, 65, 85, 40, 95, 90]
+
+    headers_row = [
+        Paragraph('<b>Sr.</b>', th_style),
+        Paragraph('<b>Ward No.<br/>वार्ड</b>', th_style),
+        Paragraph('<b>Work Details<br/>कार्य विवरणी</b>', th_style),
+        Paragraph('<b>Work Location &amp; Address<br/>कार्यस्थल पता</b>', th_style),
+        Paragraph('<b>Workmen Name<br/>कारीगरों के नाम</b>', th_style),
+        Paragraph('<b>Mobile No.<br/>मोबाइल नंबर</b>', th_style),
+        Paragraph('<b>Work Area<br/>कार्य क्षेत्र</b>', th_style),
+        Paragraph('<b>Ward<br/>वार्ड</b>', th_style),
+        Paragraph('<b>Work Activity<br/>कार्य गतिविधि</b>', th_style),
+        Paragraph('<b>Remark<br/>टिप्पणी</b>', th_style),
+    ]
+
+    table_data = [headers_row]
+
+    for idx, e in enumerate(entries, start=1):
+        table_data.append([
+            Paragraph(str(idx), cell_center),
+            Paragraph(str(e.get('ward_no') or '-'), cell_bold_center),
+            Paragraph(str(e.get('work_details') or '-'), cell_bold_left),
+            Paragraph(str(e.get('work_location') or '-'), cell_left),
+            Paragraph(str(e.get('workmen_name') or '-'), cell_bold_left),
+            Paragraph(str(e.get('mobile_no') or '-'), cell_center),
+            Paragraph(str(e.get('work_area') or '-'), cell_left),
+            Paragraph(str(e.get('sub_ward_no') or e.get('ward_no') or '-'), cell_center),
+            Paragraph(str(e.get('work_activity') or '-'), cell_left),
+            Paragraph(str(e.get('remark') or '-'), cell_left),
+        ])
+
+    if not entries:
+        table_data.append([
+            Paragraph('1', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('No DPR work entries recorded yet for this date.', cell_bold_left),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center),
+            Paragraph('-', cell_center)
+        ])
+
+    t = Table(table_data, colWidths=col_widths, repeatRows=1)
+    t_style = [
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#166534')),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#94A3B8')),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('LEFTPADDING', (0,0), (-1,-1), 3),
+        ('RIGHTPADDING', (0,0), (-1,-1), 3),
+    ]
+
+    for i in range(1, len(table_data)):
+        if i % 2 == 0:
+            t_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F8FAFC')))
+
+    t.setStyle(TableStyle(t_style))
+    elements.append(t)
+
+    doc.build(elements, canvasmaker=NumberedDprCanvas)
+    buf.seek(0)
+    return buf

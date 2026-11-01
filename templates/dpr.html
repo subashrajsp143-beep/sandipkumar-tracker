@@ -9,9 +9,15 @@
     <div class="bg-[#166534] text-white rounded-2xl p-5 sm:p-7 shadow-sm border border-[#166534] relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-white/15 text-emerald-200 border border-white/20 mb-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Jal Jeevan Mission &bull; Har Ghar Nal Ka Jal &bull; 21 Sites</span>
+                <div class="flex items-center gap-2 flex-wrap mb-2">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-white/15 text-emerald-200 border border-white/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Jal Jeevan Mission &bull; Har Ghar Nal Ka Jal &bull; 21 Sites</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-amber-200 border border-white/20">
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
+                        <span>Cloud Auto-Sync Active</span>
+                    </span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
                     <i class="fa-solid fa-clipboard-check text-amber-400"></i>
@@ -22,18 +28,26 @@
                 </p>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Action Buttons: Print, PDF, Excel & WhatsApp -->
+            <div class="flex flex-wrap items-center gap-2">
                 <button type="button" onclick="openNewDprModal()" class="btn-cta text-xs sm:text-sm shadow-md cursor-pointer">
                     <i class="fa-solid fa-circle-plus text-white"></i>
                     <span>+ Add Work Entry</span>
                 </button>
-                <a href="/export/dpr-excel?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-4 py-2.5 rounded-xl bg-white text-[#166534] hover:bg-emerald-50 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-2 border border-white/30" title="Download Excel matching Government Format">
-                    <i class="fa-solid fa-file-excel text-emerald-700"></i>
-                    <span>Excel Export</span>
+                <a href="/dpr/print?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Print DPR / Save as PDF">
+                    <i class="fa-solid fa-print text-indigo-700"></i>
+                    <span>Print / Printout</span>
                 </a>
-                <button type="button" onclick="shareDprWhatsApp()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                <a href="/export/dpr-pdf?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download PDF">
+                    <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                    <span>PDF</span>
+                </a>
+                <a href="/export/dpr-excel?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-emerald-950 hover:bg-emerald-50 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download Excel">
+                    <i class="fa-solid fa-file-excel text-emerald-700"></i>
+                    <span>Excel</span>
+                </a>
+                <button type="button" onclick="shareDprWhatsApp()" class="px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
                     <span>WhatsApp</span>
                 </button>
             </div>

@@ -1876,6 +1876,7 @@ def add_dpr_entry(site_id, report_date, ward_no="", work_details="", work_locati
     entry_id = cursor.lastrowid
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return get_dpr_entry_by_id(entry_id)
 
 
@@ -1910,6 +1911,7 @@ def update_dpr_entry(entry_id, ward_no="", work_details="", work_location="",
     ))
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return get_dpr_entry_by_id(entry_id)
 
 
@@ -1921,6 +1923,7 @@ def delete_dpr_entry(entry_id):
     affected = cursor.rowcount
     conn.commit()
     conn.close()
+    _notify_cloud_backup()
     return affected > 0
 
 

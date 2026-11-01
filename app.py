@@ -3294,6 +3294,62 @@ def export_dpr_excel():
     )
 
 
+@app.route("/export/dpr-pdf")
+def export_dpr_pdf():
+    """Export DPR work register as landscape A4 PDF document."""
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    selected_site = request.args.get("site_id")
+
+    site_name = "All Sites"
+    if selected_site and selected_site.isdigit():
+        s = database.get_site_by_id(int(selected_site))
+        if s:
+            site_name = f"{s['code']} - {s['name']}"
+
+    entries = database.get_dpr_entries(
+        site_id=int(selected_site) if (selected_site and selected_site.isdigit()) else None,
+        report_date=selected_date
+    )
+
+    buf = exporter.generate_dpr_pdf(site_name, selected_date, entries)
+    clean_site = site_name.replace(" ", "_").replace("/", "_")
+    filename = f"DPR_{clean_site}_{selected_date}.pdf"
+    return send_file(
+        buf,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/pdf"
+    )
+
+
+@app.route("/dpr/print")
+def dpr_print_view():
+    """Dedicated print-ready view for DPR Daily Progress Report."""
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    selected_date = request.args.get("date") or ist_now.strftime("%Y-%m-%d")
+    selected_site = request.args.get("site_id")
+
+    site_obj = None
+    if selected_site and selected_site.isdigit():
+        site_obj = database.get_site_by_id(int(selected_site))
+
+    entries = database.get_dpr_entries(
+        site_id=int(selected_site) if (selected_site and selected_site.isdigit()) else None,
+        report_date=selected_date
+    )
+
+    return render_template(
+        "dpr_print.html",
+        entries=entries,
+        selected_date=selected_date,
+        selected_site=selected_site,
+        site_obj=site_obj
+    )
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
 
