@@ -440,6 +440,20 @@ def dashboard():
     letter_fys = database.get_distinct_letter_fys()
     letters_stats = database.get_outgoing_letters_stats()
 
+    # Get today's manpower summary for the attendance modal
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    today_ist = (now_utc + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d")
+    try:
+        _, today_att_totals = database.get_daily_manpower(today_ist)
+    except Exception:
+        today_att_totals = {"total": 0}
+
+    # Get full materials catalog for materials modal
+    try:
+        all_materials = database.get_all_materials()
+    except Exception:
+        all_materials = []
+
     supervisors_tracking = database.get_supervisors_live_tracking_today()
 
     return render_template(
@@ -450,6 +464,8 @@ def dashboard():
         next_letter_info=next_letter_info,
         letter_fys=letter_fys,
         letters_stats=letters_stats,
+        today_att_totals=today_att_totals,
+        all_materials=all_materials,
         supervisors_tracking=supervisors_tracking
     )
 
