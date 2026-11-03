@@ -12,119 +12,100 @@
                 <div class="flex items-center gap-2 flex-wrap mb-2">
                     <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black bg-white/15 text-emerald-200 border border-white/20">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Jal Jeevan Mission &bull; Har Ghar Nal Ka Jal &bull; 21 Sites</span>
+                        <span>Jal Jeevan Mission &bull; Har Ghar Nal Ka Jal &bull; {% if is_supervisor_mode %}{{ selected_site_obj.code if selected_site_obj else 'Assigned Site' }}{% else %}21 Sites{% endif %}</span>
                     </span>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-amber-200 border border-white/20">
                         <i class="fa-solid fa-cloud-arrow-up text-amber-300"></i>
                         <span>Cloud Auto-Sync Active</span>
                     </span>
-                    {% if not is_owner and user_site_id %}
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-800 text-white border border-emerald-400/50">
-                        <i class="fa-solid fa-user-shield text-amber-300"></i>
-                        <span>Supervisor Mode: {{ selected_site_obj.code if selected_site_obj else 'Site' }}</span>
+                    {% if is_supervisor_mode %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 shadow-xs">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>{{ selected_site_obj.code }} &mdash; {{ selected_site_obj.name }} (सुपरवाइजर कार्य क्षेत्र)</span>
                     </span>
                     {% endif %}
                 </div>
 
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
                     <i class="fa-solid fa-clipboard-check text-amber-400"></i>
-                    {% if is_owner %}
-                    <span>Office DPR Monitor — All 21 Water Supply Sites</span>
+                    {% if is_supervisor_mode %}
+                    <span>{{ selected_site_obj.code if selected_site_obj else 'Site' }} &mdash; Daily DPR Sheet</span>
                     {% else %}
-                    <span>{{ selected_site_obj.code if selected_site_obj else 'Site' }} — Daily DPR Entry</span>
+                    <span>Office DPR Monitor &mdash; All 21 Water Supply Sites</span>
                     {% endif %}
                 </h1>
 
                 <p class="text-emerald-100 text-xs sm:text-sm mt-1 max-w-2xl">
-                    {% if is_owner %}
-                    कार्यालय कार्य प्रगति मॉनिटरिंग — सभी 21 साइटों की दैनिक रिपोर्ट, वार्ड अनुसार विवरणी, कारीगर, मोबाइल नंबर, कार्य क्षेत्र व गतिविधियों का मास्टर रजिस्टर।
+                    {% if is_supervisor_mode %}
+                    {{ selected_site_obj.name if selected_site_obj else 'Site' }} &bull; आज का दैनिक कार्य पर्चा (DPR) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें।
                     {% else %}
-                    {{ selected_site_obj.name if selected_site_obj else 'Assigned Site' }} — आज का दैनिक कार्य, वार्ड संख्या, कारीगरों के नाम, मोबाइल नंबर, कार्य क्षेत्र व गतिविधि दर्ज करें।
+                    कार्यालय DPR मॉनिटरिंग &bull; सभी 21 साइटों के दैनिक कार्य पर्चे (DPR Sheets) का स्टेटस, 7:30 PM रिमाइंडर व 1-क्लिक प्रिंटआउट।
                     {% endif %}
                 </p>
             </div>
 
-            <!-- Action Buttons: Add Entry, Print, PDF, Excel & WhatsApp -->
+            <!-- Top Action Buttons -->
             <div class="flex flex-wrap items-center gap-2">
-                <button type="button" onclick="openNewDprModal()" class="btn-cta text-xs sm:text-sm shadow-md cursor-pointer">
-                    <i class="fa-solid fa-circle-plus text-white"></i>
-                    <span>+ Add Work Entry</span>
+                {% if is_supervisor_mode %}
+                <button type="button" onclick="saveSupervisorDprSheet()" id="topBtnSaveSheet" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save DPR Sheet</span>
                 </button>
-                <a href="/dpr/print?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Print DPR / Save as PDF">
+                <a href="/dpr/print-sheet?site_id={{ selected_site_id }}&date={{ selected_date }}" target="_blank" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Print DPR (फोटो जैसा A4 प्रिंट)">
                     <i class="fa-solid fa-print text-indigo-700"></i>
-                    <span>Print / Printout</span>
+                    <span>Print (A4)</span>
                 </a>
-                <a href="/export/dpr-pdf?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download Landscape A4 PDF">
+                <a href="/export/dpr-sheet-pdf?site_id={{ selected_site_id }}&date={{ selected_date }}" class="px-3.5 py-2.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download PDF">
                     <i class="fa-solid fa-file-pdf text-rose-600"></i>
                     <span>PDF</span>
                 </a>
-                <a href="/export/dpr-excel?date={{ selected_date }}{% if selected_site_id %}&site_id={{ selected_site_id }}{% endif %}" class="px-3.5 py-2.5 rounded-xl bg-white text-emerald-950 hover:bg-emerald-50 font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 border border-white/40" title="Download Excel">
-                    <i class="fa-solid fa-file-excel text-emerald-700"></i>
-                    <span>Excel</span>
-                </a>
-                <button type="button" onclick="shareDprWhatsApp()" class="px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <button type="button" onclick="shareSupervisorDprWhatsApp()" class="px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-brands fa-whatsapp text-base"></i>
                     <span>WhatsApp</span>
                 </button>
+                {% else %}
+                <button type="button" onclick="sendEveningWhatsAppReminders()" class="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer" title="Send 7:30 PM WhatsApp reminder to all pending supervisors">
+                    <i class="fa-solid fa-bell text-slate-950"></i>
+                    <span>7:30 PM WhatsApp रिमाइंडर ({{ pending_sites_count }} Pending)</span>
+                </button>
+                {% endif %}
             </div>
         </div>
 
         <!-- Summary Stat Pills -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-white/15">
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
-                <div class="text-[10px] font-bold uppercase text-emerald-200">Total Work Entries</div>
-                <div class="text-2xl font-black text-white mt-1">{{ stats.total_entries }}</div>
-                <div class="text-[10px] text-emerald-300">Recorded for {{ selected_date }}</div>
+                <div class="text-[10px] font-bold uppercase text-emerald-200">Date (तारीख)</div>
+                <div class="text-xl sm:text-2xl font-black text-white mt-1">{{ selected_date }}</div>
+                <div class="text-[10px] text-emerald-300">Reporting Date</div>
             </div>
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
-                <div class="text-[10px] font-bold uppercase text-emerald-200">Workmen Deployed</div>
-                <div class="text-2xl font-black text-amber-300 mt-1">{{ stats.total_workmen }}</div>
-                <div class="text-[10px] text-emerald-300">Mistri, Plumber & Helpers</div>
+                <div class="text-[10px] font-bold uppercase text-emerald-200">Sites Reported</div>
+                <div class="text-xl sm:text-2xl font-black text-emerald-300 mt-1">{{ reported_sites_count }} / {{ sites|length }}</div>
+                <div class="text-[10px] text-emerald-300">{% if is_supervisor_mode %}{{ selected_site_obj.name }}{% else %}21 Sites Status{% endif %}</div>
             </div>
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
-                <div class="text-[10px] font-bold uppercase text-emerald-200">Wards Under Work</div>
-                <div class="text-2xl font-black text-sky-300 mt-1">{{ stats.total_wards }}</div>
-                <div class="text-[10px] text-emerald-300">Active working wards</div>
+                <div class="text-[10px] font-bold uppercase text-emerald-200">Sites Pending</div>
+                <div class="text-xl sm:text-2xl font-black {% if pending_sites_count > 0 %}text-amber-300{% else %}text-emerald-300{% endif %} mt-1">{{ pending_sites_count }}</div>
+                <div class="text-[10px] text-emerald-300">Awaiting 7:30 PM DPR</div>
             </div>
             <div class="bg-black/20 rounded-xl p-3 border border-white/10">
-                <div class="text-[10px] font-bold uppercase text-emerald-200">
-                    {% if is_owner %}Sites Reported / Total{% else %}Assigned Site Status{% endif %}
-                </div>
-                <div class="text-2xl font-black text-emerald-300 mt-1">
-                    {% if is_owner %}
-                    {{ reported_sites_count }} / {{ sites|length }}
-                    {% else %}
-                    {% if stats.total_entries > 0 %}Submitted{% else %}Pending{% endif %}
-                    {% endif %}
-                </div>
-                <div class="text-[10px] text-emerald-300">
-                    {% if is_owner %}{{ pending_sites_count }} sites pending today{% else %}{{ selected_site_obj.name if selected_site_obj else 'Site' }}{% endif %}
-                </div>
+                <div class="text-[10px] font-bold uppercase text-emerald-200">Workmen on Duty</div>
+                <div class="text-xl sm:text-2xl font-black text-sky-300 mt-1">{{ stats.total_workmen }}</div>
+                <div class="text-[10px] text-emerald-300">Total Manpower Reported</div>
             </div>
         </div>
     </div>
 
-    <!-- Filter Bar & View Toggle -->
+    <!-- Date Filter Bar -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
-        <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto" id="dprFilterForm">
-            <input type="hidden" name="view" id="filterViewMode" value="{{ view_mode }}">
-
+        <form method="GET" action="/dpr" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto" id="dprDateFilterForm">
             <div class="flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-600"><i class="fa-regular fa-calendar text-emerald-700"></i> Date:</label>
                 <input type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
             </div>
 
-            {% if is_owner and all_sites|length > 1 and not is_supervisor_mode %}
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-600"><i class="fa-solid fa-location-dot text-rose-500"></i> Site:</label>
-                <select name="site_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
-                    <option value="">-- All 21 Water Supply Sites --</option>
-                    {% for s in all_sites %}
-                    <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% elif selected_site_obj %}
+            {% if is_supervisor_mode %}
             <div class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs font-black flex items-center gap-1.5 shadow-2xs">
                 <i class="fa-solid fa-lock text-emerald-700"></i>
                 <span>{{ selected_site_obj.code }} - {{ selected_site_obj.name }} (Assigned Site)</span>
@@ -134,100 +115,209 @@
             <button type="submit" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
                 <i class="fa-solid fa-filter"></i> Apply
             </button>
-
-            {% if selected_site_id or search_query or selected_ward %}
-            <a href="/dpr?date={{ selected_date }}" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition">
-                <i class="fa-solid fa-xmark"></i> Clear Filters
-            </a>
-            {% endif %}
         </form>
 
-        <!-- Right Side: View Switcher & Live Search -->
-        <div class="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
-            
-            <!-- View Mode Switcher -->
-            <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200">
-                <button type="button" onclick="switchView('sitewise')" id="btnViewSitewise" class="px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 {% if view_mode != 'table' %}bg-white text-emerald-950 shadow-xs border border-slate-200{% else %}text-slate-600 hover:text-slate-900{% endif %}">
-                    <i class="fa-solid fa-sitemap text-emerald-700"></i>
-                    <span>Site & Ward View</span>
-                </button>
-                <button type="button" onclick="switchView('table')" id="btnViewTable" class="px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 {% if view_mode == 'table' %}bg-white text-emerald-950 shadow-xs border border-slate-200{% else %}text-slate-600 hover:text-slate-900{% endif %}">
-                    <i class="fa-solid fa-table text-indigo-700"></i>
-                    <span>Master 9-Col Table</span>
-                </button>
-            </div>
-
-            <!-- Instant Search -->
-            <div class="relative w-48 sm:w-60">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                <input type="text" id="dprSearchInput" oninput="handleUniversalDprSearch()" placeholder="Search site, ward, work, mobile..." class="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white">
-            </div>
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700">
+                <i class="fa-regular fa-clock text-emerald-700"></i>
+                <span>Daily Reporting Time: <strong>7:30 PM &ndash; 8:00 PM</strong></span>
+            </span>
         </div>
     </div>
 
     <!-- ============================================================ -->
-    <!-- VIEW MODE 1: SITE-WISE & WARD BREAKDOWN (मुख्य साइट व वार्ड व्यू) -->
+    <!-- 1. SUPERVISOR VIEW: DAILY DPR SHEET (MATCHES PHOTO 100%)      -->
     <!-- ============================================================ -->
-    <div id="sitewiseContainer" class="space-y-4 {% if view_mode == 'table' %}hidden{% endif %}">
+    {% if is_supervisor_mode %}
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-4 sm:p-6" id="supervisorSheetContainer">
         
-        <!-- Office Status Control Bar -->
-        {% if is_owner %}
-        <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3 text-xs font-bold text-emerald-950">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-black text-xs shadow-2xs">
-                    <i class="fa-solid fa-building-circle-check"></i>
-                    <span>{{ reported_sites_count }} Reported Today</span>
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg {% if pending_sites_count > 0 %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-200 text-slate-700{% endif %} font-black text-xs">
-                    <i class="fa-solid fa-clock"></i>
-                    <span>{{ pending_sites_count }} Pending Sites</span>
-                </span>
-                <span class="text-slate-600 hidden sm:inline">&bull; क्लिक करके साइट के अंदर वार्ड और काम देखें</span>
+        <!-- Status Notification Box -->
+        {% if supervisor_sheet %}
+        <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 text-xs sm:text-sm font-bold">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>आज ({{ selected_date }}) का DPR पर्चा सुरक्षित है। आप चाहें तो और लाइनें जोड़ या सुधार सकते हैं।</span>
             </div>
-
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="expandAllSites()" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300 transition">
-                    <i class="fa-solid fa-angles-down text-emerald-700"></i> Expand All
-                </button>
-                <button type="button" onclick="collapseAllSites()" class="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold border border-slate-300 transition">
-                    <i class="fa-solid fa-angles-up text-slate-600"></i> Collapse All
-                </button>
-            </div>
+            <a href="/dpr/print-sheet?site_id={{ selected_site_id }}&date={{ selected_date }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold text-xs hover:bg-emerald-800 transition flex items-center gap-1">
+                <i class="fa-solid fa-print"></i> <span>A4 Print</span>
+            </a>
+        </div>
+        {% else %}
+        <div class="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 flex items-center gap-2.5 text-xs sm:text-sm font-bold">
+            <i class="fa-solid fa-bell text-amber-600 text-base animate-pulse"></i>
+            <span>आज का DPR पर्चा अभी तक सबमिट नहीं हुआ है। कृपया नीचे कारीगरों और काम का विवरण लिखकर "Save DPR Sheet" दबाएं।</span>
         </div>
         {% endif %}
 
-        <!-- Site Cards Loop -->
-        {% for item in site_wise_data %}
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden site-card-wrapper transition-all duration-200"
-             id="siteCard_{{ item.site.id }}"
-             data-site-id="{{ item.site.id }}"
-             data-site-name="{{ item.site.name|lower }}"
-             data-site-code="{{ item.site.code|lower }}"
-             data-has-reported="{{ 'yes' if item.has_reported else 'no' }}">
+        <!-- Physical Paper Header Layout -->
+        <div class="border-2 border-slate-800 rounded-xl p-4 sm:p-5 bg-white">
+            
+            <div class="text-center pb-3 border-b-2 border-slate-800">
+                <h2 class="text-xl sm:text-2xl font-black uppercase text-slate-900 tracking-wider font-serif">M/S SANDIP KUMAR</h2>
+                <h3 class="text-xs sm:text-sm font-black uppercase text-slate-800 tracking-widest underline mt-0.5">DAILY PROGRESS REPORT</h3>
+            </div>
 
-            <!-- Site Card Header (Clickable Accordion) -->
-            <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer bg-slate-50/80 hover:bg-slate-100/90 border-b border-slate-200 select-none"
-                 onclick="toggleSiteCard('{{ item.site.id }}')">
+            <!-- Metadata Form Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 pb-3 border-b-2 border-slate-800 text-xs">
+                <div>
+                    <label class="font-bold text-slate-700 block">DATE (तारीख):</label>
+                    <input type="text" id="sheetReportDate" value="{{ selected_date }}" readonly class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-slate-100 border border-slate-300 font-bold font-mono text-slate-900">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700 block">SITE NAME (साइट का नाम):</label>
+                    <input type="text" id="sheetSiteName" value="{{ selected_site_obj.name }}{% if selected_site_obj.location %}, {{ selected_site_obj.location }}{% endif %}" readonly class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-slate-100 border border-slate-300 font-bold text-slate-900">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block">SUPERVISOR NAME (सुपरवाइजर का नाम):</label>
+                    <input type="text" id="sheetSupervisorName" value="{{ supervisor_sheet.supervisor_name if supervisor_sheet else (selected_site_obj.supervisor or user_name) }}" class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-white border border-slate-300 font-semibold text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700 block">MOB. NO. (मोबाइल नंबर):</label>
+                    <input type="tel" id="sheetSupervisorPhone" value="{{ supervisor_sheet.supervisor_phone if supervisor_sheet else selected_site_obj.contact }}" class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-white border border-slate-300 font-mono font-semibold text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="font-bold text-slate-700 block">SUB SUPERVISOR NAME (सहायक सुपरवाइजर):</label>
+                    <input type="text" id="sheetSubSupervisorName" value="{{ supervisor_sheet.sub_supervisor_name if supervisor_sheet else '' }}" placeholder="यदि कोई हो तो लिखें" class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-white border border-slate-300 font-semibold text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700 block">MOB. NO. (सहायक मोबाइल नंबर):</label>
+                    <input type="tel" id="sheetSubSupervisorPhone" value="{{ supervisor_sheet.sub_supervisor_phone if supervisor_sheet else '' }}" placeholder="सहायक का मोबाइल" class="w-full mt-0.5 px-2.5 py-1.5 rounded bg-white border border-slate-300 font-mono font-semibold text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Workmen & Activity Interactive Grid (No forced dropdowns, supervisor types freely!) -->
+            <div class="mt-3 overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse border border-slate-800" id="supervisorRowsTable">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 font-black border-b border-slate-800 text-[11px] text-center">
+                            <th class="py-2 px-1 w-10">SL NO.</th>
+                            <th class="py-2 px-2 text-left min-w-[160px]">Workmen Name (कारीगर का नाम)</th>
+                            <th class="py-2 px-2 min-w-[120px]">Mob. No. (मोबाइल)</th>
+                            <th class="py-2 px-2 text-left min-w-[150px]">Work Area (कार्य क्षेत्र / टोला)</th>
+                            <th class="py-2 px-2 min-w-[90px]">Ward No. (वार्ड)</th>
+                            <th class="py-2 px-2 text-left min-w-[180px]">Work Activity (कार्य गतिविधि)</th>
+                            <th class="py-2 px-1 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="supervisorRowsBody" class="divide-y divide-slate-300">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-2.5 flex items-center justify-between">
+                <button type="button" onclick="addNewWorkmanRow()" class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plus text-emerald-700"></i>
+                    <span>+ Add Another Row (नया कारीगर लाइन जोड़ें)</span>
+                </button>
+                <span class="text-[11px] text-slate-500 italic">जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी।</span>
+            </div>
+
+            <!-- Bottom Summary Checklist (A to F) -->
+            <div class="mt-4 pt-3 border-t-2 border-slate-800 text-xs font-bold text-slate-900 space-y-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex items-center gap-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800">(A) New Connection-</label>
+                        <input type="text" id="sheetNewConnection" value="{{ supervisor_sheet.new_connection if supervisor_sheet else '' }}" placeholder="संख्या या विवरण लिखें" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800">(B) Connection Repairing-</label>
+                        <input type="text" id="sheetConnectionRepairing" value="{{ supervisor_sheet.connection_repairing if supervisor_sheet else '' }}" placeholder="जैसे: 2" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800">(C) Motor Repair/Starter Repair-</label>
+                        <input type="text" id="sheetMotorStarterRepair" value="{{ supervisor_sheet.motor_starter_repair if supervisor_sheet else '' }}" placeholder="संख्या या विवरण लिखें" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800">(D) Main pipe Repairing-</label>
+                        <input type="text" id="sheetMainPipeRepairing" value="{{ supervisor_sheet.main_pipe_repairing if supervisor_sheet else '' }}" placeholder="संख्या या विवरण लिखें" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:col-span-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800">(E) New Motor &amp; New Starter-</label>
+                        <input type="text" id="sheetNewMotorStarter" value="{{ supervisor_sheet.new_motor_starter if supervisor_sheet else '' }}" placeholder="संख्या या विवरण लिखें" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-start gap-2 sm:col-span-2">
+                        <label class="w-48 flex-shrink-0 text-slate-800 pt-1.5">(F) Other Work-</label>
+                        <textarea id="sheetOtherWork" rows="2" placeholder="वार्ड अनुसार विशेष काम लिखें (जैसे: (1) (W-5) = मोटर खोला गया रिपेयर के लिए। (W-10) = स्टार्टर खोला गया रिपेयर के लिए।)" class="flex-grow px-2.5 py-1 rounded bg-slate-50 border border-slate-300 font-normal leading-relaxed focus:ring-1 focus:ring-emerald-600 focus:outline-none">{{ supervisor_sheet.other_work if supervisor_sheet else '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Save Button Container -->
+            <div class="mt-5 pt-4 border-t-2 border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="text-xs text-slate-500">
+                    <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> सेव करते ही पूरा पर्चा सुरक्षित हो जाएगा और ऑफिस में तुरंत दिखेगा।
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="saveSupervisorDprSheet()" id="btnSaveSheetBottom" class="px-5 py-2.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white font-black text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-check"></i>
+                        <span id="btnSaveSheetText">Save Today's DPR Sheet</span>
+                    </button>
+                    <a href="/dpr/print-sheet?site_id={{ selected_site_id }}&date={{ selected_date }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 border border-slate-300 font-bold text-xs sm:text-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print text-indigo-700"></i>
+                        <span>Print (A4)</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- 2. OFFICE VIEW: ALL 21 SITES DPR MONITOR & 1-CLICK PRINTOUT   -->
+    <!-- ============================================================ -->
+    {% else %}
+    <div class="space-y-4" id="officeViewContainer">
+        
+        <!-- Office Status Control Bar -->
+        <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3 text-xs font-bold text-emerald-950">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-2xs">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>{{ reported_sites_count }} Sites Submitted DPR</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl {% if pending_sites_count > 0 %}bg-amber-100 text-amber-900 border border-amber-300{% else %}bg-slate-200 text-slate-700{% endif %} font-black text-xs">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>{{ pending_sites_count }} Sites Pending</span>
+                </span>
+            </div>
+
+            <button type="button" onclick="sendEveningWhatsAppReminders()" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>Send 7:30 PM WhatsApp Reminder to Pending Sites</span>
+            </button>
+        </div>
+
+        <!-- 21 Sites Cards List -->
+        <div class="grid grid-cols-1 gap-3.5" id="officeSitesGrid">
+            {% for item in site_wise_data %}
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition hover:shadow-xs">
                 
                 <div class="flex items-start sm:items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-mono font-black text-sm flex-shrink-0 shadow-2xs {% if item.has_reported %}bg-[#166534] text-white{% else %}bg-slate-200 text-slate-600{% endif %}">
+                    <div class="w-11 h-11 rounded-xl flex items-center justify-center font-mono font-black text-base flex-shrink-0 shadow-2xs {% if item.sheet_submitted %}bg-[#166534] text-white{% else %}bg-slate-200 text-slate-600{% endif %}">
                         {{ item.site.code.replace('SITE-', '') if 'SITE-' in item.site.code else loop.index }}
                     </div>
 
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base sm:text-lg font-black text-slate-900 leading-tight">
+                            <h3 class="text-base sm:text-lg font-black text-slate-900">
                                 {{ item.site.code }} &mdash; {{ item.site.name }}
                             </h3>
-                            {% if item.has_reported %}
+                            {% if item.sheet_submitted %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                                <span>{{ item.ward_count }} Wards &bull; {{ item.entry_count }} Activities</span>
+                                <span>Sheet Submitted &bull; {{ item.sheet_rows|length }} Workmen</span>
                             </span>
                             {% else %}
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
                                 <i class="fa-solid fa-clock text-amber-600"></i>
-                                <span>Report Pending</span>
+                                <span>DPR Pending</span>
                             </span>
                             {% endif %}
                         </div>
@@ -237,786 +327,253 @@
                             {% if item.site.supervisor %}
                             <span><i class="fa-solid fa-user-tie text-emerald-700"></i> <strong>{{ item.site.supervisor }}</strong></span>
                             {% endif %}
-                            {% if item.site.supervisor_phone %}
-                            <a href="tel:{{ item.site.supervisor_phone }}" onclick="event.stopPropagation()" class="text-emerald-700 font-bold hover:underline">
-                                <i class="fa-solid fa-phone"></i> {{ item.site.supervisor_phone }}
+                            {% if item.site.contact %}
+                            <a href="tel:{{ item.site.contact }}" class="text-emerald-700 font-bold hover:underline">
+                                <i class="fa-solid fa-phone"></i> {{ item.site.contact }}
                             </a>
                             {% endif %}
                         </div>
-                    </div>
-                </div>
 
-                <!-- Right Action Buttons inside Site Header -->
-                <div class="flex items-center gap-2 self-end sm:self-auto" onclick="event.stopPropagation()">
-                    <button type="button" onclick="openNewDprModal('{{ item.site.id }}', '{{ item.site.code }} - {{ item.site.name }}')" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer" title="Add Work Entry for this Site">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>+ Add Entry</span>
-                    </button>
-                    
-                    {% if item.has_reported %}
-                    <a href="/dpr/print?date={{ selected_date }}&site_id={{ item.site.id }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold shadow-2xs transition flex items-center gap-1" title="Print this Site DPR">
-                        <i class="fa-solid fa-print text-indigo-700"></i>
-                    </a>
-                    <a href="/export/dpr-pdf?date={{ selected_date }}&site_id={{ item.site.id }}" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold shadow-2xs transition flex items-center gap-1" title="Download this Site PDF">
-                        <i class="fa-solid fa-file-pdf text-rose-600"></i>
-                    </a>
-                    {% endif %}
-
-                    <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 transition-transform duration-200 cursor-pointer" id="siteChevron_{{ item.site.id }}">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Site Body: Ward-by-Ward Details ("uske andar ward aur sab dikhaye") -->
-            <div id="siteBody_{{ item.site.id }}" class="p-4 sm:p-5 space-y-4">
-                
-                {% if item.has_reported %}
-                    
-                    <!-- Loop through Wards in this Site -->
-                    {% for ward_name, ward_entries in item.ward_groups.items() %}
-                    <div class="rounded-xl border border-slate-200 overflow-hidden bg-slate-50/50 ward-container" data-ward-name="{{ ward_name|lower }}">
-                        
-                        <!-- Ward Banner -->
-                        <div class="px-4 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                                <h4 class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wide">
-                                    {{ ward_name }} &bull; वार्ड विवरण
-                                </h4>
-                                <span class="text-[11px] font-bold text-slate-500">({{ ward_entries|length }} कार्य गतिविधियां)</span>
-                            </div>
-                            <span class="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
-                                JAL JEEVAN MISSION
-                            </span>
+                        {% if item.sheet_submitted and item.daily_sheet %}
+                        <div class="text-xs text-slate-700 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <strong>Summary:</strong>
+                            {% if item.daily_sheet.connection_repairing %}Repairing: <strong>{{ item.daily_sheet.connection_repairing }}</strong> &bull; {% endif %}
+                            {% if item.daily_sheet.new_connection %}New Conn: <strong>{{ item.daily_sheet.new_connection }}</strong> &bull; {% endif %}
+                            {% if item.daily_sheet.other_work %}{{ item.daily_sheet.other_work|truncate(70) }}{% else %}Regular maintenance work{% endif %}
                         </div>
-
-                        <!-- Ward Entries Table with all 9 Government Columns -->
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="bg-white text-slate-700 font-black border-b border-slate-200 text-[11px]">
-                                        <th class="py-2.5 px-3 w-10 text-center">Sr.</th>
-                                        <th class="py-2.5 px-3 min-w-[180px]">कार्य कि विवरणी (Work Details)</th>
-                                        <th class="py-2.5 px-3 min-w-[180px]">कार्यस्थल एवं पता (Location)</th>
-                                        <th class="py-2.5 px-3 min-w-[150px]">WORKMEN NAME (कारीगर)</th>
-                                        <th class="py-2.5 px-3 min-w-[110px]">MOB. NO</th>
-                                        <th class="py-2.5 px-3 min-w-[120px]">WORK AREA</th>
-                                        <th class="py-2.5 px-3 min-w-[140px]">WORK ACTIVITY</th>
-                                        <th class="py-2.5 px-3 min-w-[140px]">REMARK</th>
-                                        <th class="py-2.5 px-2 w-16 text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200 bg-white text-slate-800">
-                                    {% for row in ward_entries %}
-                                    <tr class="hover:bg-emerald-50/40 transition entry-row"
-                                        data-search="{{ (row.ward_no ~ ' ' ~ row.work_details ~ ' ' ~ (row.work_location or '') ~ ' ' ~ (row.workmen_name or '') ~ ' ' ~ (row.mobile_no or '') ~ ' ' ~ (row.work_area or '') ~ ' ' ~ (row.work_activity or '') ~ ' ' ~ (row.remark or '') ~ ' ' ~ row.site_name)|lower }}">
-                                        
-                                        <td class="py-2 px-3 text-center font-mono font-bold text-slate-400">{{ loop.index }}</td>
-                                        
-                                        <!-- Work Details -->
-                                        <td class="py-2 px-3 font-bold text-slate-900 leading-snug">
-                                            {{ row.work_details }}
-                                        </td>
-
-                                        <!-- Work Location with Address -->
-                                        <td class="py-2 px-3 text-slate-700">
-                                            {{ row.work_location or '-' }}
-                                        </td>
-
-                                        <!-- Workmen Name -->
-                                        <td class="py-2 px-3 font-semibold text-slate-900">
-                                            <i class="fa-solid fa-person-digging text-emerald-700 text-[10px] mr-1"></i>
-                                            {{ row.workmen_name or '-' }}
-                                        </td>
-
-                                        <!-- Mobile No -->
-                                        <td class="py-2 px-3 font-mono text-slate-700">
-                                            {% if row.mobile_no %}
-                                            <a href="tel:{{ row.mobile_no }}" class="hover:text-emerald-700 hover:underline">
-                                                {{ row.mobile_no }}
-                                            </a>
-                                            {% else %}-{% endif %}
-                                        </td>
-
-                                        <!-- Work Area -->
-                                        <td class="py-2 px-3 text-slate-600">
-                                            {{ row.work_area or '-' }}
-                                        </td>
-
-                                        <!-- Work Activity -->
-                                        <td class="py-2 px-3 text-slate-700 font-medium">
-                                            {{ row.work_activity or '-' }}
-                                        </td>
-
-                                        <!-- Remark -->
-                                        <td class="py-2 px-3 text-slate-600 italic">
-                                            {{ row.remark or '-' }}
-                                        </td>
-
-                                        <!-- Actions -->
-                                        <td class="py-2 px-2 text-center">
-                                            <div class="flex items-center justify-center gap-1.5">
-                                                <button type="button" onclick='openEditDprModal({{ row|tojson }})' class="p-1 rounded text-slate-500 hover:text-emerald-700 hover:bg-slate-100 transition" title="Edit">
-                                                    <i class="fa-solid fa-pen-to-square"></i>
-                                                </button>
-                                                <button type="button" onclick="deleteDprEntry({{ row.id }})" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition" title="Delete">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                {% else %}
-                    <!-- Site Has Not Reported Yet -->
-                    <div class="text-center py-6 px-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <div class="text-slate-400 text-2xl mb-1.5"><i class="fa-solid fa-clipboard-question"></i></div>
-                        <div class="text-xs font-bold text-slate-700">आज ({{ selected_date }}) को इस साइट से अभी कोई कार्य विवरणी दर्ज नहीं हुई है।</div>
-                        <div class="text-[11px] text-slate-500 mt-0.5 mb-3">सुपरवाइजर द्वारा एंट्री किए जाने पर यहां वार्ड अनुसार तुरंत अपडेट दिखेगा।</div>
-                        <button type="button" onclick="openNewDprModal('{{ item.site.id }}', '{{ item.site.code }} - {{ item.site.name }}')" class="px-3.5 py-1.5 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-bold shadow-xs transition">
-                            <i class="fa-solid fa-circle-plus"></i> + इस साइट का कार्य दर्ज करें
-                        </button>
-                    </div>
-                {% endif %}
-
-            </div>
-        </div>
-        {% endfor %}
-
-    </div>
-
-
-    <!-- ============================================================ -->
-    <!-- VIEW MODE 2: MASTER 9-COLUMN GOVERNMENT TABLE (सरकारी टेबल व्यू) -->
-    <!-- ============================================================ -->
-    <div id="tableViewContainer" class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden {% if view_mode != 'table' %}hidden{% endif %}">
-        
-        <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-                <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-table text-emerald-700"></i>
-                    <span>दैनिक कार्य प्रगति विवरणी (Master 9-Column Government Register)</span>
-                </h3>
-                <p class="text-xs text-slate-500 mt-0.5">
-                    {% if selected_site_obj %}Site: <strong>{{ selected_site_obj.code }} - {{ selected_site_obj.name }}</strong> &bull; {% endif %}Date: <strong>{{ selected_date }}</strong>
-                </p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span id="dprTableCountBadge" class="text-xs px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
-                    Showing {{ dpr_entries|length }} Work Entries
-                </span>
-            </div>
-        </div>
-
-        {% if not dpr_entries %}
-        <!-- Empty State -->
-        <div class="text-center py-16 px-4">
-            <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl border border-emerald-200">
-                <i class="fa-solid fa-clipboard-list"></i>
-            </div>
-            <h4 class="text-base font-bold text-slate-800">No DPR entries recorded for {{ selected_date }}</h4>
-            <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                Click below to add the first work entry (Ward No, Work Details, Workmen, Mobile, Location).
-            </p>
-            <button type="button" onclick="openNewDprModal()" class="btn-cta text-xs">
-                <i class="fa-solid fa-plus text-white"></i>
-                <span>+ Add Today's Work Entry</span>
-            </button>
-        </div>
-        {% else %}
-        <!-- Excel-Like Responsive Table -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse border border-slate-300" id="dprTable">
-                <thead>
-                    <tr class="bg-slate-100 text-slate-800 font-black border-b border-slate-300 divide-x divide-slate-300 text-center">
-                        <th class="py-3 px-2 w-10">Sr.<br><span class="text-[10px] font-normal text-slate-500">क्र.</span></th>
-                        {% if not selected_site_id %}
-                        <th class="py-3 px-3 min-w-[120px] text-left">Site<br><span class="text-[10px] font-normal text-slate-500">साइट</span></th>
                         {% endif %}
-                        <th class="py-3 px-3 min-w-[90px]">वार्ड संख्या<br><span class="text-[10px] font-normal text-slate-500">Ward No.</span></th>
-                        <th class="py-3 px-4 min-w-[200px] text-left">कार्य कि विवरणी<br><span class="text-[10px] font-normal text-slate-500">Work Details</span></th>
-                        <th class="py-3 px-4 min-w-[220px] text-left">कार्यस्थल एवं पता के साथ<br><span class="text-[10px] font-normal text-slate-500">Work location with Address</span></th>
-                        <th class="py-3 px-3 min-w-[170px] text-left">WORKMEN NAME<br><span class="text-[10px] font-normal text-slate-500">(कारीगरों के नाम)</span></th>
-                        <th class="py-3 px-3 min-w-[120px]">MOB. NO<br><span class="text-[10px] font-normal text-slate-500">(मोबाइल नंबर)</span></th>
-                        <th class="py-3 px-3 min-w-[140px] text-left">WORK AREA<br><span class="text-[10px] font-normal text-slate-500">(कार्य क्षेत्र)</span></th>
-                        <th class="py-3 px-3 min-w-[90px]">WARD NO<br><span class="text-[10px] font-normal text-slate-500">(वार्ड नंबर)</span></th>
-                        <th class="py-3 px-3 min-w-[160px] text-left">WORK ACTIVITY<br><span class="text-[10px] font-normal text-slate-500">(कार्य गतिविधि)</span></th>
-                        <th class="py-3 px-3 min-w-[140px] text-left">REMARK<br><span class="text-[10px] font-normal text-slate-500">(टिप्पणी)</span></th>
-                        <th class="py-3 px-2 w-16 text-center">Action<br><span class="text-[10px] font-normal text-slate-500">कार्रवाई</span></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 text-slate-800 bg-white" id="dprTableBody">
-                    {% for row in dpr_entries %}
-                    <tr class="hover:bg-slate-50 transition dpr-row divide-x divide-slate-200"
-                        data-search="{{ (row.ward_no ~ ' ' ~ row.work_details ~ ' ' ~ (row.work_location or '') ~ ' ' ~ (row.workmen_name or '') ~ ' ' ~ (row.mobile_no or '') ~ ' ' ~ (row.work_area or '') ~ ' ' ~ (row.work_activity or '') ~ ' ' ~ (row.remark or '') ~ ' ' ~ row.site_name)|lower }}">
-                        
-                        <td class="py-2.5 px-2 text-center font-mono font-bold text-slate-500 row-serial-no">{{ loop.index }}</td>
-
-                        {% if not selected_site_id %}
-                        <td class="py-2.5 px-3">
-                            <span class="font-bold text-slate-900 block truncate">{{ row.site_name }}</span>
-                            <span class="text-[10px] font-mono text-slate-500">{{ row.site_code }}</span>
-                        </td>
-                        {% endif %}
-
-                        <td class="py-2.5 px-3 text-center">
-                            <span class="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-bold font-mono text-xs border border-emerald-200">
-                                {{ row.ward_no }}
-                            </span>
-                        </td>
-
-                        <td class="py-2.5 px-4 font-bold text-slate-900 leading-snug">
-                            {{ row.work_details }}
-                        </td>
-
-                        <td class="py-2.5 px-4 text-slate-700">
-                            {{ row.work_location or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-3 font-semibold text-slate-900">
-                            {{ row.workmen_name or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-3 font-mono text-center text-slate-700">
-                            {% if row.mobile_no %}
-                            <a href="tel:{{ row.mobile_no }}" class="hover:text-emerald-700 hover:underline">
-                                {{ row.mobile_no }}
-                            </a>
-                            {% else %}-{% endif %}
-                        </td>
-
-                        <td class="py-2.5 px-3 text-slate-700">
-                            {{ row.work_area or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-3 font-mono text-center text-slate-700">
-                            {{ row.sub_ward_no or row.ward_no or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-3 text-slate-700 font-medium">
-                            {{ row.work_activity or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-3 text-slate-600 italic">
-                            {{ row.remark or '-' }}
-                        </td>
-
-                        <td class="py-2.5 px-2 text-center">
-                            <div class="flex items-center justify-center gap-1.5">
-                                <button type="button" onclick='openEditDprModal({{ row|tojson }})' class="p-1 rounded text-slate-500 hover:text-emerald-700 hover:bg-slate-100 transition" title="Edit">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                                <button type="button" onclick="deleteDprEntry({{ row.id }})" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition" title="Delete">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
-
-</div>
-
-<!-- ============================================================ -->
-<!-- ADD / EDIT DPR WORK ENTRY MODAL (9 COLUMNS BILINGUAL) -->
-<!-- ============================================================ -->
-<div id="dprModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 transform transition-all my-8 animate-in fade-in zoom-in-95 duration-150">
-        
-        <!-- Modal Header -->
-        <div class="p-5 sm:p-6 bg-[#166534] text-white flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-clipboard-list text-amber-300"></i>
-                </div>
-                <div>
-                    <h3 class="text-base sm:text-lg font-black text-white" id="dprModalTitle">Record Daily Work Entry</h3>
-                    <p class="text-[11px] text-emerald-100">Jal Jeevan Mission Government Format &bull; 9 Columns</p>
-                </div>
-            </div>
-            <button type="button" onclick="closeDprModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <!-- Form Body with 9 Columns matching Excel -->
-        <form id="dprForm" onsubmit="submitDprForm(event)" class="p-5 sm:p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-            <input type="hidden" id="dprEditId" value="">
-
-            <!-- Row 1: Site and Report Date -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        Site (साइट) <span class="text-rose-500">*</span>
-                    </label>
-                    {% if is_supervisor_mode or (user_site_id and not is_owner) %}
-                    <input type="hidden" id="dprSiteId" value="{{ selected_site_id }}">
-                    <div class="py-2.5 px-3 rounded-xl bg-slate-100 border border-slate-300 text-xs font-black text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-lock text-emerald-700"></i>
-                        <span>{{ selected_site_obj.code if selected_site_obj else 'SITE' }} - {{ selected_site_obj.name if selected_site_obj else 'Your Assigned Site' }} (Locked)</span>
                     </div>
+                </div>
+
+                <!-- Office Actions for this Site -->
+                <div class="flex items-center gap-2 self-end md:self-auto flex-wrap">
+                    {% if item.sheet_submitted %}
+                    <a href="/dpr/print-sheet?site_id={{ item.site.id }}&date={{ selected_date }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5" title="Print physical A4 DPR sheet">
+                        <i class="fa-solid fa-print text-amber-300"></i>
+                        <span>A4 Print</span>
+                    </a>
+                    <a href="/export/dpr-sheet-pdf?site_id={{ item.site.id }}&date={{ selected_date }}" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-rose-700 border border-slate-300 text-xs font-bold transition flex items-center gap-1" title="Download PDF">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>PDF</span>
+                    </a>
                     {% else %}
-                    <select id="dprSiteId" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                        <option value="">-- Select Project Site --</option>
-                        {% for s in all_sites %}
-                        <option value="{{ s.id }}" {% if selected_site_id == s.id %}selected{% endif %}>{{ s.code }} - {{ s.name }} ({{ s.location or 'Site' }})</option>
-                        {% endfor %}
-                    </select>
+                    {% if item.site.contact %}
+                    <a href="https://api.whatsapp.com/send?phone=91{{ item.site.contact }}&text=Namaste%20{{ item.site.supervisor|urlencode }},%20M/S%20Sandip%20Kumar%20Site%20{{ item.site.name|urlencode }}%20ka%20aaj%20{{ selected_date }}%20ka%20DPR%20Sheet%20pending%20hai.%20Kripya%207:30%20PM%20tak%20portal%20me%20submit%20karein." target="_blank" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>WhatsApp Reminder</span>
+                    </a>
+                    {% endif %}
+                    <a href="/dpr/print-sheet?site_id={{ item.site.id }}&date={{ selected_date }}" target="_blank" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-eye"></i>
+                        <span>View Blank Sheet</span>
+                    </a>
                     {% endif %}
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        Date (दिनांक) <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="date" id="dprDate" value="{{ selected_date }}" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-slate-50">
-                </div>
             </div>
+            {% endfor %}
+        </div>
 
-            <!-- Row 2: Col A & Col B (Ward No & Work Details) -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        वार्ड संख्या / Ward No. <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="text" id="dprWardNo" list="wardSuggestions" required placeholder="e.g. Ward 01, Ward 02" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <datalist id="wardSuggestions">
-                        <option value="Ward 01">
-                        <option value="Ward 02">
-                        <option value="Ward 03">
-                        <option value="Ward 04">
-                        <option value="Ward 05">
-                        <option value="Ward 06">
-                        <option value="Ward 07">
-                        <option value="Ward 08">
-                        <option value="Main Center">
-                    </datalist>
-                </div>
-
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        कार्य कि विवरणी / Work Details <span class="text-rose-500">*</span>
-                    </label>
-                    <input type="text" id="dprWorkDetails" list="workDetailsSuggestions" required placeholder="e.g. HDPE पाइपलाइन खुदाई एवं बिछाना कार्य" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <datalist id="workDetailsSuggestions">
-                        <option value="HDPE पाइपलाइन खुदाई एवं बिछाना कार्य (Pipeline Laying)">
-                        <option value="FHTC घरेलू नल जल कनेक्शन कार्य (Tap Connections)">
-                        <option value="बोरिंग एवं केसिंग पाइप का कार्य (Boring & Casing)">
-                        <option value="पंप हाउस निर्माण / बाउंड्री वॉल कार्य (Civil Stage)">
-                        <option value="मोटर पंप एवं स्टार्टर इंस्टॉलेशन कार्य (Motor Starter)">
-                        <option value="सड़क रीस्टोरेशन / PCC मरम्मत कार्य (Road Restoration)">
-                        <option value="पाइपलाइन हाइड्रोलिक टेस्टिंग कार्य (Hydraulic Testing)">
-                        <option value="डिलीवरी एवं राइजर पाइप फिटिंग कार्य (Delivery Pipe)">
-                    </datalist>
-                </div>
-            </div>
-
-            <!-- Row 3: Col C (Work location with Address) -->
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">
-                    कार्यस्थल एवं पता के साथ / Work location with Address <span class="text-rose-500">*</span>
-                </label>
-                <input type="text" id="dprWorkLocation" required placeholder="e.g. प्राथमिक विद्यालय के पास, उत्तर टोला, मुख्य सड़क" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
-
-            <!-- Row 4: Col D & Col E (Workmen Name & Mobile No) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        WORKMEN NAME (कारीगरों के नाम)
-                    </label>
-                    <input type="text" id="dprWorkmenName" placeholder="e.g. रमेश कुमार (मिस्त्री) / मनोज (प्लंबर)" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        MOB. NO (मोबाइल नंबर)
-                    </label>
-                    <input type="tel" id="dprMobileNo" placeholder="e.g. 9876543210" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                </div>
-            </div>
-
-            <!-- Row 5: Col F, Col G, Col H (Work Area, Ward No, Work Activity) -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        WORK AREA (कार्य क्षेत्र)
-                    </label>
-                    <input type="text" id="dprWorkArea" placeholder="e.g. उत्तर टोला / पूरब टोला" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        WARD NO (वार्ड नंबर)
-                    </label>
-                    <input type="text" id="dprSubWardNo" placeholder="e.g. Ward 01" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">
-                        WORK ACTIVITY (कार्य गतिविधि)
-                    </label>
-                    <input type="text" id="dprWorkActivity" list="activitySuggestions" placeholder="e.g. Trenching / Pipe Jointing" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
-                    <datalist id="activitySuggestions">
-                        <option value="Trenching (खुदाई)">
-                        <option value="Pipe Jointing & Laying (पाइप जोड़ना व बिछाना)">
-                        <option value="Saddle & Tap Fitting (सैडल व नल लगाना)">
-                        <option value="Testing & Flushing (टेस्टिंग व फ्लशिंग)">
-                        <option value="Brickwork & Casting (चुनाई व ढलाई)">
-                        <option value="Wiring & Starter Connection (वायरिंग व स्टार्टर)">
-                        <option value="PCC Road Restoration (सड़क मरम्मत)">
-                    </datalist>
-                </div>
-            </div>
-
-            <!-- Row 6: Col I (Remark) -->
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">
-                    REMARK (टिप्पणी / कार्य माप)
-                </label>
-                <textarea id="dprRemark" rows="2" placeholder="e.g. 150 मीटर 63mm पाइप बिछाया गया, 12 नल कनेक्शन पूरे हुए, कार्य प्रगति पर है।" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-600 leading-relaxed"></textarea>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
-                <button type="button" onclick="closeDprModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-                    Cancel
-                </button>
-                <button type="submit" id="btnSaveDpr" class="px-5 py-2.5 rounded-xl bg-[#0A261F] hover:bg-[#12382E] text-white text-xs font-bold shadow-md transition flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-check"></i> <span id="btnSaveDprText">Save Work Entry</span>
-                </button>
-            </div>
-        </form>
     </div>
+    {% endif %}
+
 </div>
 
 {% block scripts %}
 <script>
-    function switchView(mode) {
-        const sitewiseContainer = document.getElementById('sitewiseContainer');
-        const tableViewContainer = document.getElementById('tableViewContainer');
-        const btnSitewise = document.getElementById('btnViewSitewise');
-        const btnTable = document.getElementById('btnViewTable');
-        const filterInput = document.getElementById('filterViewMode');
+    // -------------------------------------------------------------
+    // SUPERVISOR ROWS LOGIC (Matches physical paper 25 rows)
+    // -------------------------------------------------------------
+    let supervisorRows = {{ supervisor_sheet_rows|tojson if supervisor_sheet_rows else '[]' }};
 
-        if (mode === 'table') {
-            sitewiseContainer.classList.add('hidden');
-            tableViewContainer.classList.remove('hidden');
+    function renderSupervisorRows() {
+        const tbody = document.getElementById('supervisorRowsBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
 
-            btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-emerald-950 shadow-xs border border-slate-200';
-            btnSitewise.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
-            if (filterInput) filterInput.value = 'table';
-        } else {
-            tableViewContainer.classList.add('hidden');
-            sitewiseContainer.classList.remove('hidden');
-
-            btnSitewise.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-white text-emerald-950 shadow-xs border border-slate-200';
-            btnTable.className = 'px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
-            if (filterInput) filterInput.value = 'sitewise';
-        }
-    }
-
-    function toggleSiteCard(siteId) {
-        const body = document.getElementById('siteBody_' + siteId);
-        const chevron = document.getElementById('siteChevron_' + siteId);
-        if (!body) return;
-
-        if (body.classList.contains('hidden')) {
-            body.classList.remove('hidden');
-            if (chevron) chevron.style.transform = 'rotate(0deg)';
-        } else {
-            body.classList.add('hidden');
-            if (chevron) chevron.style.transform = 'rotate(-90deg)';
-        }
-    }
-
-    function expandAllSites() {
-        document.querySelectorAll('[id^="siteBody_"]').forEach(el => el.classList.remove('hidden'));
-        document.querySelectorAll('[id^="siteChevron_"]').forEach(el => el.style.transform = 'rotate(0deg)');
-    }
-
-    function collapseAllSites() {
-        document.querySelectorAll('[id^="siteBody_"]').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('[id^="siteChevron_"]').forEach(el => el.style.transform = 'rotate(-90deg)');
-    }
-
-    function openNewDprModal(presetSiteId, presetSiteName) {
-        document.getElementById('dprModalTitle').innerText = presetSiteName ? ('Record Work Entry — ' + presetSiteName) : 'Record Daily Work Entry';
-        document.getElementById('btnSaveDprText').innerText = 'Save Work Entry';
-        document.getElementById('dprEditId').value = '';
-
-        const isSupervisor = {{ 'true' if (is_supervisor_mode or not is_owner) else 'false' }};
-        const assignedSiteId = {{ selected_site_id or 'null' }};
-        const siteEl = document.getElementById('dprSiteId');
-        if (siteEl) {
-            if (isSupervisor && assignedSiteId) {
-                siteEl.value = assignedSiteId;
-            } else if (presetSiteId) {
-                siteEl.value = presetSiteId;
-            }
+        // If no rows, initialize with 6 blank rows so supervisor can immediately start typing
+        const displayRows = [...supervisorRows];
+        while (displayRows.length < 6) {
+            displayRows.push({ workmen_name: '', mobile_no: '', work_area: '', ward_no: '', work_activity: '' });
         }
 
-        document.getElementById('dprWardNo').value = '';
-        document.getElementById('dprWorkDetails').value = '';
-        document.getElementById('dprWorkLocation').value = '';
-        document.getElementById('dprWorkmenName').value = '';
-        document.getElementById('dprMobileNo').value = '';
-        document.getElementById('dprWorkArea').value = '';
-        document.getElementById('dprSubWardNo').value = '';
-        document.getElementById('dprWorkActivity').value = '';
-        document.getElementById('dprRemark').value = '';
+        displayRows.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50 transition';
+            tr.innerHTML = `
+                <td class="text-center font-mono font-bold text-slate-500 py-1 px-1">${idx + 1}</td>
+                <td class="py-1 px-1.5">
+                    <input type="text" value="${escapeHtml(row.workmen_name || '')}" oninput="updateRowField(${idx}, 'workmen_name', this.value)" placeholder="कारीगर का नाम" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-medium text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </td>
+                <td class="py-1 px-1.5">
+                    <input type="tel" value="${escapeHtml(row.mobile_no || '')}" oninput="updateRowField(${idx}, 'mobile_no', this.value)" placeholder="मोबाइल नंबर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </td>
+                <td class="py-1 px-1.5">
+                    <input type="text" value="${escapeHtml(row.work_area || '')}" oninput="updateRowField(${idx}, 'work_area', this.value)" placeholder="जैसे: रामटोल + महथी चौक" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </td>
+                <td class="py-1 px-1.5">
+                    <input type="text" value="${escapeHtml(row.ward_no || '')}" oninput="updateRowField(${idx}, 'ward_no', this.value)" placeholder="जैसे: 05/10/08" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </td>
+                <td class="py-1 px-1.5">
+                    <input type="text" value="${escapeHtml(row.work_activity || '')}" oninput="updateRowField(${idx}, 'work_activity', this.value)" placeholder="जैसे: मोटर पंप खोला गया + रिपेयर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                </td>
+                <td class="text-center py-1 px-1">
+                    <button type="button" onclick="removeWorkmanRow(${idx})" class="p-1 text-slate-400 hover:text-rose-600 transition" title="Delete Row">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
 
-        document.getElementById('dprModal').classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
+        supervisorRows = displayRows;
     }
 
-    function openEditDprModal(entry) {
-        document.getElementById('dprModalTitle').innerText = 'Edit Work Entry (ID #' + entry.id + ')';
-        document.getElementById('btnSaveDprText').innerText = 'Update Work Entry';
-        document.getElementById('dprEditId').value = entry.id;
-
-        if (document.getElementById('dprSiteId')) {
-            document.getElementById('dprSiteId').value = entry.site_id;
-        }
-        document.getElementById('dprDate').value = entry.report_date || '';
-        document.getElementById('dprWardNo').value = entry.ward_no || '';
-        document.getElementById('dprWorkDetails').value = entry.work_details || '';
-        document.getElementById('dprWorkLocation').value = entry.work_location || '';
-        document.getElementById('dprWorkmenName').value = entry.workmen_name || '';
-        document.getElementById('dprMobileNo').value = entry.mobile_no || '';
-        document.getElementById('dprWorkArea').value = entry.work_area || '';
-        document.getElementById('dprSubWardNo').value = entry.sub_ward_no || entry.ward_no || '';
-        document.getElementById('dprWorkActivity').value = entry.work_activity || '';
-        document.getElementById('dprRemark').value = entry.remark || '';
-
-        document.getElementById('dprModal').classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
+    function updateRowField(index, field, val) {
+        if (!supervisorRows[index]) supervisorRows[index] = {};
+        supervisorRows[index][field] = val;
     }
 
-    function closeDprModal() {
-        document.getElementById('dprModal').classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+    function addNewWorkmanRow() {
+        supervisorRows.push({ workmen_name: '', mobile_no: '', work_area: '', ward_no: '', work_activity: '' });
+        renderSupervisorRows();
     }
 
-    // Auto-fill sub_ward_no when ward_no changes
-    document.getElementById('dprWardNo').addEventListener('input', function() {
-        const subInput = document.getElementById('dprSubWardNo');
-        if (!subInput.value || subInput.value === this.defaultValue) {
-            subInput.value = this.value;
-        }
-    });
+    function removeWorkmanRow(index) {
+        supervisorRows.splice(index, 1);
+        renderSupervisorRows();
+    }
 
-    async function submitDprForm(e) {
-        e.preventDefault();
-        const editId = document.getElementById('dprEditId').value;
-        const siteId = document.getElementById('dprSiteId').value;
-        const reportDate = document.getElementById('dprDate').value;
-        const wardNo = document.getElementById('dprWardNo').value.trim();
-        const workDetails = document.getElementById('dprWorkDetails').value.trim();
-        const workLocation = document.getElementById('dprWorkLocation').value.trim();
-        const workmenName = document.getElementById('dprWorkmenName').value.trim();
-        const mobileNo = document.getElementById('dprMobileNo').value.trim();
-        const workArea = document.getElementById('dprWorkArea').value.trim();
-        const subWardNo = document.getElementById('dprSubWardNo').value.trim() || wardNo;
-        const workActivity = document.getElementById('dprWorkActivity').value.trim();
-        const remark = document.getElementById('dprRemark').value.trim();
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
-        if (!siteId || !wardNo || !workDetails) {
-            alert('Please select Site, Ward No, and Work Details.');
-            return;
-        }
+    // -------------------------------------------------------------
+    // SAVE SUPERVISOR DPR SHEET (AJAX POST)
+    // -------------------------------------------------------------
+    async function saveSupervisorDprSheet() {
+        const btnTop = document.getElementById('topBtnSaveSheet');
+        const btnBottom = document.getElementById('btnSaveSheetBottom');
+        const btnText = document.getElementById('btnSaveSheetText');
 
-        const btn = document.getElementById('btnSaveDpr');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+        if (btnTop) btnTop.disabled = true;
+        if (btnBottom) btnBottom.disabled = true;
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        // Filter out completely empty rows
+        const cleanRows = supervisorRows.filter(r => 
+            (r.workmen_name && r.workmen_name.trim()) || 
+            (r.work_activity && r.work_activity.trim()) || 
+            (r.work_area && r.work_area.trim()) || 
+            (r.ward_no && r.ward_no.trim())
+        );
 
         const payload = {
-            site_id: siteId,
-            report_date: reportDate,
-            ward_no: wardNo,
-            work_details: workDetails,
-            work_location: workLocation,
-            workmen_name: workmenName,
-            mobile_no: mobileNo,
-            work_area: workArea,
-            sub_ward_no: subWardNo,
-            work_activity: workActivity,
-            remark: remark
+            site_id: {{ selected_site_id or 'null' }},
+            report_date: "{{ selected_date }}",
+            supervisor_name: (document.getElementById('sheetSupervisorName')?.value || '').trim(),
+            supervisor_phone: (document.getElementById('sheetSupervisorPhone')?.value || '').trim(),
+            sub_supervisor_name: (document.getElementById('sheetSubSupervisorName')?.value || '').trim(),
+            sub_supervisor_phone: (document.getElementById('sheetSubSupervisorPhone')?.value || '').trim(),
+            rows: cleanRows,
+            new_connection: (document.getElementById('sheetNewConnection')?.value || '').trim(),
+            connection_repairing: (document.getElementById('sheetConnectionRepairing')?.value || '').trim(),
+            motor_starter_repair: (document.getElementById('sheetMotorStarterRepair')?.value || '').trim(),
+            main_pipe_repairing: (document.getElementById('sheetMainPipeRepairing')?.value || '').trim(),
+            new_motor_starter: (document.getElementById('sheetNewMotorStarter')?.value || '').trim(),
+            other_work: (document.getElementById('sheetOtherWork')?.value || '').trim()
         };
 
-        const url = editId ? `/api/dpr/${editId}` : '/api/dpr';
-        const method = editId ? 'PUT' : 'POST';
-
         try {
-            const resp = await fetch(url, {
-                method: method,
+            const resp = await fetch('/api/dpr-sheet', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await resp.json();
 
             if (data.success) {
-                closeDprModal();
+                alert('✅ आज का DPR पर्चा सफलतापूर्वक सुरक्षित (Save) हो गया!');
                 window.location.reload();
             } else {
-                alert(data.message || 'Error occurred. Please try again.');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'Update Work Entry' : 'Save Work Entry');
+                alert(data.message || 'Error occurred while saving DPR sheet.');
+                if (btnTop) btnTop.disabled = false;
+                if (btnBottom) btnBottom.disabled = false;
+                if (btnText) btnText.innerHTML = 'Save Today's DPR Sheet';
             }
         } catch (err) {
             alert('Server error: ' + err.message);
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (editId ? 'Update Work Entry' : 'Save Work Entry');
+            if (btnTop) btnTop.disabled = false;
+            if (btnBottom) btnBottom.disabled = false;
+            if (btnText) btnText.innerHTML = 'Save Today's DPR Sheet';
         }
     }
 
-    async function deleteDprEntry(id) {
-        if (!confirm('Are you sure you want to delete this DPR work entry?')) {
-            return;
-        }
-
-        try {
-            const resp = await fetch(`/api/dpr/${id}`, { method: 'DELETE' });
-            const data = await resp.json();
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Failed to delete.');
-            }
-        } catch (err) {
-            alert('Server error: ' + err.message);
-        }
-    }
-
-    function handleUniversalDprSearch() {
-        const q = (document.getElementById('dprSearchInput').value || '').trim().toLowerCase();
-        
-        // 1. Filter Master Table Rows
-        const tableRows = document.querySelectorAll('#dprTableBody tr.dpr-row');
-        let tableVisibleCount = 0;
-        tableRows.forEach(row => {
-            const rowSearch = row.getAttribute('data-search') || '';
-            if (!q || rowSearch.includes(q)) {
-                row.style.display = '';
-                tableVisibleCount++;
-                const snCell = row.querySelector('.row-serial-no');
-                if (snCell) snCell.innerText = tableVisibleCount;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-        const badge = document.getElementById('dprTableCountBadge');
-        if (badge) badge.innerText = `Showing ${tableVisibleCount} Work Entries`;
-
-        // 2. Filter Site Cards in Site-wise View
-        const siteCards = document.querySelectorAll('.site-card-wrapper');
-        siteCards.forEach(card => {
-            const siteName = card.getAttribute('data-site-name') || '';
-            const siteCode = card.getAttribute('data-site-code') || '';
-            
-            // Check inside rows of this site card
-            const entryRows = card.querySelectorAll('.entry-row');
-            let hasMatchingEntry = false;
-            entryRows.forEach(er => {
-                const searchVal = er.getAttribute('data-search') || '';
-                if (!q || searchVal.includes(q)) {
-                    er.style.display = '';
-                    hasMatchingEntry = true;
-                } else {
-                    er.style.display = 'none';
-                }
-            });
-
-            // Also check ward headers
-            const wardContainers = card.querySelectorAll('.ward-container');
-            wardContainers.forEach(wc => {
-                const visibleEntries = wc.querySelectorAll('.entry-row:not([style*="display: none"])');
-                if (visibleEntries.length === 0 && q) {
-                    wc.style.display = 'none';
-                } else {
-                    wc.style.display = '';
-                }
-            });
-
-            if (!q || siteName.includes(q) || siteCode.includes(q) || hasMatchingEntry) {
-                card.style.display = '';
-                if (q && hasMatchingEntry) {
-                    const body = card.querySelector('[id^="siteBody_"]');
-                    if (body) body.classList.remove('hidden');
-                }
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-
-    function shareDprWhatsApp() {
+    function shareSupervisorDprWhatsApp() {
         const date = "{{ selected_date }}";
-        const rows = document.querySelectorAll('#dprTableBody tr.dpr-row');
-        if (rows.length === 0) {
-            alert('No DPR entries to share for ' + date);
-            return;
-        }
-
-        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT (DPR)*
+        const site = "{{ selected_site_obj.name if selected_site_obj else 'Site' }}";
+        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT*
 `;
-        text += `*Jal Jeevan Mission, Bihar*
+        text += `*Site:* ${site}
 `;
         text += `*Date:* ${date}
 `;
         text += `-----------------------------------
 `;
-
-        rows.forEach((row, idx) => {
-            if (row.style.display !== 'none') {
-                const cells = row.querySelectorAll('td');
-                const ward = cells[1] ? cells[1].innerText.trim() : '';
-                const work = cells[2] ? cells[2].innerText.trim() : '';
-                const loc = cells[3] ? cells[3].innerText.trim() : '';
-                const workmen = cells[4] ? cells[4].innerText.trim() : '';
-                const remark = cells[8] ? cells[8].innerText.trim() : '';
-
-                text += `*${idx + 1}. ${ward}* | ${work}
-`;
-                if (loc && loc !== '-') text += `   _Location:_ ${loc}
-`;
-                if (workmen && workmen !== '-') text += `   _Workmen:_ ${workmen}
-`;
-                if (remark && remark !== '-') text += `   _Remark:_ ${remark}
-`;
-                text += `
+        supervisorRows.forEach((r, idx) => {
+            if (r.workmen_name || r.work_activity) {
+                text += `${idx + 1}. *${r.workmen_name || '-'}* | Ward: ${r.ward_no || '-'} | ${r.work_activity || '-'}
 `;
             }
         });
-
         text += `-----------------------------------
 `;
-        text += `_Report generated via M/S Sandip Kumar Portal_`;
-
-        const waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-        window.open(waUrl, '_blank');
+        const connRep = document.getElementById('sheetConnectionRepairing')?.value;
+        if (connRep) text += `• Connection Repairing: ${connRep}
+`;
+        const other = document.getElementById('sheetOtherWork')?.value;
+        if (other) text += `• Other Work: ${other}
+`;
+        text += `_Report submitted via M/S Sandip Kumar Portal_`;
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
     }
 
-    // Close on backdrop or ESC
-    const modal = document.getElementById('dprModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) closeDprModal();
+    function sendEveningWhatsAppReminders() {
+        const pendingSites = [
+            {% for item in site_wise_data %}
+            {% if not item.sheet_submitted %}
+            { code: "{{ item.site.code }}", name: "{{ item.site.name }}", supervisor: "{{ item.site.supervisor or '' }}", phone: "{{ item.site.contact or '' }}" },
+            {% endif %}
+            {% endfor %}
+        ];
+
+        if (pendingSites.length === 0) {
+            alert('All 21 sites have already submitted their DPR sheet for {{ selected_date }}!');
+            return;
+        }
+
+        let summary = `*M/S SANDIP KUMAR — 7:30 PM DPR REMINDER*
+`;
+        summary += `*Date:* {{ selected_date }}
+`;
+        summary += `The following ${pendingSites.length} sites are pending for today's DPR:
+`;
+        pendingSites.forEach((s, idx) => {
+            summary += `${idx + 1}. ${s.code} - ${s.name} (${s.supervisor || 'Supervisor'}: ${s.phone || 'No phone'})
+`;
         });
+        summary += `
+Kripya sabhi supervisor 8:00 PM tak apna daily DPR form portal par submit karein.`;
+
+        window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(summary), '_blank');
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeDprModal();
+    // Initialize rows on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('supervisorRowsBody')) {
+            renderSupervisorRows();
+        }
     });
 </script>
 {% endblock %}

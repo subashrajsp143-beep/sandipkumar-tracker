@@ -1378,3 +1378,141 @@ def generate_dpr_pdf(site_name, report_date, entries):
     doc.build(elements, canvasmaker=NumberedDprCanvas)
     buf.seek(0)
     return buf
+
+
+def generate_dpr_sheet_pdf(sheet, rows):
+    """
+    Generates an official A4 portrait PDF for the single daily DPR sheet
+    matching M/S Sandip Kumar's physical paper format with 100% precision.
+    """
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    import io
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=20,
+        rightMargin=20,
+        topMargin=18,
+        bottomMargin=18
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('SheetTitle', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=16, leading=18, textColor=colors.black, alignment=1)
+    sub_style = ParagraphStyle('SheetSub', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=10, leading=12, textColor=colors.black, alignment=1)
+    
+    meta_style = ParagraphStyle('SheetMeta', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8, leading=10, textColor=colors.black)
+    meta_right = ParagraphStyle('SheetMetaR', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8, leading=10, textColor=colors.black, alignment=2)
+    
+    th_style = ParagraphStyle('SheetTH', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=7.5, leading=9, textColor=colors.black, alignment=1)
+    cell_center = ParagraphStyle('CellC', parent=styles['Normal'], fontName='Helvetica', fontSize=7, leading=8.5, alignment=1)
+    cell_left = ParagraphStyle('CellL', parent=styles['Normal'], fontName='Helvetica', fontSize=7, leading=8.5, alignment=0)
+    
+    summary_bold = ParagraphStyle('SumB', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8, leading=10.5, textColor=colors.black)
+
+    elements = [
+        Paragraph('M/S SANDIP KUMAR', title_style),
+        Spacer(1, 2),
+        Paragraph('<u>DAILY PROGRESS REPORT</u>', sub_style),
+        Spacer(1, 5)
+    ]
+
+    # Meta Table (Left & Right)
+    meta_data = [
+        [
+            Paragraph(f'<b>DATE:</b> <font name="Helvetica">{sheet.get("report_date", "")}</font>', meta_style),
+            Paragraph(f'<b>SITE NAME:</b> <font name="Helvetica">{sheet.get("site_name", "")}</font>', meta_right)
+        ],
+        [
+            Paragraph(f'<b>SUPERVISOR NAME:</b> <font name="Helvetica">{sheet.get("supervisor_name") or "-"}</font>', meta_style),
+            Paragraph(f'<b>MOB. NO.:</b> <font name="Helvetica">{sheet.get("supervisor_phone") or "-"}</font>', meta_right)
+        ],
+        [
+            Paragraph(f'<b>SUB SUPERVISOR NAME:</b> <font name="Helvetica">{sheet.get("sub_supervisor_name") or "-"}</font>', meta_style),
+            Paragraph(f'<b>MOB. NO.:</b> <font name="Helvetica">{sheet.get("sub_supervisor_phone") or "-"}</font>', meta_right)
+        ]
+    ]
+    t_meta = Table(meta_data, colWidths=[275, 280])
+    t_meta.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+        ('TOPPADDING', (0,0), (-1,-1), 1),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ('LINEBELOW', (0,-1), (-1,-1), 1, colors.black),
+    ]))
+    elements.append(t_meta)
+    elements.append(Spacer(1, 4))
+
+    # Main 6-Column Table (25 rows)
+    col_widths = [25, 130, 95, 125, 65, 115]
+    table_data = [[
+        Paragraph('<b>SL<br/>NO.</b>', th_style),
+        Paragraph('<b>Workmen Name</b>', th_style),
+        Paragraph('<b>Mob. No.</b>', th_style),
+        Paragraph('<b>Work Area</b>', th_style),
+        Paragraph('<b>Ward No.</b>', th_style),
+        Paragraph('<b>Work Activity</b>', th_style)
+    ]]
+
+    for i in range(25):
+        row = rows[i] if i < len(rows) else {}
+        table_data.append([
+            Paragraph(str(i + 1), cell_center),
+            Paragraph(str(row.get('workmen_name') or ''), cell_left),
+            Paragraph(str(row.get('mobile_no') or ''), cell_center),
+            Paragraph(str(row.get('work_area') or ''), cell_left),
+            Paragraph(str(row.get('ward_no') or ''), cell_center),
+            Paragraph(str(row.get('work_activity') or ''), cell_left)
+        ])
+
+    t_grid = Table(table_data, colWidths=col_widths)
+    t_grid.setStyle(TableStyle([
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('TOPPADDING', (0,0), (-1,-1), 1.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 1.5),
+        ('LEFTPADDING', (0,0), (-1,-1), 2),
+        ('RIGHTPADDING', (0,0), (-1,-1), 2),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#F1F5F9'))
+    ]))
+    elements.append(t_grid)
+    elements.append(Spacer(1, 5))
+
+    # Bottom Work Summary Checklist (A to F)
+    sum_data = [
+        [
+            Paragraph(f'<b>(A)&nbsp;&nbsp;New Connection-</b> <font name="Helvetica">{sheet.get("new_connection") or "-"}</font>', summary_bold),
+            Paragraph(f'<b>(B)&nbsp;&nbsp;Connection Repairing-</b> <font name="Helvetica">{sheet.get("connection_repairing") or "-"}</font>', summary_bold)
+        ],
+        [
+            Paragraph(f'<b>(C)&nbsp;&nbsp;Motor Repair/Starter Repair-</b> <font name="Helvetica">{sheet.get("motor_starter_repair") or "-"}</font>', summary_bold),
+            Paragraph(f'<b>(D)&nbsp;&nbsp;Main pipe Repairing-</b> <font name="Helvetica">{sheet.get("main_pipe_repairing") or "-"}</font>', summary_bold)
+        ],
+        [
+            Paragraph(f'<b>(E)&nbsp;&nbsp;New Motor &amp; New Starter-</b> <font name="Helvetica">{sheet.get("new_motor_starter") or "-"}</font>', summary_bold),
+            Paragraph('', summary_bold)
+        ],
+        [
+            Paragraph(f'<b>(F)&nbsp;&nbsp;Other Work-</b> <font name="Helvetica">{sheet.get("other_work") or "-"}</font>', summary_bold),
+            Paragraph('', summary_bold)
+        ]
+    ]
+    t_sum = Table(sum_data, colWidths=[275, 280])
+    t_sum.setStyle(TableStyle([
+        ('LINEABOVE', (0,0), (-1,0), 1, colors.black),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 2),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+        ('LEFTPADDING', (0,0), (-1,-1), 2),
+        ('RIGHTPADDING', (0,0), (-1,-1), 2),
+    ]))
+    elements.append(t_sum)
+
+    doc.build(elements)
+    buf.seek(0)
+    return buf

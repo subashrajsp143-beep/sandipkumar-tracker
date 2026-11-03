@@ -574,7 +574,31 @@
                     {% endif %}
                 {% endwith %}
 
-                {% block content %}{% endblock %}
+                            <!-- 7:30 PM - 8:00 PM Daily DPR Evening Reminder Notification Banner -->
+            {% if show_dpr_reminder and request.path != '/dpr' %}
+            <div class="mb-4 bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-700 text-white p-3.5 sm:p-4 rounded-2xl shadow-lg border-2 border-amber-300 flex items-center justify-between gap-3 animate-pulse">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl flex-shrink-0">
+                        <i class="fa-solid fa-bell text-amber-200"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs sm:text-sm font-black uppercase tracking-wide flex items-center gap-1.5">
+                            <span>⏰ शाम 7:30 - 8:00 PM DPR रिमाइंडर</span>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-white text-amber-900 uppercase">जरूरी</span>
+                        </div>
+                        <div class="text-[11px] sm:text-xs text-amber-100 mt-0.5">
+                            आज का दैनिक कार्य पर्चा (DPR Sheet) अभी तक जमा नहीं हुआ है। कृपया तुरंत भरें।
+                        </div>
+                    </div>
+                </div>
+                <a href="/dpr" class="px-4 py-2 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-black text-xs shadow-md transition flex items-center gap-1.5 flex-shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square text-emerald-700"></i>
+                    <span>DPR भरें</span>
+                </a>
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
 
                 <!-- Subtle Clean Footer inside scrollable area -->
                 <div class="pt-6 pb-2 text-center text-xs text-[#4B6B57] border-t border-[#C7E6D1] no-print flex flex-col sm:flex-row justify-between items-center gap-2">

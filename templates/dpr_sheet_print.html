@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPR Sheet - {{ sheet.site_name }} - {{ sheet.report_date }} - M/S SANDIP KUMAR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 8mm 10mm;
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-border {
+                border-color: #000000 !important;
+            }
+        }
+        .sheet-table, .sheet-table th, .sheet-table td {
+            border: 1px solid #1e293b;
+        }
+        @media print {
+            .sheet-table, .sheet-table th, .sheet-table td {
+                border: 1px solid #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans p-3 sm:p-6 print:p-0">
+
+    <!-- Screen Only Action Bar -->
+    <div class="no-print max-w-[800px] mx-auto mb-4 bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+            <span class="text-xs font-black uppercase tracking-wider text-slate-700">Official DPR Sheet &bull; {{ sheet.site_name }}</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-[#166534] hover:bg-[#14532D] text-white text-xs font-black shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-print"></i>
+                <span>Print DPR (A4)</span>
+            </button>
+            <a href="/export/dpr-sheet-pdf?site_id={{ sheet.site_id }}&date={{ sheet.report_date }}" class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Download PDF</span>
+            </a>
+            <button onclick="shareSheetWhatsApp()" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+                <span>WhatsApp</span>
+            </button>
+            <a href="/dpr?date={{ sheet.report_date }}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Official Printable Sheet Container (Matches user photo 100%) -->
+    <div class="max-w-[800px] mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 print:border-none print:shadow-none print:p-0 print:rounded-none text-black">
+        
+        <!-- Header -->
+        <div class="text-center pb-2">
+            <h1 class="text-2xl sm:text-3xl font-black tracking-wide text-black uppercase font-serif" style="letter-spacing: 1px;">
+                M/S SANDIP KUMAR
+            </h1>
+            <h2 class="text-sm sm:text-base font-black tracking-widest text-black uppercase underline mt-0.5">
+                DAILY PROGRESS REPORT
+            </h2>
+        </div>
+
+        <!-- Top Metadata Grid (Matches photo) -->
+        <div class="mt-2 pb-2 text-[11px] sm:text-[12px] font-bold text-black border-b border-black">
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                <div>
+                    <span>DATE:</span>
+                    <span class="font-normal font-mono underline ml-1">{{ sheet.report_date }}</span>
+                </div>
+                <div class="text-right">
+                    <span>SITE NAME:</span>
+                    <span class="font-normal underline ml-1">{{ sheet.site_name }}{% if sheet.site_location %}, {{ sheet.site_location }}{% endif %}</span>
+                </div>
+
+                <div>
+                    <span>SUPERVISOR NAME:</span>
+                    <span class="font-normal ml-1">{{ sheet.supervisor_name or '-' }}</span>
+                </div>
+                <div class="text-right">
+                    <span>MOB. NO.:</span>
+                    <span class="font-normal font-mono ml-1">{{ sheet.supervisor_phone or '-' }}</span>
+                </div>
+
+                <div>
+                    <span>SUB SUPERVISOR NAME:</span>
+                    <span class="font-normal ml-1">{{ sheet.sub_supervisor_name or '-' }}</span>
+                </div>
+                <div class="text-right">
+                    <span>MOB. NO.:</span>
+                    <span class="font-normal font-mono ml-1">{{ sheet.sub_supervisor_phone or '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main 6-Column Workmen & Activity Table (Matches photo: 25 rows) -->
+        <table class="w-full text-left text-[11px] sm:text-[11.5px] border-collapse sheet-table mt-1">
+            <thead>
+                <tr class="text-black font-black text-center bg-slate-50 print:bg-transparent text-[11px]">
+                    <th class="py-1 px-1 w-10 text-center">SL<br/>NO.</th>
+                    <th class="py-1 px-2.5 w-[26%] text-left">Workmen Name</th>
+                    <th class="py-1 px-2 w-[18%] text-center">Mob. No.</th>
+                    <th class="py-1 px-2.5 w-[24%] text-left">Work Area</th>
+                    <th class="py-1 px-2 w-[12%] text-center">Ward No.</th>
+                    <th class="py-1 px-2.5 w-[20%] text-left">Work Activity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(25) %}
+                {% set row = rows[i] if i < rows|length else None %}
+                <tr class="h-[23px] text-black leading-tight">
+                    <td class="text-center font-mono py-0.5 px-1">{{ i + 1 }}</td>
+                    <td class="py-0.5 px-2.5 font-medium truncate">{{ row.workmen_name if row else '' }}</td>
+                    <td class="text-center font-mono py-0.5 px-2">{{ row.mobile_no if row else '' }}</td>
+                    <td class="py-0.5 px-2.5 truncate">{{ row.work_area if row else '' }}</td>
+                    <td class="text-center font-mono py-0.5 px-2">{{ row.ward_no if row else '' }}</td>
+                    <td class="py-0.5 px-2.5 truncate">{{ row.work_activity if row else '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Bottom Work Summary Checklist (A to F) (Matches photo without Material or Signature) -->
+        <div class="mt-2 pt-2 border-t-2 border-black text-[11px] sm:text-[11.5px] font-bold text-black leading-relaxed">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                <div class="flex items-start">
+                    <span class="w-48 flex-shrink-0 font-bold">(A)&nbsp;&nbsp;New Connection-</span>
+                    <span class="font-normal underline flex-grow">{{ sheet.new_connection or '-' }}</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="w-48 flex-shrink-0 font-bold">(B)&nbsp;&nbsp;Connection Repairing-</span>
+                    <span class="font-normal underline flex-grow">{{ sheet.connection_repairing or '-' }}</span>
+                </div>
+
+                <div class="flex items-start">
+                    <span class="w-48 flex-shrink-0 font-bold">(C)&nbsp;&nbsp;Motor Repair/Starter Repair-</span>
+                    <span class="font-normal underline flex-grow">{{ sheet.motor_starter_repair or '-' }}</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="w-48 flex-shrink-0 font-bold">(D)&nbsp;&nbsp;Main pipe Repairing-</span>
+                    <span class="font-normal underline flex-grow">{{ sheet.main_pipe_repairing or '-' }}</span>
+                </div>
+
+                <div class="flex items-start sm:col-span-2">
+                    <span class="w-48 flex-shrink-0 font-bold">(E)&nbsp;&nbsp;New Motor &amp; New Starter-</span>
+                    <span class="font-normal underline flex-grow">{{ sheet.new_motor_starter or '-' }}</span>
+                </div>
+
+                <div class="flex items-start sm:col-span-2 pt-1">
+                    <span class="w-48 flex-shrink-0 font-bold">(F)&nbsp;&nbsp;Other Work-</span>
+                    <span class="font-normal whitespace-pre-line flex-grow leading-snug">{{ sheet.other_work or '-' }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function shareSheetWhatsApp() {
+            const date = "{{ sheet.report_date }}";
+            const site = "{{ sheet.site_name }}";
+            let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT*\n`;
+            text += `*Site:* ${site}\n`;
+            text += `*Date:* ${date}\n`;
+            text += `*Supervisor:* {{ sheet.supervisor_name or '-' }} ({{ sheet.supervisor_phone or '-' }})\n`;
+            text += `-----------------------------------\n`;
+            text += `*Summary of Work:*\n`;
+            if ("{{ sheet.new_connection }}") text += `• New Connection: {{ sheet.new_connection }}\n`;
+            if ("{{ sheet.connection_repairing }}") text += `• Connection Repairing: {{ sheet.connection_repairing }}\n`;
+            if ("{{ sheet.motor_starter_repair }}") text += `• Motor/Starter Repair: {{ sheet.motor_starter_repair }}\n`;
+            if ("{{ sheet.main_pipe_repairing }}") text += `• Main Pipe Repairing: {{ sheet.main_pipe_repairing }}\n`;
+            if ("{{ sheet.new_motor_starter }}") text += `• New Motor & Starter: {{ sheet.new_motor_starter }}\n`;
+            if (`{{ sheet.other_work }}`) text += `• Other Work: {{ sheet.other_work }}\n`;
+            text += `-----------------------------------\n`;
+            text += `_Generated via M/S Sandip Kumar Portal_`;
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+        }
+    </script>
+</body>
+</html>

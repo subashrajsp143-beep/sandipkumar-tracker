@@ -1354,6 +1354,31 @@ def init_gps_tables():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_dpr_entries_site_date ON dpr_entries(site_id, report_date);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_dpr_entries_date ON dpr_entries(report_date);")
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS daily_dpr_sheets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        site_id INTEGER NOT NULL,
+        report_date TEXT NOT NULL,
+        supervisor_name TEXT,
+        supervisor_phone TEXT,
+        sub_supervisor_name TEXT,
+        sub_supervisor_phone TEXT,
+        rows_json TEXT,
+        new_connection TEXT,
+        connection_repairing TEXT,
+        motor_starter_repair TEXT,
+        main_pipe_repairing TEXT,
+        new_motor_starter TEXT,
+        other_work TEXT,
+        status TEXT DEFAULT 'submitted',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(site_id, report_date)
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_daily_dpr_sheets_date ON daily_dpr_sheets(report_date);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_daily_dpr_sheets_site_date ON daily_dpr_sheets(site_id, report_date);")
+
     # 8. Silent Supervisor & Site Incharge Location Tracking Logs
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS supervisor_location_logs (
@@ -5183,3 +5208,112 @@ def get_shared_docs_stats():
         "other": counts.get("other", 0) + counts.get("document", 0),
         "sites_active": total_sites_active
     }
+
+
+# =====================================================================
+# DAILY DPR SHEET METHODS (Exact Matching Physical Photo Form)
+# =====================================================================
+def save_daily_dpr_sheet(site_id, report_date, supervisor_name="", supervisor_phone="",
+                         sub_supervisor_name="", sub_supervisor_phone="", rows_json="[]",
+                         new_connection="", connection_repairing="", motor_starter_repair="",
+                         main_pipe_repairing="", new_motor_starter="", other_work="", status="submitted"):
+    """
+    Saves or updates the single daily DPR sheet for a site and date.
+    Maintains 1 DPR per site per day and auto-syncs to cloud.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO daily_dpr_sheets (
+            site_id, report_date, supervisor_name, supervisor_phone,
+            sub_supervisor_name, sub_supervisor_phone, rows_json,
+            new_connection, connection_repairing, motor_starter_repair,
+            main_pipe_repairing, new_motor_starter, other_work, status,
+            created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ON CONFLICT(site_id, report_date) DO UPDATE SET
+            supervisor_name = excluded.supervisor_name,
+            supervisor_phone = excluded.supervisor_phone,
+            sub_supervisor_name = excluded.sub_supervisor_name,
+            sub_supervisor_phone = excluded.sub_supervisor_phone,
+            rows_json = excluded.rows_json,
+            new_connection = excluded.new_connection,
+            connection_repairing = excluded.connection_repairing,
+            motor_starter_repair = excluded.motor_starter_repair,
+            main_pipe_repairing = excluded.main_pipe_repairing,
+            new_motor_starter = excluded.new_motor_starter,
+            other_work = excluded.other_work,
+            status = excluded.status,
+            updated_at = CURRENT_TIMESTAMP
+    """, (
+        int(site_id), str(report_date).strip(),
+        str(supervisor_name or "").strip(), str(supervisor_phone or "").strip(),
+        str(sub_supervisor_name or "").strip(), str(sub_supervisor_phone or "").strip(),
+        str(rows_json or "[]").strip(),
+        str(new_connection or "").strip(), str(connection_repairing or "").strip(),
+        str(motor_starter_repair or "").strip(), str(main_pipe_repairing or "").strip(),
+        str(new_motor_starter or "").strip(), str(other_work or "").strip(),
+        str(status or "submitted").strip()
+    ))
+    conn.commit()
+    conn.close()
+    _notify_cloud_backup()
+    return get_daily_dpr_sheet(site_id, report_date)
+
+
+def get_daily_dpr_sheet(site_id, report_date):
+    """Fetches the daily DPR sheet for a specific site and date."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM daily_dpr_sheets d
+        JOIN sites s ON d.site_id = s.id
+        WHERE d.site_id = ? AND d.report_date = ?
+    """, (int(site_id), str(report_date).strip()))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_daily_dpr_sheet_by_id(sheet_id):
+    """Fetches daily DPR sheet by ID."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM daily_dpr_sheets d
+        JOIN sites s ON d.site_id = s.id
+        WHERE d.id = ?
+    """, (int(sheet_id),))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_daily_dpr_sheets_for_date(report_date):
+    """Fetches all daily DPR sheets submitted for a given date across all sites."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.*, s.name as site_name, s.code as site_code, s.location as site_location
+        FROM daily_dpr_sheets d
+        JOIN sites s ON d.site_id = s.id
+        WHERE d.report_date = ?
+        ORDER BY d.site_id ASC
+    """, (str(report_date).strip(),))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def delete_daily_dpr_sheet(sheet_id):
+    """Deletes a daily DPR sheet."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM daily_dpr_sheets WHERE id = ?", (int(sheet_id),))
+    affected = cursor.rowcount
+    conn.commit()
+    conn.close()
+    _notify_cloud_backup()
+    return affected > 0

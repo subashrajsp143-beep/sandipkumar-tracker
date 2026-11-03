@@ -46,7 +46,21 @@ def inject_common():
         visible_sites = all_sites
 
     open_complaints_count = database.get_open_complaints_count(int(user_site_id) if user_site_id else None)
+    
+    # 7:30 PM - 8:30 PM IST Daily DPR Reminder
+    now_ist = datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)
+    current_minutes = now_ist.hour * 60 + now_ist.minute
+    is_evening_reminder = (current_minutes >= 1170) # After 7:30 PM IST
+    
+    dpr_pending_for_user = False
+    if user_site_id and not is_owner_admin:
+        today_ymd = now_ist.strftime("%Y-%m-%d")
+        existing_sheet = database.get_daily_dpr_sheet(int(user_site_id), today_ymd)
+        dpr_pending_for_user = (existing_sheet is None)
+
     return {
+        "show_dpr_reminder": (is_evening_reminder and dpr_pending_for_user),
+        "is_evening_dpr_window": (1170 <= current_minutes <= 1230),
         "current_date": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d"),
         "now_year": (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).year,
         "user_role": user_role,
@@ -3172,6 +3186,35 @@ def dpr_dashboard():
             "has_reported": len(entries_for_site) > 0
         })
 
+    import json
+    daily_sheets_list = database.get_daily_dpr_sheets_for_date(selected_date)
+    sheet_by_site = {s["site_id"]: s for s in daily_sheets_list}
+
+    supervisor_sheet = None
+    supervisor_sheet_rows = []
+    if is_supervisor_mode and selected_site_id:
+        supervisor_sheet = sheet_by_site.get(selected_site_id) or database.get_daily_dpr_sheet(selected_site_id, selected_date)
+        if supervisor_sheet and supervisor_sheet.get("rows_json"):
+            try:
+                supervisor_sheet_rows = json.loads(supervisor_sheet["rows_json"])
+            except Exception:
+                supervisor_sheet_rows = []
+
+    for item in site_wise_data:
+        s_id = item["site"]["id"]
+        sh = sheet_by_site.get(s_id)
+        item["daily_sheet"] = sh
+        item["sheet_submitted"] = bool(sh)
+        if sh and sh.get("rows_json"):
+            try:
+                item["sheet_rows"] = json.loads(sh["rows_json"])
+            except Exception:
+                item["sheet_rows"] = []
+        else:
+            item["sheet_rows"] = []
+        if sh:
+            item["has_reported"] = True
+
     reported_sites_count = sum(1 for item in site_wise_data if item["has_reported"])
     pending_sites_count = len(site_wise_data) - reported_sites_count
 
@@ -3181,6 +3224,9 @@ def dpr_dashboard():
         all_sites=all_sites,
         dpr_entries=dpr_entries,
         site_wise_data=site_wise_data,
+        supervisor_sheet=supervisor_sheet,
+        supervisor_sheet_rows=supervisor_sheet_rows,
+        daily_sheets_list=daily_sheets_list,
         stats=stats,
         reported_sites_count=reported_sites_count,
         pending_sites_count=pending_sites_count,
@@ -3443,6 +3489,223 @@ def dpr_print_view():
         selected_date=selected_date,
         selected_site=selected_site,
         site_obj=site_obj
+    )
+
+
+
+# =====================================================================
+# DAILY DPR SHEET API & PRINT/PDF EXPORT ROUTES
+# =====================================================================
+@app.route("/api/dpr-sheet", methods=["GET", "POST", "OPTIONS"])
+def api_dpr_sheet():
+    """API for the single Daily DPR Sheet per site per day."""
+    if request.method == "OPTIONS":
+        return "", 200
+
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if request.method == "GET":
+        site_id = request.args.get("site_id")
+        if is_supervisor_mode:
+            site_id = str(user_site_id)
+        
+        date_str = request.args.get("date") or today
+        if not site_id:
+            return jsonify({"success": False, "message": "site_id is required"}), 400
+
+        sheet = database.get_daily_dpr_sheet(int(site_id), date_str)
+        import json
+        rows = []
+        if sheet and sheet.get("rows_json"):
+            try:
+                rows = json.loads(sheet["rows_json"])
+            except Exception:
+                rows = []
+
+        return jsonify({"success": True, "sheet": sheet, "rows": rows})
+
+    # POST: Save / update daily DPR sheet
+    try:
+        import json
+        data = request.get_json(silent=True) or request.form
+
+        if is_supervisor_mode:
+            site_id = int(user_site_id)
+        else:
+            site_id = int(data.get("site_id", 0) or user_site_id or 0)
+
+        if not site_id:
+            return jsonify({"success": False, "message": "Site ID is required"}), 400
+
+        site = database.get_site_by_id(site_id)
+        if not site:
+            return jsonify({"success": False, "message": "Invalid site"}), 404
+
+        report_date = str(data.get("report_date") or data.get("date") or today).strip()
+
+        supervisor_name = str(data.get("supervisor_name") or site.get("supervisor") or session.get("worker_name") or "").strip()
+        supervisor_phone = str(data.get("supervisor_phone") or site.get("contact") or session.get("worker_phone") or "").strip()
+        sub_supervisor_name = str(data.get("sub_supervisor_name") or "").strip()
+        sub_supervisor_phone = str(data.get("sub_supervisor_phone") or "").strip()
+
+        rows = data.get("rows") or []
+        if isinstance(rows, str):
+            rows_json = rows
+        else:
+            rows_json = json.dumps(rows, ensure_ascii=False)
+
+        new_connection = str(data.get("new_connection") or "").strip()
+        connection_repairing = str(data.get("connection_repairing") or "").strip()
+        motor_starter_repair = str(data.get("motor_starter_repair") or "").strip()
+        main_pipe_repairing = str(data.get("main_pipe_repairing") or "").strip()
+        new_motor_starter = str(data.get("new_motor_starter") or "").strip()
+        other_work = str(data.get("other_work") or "").strip()
+
+        sheet = database.save_daily_dpr_sheet(
+            site_id=site_id,
+            report_date=report_date,
+            supervisor_name=supervisor_name,
+            supervisor_phone=supervisor_phone,
+            sub_supervisor_name=sub_supervisor_name,
+            sub_supervisor_phone=sub_supervisor_phone,
+            rows_json=rows_json,
+            new_connection=new_connection,
+            connection_repairing=connection_repairing,
+            motor_starter_repair=motor_starter_repair,
+            main_pipe_repairing=main_pipe_repairing,
+            new_motor_starter=new_motor_starter,
+            other_work=other_work,
+            status="submitted"
+        )
+
+        return jsonify({"success": True, "message": "✅ Daily DPR Sheet saved successfully!", "sheet": sheet})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route("/dpr/print-sheet")
+def dpr_sheet_print_view():
+    """Printable view of the single Daily DPR Sheet matching the physical photo 100%."""
+    import json
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    selected_date = request.args.get("date") or today
+    raw_site_id = request.args.get("site_id")
+
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        site_id = int(user_site_id)
+    elif raw_site_id and raw_site_id.isdigit():
+        site_id = int(raw_site_id)
+    else:
+        site_id = 15  # Default to Darbhanga / Singhia if none specified
+
+    sheet = database.get_daily_dpr_sheet(site_id, selected_date)
+    site = database.get_site_by_id(site_id)
+
+    if not sheet:
+        sheet = {
+            "site_id": site_id,
+            "site_name": site["name"] if site else "Water Supply Site",
+            "site_code": site["code"] if site else "SITE",
+            "site_location": site.get("location", "") if site else "",
+            "report_date": selected_date,
+            "supervisor_name": site.get("supervisor", "") if site else "",
+            "supervisor_phone": site.get("contact", "") if site else "",
+            "sub_supervisor_name": "",
+            "sub_supervisor_phone": "",
+            "new_connection": "",
+            "connection_repairing": "",
+            "motor_starter_repair": "",
+            "main_pipe_repairing": "",
+            "new_motor_starter": "",
+            "other_work": ""
+        }
+        rows = []
+    else:
+        try:
+            rows = json.loads(sheet.get("rows_json") or "[]")
+        except Exception:
+            rows = []
+
+    return render_template(
+        "dpr_sheet_print.html",
+        sheet=sheet,
+        rows=rows,
+        selected_date=selected_date
+    )
+
+
+@app.route("/export/dpr-sheet-pdf")
+def export_dpr_sheet_pdf():
+    """Download single Daily DPR Sheet as A4 portrait PDF."""
+    import json
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    ist_now = now_utc + datetime.timedelta(hours=5, minutes=30)
+    today = ist_now.strftime("%Y-%m-%d")
+
+    selected_date = request.args.get("date") or today
+    raw_site_id = request.args.get("site_id")
+
+    user_role = session.get("role")
+    user_site_id = session.get("site_id") or session.get("locked_site_id")
+    is_supervisor_mode = (user_role == "supervisor") or (bool(user_site_id) and user_role != "owner")
+
+    if is_supervisor_mode:
+        site_id = int(user_site_id)
+    elif raw_site_id and raw_site_id.isdigit():
+        site_id = int(raw_site_id)
+    else:
+        site_id = 15
+
+    sheet = database.get_daily_dpr_sheet(site_id, selected_date)
+    site = database.get_site_by_id(site_id)
+
+    if not sheet:
+        sheet = {
+            "site_id": site_id,
+            "site_name": site["name"] if site else "Water Supply Site",
+            "site_code": site["code"] if site else "SITE",
+            "site_location": site.get("location", "") if site else "",
+            "report_date": selected_date,
+            "supervisor_name": site.get("supervisor", "") if site else "",
+            "supervisor_phone": site.get("contact", "") if site else "",
+            "sub_supervisor_name": "",
+            "sub_supervisor_phone": "",
+            "new_connection": "",
+            "connection_repairing": "",
+            "motor_starter_repair": "",
+            "main_pipe_repairing": "",
+            "new_motor_starter": "",
+            "other_work": ""
+        }
+        rows = []
+    else:
+        try:
+            rows = json.loads(sheet.get("rows_json") or "[]")
+        except Exception:
+            rows = []
+
+    buf = exporter.generate_dpr_sheet_pdf(sheet, rows)
+    site_code = sheet.get("site_code") or f"SITE_{site_id}"
+    filename = f"DPR_Sheet_{site_code}_{selected_date}.pdf"
+
+    return send_file(
+        buf,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/pdf"
     )
 
 
