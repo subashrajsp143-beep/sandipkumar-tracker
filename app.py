@@ -85,7 +85,6 @@ def ensure_canonical_and_auth():
     path = request.path
     if (path.startswith("/static") or 
         path.startswith("/uploads") or 
-        path.startswith("/demo") or 
         path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
                  "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/health", "/ping", "/website", "/download-apk", "/download/html-templates"] or
         path.startswith("/worker/") or 
@@ -1609,12 +1608,6 @@ def pwa_sw():
     response.headers["Service-Worker-Allowed"] = "/"
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return response
-
-@app.route("/demo")
-@app.route("/demo/animations")
-def demo_animations():
-    """Interactive Showcase of UI Animations & Micro-Interactions."""
-    return render_template("demo_animations.html")
 
 @app.route("/download-apk")
 def download_apk():
