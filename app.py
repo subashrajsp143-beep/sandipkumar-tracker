@@ -86,7 +86,7 @@ def ensure_canonical_and_auth():
     if (path.startswith("/static") or 
         path.startswith("/uploads") or 
         path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
-                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/website", "/download-apk", "/download/html-templates"] or
+                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/health", "/ping", "/website", "/download-apk", "/download/html-templates"] or
         path.startswith("/worker/") or 
         path == "/api/worker/ping"):
         return None
@@ -1727,6 +1727,8 @@ def get_live_entries_api():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route("/health", methods=["GET"])
+@app.route("/ping", methods=["GET"])
 @app.route("/api/live-status", methods=["GET"])
 def live_status():
     try:
