@@ -177,17 +177,29 @@
     <div class="bg-white rounded-3xl p-4 sm:p-5 border border-[#E5ECE9] shadow-xs space-y-4">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
-            <!-- Step Filter Pills -->
-            <div class="flex flex-wrap items-center gap-1.5">
-                <button type="button" onclick="applyStepFilter('')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer {% if not selected_step %}bg-[#163F37] text-white shadow-xs{% else %}bg-[#F8FAF9] hover:bg-slate-100 text-slate-600 border border-[#E5ECE9]{% endif %}">
-                    All Sites (21)
+            <!-- Step Filter Dropdown Menu (Clean replacement for the 10 wrapping buttons) -->
+            <div class="flex items-center gap-2">
+                <label for="stepFilterSelect" class="text-xs font-bold text-slate-600 flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-list-ol text-[#D97706]"></i>
+                    <span>Stage Filter:</span>
+                </label>
+                <div class="relative inline-flex items-center">
+                    <select id="stepFilterSelect" onchange="applyStepFilter(this.value)" class="pl-3.5 pr-8 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs border appearance-none {% if selected_step %}bg-[#163F37] text-white border-[#163F37]{% else %}bg-[#F8FAF9] hover:bg-slate-100 text-[#163F37] border-[#E5ECE9]{% endif %} focus:outline-none focus:ring-2 focus:ring-[#163F37]">
+                        <option value="" {% if not selected_step %}selected{% endif %}>All Sites (21 Sites)</option>
+                        {% for st in summary.steps %}
+                        <option value="{{ st.step }}" {% if selected_step == st.step %}selected{% endif %}>
+                            Step {{ st.step }}: {{ st.short }} ({{ st.count }} {% if st.count == 1 %}Site{% else %}Sites{% endif %})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 pointer-events-none text-[10px] {% if selected_step %}text-white/80{% else %}text-slate-400{% endif %}"></i>
+                </div>
+                {% if selected_step %}
+                <button type="button" onclick="applyStepFilter('')" title="Clear Stage Filter (Show All Sites)" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 text-xs font-bold transition cursor-pointer border border-[#E5ECE9] flex items-center gap-1">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Clear</span>
                 </button>
-                {% for st in summary.steps %}
-                <button type="button" onclick="applyStepFilter({{ st.step }})" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer {% if selected_step == st.step %}bg-[#163F37] text-white shadow-xs{% else %}bg-[#F8FAF9] hover:bg-slate-100 text-slate-600 border border-[#E5ECE9]{% endif %}">
-                    <span>{{ st.step }}. {{ st.short }}</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_step == st.step %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %}">{{ st.count }}</span>
-                </button>
-                {% endfor %}
+                {% endif %}
             </div>
 
             <!-- View Switcher: Checklist vs Month View vs All Bills Table -->
