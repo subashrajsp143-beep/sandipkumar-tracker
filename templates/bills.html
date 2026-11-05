@@ -1158,22 +1158,23 @@
                                     </div>
 
                                 {% elif cell.status_type == 'initial_only' %}
-                                    <!-- INITIAL MONTH WITHOUT CLEARED BILL -->
-                                    <div class="py-1 px-0.5 rounded-lg border border-dashed border-amber-300 bg-amber-50/90 text-center" title="Site Acquired in this month ({{ cell.month_label }}). Bill is pending submission.">
+                                    <!-- INITIAL MONTH WITHOUT CLEARED BILL (1-Click + Add Bill) -->
+                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, '{{ site.site_name|escape }}', '{{ cell.month_key }}')" class="py-1 px-1 rounded-xl border border-dashed border-amber-300 bg-amber-50/90 text-center cursor-pointer hover:bg-amber-100 transition shadow-2xs" title="Site Acquired in this month ({{ cell.month_label }}). Click to Add Bill.">
                                         <div class="inline-block px-1.5 py-0.2 rounded-full text-[8px] font-black bg-amber-300 text-amber-950 uppercase tracking-tighter">
                                             📍 Acquired
                                         </div>
                                         <div class="text-[9px] font-bold text-amber-800 mt-0.5">
                                             Initial Month
                                         </div>
-                                        <button type="button" onclick="openCreateBillModal({{ site.site_id }}, '{{ cell.month_key }}-01', '{{ cell.month_key }}-28')" class="mt-1 text-[9px] font-extrabold text-[#163F37] hover:underline cursor-pointer">
-                                            + Bill
+                                        <button type="button" class="mt-1 px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-[#163F37] text-white hover:bg-[#1E4940] transition cursor-pointer shadow-2xs inline-flex items-center gap-1 pointer-events-none">
+                                            <i class="fa-solid fa-plus text-[8px] text-[#D97706]"></i>
+                                            <span>+ Bill</span>
                                         </button>
                                     </div>
 
                                 {% elif cell.status_type == 'pipeline' %}
                                     <!-- IN PIPELINE (Step 1-4) -->
-                                    <div class="py-1 px-0.5 rounded-lg border border-amber-200 bg-white text-center cursor-pointer" onclick="openBillDetailsModal({{ cell.bill_id }})" title="In Pipeline: {{ cell.step_name }} (₹{{ '{:,.0f}'.format(cell.amount) }})">
+                                    <div class="py-1 px-0.5 rounded-lg border border-amber-200 bg-white text-center cursor-pointer hover:bg-amber-50 transition" onclick="openBillDetailsModal({{ cell.bill_id }})" title="In Pipeline: {{ cell.step_name }} (₹{{ '{:,.0f}'.format(cell.amount) }})">
                                         {% if cell.is_initial_month %}
                                         <div class="mb-0.5">
                                             <span class="inline-block px-1 py-0.2 rounded-full text-[8px] font-black bg-amber-200 text-amber-900">📍 Acq</span>
@@ -1196,11 +1197,11 @@
                                     </div>
 
                                 {% else %}
-                                    <!-- ACTIVE UNBILLED MONTH -->
-                                    <div class="py-2 text-center text-slate-300 hover:text-slate-600 transition group/unbilled" title="Active month ({{ cell.month_label }}): No bill submitted yet.">
-                                        <span class="font-bold text-sm block group-hover/unbilled:hidden">—</span>
-                                        <button type="button" onclick="openCreateBillModal({{ site.site_id }}, '{{ cell.month_key }}-01', '{{ cell.month_key }}-28')" class="hidden group-hover/unbilled:inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#EAF5EF] text-[#163F37] border border-[#163F37]/20 cursor-pointer">
-                                            + Bill
+                                    <!-- ACTIVE UNBILLED MONTH (Direct 1-Click + Add Bill) -->
+                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, '{{ site.site_name|escape }}', '{{ cell.month_key }}')" class="py-1.5 px-1 text-center cursor-pointer group/unbilled rounded-xl hover:bg-emerald-50/90 transition flex items-center justify-center" title="Click to Add Bill for {{ site.site_name }} ({{ cell.month_label }})">
+                                        <button type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-400 group-hover/unbilled:text-white bg-slate-100/90 group-hover/unbilled:bg-[#163F37] border border-dashed border-slate-300 group-hover/unbilled:border-[#163F37] transition shadow-2xs pointer-events-none cursor-pointer">
+                                            <i class="fa-solid fa-plus text-[8px] text-slate-400 group-hover/unbilled:text-[#D97706]"></i>
+                                            <span>+ Bill</span>
                                         </button>
                                     </div>
                                 {% endif %}
@@ -2262,25 +2263,52 @@ async function submitAdvanceStep(e) {
     }
 }
 
-// NEW BILL MODAL
-function openNewBillModal(siteId, siteName) {
-    const sSelect = document.getElementById('newBillSiteId');
-    if (siteId && sSelect) {
-        sSelect.value = siteId;
+// NEW BILL MODAL (Support Adding Bill from Any Matrix Month Cell, Checklist, or Topbar)
+function openCreateBillForMonth(siteId, siteName, monthKey) {
+    let pFrom = '';
+    let pTo = '';
+    if (monthKey && monthKey.includes('-')) {
+        const parts = monthKey.split('-');
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10);
+        const lastDay = new Date(y, m, 0).getDate();
+        const mStr = String(m).padStart(2, '0');
+        pFrom = `${y}-${mStr}-01`;
+        pTo = `${y}-${mStr}-${String(lastDay).padStart(2, '0')}`;
     }
-    const m = document.getElementById('newBillModal');
-    if (m) m.classList.remove('hidden');
+    openNewBillModalWithDates(siteId, siteName, pFrom, pTo);
+}
+
+function openCreateBillModal(siteId, pFrom, pTo) {
+    openNewBillModalWithDates(siteId, null, pFrom, pTo);
+}
+
+function openNewBillModal(siteId, siteName) {
+    openNewBillModalWithDates(siteId, siteName, null, null);
 }
 
 function openNewBillModalWithDates(siteId, siteName, pFrom, pTo) {
     const sSelect = document.getElementById('newBillSiteId');
-    if (siteId && sSelect) {
-        sSelect.value = siteId;
+    if (sSelect) {
+        if (siteId) {
+            sSelect.value = siteId;
+        } else {
+            sSelect.selectedIndex = 0;
+        }
     }
-    if (pFrom) document.getElementById('newPeriodFrom').value = pFrom;
-    if (pTo) document.getElementById('newPeriodTo').value = pTo;
+    const fromEl = document.getElementById('newPeriodFrom');
+    if (fromEl) fromEl.value = pFrom || '';
+    const toEl = document.getElementById('newPeriodTo');
+    if (toEl) toEl.value = pTo || '';
+    
     const m = document.getElementById('newBillModal');
-    if (m) m.classList.remove('hidden');
+    if (m) {
+        m.classList.remove('hidden');
+        setTimeout(() => {
+            const billNoEl = document.getElementById('newBillNo');
+            if (billNoEl) billNoEl.focus();
+        }, 100);
+    }
 }
 
 function closeNewBillModal() {
