@@ -494,7 +494,7 @@
             const data = await resp.json();
 
             if (data.success) {
-                alert('✅ आज का DPR पर्चा सफलतापूर्वक सुरक्षित (Save) हो गया!');
+                alert('✅ ' + (data.message || 'DPR Sheet saved successfully!'));
                 window.location.reload();
             } else {
                 alert(data.message || 'Error occurred while saving DPR sheet.');

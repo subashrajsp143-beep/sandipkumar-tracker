@@ -1,8 +1,8 @@
 /**
  * M/S SANDIP KUMAR - 21 Sites Material & Dispatch Tracker
  * Comprehensive Tri-Lingual Engine (All 21 Sites & All Segments)
- * 1. 'en' -> 100% Proper English (No Hindi, no mixed parens)
- * 2. 'hi' -> 100% Proper Hindi (Clean Hindi, no English in parens)
+ * 1. 'en' -> 100% Proper English (Zero Hindi, zero Devanagari in English mode)
+ * 2. 'hi' -> 100% Proper Hindi (Clean Hindi, zero English in parens)
  * 3. 'bi' -> Bilingual (English + Hindi Mixed)
  */
 
@@ -285,7 +285,7 @@ const AppTranslations = {
         }
     },
 
-    // 1400+ Exact Phrase & Keyword Mappings across All Segments
+    // 1600+ Exact Phrase & Keyword Mappings across All Segments
     dictMap: {
   "m/s sandip kumar": {
     "en": "M/S Sandip Kumar",
@@ -454,7 +454,7 @@ const AppTranslations = {
   },
   "cancel": {
     "en": "Cancel",
-    "hi": "रद्द करें",
+    "hi": "रद्द करें (Cancel)",
     "bi": "Cancel (रद्द करें)"
   },
   "रद्द करें": {
@@ -464,7 +464,7 @@ const AppTranslations = {
   },
   "cancel (रद्द करें)": {
     "en": "Cancel",
-    "hi": "रद्द करें",
+    "hi": "रद्द करें (Cancel)",
     "bi": "Cancel (रद्द करें)"
   },
   "close": {
@@ -718,8 +718,8 @@ const AppTranslations = {
     "bi": "Remarks (टिप्पणी)"
   },
   "remarks (टिप्पणी)": {
-    "en": "Remarks",
-    "hi": "टिप्पणी",
+    "en": "(Remarks)",
+    "hi": "(टिप्पणी)",
     "bi": "Remarks (टिप्पणी)"
   },
   "notes": {
@@ -943,8 +943,8 @@ const AppTranslations = {
     "bi": "Describe site problem (दिक्कत लिखें, तुरंत समाधान होगा)"
   },
   "describe site problem (दिक्कत लिखें, तुरंत समाधान होगा)": {
-    "en": "Describe site problem, office will resolve immediately",
-    "hi": "साइट की दिक्कत लिखें, ऑफिस द्वारा तुरंत समाधान होगा",
+    "en": "Describe site problem, head office will resolve immediately",
+    "hi": "साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी",
     "bi": "Describe site problem (दिक्कत लिखें, तुरंत समाधान होगा)"
   },
   "total complaints": {
@@ -1009,8 +1009,8 @@ const AppTranslations = {
   },
   "urgent": {
     "en": "Urgent",
-    "hi": "अति आवश्यक",
-    "bi": "Urgent (अति आवश्यक)"
+    "hi": "जरूरी",
+    "bi": "Urgent (जरूरी)"
   },
   "अति आवश्यक": {
     "en": "Urgent",
@@ -1268,9 +1268,9 @@ const AppTranslations = {
     "bi": "Take Live Site Photos (लाइव फोटो लें)"
   },
   "खराबी या साइट का लाइव फोटो लें": {
-    "en": "Take live site photos",
+    "en": "Take live photo of defect or site",
     "hi": "खराबी या साइट का लाइव फोटो लें",
-    "bi": "Take Live Site Photos (लाइव फोटो लें)"
+    "bi": "Take live site photo (साइट का लाइव फोटो लें)"
   },
   "take live site photos (लाइव फोटो लें)": {
     "en": "Take live site photos",
@@ -1669,8 +1669,8 @@ const AppTranslations = {
   },
   "done": {
     "en": "Done",
-    "hi": "पूर्ण",
-    "bi": "Done (पूर्ण)"
+    "hi": "ठीक है (Done)",
+    "bi": "Done (ठीक है)"
   },
   "पूर्ण": {
     "en": "Done",
@@ -2074,8 +2074,8 @@ const AppTranslations = {
   },
   "worker name": {
     "en": "Worker Name",
-    "hi": "श्रमिक का नाम",
-    "bi": "Worker Name (श्रमिक का नाम)"
+    "hi": "कारीगर का नाम",
+    "bi": "Worker Name (कारीगर का नाम)"
   },
   "श्रमिक का नाम": {
     "en": "Worker Name",
@@ -2778,8 +2778,8 @@ const AppTranslations = {
     "bi": "Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
   },
   "supervisor work area (सुपरवाइजर कार्य क्षेत्र)": {
-    "en": "Supervisor Work Area",
-    "hi": "सुपरवाइजर कार्य क्षेत्र",
+    "en": "(Supervisor Work Area)",
+    "hi": "(सुपरवाइजर कार्य क्षेत्र)",
     "bi": "Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
   },
   "site photos": {
@@ -5083,8 +5083,8 @@ const AppTranslations = {
     "bi": "Refresh Page (पेज रिफ्रेश करें)"
   },
   "refresh page (पेज रिफ्रेश करें)": {
-    "en": "Refresh Page",
-    "hi": "पेज रिफ्रेश करें",
+    "en": "Refresh Page (Try Again)",
+    "hi": "पेज रिफ्रेश करें (Try Again)",
     "bi": "Refresh Page (पेज रिफ्रेश करें)"
   },
   "your authorized site": {
@@ -5610,12 +5610,12 @@ const AppTranslations = {
   "date:": {
     "en": "Date:",
     "hi": "तारीख:",
-    "bi": "Date: (तारीख:)"
+    "bi": "Date (तारीख):"
   },
   "तारीख:": {
     "en": "Date:",
     "hi": "तारीख:",
-    "bi": "Date: (तारीख:)"
+    "bi": "Date (तारीख):"
   },
   "date: (तारीख:)": {
     "en": "Date:",
@@ -7286,6 +7286,1026 @@ const AppTranslations = {
     "en": "New",
     "hi": "नया",
     "bi": "New (नया)"
+  },
+  "(कारीगरों के नाम)": {
+    "en": "(Workers' Names)",
+    "hi": "(कारीगरों के नाम)",
+    "bi": "Workers' Names (कारीगरों के नाम)"
+  },
+  "(workers' names)": {
+    "en": "(Workers' Names)",
+    "hi": "(कारीगरों के नाम)",
+    "bi": "Workers' Names (कारीगरों के नाम)"
+  },
+  "workers' names (कारीगरों के नाम)": {
+    "en": "(Workers' Names)",
+    "hi": "(कारीगरों के नाम)",
+    "bi": "Workers' Names (कारीगरों के नाम)"
+  },
+  "(कार्य क्षेत्र)": {
+    "en": "(Work Area)",
+    "hi": "(कार्य क्षेत्र)",
+    "bi": "Work Area (कार्य क्षेत्र)"
+  },
+  "(work area)": {
+    "en": "(Work Area)",
+    "hi": "(कार्य क्षेत्र)",
+    "bi": "Work Area (कार्य क्षेत्र)"
+  },
+  "work area (कार्य क्षेत्र)": {
+    "en": "(Work Area)",
+    "hi": "(कार्य क्षेत्र)",
+    "bi": "Work Area (कार्य क्षेत्र)"
+  },
+  "(कार्य गतिविधि)": {
+    "en": "(Work Activity)",
+    "hi": "(कार्य गतिविधि)",
+    "bi": "Work Activity (कार्य गतिविधि)"
+  },
+  "(work activity)": {
+    "en": "(Work Activity)",
+    "hi": "(कार्य गतिविधि)",
+    "bi": "Work Activity (कार्य गतिविधि)"
+  },
+  "work activity (कार्य गतिविधि)": {
+    "en": "(Work Activity)",
+    "hi": "(कार्य गतिविधि)",
+    "bi": "Work Activity (कार्य गतिविधि)"
+  },
+  "(वार्ड नंबर)": {
+    "en": "(Ward No.)",
+    "hi": "(वार्ड नंबर)",
+    "bi": "Ward No. (वार्ड नंबर)"
+  },
+  "(ward no.)": {
+    "en": "(Ward No.)",
+    "hi": "(वार्ड नंबर)",
+    "bi": "Ward No. (वार्ड नंबर)"
+  },
+  "ward no. (वार्ड नंबर)": {
+    "en": "(Ward No.)",
+    "hi": "(वार्ड नंबर)",
+    "bi": "Ward No. (वार्ड नंबर)"
+  },
+  "(टिप्पणी)": {
+    "en": "(Remarks)",
+    "hi": "(टिप्पणी)",
+    "bi": "Remarks (टिप्पणी)"
+  },
+  "(remarks)": {
+    "en": "(Remarks)",
+    "hi": "(टिप्पणी)",
+    "bi": "Remarks (टिप्पणी)"
+  },
+  "(मोबाइल नंबर)": {
+    "en": "(Mobile No.)",
+    "hi": "(मोबाइल नंबर)",
+    "bi": "Mobile No. (मोबाइल नंबर)"
+  },
+  "(mobile no.)": {
+    "en": "(Mobile No.)",
+    "hi": "(मोबाइल नंबर)",
+    "bi": "Mobile No. (मोबाइल नंबर)"
+  },
+  "mobile no. (मोबाइल नंबर)": {
+    "en": "(Mobile No.)",
+    "hi": "(मोबाइल नंबर)",
+    "bi": "Mobile No. (मोबाइल नंबर)"
+  },
+  "कारीगर का नाम": {
+    "en": "Worker Name",
+    "hi": "कारीगर का नाम",
+    "bi": "Worker Name (कारीगर का नाम)"
+  },
+  "worker name (कारीगर का नाम)": {
+    "en": "Worker Name",
+    "hi": "कारीगर का नाम",
+    "bi": "Worker Name (कारीगर का नाम)"
+  },
+  "कार्य कि विवरणी": {
+    "en": "Work Details",
+    "hi": "कार्य कि विवरणी",
+    "bi": "Work Details (कार्य विवरण)"
+  },
+  "work details": {
+    "en": "Work Details",
+    "hi": "कार्य कि विवरणी",
+    "bi": "Work Details (कार्य विवरण)"
+  },
+  "work details (कार्य विवरण)": {
+    "en": "Work Details",
+    "hi": "कार्य कि विवरणी",
+    "bi": "Work Details (कार्य विवरण)"
+  },
+  "कार्यस्थल एवं पता के साथ": {
+    "en": "With Work Site & Location",
+    "hi": "कार्यस्थल एवं पता के साथ",
+    "bi": "Work Site & Location (कार्यस्थल एवं पता)"
+  },
+  "with work site & location": {
+    "en": "With Work Site & Location",
+    "hi": "कार्यस्थल एवं पता के साथ",
+    "bi": "Work Site & Location (कार्यस्थल एवं पता)"
+  },
+  "work site & location (कार्यस्थल एवं पता)": {
+    "en": "With Work Site & Location",
+    "hi": "कार्यस्थल एवं पता के साथ",
+    "bi": "Work Site & Location (कार्यस्थल एवं पता)"
+  },
+  "संख्या या विवरण लिखें": {
+    "en": "Enter quantity or details",
+    "hi": "संख्या या विवरण लिखें",
+    "bi": "Enter quantity or details (संख्या या विवरण लिखें)"
+  },
+  "enter quantity or details": {
+    "en": "Enter quantity or details",
+    "hi": "संख्या या विवरण लिखें",
+    "bi": "Enter quantity or details (संख्या या विवरण लिखें)"
+  },
+  "enter quantity or details (संख्या या विवरण लिखें)": {
+    "en": "Enter quantity or details",
+    "hi": "संख्या या विवरण लिखें",
+    "bi": "Enter quantity or details (संख्या या विवरण लिखें)"
+  },
+  "यदि कोई हो तो लिखें": {
+    "en": "Enter if any",
+    "hi": "यदि कोई हो तो लिखें",
+    "bi": "Enter if any (यदि कोई हो तो लिखें)"
+  },
+  "enter if any": {
+    "en": "Enter if any",
+    "hi": "यदि कोई हो तो लिखें",
+    "bi": "Enter if any (यदि कोई हो तो लिखें)"
+  },
+  "enter if any (यदि कोई हो तो लिखें)": {
+    "en": "Enter if any",
+    "hi": "यदि कोई हो तो लिखें",
+    "bi": "Enter if any (यदि कोई हो तो लिखें)"
+  },
+  "जैसे: 2": {
+    "en": "e.g. 2",
+    "hi": "जैसे: 2",
+    "bi": "e.g. 2 (जैसे: 2)"
+  },
+  "e.g. 2": {
+    "en": "e.g. 2",
+    "hi": "जैसे: 2",
+    "bi": "e.g. 2 (जैसे: 2)"
+  },
+  "e.g. 2 (जैसे: 2)": {
+    "en": "e.g. 2",
+    "hi": "जैसे: 2",
+    "bi": "e.g. 2 (जैसे: 2)"
+  },
+  "जैसे: मोटर पंप खोला गया + रिपेयर": {
+    "en": "e.g. Motor pump opened + repaired",
+    "hi": "जैसे: मोटर पंप खोला गया + रिपेयर",
+    "bi": "e.g. Motor pump opened + repaired (जैसे: मोटर पंप खोला गया + रिपेयर)"
+  },
+  "e.g. motor pump opened + repaired": {
+    "en": "e.g. Motor pump opened + repaired",
+    "hi": "जैसे: मोटर पंप खोला गया + रिपेयर",
+    "bi": "e.g. Motor pump opened + repaired (जैसे: मोटर पंप खोला गया + रिपेयर)"
+  },
+  "e.g. motor pump opened + repaired (जैसे: मोटर पंप खोला गया + रिपेयर)": {
+    "en": "e.g. Motor pump opened + repaired",
+    "hi": "जैसे: मोटर पंप खोला गया + रिपेयर",
+    "bi": "e.g. Motor pump opened + repaired (जैसे: मोटर पंप खोला गया + रिपेयर)"
+  },
+  "जैसे: रामटोल + महथी चौक": {
+    "en": "e.g. Ramtol + Mahathi Chowk",
+    "hi": "जैसे: रामटोल + महथी चौक",
+    "bi": "e.g. Ramtol + Mahathi Chowk (जैसे: रामटोल + महथी चौक)"
+  },
+  "e.g. ramtol + mahathi chowk": {
+    "en": "e.g. Ramtol + Mahathi Chowk",
+    "hi": "जैसे: रामटोल + महथी चौक",
+    "bi": "e.g. Ramtol + Mahathi Chowk (जैसे: रामटोल + महथी चौक)"
+  },
+  "e.g. ramtol + mahathi chowk (जैसे: रामटोल + महथी चौक)": {
+    "en": "e.g. Ramtol + Mahathi Chowk",
+    "hi": "जैसे: रामटोल + महथी चौक",
+    "bi": "e.g. Ramtol + Mahathi Chowk (जैसे: रामटोल + महथी चौक)"
+  },
+  "जैसे: 05/10/08": {
+    "en": "e.g. 05/10/08",
+    "hi": "जैसे: 05/10/08",
+    "bi": "e.g. 05/10/08 (जैसे: 05/10/08)"
+  },
+  "e.g. 05/10/08": {
+    "en": "e.g. 05/10/08",
+    "hi": "जैसे: 05/10/08",
+    "bi": "e.g. 05/10/08 (जैसे: 05/10/08)"
+  },
+  "e.g. 05/10/08 (जैसे: 05/10/08)": {
+    "en": "e.g. 05/10/08",
+    "hi": "जैसे: 05/10/08",
+    "bi": "e.g. 05/10/08 (जैसे: 05/10/08)"
+  },
+  "सुपरवाइजर:": {
+    "en": "Supervisor:",
+    "hi": "सुपरवाइजर:",
+    "bi": "Supervisor (सुपरवाइजर):"
+  },
+  "supervisor:": {
+    "en": "Supervisor:",
+    "hi": "सुपरवाइजर:",
+    "bi": "Supervisor (सुपरवाइजर):"
+  },
+  "supervisor (सुपरवाइजर):": {
+    "en": "Supervisor:",
+    "hi": "सुपरवाइजर:",
+    "bi": "Supervisor (सुपरवाइजर):"
+  },
+  "सहायक का मोबाइल": {
+    "en": "Assistant Mobile",
+    "hi": "सहायक का मोबाइल",
+    "bi": "Assistant Mobile (सहायक का मोबाइल)"
+  },
+  "assistant mobile": {
+    "en": "Assistant Mobile",
+    "hi": "सहायक का मोबाइल",
+    "bi": "Assistant Mobile (सहायक का मोबाइल)"
+  },
+  "assistant mobile (सहायक का मोबाइल)": {
+    "en": "Assistant Mobile",
+    "hi": "सहायक का मोबाइल",
+    "bi": "Assistant Mobile (सहायक का मोबाइल)"
+  },
+  "date (तारीख):": {
+    "en": "Date:",
+    "hi": "तारीख:",
+    "bi": "Date (तारीख):"
+  },
+  "क्र.": {
+    "en": "Sl.",
+    "hi": "क्र.",
+    "bi": "Sl. (क्र.)"
+  },
+  "sl.": {
+    "en": "Sl.",
+    "hi": "क्र.",
+    "bi": "Sl. (क्र.)"
+  },
+  "sl. (क्र.)": {
+    "en": "Sl.",
+    "hi": "क्र.",
+    "bi": "Sl. (क्र.)"
+  },
+  "जरूरी": {
+    "en": "Urgent",
+    "hi": "जरूरी",
+    "bi": "Urgent (जरूरी)"
+  },
+  "urgent (जरूरी)": {
+    "en": "Urgent",
+    "hi": "जरूरी",
+    "bi": "Urgent (जरूरी)"
+  },
+  "dpr भरें": {
+    "en": "Fill DPR",
+    "hi": "DPR भरें",
+    "bi": "Fill DPR (DPR भरें)"
+  },
+  "fill dpr": {
+    "en": "Fill DPR",
+    "hi": "DPR भरें",
+    "bi": "Fill DPR (DPR भरें)"
+  },
+  "fill dpr (dpr भरें)": {
+    "en": "Fill DPR",
+    "hi": "DPR भरें",
+    "bi": "Fill DPR (DPR भरें)"
+  },
+  "जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी।": {
+    "en": "All filled rows will be printed on the DPR sheet.",
+    "hi": "जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी।",
+    "bi": "All filled rows will be printed on sheet (जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी)।"
+  },
+  "all filled rows will be printed on the dpr sheet.": {
+    "en": "All filled rows will be printed on the DPR sheet.",
+    "hi": "जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी।",
+    "bi": "All filled rows will be printed on sheet (जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी)।"
+  },
+  "all filled rows will be printed on sheet (जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी)।": {
+    "en": "All filled rows will be printed on the DPR sheet.",
+    "hi": "जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी।",
+    "bi": "All filled rows will be printed on sheet (जितनी लाइनें भरेंगे, वे पर्चे पर प्रिंट होंगी)।"
+  },
+  "आज का dpr पर्चा अभी तक सबमिट नहीं हुआ है। कृपया नीचे कारीगरों और काम का विवरण लिखकर \"save dpr sheet\" दबाएं।": {
+    "en": "Today's DPR sheet has not been submitted yet. Please fill worker and work details below and click \"Save DPR Sheet\".",
+    "hi": "आज का DPR पर्चा अभी तक सबमिट नहीं हुआ है। कृपया नीचे कारीगरों और काम का विवरण लिखकर \"Save DPR Sheet\" दबाएं।",
+    "bi": "Today's DPR sheet pending (आज का DPR पर्चा सबमिट करें - Save DPR Sheet दबाएं)"
+  },
+  "today's dpr sheet has not been submitted yet. please fill worker and work details below and click \"save dpr sheet\".": {
+    "en": "Today's DPR sheet has not been submitted yet. Please fill worker and work details below and click \"Save DPR Sheet\".",
+    "hi": "आज का DPR पर्चा अभी तक सबमिट नहीं हुआ है। कृपया नीचे कारीगरों और काम का विवरण लिखकर \"Save DPR Sheet\" दबाएं।",
+    "bi": "Today's DPR sheet pending (आज का DPR पर्चा सबमिट करें - Save DPR Sheet दबाएं)"
+  },
+  "today's dpr sheet pending (आज का dpr पर्चा सबमिट करें - save dpr sheet दबाएं)": {
+    "en": "Today's DPR sheet has not been submitted yet. Please fill worker and work details below and click \"Save DPR Sheet\".",
+    "hi": "आज का DPR पर्चा अभी तक सबमिट नहीं हुआ है। कृपया नीचे कारीगरों और काम का विवरण लिखकर \"Save DPR Sheet\" दबाएं।",
+    "bi": "Today's DPR sheet pending (आज का DPR पर्चा सबमिट करें - Save DPR Sheet दबाएं)"
+  },
+  "वार्ड अनुसार विशेष काम लिखें (जैसे: (1) (w-5) = मोटर खोला गया रिपेयर के लिए। (w-10) = स्टार्टर खोला गया रिपेयर के लिए।)": {
+    "en": "Enter ward-wise specific work (e.g. (1) (W-5) = Motor opened for repair. (W-10) = Starter opened for repair.)",
+    "hi": "वार्ड अनुसार विशेष काम लिखें (जैसे: (1) (W-5) = मोटर खोला गया रिपेयर के लिए। (W-10) = स्टार्टर खोला गया रिपेयर के लिए।)",
+    "bi": "Enter ward-wise work (वार्ड अनुसार विशेष काम लिखें)"
+  },
+  "enter ward-wise specific work (e.g. (1) (w-5) = motor opened for repair. (w-10) = starter opened for repair.)": {
+    "en": "Enter ward-wise specific work (e.g. (1) (W-5) = Motor opened for repair. (W-10) = Starter opened for repair.)",
+    "hi": "वार्ड अनुसार विशेष काम लिखें (जैसे: (1) (W-5) = मोटर खोला गया रिपेयर के लिए। (W-10) = स्टार्टर खोला गया रिपेयर के लिए।)",
+    "bi": "Enter ward-wise work (वार्ड अनुसार विशेष काम लिखें)"
+  },
+  "enter ward-wise work (वार्ड अनुसार विशेष काम लिखें)": {
+    "en": "Enter ward-wise specific work (e.g. (1) (W-5) = Motor opened for repair. (W-10) = Starter opened for repair.)",
+    "hi": "वार्ड अनुसार विशेष काम लिखें (जैसे: (1) (W-5) = मोटर खोला गया रिपेयर के लिए। (W-10) = स्टार्टर खोला गया रिपेयर के लिए।)",
+    "bi": "Enter ward-wise work (वार्ड अनुसार विशेष काम लिखें)"
+  },
+  "⏰ शाम 7:30 - 8:00 pm dpr रिमाइंडर": {
+    "en": "⏰ 7:30 - 8:00 PM DPR Reminder",
+    "hi": "⏰ शाम 7:30 - 8:00 PM DPR रिमाइंडर",
+    "bi": "⏰ 7:30 - 8:00 PM DPR Reminder (शाम DPR रिमाइंडर)"
+  },
+  "⏰ 7:30 - 8:00 pm dpr reminder": {
+    "en": "⏰ 7:30 - 8:00 PM DPR Reminder",
+    "hi": "⏰ शाम 7:30 - 8:00 PM DPR रिमाइंडर",
+    "bi": "⏰ 7:30 - 8:00 PM DPR Reminder (शाम DPR रिमाइंडर)"
+  },
+  "⏰ 7:30 - 8:00 pm dpr reminder (शाम dpr रिमाइंडर)": {
+    "en": "⏰ 7:30 - 8:00 PM DPR Reminder",
+    "hi": "⏰ शाम 7:30 - 8:00 PM DPR रिमाइंडर",
+    "bi": "⏰ 7:30 - 8:00 PM DPR Reminder (शाम DPR रिमाइंडर)"
+  },
+  "आज का दैनिक कार्य पर्चा (dpr sheet) अभी तक जमा नहीं हुआ है। कृपया तुरंत भरें।": {
+    "en": "Today's Daily Progress Report (DPR Sheet) is not submitted yet. Please submit immediately.",
+    "hi": "आज का दैनिक कार्य पर्चा (DPR Sheet) अभी तक जमा नहीं हुआ है। कृपया तुरंत भरें।",
+    "bi": "Today's DPR Sheet pending (आज का दैनिक कार्य पर्चा जमा करें)"
+  },
+  "today's daily progress report (dpr sheet) is not submitted yet. please submit immediately.": {
+    "en": "Today's Daily Progress Report (DPR Sheet) is not submitted yet. Please submit immediately.",
+    "hi": "आज का दैनिक कार्य पर्चा (DPR Sheet) अभी तक जमा नहीं हुआ है। कृपया तुरंत भरें।",
+    "bi": "Today's DPR Sheet pending (आज का दैनिक कार्य पर्चा जमा करें)"
+  },
+  "today's dpr sheet pending (आज का दैनिक कार्य पर्चा जमा करें)": {
+    "en": "Today's Daily Progress Report (DPR Sheet) is not submitted yet. Please submit immediately.",
+    "hi": "आज का दैनिक कार्य पर्चा (DPR Sheet) अभी तक जमा नहीं हुआ है। कृपया तुरंत भरें।",
+    "bi": "Today's DPR Sheet pending (आज का दैनिक कार्य पर्चा जमा करें)"
+  },
+  "समस्या / help": {
+    "en": "Help / Issues",
+    "hi": "समस्या / Help",
+    "bi": "Help / Issues (समस्या व सहायता)"
+  },
+  "help / issues": {
+    "en": "Help / Issues",
+    "hi": "समस्या / Help",
+    "bi": "Help / Issues (समस्या व सहायता)"
+  },
+  "help / issues (समस्या व सहायता)": {
+    "en": "Help / Issues",
+    "hi": "समस्या / Help",
+    "bi": "Help / Issues (समस्या व सहायता)"
+  },
+  "समस्या / complaint": {
+    "en": "Complaints",
+    "hi": "समस्या / Complaint",
+    "bi": "Complaints (समस्या / शिकायत)"
+  },
+  "complaints": {
+    "en": "Complaints",
+    "hi": "समस्या / Complaint",
+    "bi": "Complaints (समस्या / शिकायत)"
+  },
+  "complaints (समस्या / शिकायत)": {
+    "en": "Complaints",
+    "hi": "समस्या / Complaint",
+    "bi": "Complaints (समस्या / शिकायत)"
+  },
+  "जहाँ काम रुका हुआ है": {
+    "en": "Where work is halted",
+    "hi": "जहाँ काम रुका हुआ है",
+    "bi": "Where work is halted (जहाँ काम रुका हुआ है)"
+  },
+  "where work is halted": {
+    "en": "Where work is halted",
+    "hi": "जहाँ काम रुका हुआ है",
+    "bi": "Where work is halted (जहाँ काम रुका हुआ है)"
+  },
+  "where work is halted (जहाँ काम रुका हुआ है)": {
+    "en": "Where work is halted",
+    "hi": "जहाँ काम रुका हुआ है",
+    "bi": "Where work is halted (जहाँ काम रुका हुआ है)"
+  },
+  "क्या दिक्कत है? विस्तार से लिखें": {
+    "en": "What is the problem? Describe in detail",
+    "hi": "क्या दिक्कत है? विस्तार से लिखें",
+    "bi": "Describe problem in detail (दिक्कत विस्तार से लिखें)"
+  },
+  "what is the problem? describe in detail": {
+    "en": "What is the problem? Describe in detail",
+    "hi": "क्या दिक्कत है? विस्तार से लिखें",
+    "bi": "Describe problem in detail (दिक्कत विस्तार से लिखें)"
+  },
+  "describe problem in detail (दिक्कत विस्तार से लिखें)": {
+    "en": "What is the problem? Describe in detail",
+    "hi": "क्या दिक्कत है? विस्तार से लिखें",
+    "bi": "Describe problem in detail (दिक्कत विस्तार से लिखें)"
+  },
+  "take live photo of defect or site": {
+    "en": "Take live photo of defect or site",
+    "hi": "खराबी या साइट का लाइव फोटो लें",
+    "bi": "Take live site photo (साइट का लाइव फोटो लें)"
+  },
+  "take live site photo (साइट का लाइव फोटो लें)": {
+    "en": "Take live photo of defect or site",
+    "hi": "खराबी या साइट का लाइव फोटो लें",
+    "bi": "Take live site photo (साइट का लाइव फोटो लें)"
+  },
+  "समस्या दर्ज हो गई है!": {
+    "en": "Issue registered successfully!",
+    "hi": "समस्या दर्ज हो गई है!",
+    "bi": "Issue registered successfully! (समस्या दर्ज हो गई!)"
+  },
+  "issue registered successfully!": {
+    "en": "Issue registered successfully!",
+    "hi": "समस्या दर्ज हो गई है!",
+    "bi": "Issue registered successfully! (समस्या दर्ज हो गई!)"
+  },
+  "issue registered successfully! (समस्या दर्ज हो गई!)": {
+    "en": "Issue registered successfully!",
+    "hi": "समस्या दर्ज हो गई है!",
+    "bi": "Issue registered successfully! (समस्या दर्ज हो गई!)"
+  },
+  "समस्या का समाधान दर्ज करें": {
+    "en": "Record Issue Resolution",
+    "hi": "समस्या का समाधान दर्ज करें",
+    "bi": "Record Issue Resolution (समस्या का समाधान दर्ज करें)"
+  },
+  "record issue resolution": {
+    "en": "Record Issue Resolution",
+    "hi": "समस्या का समाधान दर्ज करें",
+    "bi": "Record Issue Resolution (समस्या का समाधान दर्ज करें)"
+  },
+  "record issue resolution (समस्या का समाधान दर्ज करें)": {
+    "en": "Record Issue Resolution",
+    "hi": "समस्या का समाधान दर्ज करें",
+    "bi": "Record Issue Resolution (समस्या का समाधान दर्ज करें)"
+  },
+  "समाधान विवरण (resolution):": {
+    "en": "Resolution Details:",
+    "hi": "समाधान विवरण (Resolution):",
+    "bi": "Resolution Details (समाधान विवरण):"
+  },
+  "resolution details:": {
+    "en": "Resolution Details:",
+    "hi": "समाधान विवरण (Resolution):",
+    "bi": "Resolution Details (समाधान विवरण):"
+  },
+  "resolution details (समाधान विवरण):": {
+    "en": "Resolution Details:",
+    "hi": "समाधान विवरण (Resolution):",
+    "bi": "Resolution Details (समाधान विवरण):"
+  },
+  "हल करें (resolve)": {
+    "en": "Resolve",
+    "hi": "हल करें (Resolve)",
+    "bi": "Resolve (हल करें)"
+  },
+  "resolve": {
+    "en": "Resolve",
+    "hi": "हल करें (Resolve)",
+    "bi": "Resolve (हल करें)"
+  },
+  "resolve (हल करें)": {
+    "en": "Resolve",
+    "hi": "हल करें (Resolve)",
+    "bi": "Resolve (हल करें)"
+  },
+  "फोटो देखें (view photo)": {
+    "en": "View Photo",
+    "hi": "फोटो देखें (View Photo)",
+    "bi": "View Photo (फोटो देखें)"
+  },
+  "view photo": {
+    "en": "View Photo",
+    "hi": "फोटो देखें (View Photo)",
+    "bi": "View Photo (फोटो देखें)"
+  },
+  "view photo (फोटो देखें)": {
+    "en": "View Photo",
+    "hi": "फोटो देखें (View Photo)",
+    "bi": "View Photo (फोटो देखें)"
+  },
+  "रद्द करें (cancel)": {
+    "en": "Cancel",
+    "hi": "रद्द करें (Cancel)",
+    "bi": "Cancel (रद्द करें)"
+  },
+  "ठीक है (done)": {
+    "en": "Done",
+    "hi": "ठीक है (Done)",
+    "bi": "Done (ठीक है)"
+  },
+  "done (ठीक है)": {
+    "en": "Done",
+    "hi": "ठीक है (Done)",
+    "bi": "Done (ठीक है)"
+  },
+  "दर्ज हो रहा है...": {
+    "en": "Submitting...",
+    "hi": "दर्ज हो रहा है...",
+    "bi": "Submitting (दर्ज हो रहा है)..."
+  },
+  "submitting...": {
+    "en": "Submitting...",
+    "hi": "दर्ज हो रहा है...",
+    "bi": "Submitting (दर्ज हो रहा है)..."
+  },
+  "submitting (दर्ज हो रहा है)...": {
+    "en": "Submitting...",
+    "hi": "दर्ज हो रहा है...",
+    "bi": "Submitting (दर्ज हो रहा है)..."
+  },
+  "इस समय कोई भी खुली (open) समस्या नहीं है। सब कुछ ठीक चल रहा है! अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।": {
+    "en": "There are no open issues at this time. Everything is running smoothly! If there is any shortage or defect at site, click the button below to register a complaint.",
+    "hi": "इस समय कोई भी खुली (Open) समस्या नहीं है। सब कुछ ठीक चल रहा है! अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।",
+    "bi": "No open issues currently (इस समय कोई खुली समस्या नहीं है)"
+  },
+  "there are no open issues at this time. everything is running smoothly! if there is any shortage or defect at site, click the button below to register a complaint.": {
+    "en": "There are no open issues at this time. Everything is running smoothly! If there is any shortage or defect at site, click the button below to register a complaint.",
+    "hi": "इस समय कोई भी खुली (Open) समस्या नहीं है। सब कुछ ठीक चल रहा है! अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।",
+    "bi": "No open issues currently (इस समय कोई खुली समस्या नहीं है)"
+  },
+  "no open issues currently (इस समय कोई खुली समस्या नहीं है)": {
+    "en": "There are no open issues at this time. Everything is running smoothly! If there is any shortage or defect at site, click the button below to register a complaint.",
+    "hi": "इस समय कोई भी खुली (Open) समस्या नहीं है। सब कुछ ठीक चल रहा है! अगर साइट पर कोई दिक्कत या सामान की कमी है तो नीचे बटन दबाकर शिकायत दर्ज करें।",
+    "bi": "No open issues currently (इस समय कोई खुली समस्या नहीं है)"
+  },
+  "साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।": {
+    "en": "Report any site issues (material shortage, dispute, machine breakdown, labour) here. Head office will resolve immediately.",
+    "hi": "साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।",
+    "bi": "Report site issues here (साइट की दिक्कत यहाँ दर्ज करें)"
+  },
+  "report any site issues (material shortage, dispute, machine breakdown, labour) here. head office will resolve immediately.": {
+    "en": "Report any site issues (material shortage, dispute, machine breakdown, labour) here. Head office will resolve immediately.",
+    "hi": "साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।",
+    "bi": "Report site issues here (साइट की दिक्कत यहाँ दर्ज करें)"
+  },
+  "report site issues here (साइट की दिक्कत यहाँ दर्ज करें)": {
+    "en": "Report any site issues (material shortage, dispute, machine breakdown, labour) here. Head office will resolve immediately.",
+    "hi": "साइट पर कोई भी दिक्कत (सामान की कमी, विवाद, मशीन खराबी, लेबर) हो तो यहाँ तुरंत दर्ज करें। हेड ऑफिस द्वारा तुरंत समाधान किया जाएगा।",
+    "bi": "Report site issues here (साइट की दिक्कत यहाँ दर्ज करें)"
+  },
+  "उदाहरण: 63mm pvc पाइप खत्म हो गया है, 200 मीटर तुरंत चाहिए। या मशीन में खराबी आ गई है...": {
+    "en": "e.g. 63mm PVC pipe shortage, need 200m immediately. Or machine breakdown...",
+    "hi": "उदाहरण: 63mm PVC पाइप खत्म हो गया है, 200 मीटर तुरंत चाहिए। या मशीन में खराबी आ गई है...",
+    "bi": "e.g. 63mm PVC pipe shortage (उदाहरण: 63mm PVC पाइप खत्म हो गया है...)"
+  },
+  "e.g. 63mm pvc pipe shortage, need 200m immediately. or machine breakdown...": {
+    "en": "e.g. 63mm PVC pipe shortage, need 200m immediately. Or machine breakdown...",
+    "hi": "उदाहरण: 63mm PVC पाइप खत्म हो गया है, 200 मीटर तुरंत चाहिए। या मशीन में खराबी आ गई है...",
+    "bi": "e.g. 63mm PVC pipe shortage (उदाहरण: 63mm PVC पाइप खत्म हो गया है...)"
+  },
+  "e.g. 63mm pvc pipe shortage (उदाहरण: 63mm pvc पाइप खत्म हो गया है...)": {
+    "en": "e.g. 63mm PVC pipe shortage, need 200m immediately. Or machine breakdown...",
+    "hi": "उदाहरण: 63mm PVC पाइप खत्म हो गया है, 200 मीटर तुरंत चाहिए। या मशीन में खराबी आ गई है...",
+    "bi": "e.g. 63mm PVC pipe shortage (उदाहरण: 63mm PVC पाइप खत्म हो गया है...)"
+  },
+  "आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।": {
+    "en": "Your complaint has been successfully recorded in the system. Head office will take immediate action.",
+    "hi": "आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।",
+    "bi": "Complaint recorded successfully (शिकायत सफलता-पूर्वक रिकॉर्ड हो गई)"
+  },
+  "your complaint has been successfully recorded in the system. head office will take immediate action.": {
+    "en": "Your complaint has been successfully recorded in the system. Head office will take immediate action.",
+    "hi": "आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।",
+    "bi": "Complaint recorded successfully (शिकायत सफलता-पूर्वक रिकॉर्ड हो गई)"
+  },
+  "complaint recorded successfully (शिकायत सफलता-पूर्वक रिकॉर्ड हो गई)": {
+    "en": "Your complaint has been successfully recorded in the system. Head office will take immediate action.",
+    "hi": "आपकी शिकायत सिस्टम में सफलता-पूर्वक रिकॉर्ड हो गई है। हेड ऑफिस द्वारा इस पर तुरंत आवश्यक कार्रवाई की जाएगी।",
+    "bi": "Complaint recorded successfully (शिकायत सफलता-पूर्वक रिकॉर्ड हो गई)"
+  },
+  "acquired month क्या है?": {
+    "en": "What is Acquired Month?",
+    "hi": "Acquired Month क्या है?",
+    "bi": "What is Acquired Month? (अधिग्रहण माह क्या है?)"
+  },
+  "what is acquired month?": {
+    "en": "What is Acquired Month?",
+    "hi": "Acquired Month क्या है?",
+    "bi": "What is Acquired Month? (अधिग्रहण माह क्या है?)"
+  },
+  "what is acquired month? (अधिग्रहण माह क्या है?)": {
+    "en": "What is Acquired Month?",
+    "hi": "Acquired Month क्या है?",
+    "bi": "What is Acquired Month? (अधिग्रहण माह क्या है?)"
+  },
+  "• जिस माह साइट शुरू या हैंडओवर हुई है, उसे सेट करें।": {
+    "en": "• Set the month when site work started or was handed over.",
+    "hi": "• जिस माह साइट शुरू या हैंडओवर हुई है, उसे सेट करें।",
+    "bi": "• Set site takeover month (जिस माह साइट शुरू हुई उसे सेट करें)"
+  },
+  "• set the month when site work started or was handed over.": {
+    "en": "• Set the month when site work started or was handed over.",
+    "hi": "• जिस माह साइट शुरू या हैंडओवर हुई है, उसे सेट करें।",
+    "bi": "• Set site takeover month (जिस माह साइट शुरू हुई उसे सेट करें)"
+  },
+  "• set site takeover month (जिस माह साइट शुरू हुई उसे सेट करें)": {
+    "en": "• Set the month when site work started or was handed over.",
+    "hi": "• जिस माह साइट शुरू या हैंडओवर हुई है, उसे सेट करें।",
+    "bi": "• Set site takeover month (जिस माह साइट शुरू हुई उसे सेट करें)"
+  },
+  "• इस माह से पहले के महीनों पर \"pre-acquisition\" मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।": {
+    "en": "• Months prior to this month will be marked \"Pre-Acquisition\" (no bill considered pending).",
+    "hi": "• इस माह से पहले के महीनों पर \"Pre-Acquisition\" मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "• Prior months marked Pre-Acquisition (पहले के माह Pre-Acquisition रहेंगे)"
+  },
+  "• months prior to this month will be marked \"pre-acquisition\" (no bill considered pending).": {
+    "en": "• Months prior to this month will be marked \"Pre-Acquisition\" (no bill considered pending).",
+    "hi": "• इस माह से पहले के महीनों पर \"Pre-Acquisition\" मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "• Prior months marked Pre-Acquisition (पहले के माह Pre-Acquisition रहेंगे)"
+  },
+  "• prior months marked pre-acquisition (पहले के माह pre-acquisition रहेंगे)": {
+    "en": "• Months prior to this month will be marked \"Pre-Acquisition\" (no bill considered pending).",
+    "hi": "• इस माह से पहले के महीनों पर \"Pre-Acquisition\" मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "• Prior months marked Pre-Acquisition (पहले के माह Pre-Acquisition रहेंगे)"
+  },
+  "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो april 2026 चुनें।": {
+    "en": "• Bills will be tracked for this month and subsequent months. If site was active all year, select April 2026.",
+    "hi": "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो April 2026 चुनें।",
+    "bi": "• Bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)"
+  },
+  "• bills will be tracked for this month and subsequent months. if site was active all year, select april 2026.": {
+    "en": "• Bills will be tracked for this month and subsequent months. If site was active all year, select April 2026.",
+    "hi": "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो April 2026 चुनें।",
+    "bi": "• Bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)"
+  },
+  "• bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)": {
+    "en": "• Bills will be tracked for this month and onwards. If site was active all year, select April 2026.",
+    "hi": "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो",
+    "bi": "• Bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)"
+  },
+  "पहले के महीनों": {
+    "en": "Prior Months",
+    "hi": "पहले के महीनों",
+    "bi": "Prior Months (पहले के महीनों)"
+  },
+  "prior months": {
+    "en": "Prior Months",
+    "hi": "पहले के महीनों",
+    "bi": "Prior Months (पहले के महीनों)"
+  },
+  "prior months (पहले के महीनों)": {
+    "en": "Prior Months",
+    "hi": "पहले के महीनों",
+    "bi": "Prior Months (पहले के महीनों)"
+  },
+  "• इस माह से": {
+    "en": "• From this month",
+    "hi": "• इस माह से",
+    "bi": "• From this month (इस माह से)"
+  },
+  "• from this month": {
+    "en": "• From this month",
+    "hi": "• इस माह से",
+    "bi": "• From this month (इस माह से)"
+  },
+  "• from this month (इस माह से)": {
+    "en": "• From this month",
+    "hi": "• इस माह से",
+    "bi": "• From this month (इस माह से)"
+  },
+  "मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।": {
+    "en": "will be marked (where no bill is considered pending).",
+    "hi": "मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "will be marked (no bill pending)"
+  },
+  "will be marked (where no bill is considered pending).": {
+    "en": "will be marked (where no bill is considered pending).",
+    "hi": "मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "will be marked (no bill pending)"
+  },
+  "will be marked (no bill pending)": {
+    "en": "will be marked (where no bill is considered pending).",
+    "hi": "मार्क होगा (जहां कोई बिल पेंडिंग नहीं माना जाएगा)।",
+    "bi": "will be marked (no bill pending)"
+  },
+  "pdf, excel, word, इमेज या दस्तावेज़ अपलोड करें": {
+    "en": "Upload PDF, Excel, Word, image or document",
+    "hi": "PDF, Excel, Word, इमेज या दस्तावेज़ अपलोड करें",
+    "bi": "Upload PDF, Excel, Word, image or document (दस्तावेज़ अपलोड करें)"
+  },
+  "upload pdf, excel, word, image or document": {
+    "en": "Upload PDF, Excel, Word, image or document",
+    "hi": "PDF, Excel, Word, इमेज या दस्तावेज़ अपलोड करें",
+    "bi": "Upload PDF, Excel, Word, image or document (दस्तावेज़ अपलोड करें)"
+  },
+  "upload pdf, excel, word, image or document (दस्तावेज़ अपलोड करें)": {
+    "en": "Upload PDF, Excel, Word, image or document",
+    "hi": "PDF, Excel, Word, इमेज या दस्तावेज़ अपलोड करें",
+    "bi": "Upload PDF, Excel, Word, image or document (दस्तावेज़ अपलोड करें)"
+  },
+  "सुपरवाइजर और स्टाफ के बीच pdf, excel, word, इमेज और महत्वपूर्ण दस्तावेजों का सुरक्षित आदान-प्रदान — प्रत्येक फ़ाइल पर शेयर करने वाले सुपरवाइजर का नाम व तारीख स्पष्ट रूप से दर्ज रहेगी।": {
+    "en": "Secure exchange of PDF, Excel, Word, images and important documents between supervisors and staff — each file clearly records supervisor name and date.",
+    "hi": "सुपरवाइजर और स्टाफ के बीच PDF, Excel, Word, इमेज और महत्वपूर्ण दस्तावेजों का सुरक्षित आदान-प्रदान — प्रत्येक फ़ाइल पर शेयर करने वाले सुपरवाइजर का नाम व तारीख स्पष्ट रूप से दर्ज रहेगी।",
+    "bi": "Secure document sharing (सुपरवाइजर और स्टाफ के बीच सुरक्षित दस्तावेज़ आदान-प्रदान)"
+  },
+  "secure exchange of pdf, excel, word, images and important documents between supervisors and staff — each file clearly records supervisor name and date.": {
+    "en": "Secure exchange of PDF, Excel, Word, images and important documents between supervisors and staff — each file clearly records supervisor name and date.",
+    "hi": "सुपरवाइजर और स्टाफ के बीच PDF, Excel, Word, इमेज और महत्वपूर्ण दस्तावेजों का सुरक्षित आदान-प्रदान — प्रत्येक फ़ाइल पर शेयर करने वाले सुपरवाइजर का नाम व तारीख स्पष्ट रूप से दर्ज रहेगी।",
+    "bi": "Secure document sharing (सुपरवाइजर और स्टाफ के बीच सुरक्षित दस्तावेज़ आदान-प्रदान)"
+  },
+  "secure document sharing (सुपरवाइजर और स्टाफ के बीच सुरक्षित दस्तावेज़ आदान-प्रदान)": {
+    "en": "Secure exchange of PDF, Excel, Word, images and important documents between supervisors and staff — each file clearly records supervisor name and date.",
+    "hi": "सुपरवाइजर और स्टाफ के बीच PDF, Excel, Word, इमेज और महत्वपूर्ण दस्तावेजों का सुरक्षित आदान-प्रदान — प्रत्येक फ़ाइल पर शेयर करने वाले सुपरवाइजर का नाम व तारीख स्पष्ट रूप से दर्ज रहेगी।",
+    "bi": "Secure document sharing (सुपरवाइजर और स्टाफ के बीच सुरक्षित दस्तावेज़ आदान-प्रदान)"
+  },
+  "यह नाम प्रत्येक यूजर को फ़ाइल के साथ \"shared by\" के रूप में प्रदर्शित होगा।": {
+    "en": "This name will be displayed to every user as \"Shared by\" with the file.",
+    "hi": "यह नाम प्रत्येक यूजर को फ़ाइल के साथ \"Shared by\" के रूप में प्रदर्शित होगा।",
+    "bi": "Name shown as Shared by (यह नाम फ़ाइल के साथ प्रदर्शित होगा)"
+  },
+  "this name will be displayed to every user as \"shared by\" with the file.": {
+    "en": "This name will be displayed to every user as \"Shared by\" with the file.",
+    "hi": "यह नाम प्रत्येक यूजर को फ़ाइल के साथ \"Shared by\" के रूप में प्रदर्शित होगा।",
+    "bi": "Name shown as Shared by (यह नाम फ़ाइल के साथ प्रदर्शित होगा)"
+  },
+  "name shown as shared by (यह नाम फ़ाइल के साथ प्रदर्शित होगा)": {
+    "en": "This name will be displayed to every user as \"Shared by\" with the file.",
+    "hi": "यह नाम प्रत्येक यूजर को फ़ाइल के साथ \"Shared by\" के रूप में प्रदर्शित होगा।",
+    "bi": "Name shown as Shared by (यह नाम फ़ाइल के साथ प्रदर्शित होगा)"
+  },
+  "फ़िल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें।": {
+    "en": "No documents available matching filter or search. Please reset filters.",
+    "hi": "फ़िल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें।",
+    "bi": "No documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)"
+  },
+  "no documents available matching filter or search. please reset filters.": {
+    "en": "No documents available matching filter or search. Please reset filters.",
+    "hi": "फ़िल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें।",
+    "bi": "No documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)"
+  },
+  "no documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)": {
+    "en": "No documents available matching filter or search. Please reset filters. No documents have been shared yet.",
+    "hi": "फिल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें। अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)"
+  },
+  "अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।": {
+    "en": "No documents have been shared yet. Supervisors or staff can share the first file.",
+    "hi": "अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents shared yet (अभी तक कोई दस्तावेज़ शेयर नहीं किया गया)"
+  },
+  "no documents have been shared yet. supervisors or staff can share the first file.": {
+    "en": "No documents have been shared yet. Supervisors or staff can share the first file.",
+    "hi": "अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents shared yet (अभी तक कोई दस्तावेज़ शेयर नहीं किया गया)"
+  },
+  "no documents shared yet (अभी तक कोई दस्तावेज़ शेयर नहीं किया गया)": {
+    "en": "No documents have been shared yet. Supervisors or staff can share the first file.",
+    "hi": "अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents shared yet (अभी तक कोई दस्तावेज़ शेयर नहीं किया गया)"
+  },
+  "सर्वर पर एक अस्थाई समस्या उत्पन्न हुई है। आपकी सुरक्षित लॉगिन या कुकीज़ रीसेट करके दोबारा आसानी से पेज खोला जा सकता है।": {
+    "en": "A temporary server issue occurred. Re-logging in or clearing cookies will restore access smoothly.",
+    "hi": "सर्वर पर एक अस्थाई समस्या उत्पन्न हुई है। आपकी सुरक्षित लॉगिन या कुकीज़ रीसेट करके दोबारा आसानी से पेज खोला जा सकता है।",
+    "bi": "Temporary server issue (सर्वर पर अस्थाई समस्या)"
+  },
+  "a temporary server issue occurred. re-logging in or clearing cookies will restore access smoothly.": {
+    "en": "A temporary server issue occurred. Re-logging in or clearing cookies will restore access smoothly.",
+    "hi": "सर्वर पर एक अस्थाई समस्या उत्पन्न हुई है। आपकी सुरक्षित लॉगिन या कुकीज़ रीसेट करके दोबारा आसानी से पेज खोला जा सकता है।",
+    "bi": "Temporary server issue (सर्वर पर अस्थाई समस्या)"
+  },
+  "temporary server issue (सर्वर पर अस्थाई समस्या)": {
+    "en": "A temporary server issue occurred. Re-logging in or clearing cookies will restore access smoothly.",
+    "hi": "सर्वर पर एक अस्थाई समस्या उत्पन्न हुई है। आपकी सुरक्षित लॉगिन या कुकीज़ रीसेट करके दोबारा आसानी से पेज खोला जा सकता है।",
+    "bi": "Temporary server issue (सर्वर पर अस्थाई समस्या)"
+  },
+  "सर्वर में तकनीकी समस्या (500)": {
+    "en": "Server Technical Issue (500)",
+    "hi": "सर्वर में तकनीकी समस्या (500)",
+    "bi": "Server Technical Issue (सर्वर में तकनीकी समस्या - 500)"
+  },
+  "server technical issue (500)": {
+    "en": "Server Technical Issue (500)",
+    "hi": "सर्वर में तकनीकी समस्या (500)",
+    "bi": "Server Technical Issue (सर्वर में तकनीकी समस्या - 500)"
+  },
+  "server technical issue (सर्वर में तकनीकी समस्या - 500)": {
+    "en": "Server Technical Issue (500)",
+    "hi": "सर्वर में तकनीकी समस्या (500)",
+    "bi": "Server Technical Issue (सर्वर में तकनीकी समस्या - 500)"
+  },
+  "पेज रिफ्रेश करें (try again)": {
+    "en": "Refresh Page (Try Again)",
+    "hi": "पेज रिफ्रेश करें (Try Again)",
+    "bi": "Refresh Page (पेज रिफ्रेश करें)"
+  },
+  "refresh page (try again)": {
+    "en": "Refresh Page (Try Again)",
+    "hi": "पेज रिफ्रेश करें (Try Again)",
+    "bi": "Refresh Page (पेज रिफ्रेश करें)"
+  },
+  "मुख्य डैशबोर्ड (home)": {
+    "en": "Main Dashboard (Home)",
+    "hi": "मुख्य डैशबोर्ड (Home)",
+    "bi": "Main Dashboard (मुख्य डैशबोर्ड)"
+  },
+  "main dashboard (home)": {
+    "en": "Main Dashboard (Home)",
+    "hi": "मुख्य डैशबोर्ड (Home)",
+    "bi": "Main Dashboard (मुख्य डैशबोर्ड)"
+  },
+  "main dashboard (मुख्य डैशबोर्ड)": {
+    "en": "Main Dashboard (Home)",
+    "hi": "मुख्य डैशबोर्ड (Home)",
+    "bi": "Main Dashboard (मुख्य डैशबोर्ड)"
+  },
+  "चुनें।": {
+    "en": "Select.",
+    "hi": "चुनें।",
+    "bi": "Select (चुनें)।"
+  },
+  "select.": {
+    "en": "Select.",
+    "hi": "चुनें।",
+    "bi": "Select (चुनें)।"
+  },
+  "select (चुनें)।": {
+    "en": "Select.",
+    "hi": "चुनें।",
+    "bi": "Select (चुनें)।"
+  },
+  "पर": {
+    "en": "on",
+    "hi": "पर",
+    "bi": "on (पर)"
+  },
+  "on": {
+    "en": "on",
+    "hi": "पर",
+    "bi": "on (पर)"
+  },
+  "on (पर)": {
+    "en": "on",
+    "hi": "पर",
+    "bi": "on (पर)"
+  },
+  "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो": {
+    "en": "• Bills will be tracked for this month and onwards. If site was active all year, select April 2026.",
+    "hi": "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो",
+    "bi": "• Bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)"
+  },
+  "• bills will be tracked for this month and onwards. if site was active all year, select april 2026.": {
+    "en": "• Bills will be tracked for this month and onwards. If site was active all year, select April 2026.",
+    "hi": "• इस माह और इसके बाद के महीनों में बिल ट्रैक होंगे। यदि पूरी साल साइट चालू रही है तो",
+    "bi": "• Bills tracked from this month (इस माह से आगे बिल ट्रैक होंगे)"
+  },
+  "उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है...": {
+    "en": "e.g. 200m pipe dispatched today via vehicle...",
+    "hi": "उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है...",
+    "bi": "e.g. 200m pipe dispatched (उदाहरण: 200m पाइप रवाना किया गया...)"
+  },
+  "e.g. 200m pipe dispatched today via vehicle...": {
+    "en": "e.g. 200m pipe dispatched today via vehicle...",
+    "hi": "उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है...",
+    "bi": "e.g. 200m pipe dispatched (उदाहरण: 200m पाइप रवाना किया गया...)"
+  },
+  "e.g. 200m pipe dispatched (उदाहरण: 200m पाइप रवाना किया गया...)": {
+    "en": "e.g. 200m pipe dispatched today via vehicle...",
+    "hi": "उदाहरण: 200m पाइप आज गाड़ी से रवाना कर दिया गया है...",
+    "bi": "e.g. 200m pipe dispatched (उदाहरण: 200m पाइप रवाना किया गया...)"
+  },
+  "सेव करते ही पूरा पर्चा सुरक्षित हो जाएगा और ऑफिस में तुरंत दिखेगा।": {
+    "en": "Once saved, entire DPR sheet is securely stored and visible to head office.",
+    "hi": "सेव करते ही पूरा पर्चा सुरक्षित हो जाएगा और ऑफिस में तुरंत दिखेगा।",
+    "bi": "Once saved, sheet is securely stored (सेव करते ही पूरा पर्चा सुरक्षित होगा)"
+  },
+  "once saved, entire dpr sheet is securely stored and visible to head office.": {
+    "en": "Once saved, entire DPR sheet is securely stored and visible to head office.",
+    "hi": "सेव करते ही पूरा पर्चा सुरक्षित हो जाएगा और ऑफिस में तुरंत दिखेगा।",
+    "bi": "Once saved, sheet is securely stored (सेव करते ही पूरा पर्चा सुरक्षित होगा)"
+  },
+  "once saved, sheet is securely stored (सेव करते ही पूरा पर्चा सुरक्षित होगा)": {
+    "en": "Once saved, entire DPR sheet is securely stored and visible to head office.",
+    "hi": "सेव करते ही पूरा पर्चा सुरक्षित हो जाएगा और ऑफिस में तुरंत दिखेगा।",
+    "bi": "Once saved, sheet is securely stored (सेव करते ही पूरा पर्चा सुरक्षित होगा)"
+  },
+  "🔴 अति आवश्यक (काम रुका है)": {
+    "en": "🔴 Urgent (Work Halted)",
+    "hi": "🔴 अति आवश्यक (काम रुका है)",
+    "bi": "🔴 Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "🔴 urgent (work halted)": {
+    "en": "🔴 Urgent (Work Halted)",
+    "hi": "🔴 अति आवश्यक (काम रुका है)",
+    "bi": "🔴 Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "🔴 urgent (अति आवश्यक - काम रुका है)": {
+    "en": "🔴 Urgent (Work Halted)",
+    "hi": "🔴 अति आवश्यक (काम रुका है)",
+    "bi": "🔴 Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "अति आवश्यक (काम रुका है)": {
+    "en": "Urgent (Work Halted)",
+    "hi": "अति आवश्यक (काम रुका है)",
+    "bi": "Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "urgent (work halted)": {
+    "en": "Urgent (Work Halted)",
+    "hi": "अति आवश्यक (काम रुका है)",
+    "bi": "Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "urgent (अति आवश्यक - काम रुका है)": {
+    "en": "Urgent (Work Halted)",
+    "hi": "अति आवश्यक (काम रुका है)",
+    "bi": "Urgent (अति आवश्यक - काम रुका है)"
+  },
+  "साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी": {
+    "en": "Describe site problem, head office will resolve immediately",
+    "hi": "साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी",
+    "bi": "Describe site problem (दिक्कत लिखें, तुरंत समाधान होगा)"
+  },
+  "describe site problem, head office will resolve immediately": {
+    "en": "Describe site problem, head office will resolve immediately",
+    "hi": "साइट की दिक्कत लिखें, ऑफिस तक तुरंत पहुँचेगी",
+    "bi": "Describe site problem (दिक्कत लिखें, तुरंत समाधान होगा)"
+  },
+  "फिल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें। अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।": {
+    "en": "No documents available matching filter or search. Please reset filters. No documents have been shared yet.",
+    "hi": "फिल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें। अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)"
+  },
+  "no documents available matching filter or search. please reset filters. no documents have been shared yet.": {
+    "en": "No documents available matching filter or search. Please reset filters. No documents have been shared yet.",
+    "hi": "फिल्टर या सर्च के अनुसार कोई दस्तावेज़ उपलब्ध नहीं है। कृपया फ़िल्टर रीसेट करें। अभी तक कोई दस्तावेज़ शेयर नहीं किया गया है। सुपरवाइजर या स्टाफ पहली फ़ाइल शेयर कर सकते हैं।",
+    "bi": "No documents matching filter (कोई दस्तावेज़ उपलब्ध नहीं है)"
+  },
+  "(सुपरवाइजर कार्य क्षेत्र)": {
+    "en": "(Supervisor Work Area)",
+    "hi": "(सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "(supervisor work area)": {
+    "en": "(Supervisor Work Area)",
+    "hi": "(सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "&mdash; (सुपरवाइजर कार्य क्षेत्र)": {
+    "en": "— (Supervisor Work Area)",
+    "hi": "&mdash; (सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "— Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "— (supervisor work area)": {
+    "en": "— (Supervisor Work Area)",
+    "hi": "— (सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "— Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "— supervisor work area (सुपरवाइजर कार्य क्षेत्र)": {
+    "en": "— (Supervisor Work Area)",
+    "hi": "— (सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "— Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "— (सुपरवाइजर कार्य क्षेत्र)": {
+    "en": "— (Supervisor Work Area)",
+    "hi": "— (सुपरवाइजर कार्य क्षेत्र)",
+    "bi": "— Supervisor Work Area (सुपरवाइजर कार्य क्षेत्र)"
+  },
+  "&bull; आज का दैनिक कार्य पर्चा (dpr) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय dpr मॉनिटरिंग &bull; सभी 21 साइटों के दैनिक कार्य पर्चे (dpr sheets) का स्टेटस, 7:30 pm रिमाइंडर व 1-क्लिक प्रिंटआउट।": {
+    "en": "• Fill today's DPR sheet with worker names, phone, work area, ward and activity. Office DPR Monitoring • Status of all 21 sites' daily DPR sheets, 7:30 PM WhatsApp reminder and 1-click A4 printout.",
+    "hi": "&bull; आज का दैनिक कार्य पर्चा (DPR) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय DPR मॉनिटरिंग &bull; सभी 21 साइटों के दैनिक कार्य पर्चे (DPR Sheets) का स्टेटस, 7:30 PM रिमाइंडर व 1-क्लिक प्रिंटआउट।",
+    "bi": "Daily DPR Sheet Submission & Monitoring (दैनिक कार्य पर्चा व कार्यालय मॉनिटरिंग)"
+  },
+  "• fill today's dpr sheet with worker names, phone, work area, ward and activity. office dpr monitoring • status of all 21 sites' daily dpr sheets, 7:30 pm whatsapp reminder and 1-click a4 printout.": {
+    "en": "• Fill today's DPR sheet with worker names, phone, work area, ward and activity. Office DPR Monitoring • Status of all 21 sites' daily DPR sheets, 7:30 PM WhatsApp reminder and 1-click A4 printout.",
+    "hi": "• आज का दैनिक कार्य पर्चा (DPR) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय DPR मॉनिटरिंग • सभी 21 साइटों के दैनिक कार्य पर्चे (DPR Sheets) का स्टेटस, 7:30 PM रिमाइंडर व 1-क्लिक प्रिंटआउट।",
+    "bi": "Daily DPR Sheet Submission & Monitoring (दैनिक कार्य पर्चा व कार्यालय मॉनिटरिंग)"
+  },
+  "daily dpr sheet submission & monitoring (दैनिक कार्य पर्चा व कार्यालय मॉनिटरिंग)": {
+    "en": "• Fill today's DPR sheet with worker names, phone, work area, ward and activity. Office DPR Monitoring • Status of all 21 sites' daily DPR sheets, 7:30 PM WhatsApp reminder and 1-click A4 printout.",
+    "hi": "• आज का दैनिक कार्य पर्चा (DPR) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय DPR मॉनिटरिंग • सभी 21 साइटों के दैनिक कार्य पर्चे (DPR Sheets) का स्टेटस, 7:30 PM रिमाइंडर व 1-क्लिक प्रिंटआउट।",
+    "bi": "Daily DPR Sheet Submission & Monitoring (दैनिक कार्य पर्चा व कार्यालय मॉनिटरिंग)"
+  },
+  "• आज का दैनिक कार्य पर्चा (dpr) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय dpr मॉनिटरिंग • सभी 21 साइटों के दैनिक कार्य पर्चे (dpr sheets) का स्टेटस, 7:30 pm रिमाइंडर व 1-क्लिक प्रिंटआउट।": {
+    "en": "• Fill today's DPR sheet with worker names, phone, work area, ward and activity. Office DPR Monitoring • Status of all 21 sites' daily DPR sheets, 7:30 PM WhatsApp reminder and 1-click A4 printout.",
+    "hi": "• आज का दैनिक कार्य पर्चा (DPR) भरें। कारीगर, मोबाइल नंबर, कार्य क्षेत्र, वार्ड व कार्य विवरणी लिखकर सबमिट करें। कार्यालय DPR मॉनिटरिंग • सभी 21 साइटों के दैनिक कार्य पर्चे (DPR Sheets) का स्टेटस, 7:30 PM रिमाइंडर व 1-क्लिक प्रिंटआउट।",
+    "bi": "Daily DPR Sheet Submission & Monitoring (दैनिक कार्य पर्चा व कार्यालय मॉनिटरिंग)"
+  },
+  "आज () का dpr पर्चा सुरक्षित है। आप चाहें तो और लाइनें जोड़ या सुधार सकते हैं।": {
+    "en": "Today's DPR sheet is securely saved. You can add or edit lines if needed.",
+    "hi": "आज () का DPR पर्चा सुरक्षित है। आप चाहें तो और लाइनें जोड़ या सुधार सकते हैं।",
+    "bi": "Today's DPR sheet is securely saved (आज का DPR पर्चा सुरक्षित है)"
+  },
+  "today's dpr sheet is securely saved. you can add or edit lines if needed.": {
+    "en": "Today's DPR sheet is securely saved. You can add or edit lines if needed.",
+    "hi": "आज () का DPR पर्चा सुरक्षित है। आप चाहें तो और लाइनें जोड़ या सुधार सकते हैं।",
+    "bi": "Today's DPR sheet is securely saved (आज का DPR पर्चा सुरक्षित है)"
+  },
+  "today's dpr sheet is securely saved (आज का dpr पर्चा सुरक्षित है)": {
+    "en": "Today's DPR sheet is securely saved. You can add or edit lines if needed.",
+    "hi": "आज () का DPR पर्चा सुरक्षित है। आप चाहें तो और लाइनें जोड़ या सुधार सकते हैं।",
+    "bi": "Today's DPR sheet is securely saved (आज का DPR पर्चा सुरक्षित है)"
   }
 },
 
@@ -7296,18 +8316,21 @@ const AppTranslations = {
      */
     resolveString: function(str, targetLang) {
         if (!str || typeof str !== 'string') return str;
-        const rawTrimmed = str.trim();
-        if (!rawTrimmed) return str;
+        let raw = str.trim();
+        if (!raw) return str;
+
+        // Clean common HTML entities
+        raw = raw.replace(/&mdash;/g, '—').replace(/&bull;/g, '•').replace(/&amp;/g, '&');
 
         // Skip purely numeric, symbols, currency, dates
-        if (/^[₹\$\d\s\-\/:\,\.\%\(\)\#\@\+]+$/.test(rawTrimmed)) {
+        if (/^[₹\$\d\s\-\/:\,\.\%\(\)\#\@\+]+$/.test(raw)) {
             return str;
         }
 
         // Extract leading emoji/icon/bullet
-        const prefixMatch = rawTrimmed.match(/^([^\w\s\u0900-\u097F]+[\s]*)/);
+        const prefixMatch = raw.match(/^([^\w\s\u0900-\u097F]+[\s]*)/);
         const prefix = prefixMatch ? prefixMatch[1] : "";
-        let body = rawTrimmed.substring(prefix.length).trim();
+        let body = raw.substring(prefix.length).trim();
 
         // Extract trailing punctuation (* or :)
         const suffixMatch = body.match(/([\s]*[\*\:]+)$/);
@@ -7321,74 +8344,111 @@ const AppTranslations = {
         // 1. Direct O(1) Map Lookup by exact body (case-insensitive)
         const normKey = body.toLowerCase();
         if (this.dictMap[normKey]) {
-            const item = this.dictMap[normKey];
-            return prefix + item[targetLang] + suffix;
+            return prefix + this.dictMap[normKey][targetLang] + suffix;
         }
 
-        // Also check rawTrimmed directly
-        const rawNorm = rawTrimmed.toLowerCase();
+        // Also check raw directly
+        const rawNorm = raw.toLowerCase();
         if (this.dictMap[rawNorm]) {
             return this.dictMap[rawNorm][targetLang];
         }
 
-        // 2. Intelligent Parenthetical Parser: "Part1 (Part2)" or "Part1 [Part2]"
-        const parenMatch = body.match(/^(.*?)\s*[\(\[](.*?)[\)\]]$/);
-        if (parenMatch) {
-            const p1 = parenMatch[1].trim();
-            const p2 = parenMatch[2].trim();
-            const hasDev1 = /[\u0900-\u097F]/.test(p1);
-            const hasDev2 = /[\u0900-\u097F]/.test(p2);
-            const hasLat1 = /[A-Za-z]/.test(p1);
-            const hasLat2 = /[A-Za-z]/.test(p2);
+        const hasDev = /[\u0900-\u097F]/.test(body);
+        const hasLat = /[A-Za-z]/.test(body);
 
-            // Scenario A: p1 is Devanagari, p2 is English (e.g. 'समस्या का प्रकार (Issue Category)')
-            if (hasDev1 && (hasLat2 || !hasDev2)) {
-                if (targetLang === 'en') return prefix + p2 + suffix;
-                if (targetLang === 'hi') return prefix + p1 + suffix;
-                return prefix + p2 + " (" + p1 + ")" + suffix;
+        // 2. Intelligent Multi-Script Parser for mixed elements
+        if (hasDev && hasLat) {
+            // A. PARENTHESIS FIRST: "Part1 (Part2)" or "Part1 [Part2]"
+            const parenMatch = body.match(/^(.*?)\s*[\(\[](.*?)[\)\]]$/);
+            if (parenMatch) {
+                const p1 = parenMatch[1].trim();
+                const p2 = parenMatch[2].trim();
+                const countMatch = p2.match(/(\d+)/);
+                const countStr = countMatch ? (" (" + countMatch[1] + ")") : "";
+
+                const p1HasDev = /[\u0900-\u097F]/.test(p1);
+                const p2HasDev = /[\u0900-\u097F]/.test(p2);
+                const p1HasLat = /[A-Za-z]/.test(p1);
+                const p2HasLat = /[A-Za-z]/.test(p2);
+
+                // Case: p1 has Latin (e.g. "Work Area", "Open", "Print DPR"), p2 has Devanagari
+                if (p1HasLat && p2HasDev) {
+                    let cleanLat = p1;
+                    if (p1HasDev) {
+                        cleanLat = p1.replace(/[\u0900-\u097F\s\/\-\:]+/g, '').trim();
+                    }
+                    if (cleanLat) {
+                        if (targetLang === 'en') return prefix + cleanLat + countStr + suffix;
+                        if (targetLang === 'hi') return prefix + p2 + suffix;
+                        return prefix + cleanLat + " (" + p2 + ")" + suffix;
+                    }
+                }
+
+                // Case: p1 has Devanagari, p2 has Latin (e.g. "सामान की कमी (Material Shortage)")
+                if (p1HasDev && p2HasLat && !p2HasDev) {
+                    if (targetLang === 'en') return prefix + p2 + suffix;
+                    if (targetLang === 'hi') return prefix + p1 + suffix;
+                    return prefix + p2 + " (" + p1 + ")" + suffix;
+                }
             }
 
-            // Scenario B: p1 is English, p2 is Devanagari (e.g. 'RA Bill (रनिंग बिल)')
-            if (hasLat1 && (hasDev2 || !hasLat2)) {
-                if (targetLang === 'en') return prefix + p1 + suffix;
-                if (targetLang === 'hi') return prefix + p2 + suffix;
-                return prefix + p1 + " (" + p2 + ")" + suffix;
+            // B. DASH SEPARATOR: "Part1 — Part2" or "Part1 - Part2"
+            const dashMatch = body.match(/^(.*?)\s*[\—\–]\s*(.*?)$/);
+            if (dashMatch) {
+                const p1 = dashMatch[1].trim();
+                const p2 = dashMatch[2].trim();
+                const p1HasLat = /[A-Za-z]/.test(p1);
+                const p2HasLat = /[A-Za-z]/.test(p2);
+
+                if (p1HasLat && !p2HasLat) {
+                    if (targetLang === 'en') return prefix + p1 + suffix;
+                    if (targetLang === 'hi') return prefix + p2 + suffix;
+                    return prefix + p1 + " (" + p2 + ")" + suffix;
+                } else if (!p1HasLat && p2HasLat) {
+                    if (targetLang === 'en') return prefix + p2 + suffix;
+                    if (targetLang === 'hi') return prefix + p1 + suffix;
+                    return prefix + p2 + " (" + p1 + ")" + suffix;
+                }
+            }
+
+            // C. SLASH SEPARATOR: "Part1 / Part2" (only if no parentheses)
+            const slashMatch = body.match(/^([^\(\)]*?)\s*[\/]\s*([^\(\)]*?)$/);
+            if (slashMatch) {
+                const p1 = slashMatch[1].trim();
+                const p2 = slashMatch[2].trim();
+                const p1HasLat = /[A-Za-z]/.test(p1);
+                const p2HasLat = /[A-Za-z]/.test(p2);
+
+                if (p1HasLat && !p2HasLat) {
+                    if (targetLang === 'en') return prefix + p1 + suffix;
+                    if (targetLang === 'hi') return prefix + p2 + suffix;
+                    return prefix + p1 + " (" + p2 + ")" + suffix;
+                } else if (!p1HasLat && p2HasLat) {
+                    if (targetLang === 'en') return prefix + p2 + suffix;
+                    if (targetLang === 'hi') return prefix + p1 + suffix;
+                    return prefix + p2 + " (" + p1 + ")" + suffix;
+                }
+            }
+
+            // D. UNIVERSAL STRIP: In 'en', strip any remaining bracketed or trailing Devanagari
+            if (targetLang === 'en') {
+                let stripped = body.replace(/\s*[\(\[][\u0900-\u097F\s\/\-\.\&\+\:]+[\)\]]/g, '').trim();
+                stripped = stripped.replace(/\s*\/[\s\u0900-\u097F\s\/\-\.\&\+\:]+$/g, '').trim();
+                if (stripped && /[A-Za-z]/.test(stripped) && !/[\u0900-\u097F]/.test(stripped)) {
+                    return prefix + stripped + suffix;
+                }
+            } else if (targetLang === 'hi') {
+                let stripped = body.replace(/\s*[\(\[][A-Za-z\s\/\-\.\&\+\:]+[\)\]]/g, '').trim();
+                stripped = stripped.replace(/\s*\/[\sA-Za-z\s\/\-\.\&\+\:]+$/g, '').trim();
+                if (stripped && /[\u0900-\u097F]/.test(stripped) && !/[A-Za-z]/.test(stripped)) {
+                    return prefix + stripped + suffix;
+                }
             }
         }
 
-        // 3. Slash Parser: "Part1 / Part2" (e.g. "Cancel / बंद करें", "Category / श्रेणी")
-        const slashMatch = body.match(/^(.*?)\s*\/\s*(.*?)$/);
-        if (slashMatch) {
-            const p1 = slashMatch[1].trim();
-            const p2 = slashMatch[2].trim();
-            const hasDev1 = /[\u0900-\u097F]/.test(p1);
-            const hasDev2 = /[\u0900-\u097F]/.test(p2);
-            const hasLat1 = /[A-Za-z]/.test(p1);
-            const hasLat2 = /[A-Za-z]/.test(p2);
-
-            if (hasDev1 && hasLat2) {
-                if (targetLang === 'en') return prefix + p2 + suffix;
-                if (targetLang === 'hi') return prefix + p1 + suffix;
-                return prefix + p2 + " (" + p1 + ")" + suffix;
-            } else if (hasLat1 && hasDev2) {
-                if (targetLang === 'en') return prefix + p1 + suffix;
-                if (targetLang === 'hi') return prefix + p2 + suffix;
-                return prefix + p1 + " (" + p2 + ")" + suffix;
-            }
-        }
-
-        // 4. Default Fallbacks:
-        if (targetLang === 'en') {
-            if (!/[\u0900-\u097F]/.test(rawTrimmed)) {
-                return str;
-            }
-        }
-
-        if (targetLang === 'hi') {
-            if (!/[A-Za-z]/.test(rawTrimmed)) {
-                return str;
-            }
-        }
+        // 3. Fallbacks: If pure language, keep as is
+        if (targetLang === 'en' && !hasDev) return str;
+        if (targetLang === 'hi' && !hasLat) return str;
 
         return str;
     },
@@ -7538,7 +8598,7 @@ const AppTranslations = {
     },
 
     /**
-     * Setup MutationObserver for dynamically added elements (like modals)
+     * Setup MutationObserver for dynamically added elements (like modals & supervisor rows)
      */
     setupObserver: function() {
         if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') return;

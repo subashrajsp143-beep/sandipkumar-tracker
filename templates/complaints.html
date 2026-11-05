@@ -502,7 +502,7 @@ async function submitComplaintForm(e) {
             // modal confirmed
             document.getElementById('complaintSuccessModal').classList.remove('hidden');
         } else {
-            alert('❌ ' + (data.message || 'त्रुटि हुई'));
+            alert('❌ ' + (data.message || 'Error occurred'));
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-paper-plane text-[#7EA79E]"></i> <span>शिकायत दर्ज करें (Submit)</span>';
         }
