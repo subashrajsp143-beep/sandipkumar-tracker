@@ -46,6 +46,16 @@ def _sync_to_github_worker():
             db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
             if not os.path.exists(db_path):
                 return
+
+            # Flush SQLite WAL transactions to disk before reading
+            try:
+                import sqlite3
+                _wal_conn = sqlite3.connect(db_path, timeout=5.0)
+                _wal_conn.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+                _wal_conn.close()
+            except Exception as _we:
+                pass
+
             with open(db_path, "rb") as f:
                 content_bytes = f.read()
 

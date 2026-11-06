@@ -122,7 +122,7 @@ def _start_keep_alive_daemon():
         import datetime
         # Wait 45 seconds after boot to let server warm up
         time.sleep(45)
-        live_url = "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status"
+        live_url = "https://sandipkumar-tracker-i4ub.onrender.com/ping"
         last_synced_date = None
         while True:
             try:
@@ -4477,7 +4477,7 @@ def handle_500_error(e):
 
 @app.errorhandler(404)
 def handle_404_error(e):
-    if request.path.startswith("/api/"):
-        return jsonify({"error": "Endpoint not found", "path": request.path}), 404
+    if request.path.startswith("/api/") or request.path.startswith("/static/") or request.path.startswith("/uploads/"):
+        return jsonify({"error": "Resource not found", "path": request.path}), 404
     return redirect(url_for("home_index"))
 
