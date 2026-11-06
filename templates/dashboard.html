@@ -447,10 +447,10 @@
                             </td>
                             <td class="py-2.5 px-2.5 text-center whitespace-nowrap">
                                 <div class="flex items-center justify-center gap-1">
-                                    <button type="button" onclick="openEditLetterModal({{ letter|tojson }})" title="Edit Letter" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition">
+                                    <button type="button" onclick="openEditLetterModalById({{ letter.id }})" title="Edit Letter" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-100 text-[#4B6B57] border border-amber-200 flex items-center justify-center transition cursor-pointer">
                                         <i class="fa-solid fa-pen text-[9px]"></i>
                                     </button>
-                                    <button type="button" onclick="deleteLetter({{ letter.id }}, '{{ letter.ref_no }}')" title="Delete Letter" class="w-6 h-6 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition">
+                                    <button type="button" onclick="deleteLetterById({{ letter.id }})" title="Delete Letter" class="w-6 h-6 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center transition cursor-pointer">
                                         <i class="fa-solid fa-trash text-[9px]"></i>
                                     </button>
                                 </div>
@@ -581,7 +581,7 @@
 <!-- ======================================================== -->
 <!-- MODAL 5: ADD / EDIT OUTGOING LETTER REFERENCE -->
 <!-- ======================================================== -->
-<div id="letterModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+<div id="letterModal" class="hidden fixed inset-0 z-[70] overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-scaleIn">
         
         <!-- Modal Header -->
@@ -820,6 +820,33 @@
     });
 
     // --- OUTGOING LETTERS REGISTER JS ---
+    const outgoingLettersData = {{ outgoing_letters|tojson|safe }};
+
+    async function openEditLetterModalById(id) {
+        let letter = (outgoingLettersData || []).find(l => l.id == id);
+        if (!letter) {
+            try {
+                const res = await fetch(`/api/letters/${id}`);
+                const data = await res.json();
+                if (data.success && data.letter) {
+                    letter = data.letter;
+                }
+            } catch (e) {
+                console.error("Fetch letter error:", e);
+            }
+        }
+        if (letter) {
+            openEditLetterModal(letter);
+        } else {
+            alert("Letter details not found!");
+        }
+    }
+
+    async function deleteLetterById(id) {
+        const letter = (outgoingLettersData || []).find(l => l.id == id);
+        const refNo = letter ? letter.ref_no : ('#' + id);
+        deleteLetter(id, refNo);
+    }
     let currentNextRefNo = "{{ next_letter_info.ref_no }}";
     let currentNextSeq = {{ next_letter_info.seq_num }};
     let currentFy = "{{ next_letter_info.fy }}";
