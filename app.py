@@ -1729,6 +1729,14 @@ def get_live_entries_api():
 
 @app.route("/health", methods=["GET"])
 @app.route("/ping", methods=["GET"])
+def health_ping():
+    return jsonify({
+        "status": "online",
+        "service": "Sandip Kumar Material Tracker",
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }), 200
+
+
 @app.route("/api/live-status", methods=["GET"])
 def live_status():
     try:
