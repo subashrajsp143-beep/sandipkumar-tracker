@@ -720,7 +720,7 @@ def save_entries():
         for item in items:
             mat_id = int(item["material_id"])
             qty = float(item["quantity"])
-            rate = float(item.get("rate", 0))
+            rate = float(item.get("rate") or 0)
             item_remarks = item.get("remarks", "")
 
             # Auto-fill standard rate from DB for supervisors / non-owners to maintain accurate financial ledgers
@@ -1542,30 +1542,43 @@ def materials_list():
 
 @app.route("/api/materials", methods=["POST"])
 def add_material():
-    is_owner = session.get("is_owner", False)
+    import sqlite3
+    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
     if not is_owner:
         flash("❌ Only authorized owner can add materials.", "error")
         return redirect(url_for("site_stock"))
     try:
         data = request.form
         name = data.get("name", "").strip()
-        unit = data.get("unit", "NOS").strip()
-        rate = float(data.get("rate", 0))
-        category = data.get("category", "General").strip()
+        unit = data.get("unit", "NOS").strip() or "NOS"
+        raw_rate = str(data.get("rate", "")).strip()
+        rate = float(raw_rate) if raw_rate else 0.0
+        category = data.get("category", "General").strip() or "General"
 
         if not name:
-            flash("Material name is required", "error")
+            flash("❌ Material name is required", "error")
             return redirect(url_for("materials_list"))
 
         conn = database.get_db()
         cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO materials (name, unit, rate, category)
-            VALUES (?, ?, ?, ?)
-        """, (name, unit, rate, category))
-        conn.commit()
+        try:
+            cursor.execute("""
+                INSERT INTO materials (name, unit, rate, category)
+                VALUES (?, ?, ?, ?)
+            """, (name, unit, rate, category))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            flash(f"⚠️ Yeh material '{name}' pehle se list me maujood hai!", "error")
+            return redirect(url_for("materials_list"))
         conn.close()
-        flash("Naya material list me jud gaya!", "success")
+
+        try:
+            database._notify_cloud_backup()
+        except Exception:
+            pass
+
+        flash("✅ Naya material list me safalta se jud gaya!", "success")
         return redirect(url_for("materials_list"))
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
@@ -1576,9 +1589,10 @@ def edit_material(mat_id):
     try:
         data = request.form
         name = data.get("name", "").strip()
-        unit = data.get("unit", "NOS").strip()
-        rate = float(data.get("rate", 0))
-        category = data.get("category", "General").strip()
+        unit = data.get("unit", "NOS").strip() or "NOS"
+        raw_rate = str(data.get("rate", "")).strip()
+        rate = float(raw_rate) if raw_rate else 0.0
+        category = data.get("category", "General").strip() or "General"
 
         conn = database.get_db()
         cursor = conn.cursor()
@@ -1588,7 +1602,13 @@ def edit_material(mat_id):
         """, (name, unit, rate, category, mat_id))
         conn.commit()
         conn.close()
-        flash("Material safalta se update ho gaya!", "success")
+
+        try:
+            database._notify_cloud_backup()
+        except Exception:
+            pass
+
+        flash("✅ Material safalta se update ho gaya!", "success")
         return redirect(url_for("materials_list"))
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
@@ -1699,7 +1719,7 @@ def sync_batch_entries():
             for item in items:
                 mat_id = int(item["material_id"])
                 qty = float(item["quantity"])
-                rate = float(item.get("rate", 0))
+                rate = float(item.get("rate") or 0)
                 remarks = item.get("remarks", "")
                 if qty > 0:
                     database.add_consumption_entry(
