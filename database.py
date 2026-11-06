@@ -52,6 +52,11 @@ def get_db():
     return conn
 
 def init_db():
+    try:
+        import github_sync
+        github_sync.restore_db_from_github_if_newer()
+    except Exception as _e:
+        pass
     conn = get_db()
     cursor = conn.cursor()
     try:

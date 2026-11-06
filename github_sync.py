@@ -94,3 +94,44 @@ def _sync_to_github_worker():
                     logging.info(f"Auto-sync: Successfully backed up material_tracker.db to GitHub ({local_sha[:8]})")
         except Exception as e:
             logging.error(f"Auto-sync failed: {e}")
+
+
+def restore_db_from_github_if_newer():
+    """
+    On application boot, checks if GitHub has a newer material_tracker.db.
+    If remote SHA differs from local SHA, restores it safely.
+    """
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
+        local_sha = None
+        if os.path.exists(db_path):
+            with open(db_path, "rb") as f:
+                local_sha = git_blob_sha(f.read())
+
+        get_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
+        headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "User-Agent": "SandipKumarTracker-AutoSync",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        req_get = urllib.request.Request(get_url, headers=headers)
+        with urllib.request.urlopen(req_get, timeout=12) as resp:
+            info = json.loads(resp.read().decode("utf-8"))
+            remote_sha = info.get("sha")
+            if remote_sha and remote_sha != local_sha:
+                logging.info(f"Startup Restore: Remote DB ({remote_sha[:8]}) is newer than local. Downloading...")
+                download_url = info.get("download_url") or get_url
+                if info.get("content"):
+                    data = base64.b64decode(info["content"])
+                else:
+                    dl_req = urllib.request.Request(download_url, headers=headers)
+                    with urllib.request.urlopen(dl_req, timeout=30) as dl_resp:
+                        data = dl_resp.read()
+                if len(data) > 10000:
+                    with open(db_path, "wb") as f:
+                        f.write(data)
+                    logging.info(f"Startup Restore: Successfully restored material_tracker.db ({len(data)} bytes).")
+            else:
+                logging.info("Startup Restore: Local DB is already up to date with cloud.")
+    except Exception as e:
+        logging.warning(f"Startup Restore check notice: {e}")
