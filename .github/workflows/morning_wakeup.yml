@@ -15,7 +15,7 @@ jobs:
       - name: Ping Live Service
         run: |
           echo "Pinging M/S Sandip Kumar Tracker on Render..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 60 "https://sandipkumar-tracker-i4ub.onrender.com/api/live-status" || echo "FAIL")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 15 "https://sandipkumar-tracker-i4ub.onrender.com/ping" || echo "FAIL")
           echo "Target response HTTP code: $STATUS"
           if [ "$STATUS" = "200" ]; then
             echo "SUCCESS: Server is warm and responsive."
