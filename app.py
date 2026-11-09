@@ -4296,6 +4296,7 @@ def data_sharing_dashboard():
     site_filter = request.args.get("site_id")
     type_filter = request.args.get("type", "all")
     cat_filter = request.args.get("cat", "all")
+    scope_filter = request.args.get("scope", "all")
     search_q = request.args.get("q", "").strip()
     
     user_site_id = session.get("site_id")
@@ -4304,10 +4305,13 @@ def data_sharing_dashboard():
         site_id=site_filter,
         file_type=type_filter,
         category=cat_filter,
-        search=search_q
+        search=search_q,
+        share_scope=scope_filter,
+        is_owner=is_owner,
+        user_site_id=user_site_id
     )
     
-    stats = database.get_shared_docs_stats()
+    stats = database.get_shared_docs_stats(is_owner=is_owner, user_site_id=user_site_id)
     sites = database.get_all_sites()
     
     categories = [
@@ -4332,6 +4336,7 @@ def data_sharing_dashboard():
         selected_site_id=int(site_filter) if site_filter and str(site_filter).isdigit() else None,
         selected_type=type_filter,
         selected_cat=cat_filter,
+        selected_scope=scope_filter,
         search_q=search_q,
         is_owner=is_owner,
         current_user_name=current_user_name,
@@ -4341,7 +4346,7 @@ def data_sharing_dashboard():
 
 @app.route("/api/shared-docs/upload", methods=["POST"])
 def api_upload_shared_doc():
-    """Uploads a new document shared by supervisor or staff."""
+    """Uploads a new document with share scope (office, all_sites, site)."""
     role = session.get("role")
     is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
     if not role and not is_owner:
@@ -4383,7 +4388,12 @@ def api_upload_shared_doc():
     site_id = request.form.get("site_id")
     notes = request.form.get("notes", "").strip()
     
-    # Crucial requirement: With the name of supervisor sharing the file
+    # Share Scope: office (Default), all_sites, site
+    share_scope = request.form.get("share_scope", "office").strip().lower()
+    if share_scope not in ["office", "all_sites", "site"]:
+        share_scope = "office"
+    
+    # Uploader Identity
     uploader_name = request.form.get("uploader_name", "").strip()
     if not uploader_name:
         uploader_name = session.get("worker_name") or ("Sandip Kumar" if is_owner else "Supervisor")
@@ -4395,7 +4405,7 @@ def api_upload_shared_doc():
     doc_id = database.add_shared_document(
         title=title,
         category=category,
-        site_id=int(site_id) if site_id and str(site_id).isdigit() else None,
+        site_id=int(site_id) if site_id and str(site_id).isdigit() and share_scope == "site" else (int(site_id) if site_id and str(site_id).isdigit() else None),
         filename=unique_filename,
         original_filename=orig_filename,
         file_type=file_type,
@@ -4406,23 +4416,48 @@ def api_upload_shared_doc():
         uploader_role=uploader_role,
         uploader_phone=uploader_phone,
         uploader_id=uploader_id,
-        notes=notes
+        notes=notes,
+        share_scope=share_scope
     )
     
+    scope_labels = {
+        "office": "Office Only (सिर्फ ऑफिस)",
+        "all_sites": "All Sites (सभी साइट्स)",
+        "site": "Specific Site (चयनित साइट)"
+    }
     return jsonify({
         "success": True,
-        "message": f"Document '{title}' successfully shared by {uploader_name}!",
+        "message": f"Document '{title}' successfully saved [{scope_labels.get(share_scope, 'Office')}] by {uploader_name}!",
         "doc_id": doc_id
     })
 
 @app.route("/shared-docs/download/<int:doc_id>")
 def download_shared_doc(doc_id):
-    """Downloads a shared document."""
+    """Downloads a shared document with permission enforcement."""
+    role = session.get("role")
+    is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
+    user_site_id = session.get("site_id")
+    user_phone = session.get("worker_phone")
+    user_name = session.get("worker_name")
+
     doc = database.get_shared_document_by_id(doc_id)
     if not doc:
         flash("Document not found.", "error")
         return redirect(url_for("data_sharing_dashboard"))
-        
+
+    # Permission verification
+    share_scope = doc.get("share_scope", "office")
+    is_uploader = (user_name and doc.get("uploader_name") and user_name.lower() == doc["uploader_name"].lower()) or                   (user_phone and doc.get("uploader_phone") and user_phone == doc["uploader_phone"])
+
+    if not is_owner and not is_uploader:
+        if share_scope == "office":
+            flash("❌ Access Denied: This document is marked 'Office Only' and cannot be accessed by supervisors.", "error")
+            return redirect(url_for("data_sharing_dashboard"))
+        elif share_scope == "site":
+            if not user_site_id or int(user_site_id) != doc.get("site_id"):
+                flash("❌ Access Denied: This document is restricted to its specific site.", "error")
+                return redirect(url_for("data_sharing_dashboard"))
+          
     file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
     if not os.path.exists(file_path):
         flash("File not found on storage disk.", "error")
@@ -4437,12 +4472,31 @@ def download_shared_doc(doc_id):
 
 @app.route("/shared-docs/view/<int:doc_id>")
 def view_shared_doc(doc_id):
-    """View PDF or Image directly in browser."""
+    """View PDF or Image directly in browser with permission enforcement."""
+    role = session.get("role")
+    is_owner = (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075")
+    user_site_id = session.get("site_id")
+    user_phone = session.get("worker_phone")
+    user_name = session.get("worker_name")
+
     doc = database.get_shared_document_by_id(doc_id)
     if not doc:
         flash("Document not found.", "error")
         return redirect(url_for("data_sharing_dashboard"))
-        
+
+    # Permission verification
+    share_scope = doc.get("share_scope", "office")
+    is_uploader = (user_name and doc.get("uploader_name") and user_name.lower() == doc["uploader_name"].lower()) or                   (user_phone and doc.get("uploader_phone") and user_phone == doc["uploader_phone"])
+
+    if not is_owner and not is_uploader:
+        if share_scope == "office":
+            flash("❌ Access Denied: This document is marked 'Office Only' and cannot be viewed by supervisors.", "error")
+            return redirect(url_for("data_sharing_dashboard"))
+        elif share_scope == "site":
+            if not user_site_id or int(user_site_id) != doc.get("site_id"):
+                flash("❌ Access Denied: This document is restricted to its specific site.", "error")
+                return redirect(url_for("data_sharing_dashboard"))
+          
     file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
     if not os.path.exists(file_path):
         flash("File not found on storage disk.", "error")
@@ -4461,7 +4515,6 @@ def api_delete_shared_doc(doc_id):
     if not doc:
         return jsonify({"success": False, "message": "Document not found."}), 404
         
-    # Permission check: Owner or matching uploader name / phone
     user_name = session.get("worker_name", "")
     user_phone = session.get("worker_phone", "")
     can_delete = (is_owner or 
@@ -4471,7 +4524,6 @@ def api_delete_shared_doc(doc_id):
     if not can_delete:
         return jsonify({"success": False, "message": "Permission denied! Only the uploader or Owner can delete this document."}), 403
         
-    # Delete from disk
     file_path = os.path.join(SHARED_DOCS_DIR, doc["filename"])
     if os.path.exists(file_path):
         try:
@@ -4482,10 +4534,6 @@ def api_delete_shared_doc(doc_id):
     database.delete_shared_document(doc_id)
     return jsonify({"success": True, "message": "Document deleted successfully."})
 
-# ==========================================
-# GLOBAL ERROR HANDLERS (500 & 404)
-# ==========================================
-@app.errorhandler(500)
 def handle_500_error(e):
     import traceback
     err_trace = traceback.format_exc()

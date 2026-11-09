@@ -136,6 +136,27 @@
             </div>
         </div>
 
+        <!-- Quick Scope Filter Pills (Owner Privacy Controls) -->
+        {% if is_owner %}
+        <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+            <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider mr-1">
+                <i class="fa-solid fa-shield-halved text-[#D97706]"></i> Scope:
+            </span>
+            <button type="button" onclick="filterByScope('all')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer {% if selected_scope == 'all' or not selected_scope %}bg-[#163F37] text-white shadow-2xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                All Files ({{ stats.total }})
+            </button>
+            <button type="button" onclick="filterByScope('office')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_scope == 'office' %}bg-purple-800 text-white shadow-2xs{% else %}bg-purple-50 text-purple-900 hover:bg-purple-100 border border-purple-200{% endif %}">
+                <i class="fa-solid fa-lock text-purple-600"></i> Office Only ({{ stats.office_count }})
+            </button>
+            <button type="button" onclick="filterByScope('all_sites')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_scope == 'all_sites' %}bg-emerald-700 text-white shadow-2xs{% else %}bg-emerald-50 text-emerald-900 hover:bg-emerald-100 border border-emerald-200{% endif %}">
+                <i class="fa-solid fa-globe text-emerald-600"></i> All Sites ({{ stats.all_sites_count }})
+            </button>
+            <button type="button" onclick="filterByScope('site')" class="px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1.5 {% if selected_scope == 'site' %}bg-blue-700 text-white shadow-2xs{% else %}bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-200{% endif %}">
+                <i class="fa-solid fa-location-dot text-blue-600"></i> Site Specific ({{ stats.site_specific_count }})
+            </button>
+        </div>
+        {% endif %}
+
         <!-- Quick File Type Filter Pills -->
         <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
             <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Type:</span>
@@ -233,18 +254,30 @@
                             </div>
                         </div>
 
-                        <!-- Site Badge -->
-                        {% if doc.site_name %}
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF5EF] text-[#163F37] border border-[#C3E3D2] flex-shrink-0">
-                            <i class="fa-solid fa-location-dot text-[#D97706] text-[9px]"></i>
-                            <span>{{ doc.site_name }}</span>
-                        </span>
-                        {% else %}
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 flex-shrink-0">
-                            <i class="fa-solid fa-globe text-slate-400 text-[9px]"></i>
-                            <span>All Sites</span>
-                        </span>
-                        {% endif %}
+                        <!-- Scope & Site Badge -->
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            {% if doc.share_scope == 'office' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-200 shadow-2xs" title="Only Office can see this">
+                                <i class="fa-solid fa-lock text-purple-700 text-[9px]"></i>
+                                <span>Office Only</span>
+                            </span>
+                            {% elif doc.share_scope == 'all_sites' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs" title="Shared with all 21 sites">
+                                <i class="fa-solid fa-globe text-emerald-700 text-[9px]"></i>
+                                <span>All Sites</span>
+                            </span>
+                            {% elif doc.share_scope == 'site' and doc.site_name %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-900 border border-blue-200 shadow-2xs" title="Only for {{ doc.site_name }}">
+                                <i class="fa-solid fa-location-dot text-blue-700 text-[9px]"></i>
+                                <span>{{ doc.site_name }}</span>
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                <i class="fa-solid fa-building text-slate-500 text-[9px]"></i>
+                                <span>{{ doc.site_name or 'General' }}</span>
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <!-- Title & Original File Info -->
@@ -353,7 +386,21 @@
                             </td>
                             <td class="py-3 px-4 align-top text-slate-700 font-medium">{{ doc.category }}</td>
                             <td class="py-3 px-4 align-top">
-                                <span class="font-bold text-slate-800">{{ doc.site_name or 'All Sites' }}</span>
+                                {% if doc.share_scope == 'office' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-lock text-purple-700 text-[9px]"></i> Office Only
+                                </span>
+                                {% elif doc.share_scope == 'all_sites' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-globe text-emerald-700 text-[9px]"></i> All Sites
+                                </span>
+                                {% elif doc.share_scope == 'site' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200 inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot text-blue-700 text-[9px]"></i> {{ doc.site_name }}
+                                </span>
+                                {% else %}
+                                <span class="font-bold text-slate-700">{{ doc.site_name or 'All Sites' }}</span>
+                                {% endif %}
                             </td>
                             <td class="py-3 px-4 align-top">
                                 <div class="font-black text-[#163F37] flex items-center gap-1.5">
@@ -451,6 +498,53 @@
                 <input type="text" id="docTitleInput" name="title" placeholder="e.g. Mairwa Ward 5 Estimate Copy or Pump Installation Letter" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition" required>
             </div>
 
+            <!-- Sharing Scope Selector (User Requirement: Office me share ya saare sites per share) -->
+            <div>
+                <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Share Option / फ़ाइल कहाँ शेयर करनी है? *</span>
+                    <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <i class="fa-solid fa-shield-halved"></i> Access Control
+                    </span>
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <!-- Option 1: Office Only (Default / Private) -->
+                    <label class="relative flex flex-col p-3 rounded-2xl border-2 border-purple-300 bg-purple-50/60 hover:bg-purple-100/50 cursor-pointer transition select-none has-checked:border-purple-600 has-checked:bg-purple-100 has-checked:ring-2 has-checked:ring-purple-600">
+                        <input type="radio" name="share_scope" value="office" checked onchange="handleShareScopeChange(this.value)" class="sr-only">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-6 h-6 rounded-lg bg-purple-700 text-white flex items-center justify-center text-xs flex-shrink-0">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <span class="text-xs font-black text-purple-950">Office Only</span>
+                        </div>
+                        <p class="text-[10px] text-purple-800 font-medium leading-tight">सिर्फ ऑफिस में रहेगा — सुपरवाइज़र को बिल्कुल नहीं दिखेगा</p>
+                    </label>
+
+                    <!-- Option 2: All Sites -->
+                    <label class="relative flex flex-col p-3 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-emerald-50/50 cursor-pointer transition select-none has-checked:border-emerald-600 has-checked:bg-emerald-50 has-checked:ring-2 has-checked:ring-emerald-600">
+                        <input type="radio" name="share_scope" value="all_sites" onchange="handleShareScopeChange(this.value)" class="sr-only">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs flex-shrink-0">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <span class="text-xs font-black text-emerald-950">All Sites</span>
+                        </div>
+                        <p class="text-[10px] text-emerald-800 font-medium leading-tight">सभी 21 साइट्स और सुपरवाइज़र्स के साथ शेयर होगा</p>
+                    </label>
+
+                    <!-- Option 3: Specific Site -->
+                    <label class="relative flex flex-col p-3 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-blue-50/50 cursor-pointer transition select-none has-checked:border-blue-600 has-checked:bg-blue-50 has-checked:ring-2 has-checked:ring-blue-600">
+                        <input type="radio" name="share_scope" value="site" onchange="handleShareScopeChange(this.value)" class="sr-only">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-6 h-6 rounded-lg bg-blue-700 text-white flex items-center justify-center text-xs flex-shrink-0">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <span class="text-xs font-black text-blue-950">Selected Site</span>
+                        </div>
+                        <p class="text-[10px] text-blue-800 font-medium leading-tight">सिर्फ चुनी हुई साइट के सुपरवाइज़र को दिखेगा</p>
+                    </label>
+                </div>
+            </div>
+
             <!-- Category & Site Row -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <!-- Category -->
@@ -466,12 +560,12 @@
                 </div>
 
                 <!-- Site Selection -->
-                <div>
+                <div id="siteSelectWrapper">
                     <label class="block text-xs font-black text-[#163F37] uppercase tracking-wider mb-1.5">
-                        Related Site / संबंधित साइट
+                        Related Site / संबंधित साइट <span id="siteReqStar" class="text-rose-500 hidden">*</span>
                     </label>
                     <select id="docSiteSelect" name="site_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#163F37] focus:bg-white transition cursor-pointer">
-                        <option value="">🌐 All Sites (General Document)</option>
+                        <option value="">-- Choose Site if Specific --</option>
                         {% for s in sites %}
                         <option value="{{ s.id }}" {% if user_site_id == s.id %}selected{% endif %}>
                             {{ s.code }} — {{ s.name }}
@@ -656,6 +750,30 @@ function applyFilters() {
     else url.searchParams.delete('q');
     
     window.location.href = url.toString();
+}
+
+function filterByScope(scopeKey) {
+    const url = new URL(window.location.href);
+    if (scopeKey && scopeKey !== 'all') {
+        url.searchParams.set('scope', scopeKey);
+    } else {
+        url.searchParams.delete('scope');
+    }
+    window.location.href = url.toString();
+}
+
+function handleShareScopeChange(val) {
+    const siteSelect = document.getElementById('docSiteSelect');
+    const siteReqStar = document.getElementById('siteReqStar');
+    if (!siteSelect) return;
+    if (val === 'site') {
+        if (siteReqStar) siteReqStar.classList.remove('hidden');
+        siteSelect.required = true;
+        siteSelect.focus();
+    } else {
+        if (siteReqStar) siteReqStar.classList.add('hidden');
+        siteSelect.required = false;
+    }
 }
 
 function filterByType(typeKey) {

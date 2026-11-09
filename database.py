@@ -5047,7 +5047,7 @@ def get_pending_amendment_requests():
 
 @db_retry()
 def init_shared_documents_table():
-    """Initializes shared_documents table for Supervisor & Staff file exchange."""
+    """Initializes shared_documents table with share_scope (office, all_sites, site)."""
     conn = get_db()
     c = conn.cursor()
     c.execute("""
@@ -5055,6 +5055,7 @@ def init_shared_documents_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             category TEXT DEFAULT 'General Document',
+            share_scope TEXT DEFAULT 'office',
             site_id INTEGER,
             site_name TEXT,
             filename TEXT NOT NULL,
@@ -5072,6 +5073,10 @@ def init_shared_documents_table():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    c.execute("PRAGMA table_info(shared_documents)")
+    cols = [r[1] for r in c.fetchall()]
+    if "share_scope" not in cols:
+        c.execute("ALTER TABLE shared_documents ADD COLUMN share_scope TEXT DEFAULT 'office'")
     conn.commit()
     conn.close()
 
@@ -5079,26 +5084,32 @@ def init_shared_documents_table():
 @db_retry()
 def add_shared_document(title, category, site_id, filename, original_filename,
                         file_type, file_extension, file_size_bytes, file_size_formatted,
-                        uploader_name, uploader_role, uploader_phone=None, uploader_id=None, notes=None):
-    """Inserts a newly shared document into shared_documents table."""
+                        uploader_name, uploader_role, uploader_phone=None, uploader_id=None, notes=None,
+                        share_scope="office"):
+    """Inserts a newly shared document with sharing scope (office, all_sites, site)."""
     init_shared_documents_table()
     site_name = None
     if site_id:
         s = get_site_by_id(int(site_id))
         if s:
             site_name = s.get("name")
+
+    valid_scope = (share_scope or "office").lower().strip()
+    if valid_scope not in ["office", "all_sites", "site"]:
+        valid_scope = "office"
             
     conn = get_db()
     c = conn.cursor()
     c.execute("""
         INSERT INTO shared_documents (
-            title, category, site_id, site_name, filename, original_filename,
+            title, category, share_scope, site_id, site_name, filename, original_filename,
             file_type, file_extension, file_size_bytes, file_size_formatted,
             uploader_name, uploader_role, uploader_phone, uploader_id, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         title.strip(),
         category.strip() if category else "General Document",
+        valid_scope,
         int(site_id) if site_id else None,
         site_name,
         filename.strip(),
@@ -5121,8 +5132,8 @@ def add_shared_document(title, category, site_id, filename, original_filename,
 
 
 @db_retry()
-def get_shared_documents(site_id=None, file_type=None, category=None, search=None):
-    """Retrieves list of shared documents with optional filtering and search."""
+def get_shared_documents(site_id=None, file_type=None, category=None, search=None, share_scope=None, is_owner=True, user_site_id=None):
+    """Retrieves list of shared documents with permission-based scoping and filtering."""
     init_shared_documents_table()
     conn = get_db()
     c = conn.cursor()
@@ -5130,8 +5141,22 @@ def get_shared_documents(site_id=None, file_type=None, category=None, search=Non
     query = "SELECT * FROM shared_documents WHERE 1=1"
     params = []
     
+    # 1. STRICT ACCESS CONTROL:
+    if not is_owner:
+        # Non-owners (Supervisors/Workers) can NEVER see 'office' documents!
+        if user_site_id and str(user_site_id).isdigit():
+            query += " AND (share_scope = 'all_sites' OR (share_scope = 'site' AND site_id = ?))"
+            params.append(int(user_site_id))
+        else:
+            query += " AND share_scope = 'all_sites'"
+    else:
+        # Owner can filter by scope (office, all_sites, site)
+        if share_scope and share_scope != "all":
+            query += " AND share_scope = ?"
+            params.append(share_scope.lower().strip())
+    
     if site_id and str(site_id).isdigit():
-        query += " AND (site_id = ? OR site_id IS NULL)"
+        query += " AND site_id = ?"
         params.append(int(site_id))
         
     if file_type and file_type != "all":
@@ -5153,6 +5178,7 @@ def get_shared_documents(site_id=None, file_type=None, category=None, search=Non
     conn.close()
     
     return [dict(r) for r in rows]
+
 
 
 @db_retry()
@@ -5191,17 +5217,38 @@ def increment_doc_download_count(doc_id):
 
 
 @db_retry()
-def get_shared_docs_stats():
-    """Returns total counts by file type for dashboard KPI cards."""
+def get_shared_docs_stats(is_owner=True, user_site_id=None):
+    """Returns total counts by file type, filtered by user visibility."""
     init_shared_documents_table()
     conn = get_db()
     c = conn.cursor()
+
+    base_where = "WHERE 1=1"
+    params = []
+    if not is_owner:
+        if user_site_id and str(user_site_id).isdigit():
+            base_where += " AND (share_scope = 'all_sites' OR (share_scope = 'site' AND site_id = ?))"
+            params.append(int(user_site_id))
+        else:
+            base_where += " AND share_scope = 'all_sites'"
     
-    rows = c.execute("SELECT file_type, COUNT(*) as cnt FROM shared_documents GROUP BY file_type").fetchall()
+    rows = c.execute(f"SELECT file_type, COUNT(*) as cnt FROM shared_documents {base_where} GROUP BY file_type", params).fetchall()
     counts = {r["file_type"]: r["cnt"] for r in rows}
     
-    total = c.execute("SELECT COUNT(*) FROM shared_documents").fetchone()[0]
-    total_sites_active = c.execute("SELECT COUNT(DISTINCT site_id) FROM shared_documents WHERE site_id IS NOT NULL").fetchone()[0]
+    total = c.execute(f"SELECT COUNT(*) FROM shared_documents {base_where}", params).fetchone()[0]
+    total_sites_active = c.execute(f"SELECT COUNT(DISTINCT site_id) FROM shared_documents {base_where} AND site_id IS NOT NULL", params).fetchone()[0]
+
+    # Scope breakdown for Owner
+    office_count = 0
+    all_sites_count = 0
+    site_specific_count = 0
+    if is_owner:
+        scope_rows = c.execute("SELECT share_scope, COUNT(*) as cnt FROM shared_documents GROUP BY share_scope").fetchall()
+        scope_map = {r["share_scope"]: r["cnt"] for r in scope_rows}
+        office_count = scope_map.get("office", 0)
+        all_sites_count = scope_map.get("all_sites", 0)
+        site_specific_count = scope_map.get("site", 0)
+
     conn.close()
     
     return {
@@ -5211,7 +5258,10 @@ def get_shared_docs_stats():
         "word": counts.get("word", 0),
         "image": counts.get("image", 0),
         "other": counts.get("other", 0) + counts.get("document", 0),
-        "sites_active": total_sites_active
+        "sites_active": total_sites_active,
+        "office_count": office_count,
+        "all_sites_count": all_sites_count,
+        "site_specific_count": site_specific_count
     }
 
 
