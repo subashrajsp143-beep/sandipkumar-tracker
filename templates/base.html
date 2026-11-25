@@ -1241,8 +1241,8 @@
         }
     }
 
-    // Instant 1-Click Universal Signout (Purges Session, Cookie, LocalStorage & SW Caches)
-    async function handleAppSignout(e) {
+    // Instant 1-Click Universal Signout (Zero-Wait Client Cleanup + Single-Hop /logout)
+    function handleAppSignout(e) {
         if (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1255,32 +1255,24 @@
             btn.style.pointerEvents = 'none';
         });
 
-        // 2. Wipe client-side auth tokens & role storage
+        // 2. Synchronously wipe client-side auth tokens & role storage (< 1ms)
         try {
             localStorage.removeItem('sandip_user_role');
             localStorage.removeItem('sandip_worker_token');
             localStorage.removeItem('sandip_is_owner');
-            sessionStorage.removeItem('owner_pin');
+            localStorage.removeItem('sandip_site_id');
             sessionStorage.clear();
         } catch(err) {}
 
-        // 3. Clear Service Worker caches
-        if ('caches' in window) {
-            try {
-                const keys = await caches.keys();
-                await Promise.all(keys.map(k => caches.delete(k)));
-            } catch(err) {}
-        }
-
-        // 4. Message Service Worker to purge cache
+        // 3. Fire-and-forget SW auth-page cache purge in background (never block navigation)
         try {
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ action: 'clearCache' });
             }
         } catch(err) {}
 
-        // 5. Direct hard replace navigation to /logout with cache buster
-        window.location.replace('/logout?_t=' + Date.now());
+        // 4. Immediately replace location to /logout (clears cookie & renders login in 1 hop)
+        window.location.replace('/logout');
     }
 
     async function logoutOwner() {

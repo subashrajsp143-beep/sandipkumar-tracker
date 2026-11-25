@@ -1,5 +1,5 @@
 // Service Worker for M/S Sandip Kumar Material Tracker
-const CACHE_NAME = 'sandip-tracker-v58';
+const CACHE_NAME = 'sandip-tracker-v59';
 const STATIC_ASSETS = [
   '/',
   '/static/css/theme.css',
@@ -34,11 +34,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Message Listener: Clear cache on user logout
+// Message Listener: Clear only dynamic/HTML pages on logout (preserve static CSS/icons/CDN for fast login load)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'clearCache') {
-    caches.keys().then((keys) => {
-      keys.forEach((key) => caches.delete(key));
+    caches.open(CACHE_NAME).then((cache) => {
+      cache.keys().then((requests) => {
+        requests.forEach((req) => {
+          const reqUrl = new URL(req.url);
+          const isStaticAsset = reqUrl.origin !== self.location.origin || reqUrl.pathname.startsWith('/static/');
+          if (!isStaticAsset) {
+            cache.delete(req);
+          }
+        });
+      });
     });
   }
 });

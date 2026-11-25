@@ -34,6 +34,9 @@ database.init_db()
 
 @app.context_processor
 def inject_common():
+    if request.endpoint in ("login_page", "logout_user"):
+        return {}
+
     user_site_id = session.get("site_id", None)
     user_role = session.get("role", "guest")
     # Master owner mode is ONLY active if logged in as head-office owner without being locked to a supervisor site
@@ -414,25 +417,35 @@ def my_attendance_portal():
         history=history
     )
 
-# 0.6 Universal Logout - Instant 1-Click Session & Cookie Annihilation
-@app.route("/logout", methods=["GET", "POST"])
-def logout_user():
-    session.clear()
-    session.permanent = False
-    
-    resp = redirect(url_for("login_page"))
-    # Explicitly expire session cookies across root path
+def _apply_logout_headers(resp):
+    """Expire auth cookies and disable page caching without Clear-Site-Data disk-cache stalls."""
     cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
     resp.delete_cookie(cookie_name, path="/")
-    resp.delete_cookie("session", path="/")
+    if cookie_name != "session":
+        resp.delete_cookie("session", path="/")
     resp.delete_cookie("remember_token", path="/")
-    
-    # Strict anti-cache headers so browser never serves stale redirect/page
-    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0"
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
     resp.headers["Pragma"] = "no-cache"
     resp.headers["Expires"] = "0"
-    resp.headers["Clear-Site-Data"] = '"cache", "cookies"'
     return resp
+
+# 0.6 Universal Logout - Instant 1-Click Single-Hop Signout
+@app.route("/logout", methods=["GET", "POST"])
+def logout_user():
+    session.permanent = False
+    session.clear()
+
+    if request.method == "POST":
+        if request.is_json or "application/json" in request.headers.get("Accept", ""):
+            resp = jsonify({"success": True, "redirect": url_for("login_page")})
+        else:
+            resp = redirect(url_for("login_page"))
+    else:
+        # Render login page directly on GET /logout so signout completes in 1 network hop instead of 2
+        sites = database.get_all_sites()
+        resp = make_response(render_template("login.html", sites=sites))
+
+    return _apply_logout_headers(resp)
 
 # 1. Internal Contractor Portal & Tracker Dashboard
 @app.route("/dashboard")
@@ -1790,16 +1803,10 @@ def owner_login_api():
 
 @app.route("/api/owner/logout", methods=["POST", "GET"])
 def owner_logout_api():
-    session.clear()
     session.permanent = False
+    session.clear()
     resp = jsonify({"success": True, "is_owner": False, "message": "Office Work mode ended."})
-    resp.delete_cookie(app.config.get("SESSION_COOKIE_NAME", "session"), path="/")
-    resp.delete_cookie("session", path="/")
-    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
-    resp.headers["Pragma"] = "no-cache"
-    resp.headers["Expires"] = "0"
-    resp.headers["Clear-Site-Data"] = '"cache", "cookies"'
-    return resp
+    return _apply_logout_headers(resp)
 
 @app.route("/api/owner/status", methods=["GET"])
 def owner_status_api():
