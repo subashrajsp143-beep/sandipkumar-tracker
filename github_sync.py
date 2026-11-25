@@ -10,8 +10,7 @@ import urllib.request
 GITHUB_REPO = "subashrajsp143-beep/sandipkumar-tracker"
 GITHUB_FILE_PATH = "material_tracker.db"
 
-_K = [77, 66, 90, 117, 72, 105, 73, 91, 127, 18, 101, 89, 124, 111, 73, 64, 64, 96, 77, 88, 18, 79, 97, 100, 77, 111, 125, 99, 105, 24, 28, 68, 114, 67, 26, 114, 114, 19, 93, 107]
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") or "".join(chr(b ^ 42) for b in _K)
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "").strip()
 
 _sync_lock = threading.Lock()
 _debounce_timer = None
@@ -39,8 +38,22 @@ def trigger_cloud_backup_async(debounce_seconds=12):
         _debounce_timer.daemon = True
         _debounce_timer.start()
 
+def _get_github_headers():
+    """Return GitHub API headers using env token, or None when unconfigured."""
+    token = os.environ.get("GITHUB_TOKEN", "").strip() or GITHUB_TOKEN
+    if not token:
+        return None
+    return {
+        "Authorization": f"token {token}",
+        "User-Agent": "SandipKumarTracker-AutoSync",
+        "Accept": "application/vnd.github.v3+json"
+    }
+
 def _sync_to_github_worker():
     global _last_pushed_sha
+    headers = _get_github_headers()
+    if not headers:
+        return
     with _sync_lock:
         try:
             db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
@@ -68,11 +81,6 @@ def _sync_to_github_worker():
 
             # 1. Get current file SHA from GitHub
             get_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
-            headers = {
-                "Authorization": f"token {GITHUB_TOKEN}",
-                "User-Agent": "SandipKumarTracker-AutoSync",
-                "Accept": "application/vnd.github.v3+json"
-            }
             remote_sha = None
             try:
                 req_get = urllib.request.Request(get_url, headers=headers)
@@ -111,6 +119,9 @@ def restore_db_from_github_if_newer():
     On application boot, checks if GitHub has a newer material_tracker.db.
     If remote SHA differs from local SHA, restores it safely.
     """
+    headers = _get_github_headers()
+    if not headers:
+        return
     try:
         db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "material_tracker.db")
         local_sha = None
@@ -119,11 +130,6 @@ def restore_db_from_github_if_newer():
                 local_sha = git_blob_sha(f.read())
 
         get_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILE_PATH}"
-        headers = {
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "User-Agent": "SandipKumarTracker-AutoSync",
-            "Accept": "application/vnd.github.v3+json"
-        }
         req_get = urllib.request.Request(get_url, headers=headers)
         with urllib.request.urlopen(req_get, timeout=12) as resp:
             info = json.loads(resp.read().decode("utf-8"))
