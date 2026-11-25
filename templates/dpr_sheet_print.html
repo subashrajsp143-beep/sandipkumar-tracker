@@ -174,20 +174,28 @@
 
     <script>
         function shareSheetWhatsApp() {
-            const date = "{{ sheet.report_date }}";
-            const site = "{{ sheet.site_name }}";
+            const date = {{ sheet.report_date|tojson }};
+            const site = {{ (sheet.site_name or '')|tojson }};
+            const supName = {{ (sheet.supervisor_name or '-')|tojson }};
+            const supPhone = {{ (sheet.supervisor_phone or '-')|tojson }};
+            const newConn = {{ (sheet.new_connection or '')|tojson }};
+            const connRep = {{ (sheet.connection_repairing or '')|tojson }};
+            const motorRep = {{ (sheet.motor_starter_repair or '')|tojson }};
+            const pipeRep = {{ (sheet.main_pipe_repairing or '')|tojson }};
+            const newMotor = {{ (sheet.new_motor_starter or '')|tojson }};
+            const otherWork = {{ (sheet.other_work or '')|tojson }};
             let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT*\n`;
             text += `*Site:* ${site}\n`;
             text += `*Date:* ${date}\n`;
-            text += `*Supervisor:* {{ sheet.supervisor_name or '-' }} ({{ sheet.supervisor_phone or '-' }})\n`;
+            text += `*Supervisor:* ${supName} (${supPhone})\n`;
             text += `-----------------------------------\n`;
             text += `*Summary of Work:*\n`;
-            if ("{{ sheet.new_connection }}") text += `• New Connection: {{ sheet.new_connection }}\n`;
-            if ("{{ sheet.connection_repairing }}") text += `• Connection Repairing: {{ sheet.connection_repairing }}\n`;
-            if ("{{ sheet.motor_starter_repair }}") text += `• Motor/Starter Repair: {{ sheet.motor_starter_repair }}\n`;
-            if ("{{ sheet.main_pipe_repairing }}") text += `• Main Pipe Repairing: {{ sheet.main_pipe_repairing }}\n`;
-            if ("{{ sheet.new_motor_starter }}") text += `• New Motor & Starter: {{ sheet.new_motor_starter }}\n`;
-            if (`{{ sheet.other_work }}`) text += `• Other Work: {{ sheet.other_work }}\n`;
+            if (newConn) text += `• New Connection: ${newConn}\n`;
+            if (connRep) text += `• Connection Repairing: ${connRep}\n`;
+            if (motorRep) text += `• Motor/Starter Repair: ${motorRep}\n`;
+            if (pipeRep) text += `• Main Pipe Repairing: ${pipeRep}\n`;
+            if (newMotor) text += `• New Motor & Starter: ${newMotor}\n`;
+            if (otherWork) text += `• Other Work: ${otherWork}\n`;
             text += `-----------------------------------\n`;
             text += `_Generated via M/S Sandip Kumar Portal_`;
             window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');

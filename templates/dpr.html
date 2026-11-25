@@ -378,13 +378,32 @@
     {% endif %}
 
 </div>
+{% endblock %}
 
 {% block scripts %}
 <script>
     // -------------------------------------------------------------
     // SUPERVISOR ROWS LOGIC (Matches physical paper 25 rows)
     // -------------------------------------------------------------
-    let supervisorRows = {{ supervisor_sheet_rows|tojson if supervisor_sheet_rows else '[]' }};
+    let supervisorRows = {{ (supervisor_sheet_rows or [])|tojson }};
+
+    function syncRowsFromDom() {
+        const tbody = document.getElementById('supervisorRowsBody');
+        if (!tbody) return supervisorRows;
+        const rows = [];
+        tbody.querySelectorAll('tr').forEach((tr) => {
+            const getVal = (f) => (tr.querySelector(`[data-field="${f}"]`)?.value || '');
+            rows.push({
+                workmen_name: getVal('workmen_name'),
+                mobile_no: getVal('mobile_no'),
+                work_area: getVal('work_area'),
+                ward_no: getVal('ward_no'),
+                work_activity: getVal('work_activity')
+            });
+        });
+        supervisorRows = rows;
+        return rows;
+    }
 
     function renderSupervisorRows() {
         const tbody = document.getElementById('supervisorRowsBody');
@@ -403,19 +422,19 @@
             tr.innerHTML = `
                 <td class="text-center font-mono font-bold text-slate-500 py-1 px-1">${idx + 1}</td>
                 <td class="py-1 px-1.5">
-                    <input type="text" value="${escapeHtml(row.workmen_name || '')}" oninput="updateRowField(${idx}, 'workmen_name', this.value)" placeholder="कारीगर का नाम" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-medium text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    <input type="text" data-field="workmen_name" value="${escapeHtml(row.workmen_name || '')}" oninput="updateRowField(${idx}, 'workmen_name', this.value)" placeholder="कारीगर का नाम" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-medium text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
                 </td>
                 <td class="py-1 px-1.5">
-                    <input type="tel" value="${escapeHtml(row.mobile_no || '')}" oninput="updateRowField(${idx}, 'mobile_no', this.value)" placeholder="मोबाइल नंबर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    <input type="tel" data-field="mobile_no" value="${escapeHtml(row.mobile_no || '')}" oninput="updateRowField(${idx}, 'mobile_no', this.value)" placeholder="मोबाइल नंबर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
                 </td>
                 <td class="py-1 px-1.5">
-                    <input type="text" value="${escapeHtml(row.work_area || '')}" oninput="updateRowField(${idx}, 'work_area', this.value)" placeholder="जैसे: रामटोल + महथी चौक" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    <input type="text" data-field="work_area" value="${escapeHtml(row.work_area || '')}" oninput="updateRowField(${idx}, 'work_area', this.value)" placeholder="जैसे: रामटोल + महथी चौक" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
                 </td>
                 <td class="py-1 px-1.5">
-                    <input type="text" value="${escapeHtml(row.ward_no || '')}" oninput="updateRowField(${idx}, 'ward_no', this.value)" placeholder="जैसे: 05/10/08" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    <input type="text" data-field="ward_no" value="${escapeHtml(row.ward_no || '')}" oninput="updateRowField(${idx}, 'ward_no', this.value)" placeholder="जैसे: 05/10/08" class="w-full px-2 py-1 rounded bg-white border border-slate-300 font-mono text-center text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
                 </td>
                 <td class="py-1 px-1.5">
-                    <input type="text" value="${escapeHtml(row.work_activity || '')}" oninput="updateRowField(${idx}, 'work_activity', this.value)" placeholder="जैसे: मोटर पंप खोला गया + रिपेयर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
+                    <input type="text" data-field="work_activity" value="${escapeHtml(row.work_activity || '')}" oninput="updateRowField(${idx}, 'work_activity', this.value)" placeholder="जैसे: मोटर पंप खोला गया + रिपेयर" class="w-full px-2 py-1 rounded bg-white border border-slate-300 text-slate-900 focus:ring-1 focus:ring-emerald-600 focus:outline-none">
                 </td>
                 <td class="text-center py-1 px-1">
                     <button type="button" onclick="removeWorkmanRow(${idx})" class="p-1 text-slate-400 hover:text-rose-600 transition" title="Delete Row">
@@ -435,11 +454,13 @@
     }
 
     function addNewWorkmanRow() {
+        syncRowsFromDom();
         supervisorRows.push({ workmen_name: '', mobile_no: '', work_area: '', ward_no: '', work_activity: '' });
         renderSupervisorRows();
     }
 
     function removeWorkmanRow(index) {
+        syncRowsFromDom();
         supervisorRows.splice(index, 1);
         renderSupervisorRows();
     }
@@ -461,9 +482,11 @@
         if (btnBottom) btnBottom.disabled = true;
         if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
+        const currentRows = syncRowsFromDom();
         // Filter out completely empty rows
-        const cleanRows = supervisorRows.filter(r => 
+        const cleanRows = currentRows.filter(r => 
             (r.workmen_name && r.workmen_name.trim()) || 
+            (r.mobile_no && r.mobile_no.trim()) ||
             (r.work_activity && r.work_activity.trim()) || 
             (r.work_area && r.work_area.trim()) || 
             (r.ward_no && r.ward_no.trim())
@@ -471,7 +494,7 @@
 
         const payload = {
             site_id: {{ selected_site_id or 'null' }},
-            report_date: "{{ selected_date }}",
+            report_date: {{ selected_date|tojson }},
             supervisor_name: (document.getElementById('sheetSupervisorName')?.value || '').trim(),
             supervisor_phone: (document.getElementById('sheetSupervisorPhone')?.value || '').trim(),
             sub_supervisor_name: (document.getElementById('sheetSubSupervisorName')?.value || '').trim(),
@@ -500,41 +523,34 @@
                 alert(data.message || 'Error occurred while saving DPR sheet.');
                 if (btnTop) btnTop.disabled = false;
                 if (btnBottom) btnBottom.disabled = false;
-                if (btnText) btnText.innerHTML = 'Save Today's DPR Sheet';
+                if (btnText) btnText.innerHTML = "Save Today's DPR Sheet";
             }
         } catch (err) {
             alert('Server error: ' + err.message);
             if (btnTop) btnTop.disabled = false;
             if (btnBottom) btnBottom.disabled = false;
-            if (btnText) btnText.innerHTML = 'Save Today's DPR Sheet';
+            if (btnText) btnText.innerHTML = "Save Today's DPR Sheet";
         }
     }
 
     function shareSupervisorDprWhatsApp() {
-        const date = "{{ selected_date }}";
-        const site = "{{ selected_site_obj.name if selected_site_obj else 'Site' }}";
-        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT*
-`;
-        text += `*Site:* ${site}
-`;
-        text += `*Date:* ${date}
-`;
-        text += `-----------------------------------
-`;
+        syncRowsFromDom();
+        const date = {{ selected_date|tojson }};
+        const site = {{ (selected_site_obj.name if selected_site_obj else 'Site')|tojson }};
+        let text = `*M/S SANDIP KUMAR — DAILY PROGRESS REPORT*\n`;
+        text += `*Site:* ${site}\n`;
+        text += `*Date:* ${date}\n`;
+        text += `-----------------------------------\n`;
         supervisorRows.forEach((r, idx) => {
             if (r.workmen_name || r.work_activity) {
-                text += `${idx + 1}. *${r.workmen_name || '-'}* | Ward: ${r.ward_no || '-'} | ${r.work_activity || '-'}
-`;
+                text += `${idx + 1}. *${r.workmen_name || '-'}* | Ward: ${r.ward_no || '-'} | ${r.work_activity || '-'}\n`;
             }
         });
-        text += `-----------------------------------
-`;
+        text += `-----------------------------------\n`;
         const connRep = document.getElementById('sheetConnectionRepairing')?.value;
-        if (connRep) text += `• Connection Repairing: ${connRep}
-`;
+        if (connRep) text += `• Connection Repairing: ${connRep}\n`;
         const other = document.getElementById('sheetOtherWork')?.value;
-        if (other) text += `• Other Work: ${other}
-`;
+        if (other) text += `• Other Work: ${other}\n`;
         text += `_Report submitted via M/S Sandip Kumar Portal_`;
         window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
     }
@@ -543,28 +559,23 @@
         const pendingSites = [
             {% for item in site_wise_data %}
             {% if not item.sheet_submitted %}
-            { code: "{{ item.site.code }}", name: "{{ item.site.name }}", supervisor: "{{ item.site.supervisor or '' }}", phone: "{{ item.site.contact or '' }}" },
+            { code: {{ item.site.code|tojson }}, name: {{ item.site.name|tojson }}, supervisor: {{ (item.site.supervisor or '')|tojson }}, phone: {{ (item.site.contact or '')|tojson }} },
             {% endif %}
             {% endfor %}
         ];
 
         if (pendingSites.length === 0) {
-            alert('All 21 sites have already submitted their DPR sheet for {{ selected_date }}!');
+            alert({{ ('All 21 sites have already submitted their DPR sheet for ' ~ selected_date ~ '!')|tojson }});
             return;
         }
 
-        let summary = `*M/S SANDIP KUMAR — 7:30 PM DPR REMINDER*
-`;
-        summary += `*Date:* {{ selected_date }}
-`;
-        summary += `The following ${pendingSites.length} sites are pending for today's DPR:
-`;
+        let summary = `*M/S SANDIP KUMAR — 7:30 PM DPR REMINDER*\n`;
+        summary += `*Date:* {{ selected_date }}\n`;
+        summary += `The following ${pendingSites.length} sites are pending for today's DPR:\n`;
         pendingSites.forEach((s, idx) => {
-            summary += `${idx + 1}. ${s.code} - ${s.name} (${s.supervisor || 'Supervisor'}: ${s.phone || 'No phone'})
-`;
+            summary += `${idx + 1}. ${s.code} - ${s.name} (${s.supervisor || 'Supervisor'}: ${s.phone || 'No phone'})\n`;
         });
-        summary += `
-Kripya sabhi supervisor 8:00 PM tak apna daily DPR form portal par submit karein.`;
+        summary += `\nKripya sabhi supervisor 8:00 PM tak apna daily DPR form portal par submit karein.`;
 
         window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(summary), '_blank');
     }
@@ -576,5 +587,4 @@ Kripya sabhi supervisor 8:00 PM tak apna daily DPR form portal par submit karein
         }
     });
 </script>
-{% endblock %}
 {% endblock %}
