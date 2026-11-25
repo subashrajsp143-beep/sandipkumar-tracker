@@ -22,6 +22,30 @@ app = Flask(__name__)
 app.secret_key = "construction-material-secret-key-19-sites"
 app.permanent_session_lifetime = datetime.timedelta(days=365)
 
+def _safe_int(val, default=0):
+    """Safely parse int values from forms/JSON without crashing on blank strings."""
+    if val is None or val == "":
+        return default
+    try:
+        return int(float(val))
+    except (ValueError, TypeError):
+        return default
+
+def _safe_float(val, default=0.0):
+    """Safely parse float values from forms/JSON without crashing on blank strings."""
+    if val is None or val == "":
+        return default
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return default
+
+def _is_master_owner():
+    """True only for Head Office Master Owner mode (never when locked to a supervisor site)."""
+    user_site_id = session.get("site_id")
+    role = session.get("role")
+    return (session.get("is_owner", False) or role == "owner" or session.get("worker_phone") == "9835180075") and not user_site_id
+
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -84,18 +108,31 @@ def ensure_canonical_and_auth():
         url = request.url.replace("ms-sandipkumar-tracker.onrender.com", "sandipkumar-tracker-i4ub.onrender.com").replace("sandipkumar-tracker.onrender.com", "sandipkumar-tracker-i4ub.onrender.com")
         return redirect(url, code=301)
 
+    if request.method == "OPTIONS":
+        return None
+
     # Public paths that never require login
     path = request.path
     if (path.startswith("/static") or 
         path.startswith("/uploads") or 
-        path in ["/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
-                 "/logout", "/manifest.json", "/sw.js", "/api/live-status", "/health", "/ping", "/website", "/download-apk", "/download/html-templates"] or
+        path in ["/", "/login", "/api/auth/worker-login", "/api/auth/supervisor-login", "/api/owner/login", 
+                 "/api/owner/logout", "/api/owner/status", "/logout", "/manifest.json", "/sw.js", 
+                 "/api/live-status", "/api/app-version", "/health", "/ping", "/website", 
+                 "/download-apk", "/download/html-templates", "/download/desktop-launcher"] or
         path.startswith("/worker/") or 
         path == "/api/worker/ping"):
         return None
 
     role = session.get("role")
     is_owner = session.get("is_owner", False) or role == "owner"
+
+    # Allow desktop/API scripts authenticated via Master Admin PIN
+    if not role and not is_owner:
+        req_pin = (request.headers.get("X-Admin-PIN") or request.args.get("pin") or "").strip()
+        if not req_pin and request.is_json:
+            req_pin = str((request.get_json(silent=True) or {}).get("pin", "")).strip()
+        if req_pin == "Sandip@@12":
+            return None
 
     # If worker is logged in, restrict to worker portal only (privacy protection)
     # BUT if worker role is Data Entry / DEO, allow them to also access daily entry!
@@ -108,13 +145,15 @@ def ensure_canonical_and_auth():
         if path.startswith("/data-sharing") or path.startswith("/shared-docs") or path.startswith("/api/shared-docs"):
             return None
         if path not in allowed_worker_paths:
+            if path.startswith("/api/"):
+                return jsonify({"success": False, "message": "Access restricted for worker role."}), 403
             return redirect(url_for("my_attendance_portal"))
 
-    # If not logged in at all, direct them to login
+    # Require login for ALL non-public application pages, exports, and APIs
     if not role and not is_owner:
-        if path in ["/", "/dashboard", "/portal", "/stock", "/entry", "/daily-entry", 
-                    "/reports", "/attendance", "/geo-attendance", "/sites", "/materials", "/store", "/dpr", "/bills", "/progress/bills", "/data-sharing", "/shared-docs"]:
-            return redirect(url_for("login_page"))
+        if path.startswith("/api/"):
+            return jsonify({"success": False, "message": "Authentication required. Please log in."}), 401
+        return redirect(url_for("login_page"))
 
 
 # Smart Working-Hours Keep-Alive (06:00 AM to 12:00 AM IST) & 10:30 AM GPS Attendance Auto-Sync
@@ -501,9 +540,11 @@ def letters_shortcut():
     return redirect("/dashboard#letters")
 
 
-# 1.05 Outgoing Letters Reference Register APIs & Exporters
+# 1.05 Outgoing Letters Reference Register APIs & Exporters (Owner Only)
 @app.route("/api/letters", methods=["GET", "POST"])
 def api_letters():
+    if not _is_master_owner():
+        return jsonify({"success": False, "message": "Unauthorized! Office Work (Owner) access required."}), 403
     if request.method == "GET":
         fy = request.args.get("fy")
         search = request.args.get("search")
@@ -557,6 +598,8 @@ def api_letters():
 
 @app.route("/api/letters/<int:letter_id>", methods=["GET", "POST", "PUT", "DELETE"])
 def api_letter_detail(letter_id):
+    if not _is_master_owner():
+        return jsonify({"success": False, "message": "Unauthorized! Office Work (Owner) access required."}), 403
     if request.method == "GET":
         letter = database.get_outgoing_letter_by_id(letter_id)
         if not letter:
@@ -600,6 +643,8 @@ def api_letter_detail(letter_id):
 
 @app.route("/export/letters-excel")
 def export_letters_excel():
+    if not _is_master_owner():
+        return redirect(url_for("dashboard"))
     fy = request.args.get("fy")
     search = request.args.get("search")
     letters = database.get_outgoing_letters(search=search, fy=fy)
@@ -616,6 +661,8 @@ def export_letters_excel():
 
 @app.route("/export/letters-pdf")
 def export_letters_pdf():
+    if not _is_master_owner():
+        return redirect(url_for("dashboard"))
     fy = request.args.get("fy")
     search = request.args.get("search")
     letters = database.get_outgoing_letters(search=search, fy=fy)
@@ -712,8 +759,8 @@ def daily_entry():
 @app.route("/api/entries", methods=["POST"])
 def save_entries():
     try:
-        data = request.get_json()
-        site_id = int(data.get("site_id"))
+        data = request.get_json() or {}
+        site_id = _safe_int(data.get("site_id"), 0)
         usage_date = data.get("usage_date") or datetime.date.today().strftime("%Y-%m-%d")
         purpose = data.get("purpose", "")
         entered_by = data.get("entered_by", "")
@@ -731,10 +778,12 @@ def save_entries():
 
         added_count = 0
         for item in items:
-            mat_id = int(item["material_id"])
-            qty = float(item["quantity"])
-            rate = float(item.get("rate") or 0)
+            mat_id = _safe_int(item.get("material_id"), 0)
+            qty = _safe_float(item.get("quantity"), 0.0)
+            rate = _safe_float(item.get("rate"), 0.0)
             item_remarks = item.get("remarks", "")
+            if not mat_id:
+                continue
 
             # Auto-fill standard rate from DB for supervisors / non-owners to maintain accurate financial ledgers
             if not is_owner or rate <= 0:
@@ -1199,10 +1248,14 @@ def update_material_photo(material_id):
 # 3. Unified Reports Hub (All-in-One: Daily, Monthly, Site, Material, Matrix)
 @app.route("/reports")
 def reports_hub():
-    is_owner = session.get("is_owner", False)
+    is_owner = _is_master_owner()
     user_site_id = session.get("site_id")
 
     tab = request.args.get("tab", "daily")
+    # Supervisors cannot view cross-site material distribution or 21-site matrix
+    if not is_owner and user_site_id and tab in ("material", "matrix"):
+        tab = "site"
+
     sites = database.get_all_sites()
     if not is_owner and user_site_id:
         sites = [s for s in sites if s["id"] == int(user_site_id)]
@@ -1231,6 +1284,13 @@ def reports_hub():
     }
     if tab == "monthly":
         monthly_data = database.get_monthly_report(month_arg)
+        if not is_owner and user_site_id:
+            uid = int(user_site_id)
+            monthly_data["entries"] = [e for e in monthly_data["entries"] if e.get("site_id") == uid]
+            monthly_data["site_summaries"] = [s for s in monthly_data["site_summaries"] if s.get("site_id") == uid or s.get("id") == uid]
+            monthly_data["total_month_cost"] = sum(s.get("site_total_cost") or 0 for s in monthly_data["site_summaries"])
+            monthly_data["total_items_count"] = sum(s.get("items_count") or 0 for s in monthly_data["site_summaries"])
+            monthly_data["active_sites_count"] = 1 if monthly_data["entries"] else 0
 
     # Site Wise Data
     site_id_arg = request.args.get("site_id", type=int)
@@ -1398,6 +1458,11 @@ def export_site_excel():
 def export_daily_excel():
     report_date = request.args.get("date", datetime.date.today().strftime("%Y-%m-%d"))
     entries, site_summaries = database.get_daily_report(report_date)
+    user_site_id = session.get("site_id")
+    if not _is_master_owner() and user_site_id:
+        uid = int(user_site_id)
+        entries = [e for e in entries if e.get("site_id") == uid]
+        site_summaries = [s for s in site_summaries if s.get("id") == uid or s.get("site_id") == uid]
 
     excel_stream = exporter.generate_daily_report_excel(report_date, entries, site_summaries)
     filename = f"Daily_Material_Report_{report_date}.xlsx"
@@ -1412,11 +1477,20 @@ def export_daily_excel():
 def export_monthly_excel():
     month_arg = request.args.get("month", datetime.date.today().strftime("%Y-%m"))
     report_data = database.get_monthly_report(month_arg)
+    entries = report_data["entries"]
+    site_summaries = report_data["site_summaries"]
+    top_materials = report_data["top_materials"]
+    user_site_id = session.get("site_id")
+    if not _is_master_owner() and user_site_id:
+        uid = int(user_site_id)
+        entries = [e for e in entries if e.get("site_id") == uid]
+        site_summaries = [s for s in site_summaries if s.get("site_id") == uid or s.get("id") == uid]
+
     excel_stream = exporter.generate_monthly_report_excel(
         month_str=month_arg,
-        entries=report_data["entries"],
-        site_summaries=report_data["site_summaries"],
-        top_materials=report_data["top_materials"]
+        entries=entries,
+        site_summaries=site_summaries,
+        top_materials=top_materials
     )
     filename = f"Monthly_Material_Report_{month_arg}.xlsx"
     return send_file(
@@ -2446,6 +2520,9 @@ def delete_stock_inward_api(entry_id):
 def export_stock_excel():
     site_id_arg = request.args.get("site_id")
     selected_site_id = int(site_id_arg) if (site_id_arg and site_id_arg.isdigit()) else None
+    user_site_id = session.get("site_id")
+    if not _is_master_owner() and user_site_id:
+        selected_site_id = int(user_site_id)
     
     site_name = None
     if selected_site_id:
@@ -2551,8 +2628,8 @@ def worker_location_ping():
     try:
         data = request.get_json(silent=True) or {}
         token = data.get("token", "").strip()
-        lat = float(data.get("lat", 0))
-        lng = float(data.get("lng", 0))
+        lat = _safe_float(data.get("lat"), 0.0)
+        lng = _safe_float(data.get("lng"), 0.0)
 
         if not token or not lat or not lng:
             return jsonify({"success": False, "message": "Token aur location zaruri hai."}), 400
@@ -3021,9 +3098,9 @@ def set_site_gps(site_id):
         if not (is_owner or is_supervisor_of_site):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can configure GPS."}), 403
 
-        lat = float(data.get("latitude", 0))
-        lng = float(data.get("longitude", 0))
-        radius = int(data.get("radius", 1000))
+        lat = _safe_float(data.get("latitude"), 0.0)
+        lng = _safe_float(data.get("longitude"), 0.0)
+        radius = _safe_int(data.get("radius"), 1000)
 
         if not lat or not lng:
             return jsonify({"success": False, "message": "Latitude aur longitude zaruri hai."}), 400
@@ -3052,9 +3129,9 @@ def site_geo_points_api(site_id):
             return jsonify({"success": False, "message": "❌ Only authorized supervisor or owner can add GPS work locations."}), 403
 
         point_name = data.get("point_name", "").strip()
-        lat = float(data.get("latitude", 0))
-        lng = float(data.get("longitude", 0))
-        radius = int(data.get("radius", 1000))
+        lat = _safe_float(data.get("latitude"), 0.0)
+        lng = _safe_float(data.get("longitude"), 0.0)
+        radius = _safe_int(data.get("radius"), 1000)
 
         if not point_name or not lat or not lng:
             return jsonify({"success": False, "message": "Point Name, Latitude, and Longitude are required."}), 400
@@ -3920,7 +3997,11 @@ def supervisor_bill_prep_view():
     """Renders the 3-Step Field Preparation view for site supervisor."""
     import datetime
     now = datetime.datetime.now()
-    user_site_id = int(request.args.get("site_id") or session.get("site_id") or session.get("worker_site_id") or 1)
+    session_site_id = session.get("site_id") or session.get("worker_site_id")
+    if not _is_master_owner() and session_site_id:
+        user_site_id = _safe_int(session_site_id, 1)
+    else:
+        user_site_id = _safe_int(request.args.get("site_id") or session_site_id, 1)
     selected_month = request.args.get("month") or now.strftime("%Y-%m")
     
     site = database.get_site_by_id(user_site_id)
@@ -4142,7 +4223,7 @@ def api_bill_advance_step(bill_id):
         return jsonify({"success": False, "message": "Unauthorized! Owner access required."}), 403
         
     data = request.get_json(silent=True) or request.form.to_dict() or {}
-    next_step = int(data.get("next_step", 1))
+    next_step = _safe_int(data.get("next_step"), 1)
     step_date = data.get("step_date")
     ref_val = data.get("ref_val")
     officer_val = data.get("officer_val")

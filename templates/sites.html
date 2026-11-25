@@ -126,7 +126,7 @@
                         </a>
                         {% endif %}
                         {% if not is_supervisor_view %}
-                        <button type="button" onclick='openGlobalSiteGpsModal({{ s.id }}, "{{ s.name }}", "{{ s.latitude or "" }}", "{{ s.longitude or "" }}", {{ s.geo_radius or 1000 }})'
+                        <button type="button" onclick="openGlobalSiteGpsModal({{ s.id }}, {{ s.name|tojson|forceescape }}, {{ (s.latitude or '')|tojson|forceescape }}, {{ (s.longitude or '')|tojson|forceescape }}, {{ s.geo_radius or 1000 }})"
                                 class="px-2.5 py-1 rounded-lg bg-[#163F37] hover:opacity-90 text-white font-bold text-[11px] transition flex items-center gap-1 cursor-pointer"
                                 title="Edit GPS Coordinates & Geofence">
                             <i class="fa-solid fa-pen-to-square"></i>

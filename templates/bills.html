@@ -484,7 +484,7 @@
                                 {% if item.latest_bill %}
                                 <div class="flex items-center justify-end gap-1.5">
                                     {% if item.current_step < 6 %}
-                                    <button type="button" onclick="openAdvanceStepModal({{ item.latest_bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.latest_bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
+                                    <button type="button" onclick="openAdvanceStepModal({{ item.latest_bill.id }}, {{ item.current_step }}, {{ item.site_name|tojson|forceescape }}, {{ item.latest_bill.bill_no|tojson|forceescape }})" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
                                         <i class="fa-solid fa-forward-step text-[#D97706]"></i>
                                         <span>Next Step</span>
                                     </button>
@@ -496,12 +496,12 @@
                                     <button type="button" onclick="openEditBillModal({{ item.latest_bill.id }})" class="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition cursor-pointer">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button type="button" onclick="openNewBillModal({{ item.site_id }}, '{{ item.site_name }}')" class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition cursor-pointer" title="+ Add Another Bill for Site">
+                                    <button type="button" onclick="openNewBillModal({{ item.site_id }}, {{ item.site_name|tojson|forceescape }})" class="p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition cursor-pointer" title="+ Add Another Bill for Site">
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
                                 </div>
                                 {% else %}
-                                <button type="button" onclick="openNewBillModal({{ item.site_id }}, '{{ item.site_name }}')" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
+                                <button type="button" onclick="openNewBillModal({{ item.site_id }}, {{ item.site_name|tojson|forceescape }})" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
                                     <i class="fa-solid fa-plus"></i>
                                     <span>Create Bill</span>
                                 </button>
@@ -823,7 +823,7 @@
                                 {% if item.has_bill %}
                                 <div class="flex items-center justify-end gap-1.5">
                                     {% if item.current_step < 6 %}
-                                    <button type="button" onclick="openAdvanceStepModal({{ item.bill.id }}, {{ item.current_step }}, '{{ item.site_name }}', '{{ item.bill.bill_no }}')" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
+                                    <button type="button" onclick="openAdvanceStepModal({{ item.bill.id }}, {{ item.current_step }}, {{ item.site_name|tojson|forceescape }}, {{ item.bill.bill_no|tojson|forceescape }})" class="px-2.5 py-1.5 rounded-xl bg-[#163F37] hover:bg-[#1E4940] text-white font-bold text-xs shadow-xs transition flex items-center gap-1 cursor-pointer">
                                         <i class="fa-solid fa-forward-step text-[#D97706]"></i>
                                         <span>Next Step</span>
                                     </button>
@@ -837,7 +837,7 @@
                                     </button>
                                 </div>
                                 {% else %}
-                                <button type="button" onclick="openNewBillModalWithDates({{ item.site_id }}, '{{ item.site_name }}', '{{ item.suggested_from }}', '{{ item.suggested_to }}')" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
+                                <button type="button" onclick="openNewBillModalWithDates({{ item.site_id }}, {{ item.site_name|tojson|forceescape }}, '{{ item.suggested_from }}', '{{ item.suggested_to }}')" class="px-3 py-1.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-slate-950 font-bold text-xs shadow-xs transition flex items-center gap-1 ml-auto cursor-pointer">
                                     <i class="fa-solid fa-plus"></i>
                                     <span>Create Bill</span>
                                 </button>
@@ -1083,7 +1083,7 @@
                                         </div>
                                     </div>
                                     <!-- Acquired Month Badge with Quick Edit Trigger -->
-                                    <button type="button" onclick="openAcquiredMonthModal({{ site.site_id }}, '{{ site.site_name|escape }}', '{{ site.initial_month }}')" title="Change Acquired / Initial Month" class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 flex items-center gap-1 cursor-pointer transition flex-shrink-0">
+                                    <button type="button" onclick="openAcquiredMonthModal({{ site.site_id }}, {{ site.site_name|tojson|forceescape }}, '{{ site.initial_month }}')" title="Change Acquired / Initial Month" class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 flex items-center gap-1 cursor-pointer transition flex-shrink-0">
                                         <span>📍 {{ site.initial_label }}</span>
                                         <i class="fa-solid fa-pen text-[8px] text-amber-700"></i>
                                     </button>
@@ -1159,7 +1159,7 @@
 
                                 {% elif cell.status_type == 'initial_only' %}
                                     <!-- INITIAL MONTH WITHOUT CLEARED BILL (1-Click + Add Bill) -->
-                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, '{{ site.site_name|escape }}', '{{ cell.month_key }}')" class="py-1 px-1 rounded-xl border border-dashed border-amber-300 bg-amber-50/90 text-center cursor-pointer hover:bg-amber-100 transition shadow-2xs" title="Site Acquired in this month ({{ cell.month_label }}). Click to Add Bill.">
+                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, {{ site.site_name|tojson|forceescape }}, '{{ cell.month_key }}')" class="py-1 px-1 rounded-xl border border-dashed border-amber-300 bg-amber-50/90 text-center cursor-pointer hover:bg-amber-100 transition shadow-2xs" title="Site Acquired in this month ({{ cell.month_label }}). Click to Add Bill.">
                                         <div class="inline-block px-1.5 py-0.2 rounded-full text-[8px] font-black bg-amber-300 text-amber-950 uppercase tracking-tighter">
                                             📍 Acquired
                                         </div>
@@ -1198,7 +1198,7 @@
 
                                 {% else %}
                                     <!-- ACTIVE UNBILLED MONTH (Direct 1-Click + Add Bill) -->
-                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, '{{ site.site_name|escape }}', '{{ cell.month_key }}')" class="py-1.5 px-1 text-center cursor-pointer group/unbilled rounded-xl hover:bg-emerald-50/90 transition flex items-center justify-center" title="Click to Add Bill for {{ site.site_name }} ({{ cell.month_label }})">
+                                    <div onclick="openCreateBillForMonth({{ site.site_id }}, {{ site.site_name|tojson|forceescape }}, '{{ cell.month_key }}')" class="py-1.5 px-1 text-center cursor-pointer group/unbilled rounded-xl hover:bg-emerald-50/90 transition flex items-center justify-center" title="Click to Add Bill for {{ site.site_name }} ({{ cell.month_label }})">
                                         <button type="button" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-400 group-hover/unbilled:text-white bg-slate-100/90 group-hover/unbilled:bg-[#163F37] border border-dashed border-slate-300 group-hover/unbilled:border-[#163F37] transition shadow-2xs pointer-events-none cursor-pointer">
                                             <i class="fa-solid fa-plus text-[8px] text-slate-400 group-hover/unbilled:text-[#D97706]"></i>
                                             <span>+ Bill</span>
@@ -1338,13 +1338,13 @@
                             </td>
                             <td class="py-3 px-4 text-right no-print whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button type="button" onclick="openAdvanceStepModal({{ b.id }}, {{ b.current_step }}, '{{ b.site_name }}', '{{ b.bill_no }}')" class="p-1.5 rounded-lg bg-[#163F37] text-white hover:bg-[#1E4940] transition cursor-pointer" title="Advance Step">
+                                    <button type="button" onclick="openAdvanceStepModal({{ b.id }}, {{ b.current_step }}, {{ b.site_name|tojson|forceescape }}, {{ b.bill_no|tojson|forceescape }})" class="p-1.5 rounded-lg bg-[#163F37] text-white hover:bg-[#1E4940] transition cursor-pointer" title="Advance Step">
                                         <i class="fa-solid fa-forward-step text-[#D97706] text-xs"></i>
                                     </button>
                                     <button type="button" onclick="openEditBillModal({{ b.id }})" class="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer" title="Edit">
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                     </button>
-                                    <button type="button" onclick="deleteBill({{ b.id }}, '{{ b.bill_no }}')" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition cursor-pointer" title="Archive / Delete">
+                                    <button type="button" onclick="deleteBill({{ b.id }}, {{ b.bill_no|tojson|forceescape }})" class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition cursor-pointer" title="Archive / Delete">
                                         <i class="fa-solid fa-trash-can text-xs"></i>
                                     </button>
                                 </div>

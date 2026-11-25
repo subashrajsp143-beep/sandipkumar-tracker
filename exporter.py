@@ -112,15 +112,15 @@ def generate_site_report_excel(site_name, entries, material_summary, from_date=N
     for i, e in enumerate(entries, start=1):
         ws_log.append([
             i,
-            e["usage_date"],
-            e["material_name"],
-            e["quantity"],
-            e["material_unit"],
-            e["rate"],
-            e["total_amount"],
-            e["purpose"] or "",
-            e["entered_by"] or "",
-            e["remarks"] or ""
+            e.get("usage_date") or "",
+            e.get("material_name") or "",
+            e.get("quantity") or 0,
+            e.get("material_unit") or e.get("unit") or "",
+            e.get("rate") or 0,
+            e.get("total_amount") or 0,
+            e.get("purpose") or "",
+            e.get("entered_by") or "",
+            e.get("remarks") or ""
         ])
         for c in range(1, 11):
             cell = ws_log.cell(log_row, c)
@@ -217,16 +217,16 @@ def generate_monthly_report_excel(month_str, entries, site_summaries, top_materi
     total_sites_val = 0
     total_sites_items = 0
     for i, s in enumerate(site_summaries, start=1):
-        cost = s["site_total_cost"] or 0
+        cost = s.get("site_total_cost") or 0
         total_sites_val += cost
-        items_cnt = s["items_count"] or 0
+        items_cnt = s.get("items_count") or 0
         total_sites_items += items_cnt
         ws_sites.append([
             i,
-            s["code"],
-            s["name"],
-            s.get("supervisor", "") or "",
-            s.get("contact", "") or "",
+            s.get("site_code") or s.get("code") or "",
+            s.get("site_name") or s.get("name") or "",
+            s.get("site_supervisor") or s.get("supervisor") or "",
+            s.get("site_contact") or s.get("contact") or "",
             items_cnt,
             cost
         ])

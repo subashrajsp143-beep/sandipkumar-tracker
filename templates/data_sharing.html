@@ -346,7 +346,7 @@
 
                         <!-- Delete Button (Owner or Uploader) -->
                         {% if is_owner or (current_user_name and current_user_name.lower() == doc.uploader_name.lower()) %}
-                        <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, '{{ doc.title|escape }}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition cursor-pointer border border-rose-200 flex-shrink-0" title="Delete this file">
+                        <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, {{ doc.title|tojson|forceescape }})" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition cursor-pointer border border-rose-200 flex-shrink-0" title="Delete this file">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                         {% endif %}
@@ -422,7 +422,7 @@
                                         <i class="fa-solid fa-download text-xs text-[#D97706]"></i>
                                     </a>
                                     {% if is_owner or (current_user_name and current_user_name.lower() == doc.uploader_name.lower()) %}
-                                    <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, '{{ doc.title|escape }}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition cursor-pointer" title="Delete">
+                                    <button type="button" onclick="confirmDeleteDoc({{ doc.id }}, {{ doc.title|tojson|forceescape }})" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition cursor-pointer" title="Delete">
                                         <i class="fa-regular fa-trash-can text-xs"></i>
                                     </button>
                                     {% endif %}
