@@ -118,17 +118,6 @@ def ensure_canonical_and_auth():
     if request.method == "OPTIONS":
         return None
 
-    # TEMPORARY DEMO / REVIEW MODE: Auto-authenticate as Master Owner so anyone can inspect and test the site without login barrier
-    if request.args.get("force_login") != "1" and not session.get("role"):
-        session.permanent = True
-        session["role"] = "owner"
-        session["is_owner"] = True
-        session["worker_name"] = "Sandip Kumar"
-        session["worker_role"] = "Owner"
-        session["worker_phone"] = "9835180075"
-        session["site_id"] = None
-        session["site_name"] = "All Sites (Master Owner)"
-
     # Public paths that never require login
     path = request.path
     if (path.startswith("/static") or 
@@ -251,8 +240,6 @@ def company_website():
 # 0.2 Universal Login Page
 @app.route("/login")
 def login_page():
-    if request.args.get("force_login") != "1":
-        return redirect(url_for("dashboard"))
     role = session.get("role")
     is_owner = session.get("is_owner", False)
     if role == "worker":
