@@ -512,7 +512,7 @@
                         <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#22C55E]"></span>
                     </div>
 
-                    <!-- User Profile Pill (matches Employee pill in screenshot) -->
+                    <!-- User Profile Pill + Always-Visible Quick Signout -->
                     <div class="flex items-center gap-2 pl-2 border-l border-[#E5ECE9]">
                         <div class="w-8 h-8 rounded-full bg-[#EAF5EF] text-[#163F37] font-bold text-xs flex items-center justify-center border border-[#C3E3D2]">
                             {% if session.get('is_owner') or user_role == 'owner' %}🏢{% else %}👤{% endif %}
@@ -521,6 +521,10 @@
                             <span class="text-xs font-bold text-[#163F37]" data-i18n="top_user">{% if session.get('is_owner') or user_role == 'owner' %}Sandip Kumar{% else %}{{ user_name or 'Staff' }}{% endif %}</span>
                             <span class="text-[10px] text-[#52736B] capitalize" data-i18n="top_role">{% if session.get('is_owner') or user_role == 'owner' %}Office Work{% else %}{{ user_role or 'Staff' }}{% endif %}</span>
                         </div>
+                        <a href="/logout" onclick="handleAppSignout(event); return false;" title="Sign Out" class="sidebar-signout-btn ml-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            <span class="hidden sm:inline" data-i18n="sign_out">Sign Out</span>
+                        </a>
                     </div>
                 </div>
             </header>
@@ -800,8 +804,7 @@
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('[PWA] Naya version mila! Auto-updating page...');
-                                window.location.reload();
+                                console.log('[PWA] New Service Worker ready for next navigation.');
                             }
                         });
                     });
@@ -1194,8 +1197,12 @@
         }
     }
     // --- OWNER ROLE  CLIENT LOGIC ---
+    const SERVER_IS_OWNER = {{ is_owner|default(false)|tojson }};
     function isOwnerLoggedIn() {
-        return localStorage.getItem('sandip_is_owner') === 'true';
+        return SERVER_IS_OWNER || localStorage.getItem('sandip_is_owner') === 'true';
+    }
+    if (SERVER_IS_OWNER) {
+        try { localStorage.setItem('sandip_is_owner', 'true'); } catch(e) {}
     }
 
     function openOwnerPinModal() {

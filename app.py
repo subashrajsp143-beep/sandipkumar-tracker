@@ -51,7 +51,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    full_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.isfile(full_path):
+        return send_from_directory(UPLOAD_FOLDER, filename)
+    if filename.startswith("materials/"):
+        fallback = os.path.join(UPLOAD_FOLDER, "materials", "fittings.jpg")
+        if os.path.isfile(fallback):
+            return send_file(fallback, mimetype="image/jpeg")
+    return "", 404
 
 # Ensure DB is created on startup
 database.init_db()
@@ -833,6 +840,7 @@ def save_entries():
         return jsonify({"success": False, "message": f"Error saving entries: {str(e)}"}), 500
 
 @app.route("/api/entries/<int:entry_id>", methods=["DELETE", "OPTIONS"])
+@app.route("/api/entries/<int:entry_id>/delete", methods=["POST", "DELETE", "OPTIONS"])
 def delete_entry(entry_id):
     if request.method == "OPTIONS":
         return "", 200
@@ -1152,23 +1160,23 @@ def process_and_save_photo(url_or_path, material_id):
                     # Recursively fetch the actual image URL
                     return process_and_save_photo(urllib.parse.urljoin(clean_url, found_img), material_id)
 
-            # Verify that data is a valid image using PIL
-            import io
-            from PIL import Image
-            im = Image.open(io.BytesIO(data))
-            im = im.convert("RGB")
-
-            fname = f"mat_{material_id}_{uuid.uuid4().hex[:6]}.jpg"
-            target_dir = os.path.join(UPLOAD_FOLDER, "materials")
-            os.makedirs(target_dir, exist_ok=True)
-            fpath = os.path.join(target_dir, fname)
-            im.save(fpath, format="JPEG", quality=85, optimize=True)
-            return f"/uploads/materials/{fname}"
+            # Compress uploaded/fetched material photo into compact Base64 data URI so it persists in DB across Render restarts
+            return _image_stream_to_data_uri(io.BytesIO(data))
         except Exception as e:
             print(f"Warning: could not process remote image {clean_url}: {e}")
             return clean_url
 
     return clean_url
+
+def _image_stream_to_data_uri(stream):
+    """Resize and encode an image stream to a compact JPEG data URI for persistent SQLite storage."""
+    from PIL import Image
+    im = Image.open(stream)
+    im = im.convert("RGB")
+    im.thumbnail((360, 360), Image.Resampling.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, format="JPEG", quality=75, optimize=True)
+    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
 
 # CORS and Options handler + No-Cache for HTML
 @app.after_request
@@ -1195,17 +1203,13 @@ def resolve_photo_url():
             return jsonify({"success": False, "message": "Koi URL nahi mila"}), 400
         
         saved_path = process_and_save_photo(raw_url, mat_id)
+        if saved_path and saved_path.startswith("data:image/"):
+            return jsonify({"success": True, "image_url": saved_path, "b64": saved_path})
         if saved_path and saved_path.startswith("/uploads/"):
             full_path = os.path.join(app.root_path, saved_path.lstrip("/"))
             if os.path.exists(full_path):
-                import io
-                from PIL import Image
-                im = Image.open(full_path)
-                im = im.convert("RGB")
-                im.thumbnail((380, 380), Image.Resampling.LANCZOS)
-                buf = io.BytesIO()
-                im.save(buf, format="JPEG", quality=80, optimize=True)
-                b64 = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+                with open(full_path, "rb") as f:
+                    b64 = _image_stream_to_data_uri(f)
                 return jsonify({"success": True, "image_url": saved_path, "b64": b64})
         return jsonify({"success": False, "message": "Image extract nahi ho payi"}), 400
     except Exception as e:
@@ -1220,25 +1224,15 @@ def update_material_photo(material_id):
         # Check if file was uploaded
         if "photo" in request.files and request.files["photo"].filename != "":
             file = request.files["photo"]
-            ext = os.path.splitext(file.filename)[1].lower()
-            if ext not in [".jpg", ".jpeg", ".png", ".webp", ".svg"]:
-                ext = ".jpg"
-            fname = f"mat_{material_id}_{uuid.uuid4().hex[:6]}{ext}"
-            target_dir = os.path.join(UPLOAD_FOLDER, "materials")
-            os.makedirs(target_dir, exist_ok=True)
-            filepath = os.path.join(target_dir, fname)
-            file.save(filepath)
-            image_url = f"/uploads/materials/{fname}"
+            final_image_url = _image_stream_to_data_uri(file.stream)
         else:
             image_url = request.form.get("image_url", "").strip()
             if not image_url and request.is_json:
                 image_url = (request.get_json() or {}).get("image_url", "").strip()
+            if not image_url:
+                return jsonify({"success": False, "message": "Photo URL ya file upload karna anivarya hai."}), 400
+            final_image_url = process_and_save_photo(image_url, material_id)
 
-        if not image_url:
-            return jsonify({"success": False, "message": "Photo URL ya file upload karna anivarya hai."}), 400
-
-        # Smartly process, extract Google image links and save locally
-        final_image_url = process_and_save_photo(image_url, material_id)
         database.update_material_photo(material_id, final_image_url)
 
         return jsonify({"success": True, "message": "Material photo safalta se update ho gayi!", "image_url": final_image_url})
@@ -1517,8 +1511,7 @@ def sites_list():
 
 @app.route("/api/sites/<int:site_id>/edit", methods=["POST"])
 def edit_site(site_id):
-    is_owner = session.get("is_owner", False)
-    if not is_owner:
+    if not _is_master_owner():
         return jsonify({"success": False, "message": "❌ Security Restriction: Only authorized owner can modify site details."}), 403
     try:
         data = request.form
@@ -1561,8 +1554,7 @@ def add_site():
         incharge = data.get("incharge", "").strip()
         incharge_phone = data.get("incharge_phone", "").strip()
 
-        is_owner = session.get("is_owner", False)
-        if not is_owner:
+        if not _is_master_owner():
             flash("❌ Only authorized owner can add new sites.", "error")
             return redirect(url_for("site_stock"))
 
@@ -1592,8 +1584,7 @@ def add_site():
 
 @app.route("/api/sites/<int:site_id>/delete", methods=["POST"])
 def delete_site(site_id):
-    is_owner = session.get("is_owner", False)
-    if not is_owner:
+    if not _is_master_owner():
         flash("❌ Only authorized owner can delete sites.", "error")
         return redirect(url_for("site_stock"))
     try:
@@ -1619,8 +1610,7 @@ def delete_site(site_id):
 # 9. Materials Master Management
 @app.route("/materials")
 def materials_list():
-    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
-    if not is_owner:
+    if not _is_master_owner():
         flash("❌ Rate Master is authorized for Owner only.", "error")
         return redirect(url_for("site_stock"))
 
@@ -1630,16 +1620,14 @@ def materials_list():
 @app.route("/api/materials", methods=["POST"])
 def add_material():
     import sqlite3
-    is_owner = session.get("is_owner", False) or session.get("role") == "owner"
-    if not is_owner:
+    if not _is_master_owner():
         flash("❌ Only authorized owner can add materials.", "error")
         return redirect(url_for("site_stock"))
     try:
         data = request.form
         name = data.get("name", "").strip()
         unit = data.get("unit", "NOS").strip() or "NOS"
-        raw_rate = str(data.get("rate", "")).strip()
-        rate = float(raw_rate) if raw_rate else 0.0
+        rate = _safe_float(str(data.get("rate", "")).strip(), 0.0)
         category = data.get("category", "General").strip() or "General"
 
         if not name:
@@ -1650,9 +1638,9 @@ def add_material():
         cursor = conn.cursor()
         try:
             cursor.execute("""
-                INSERT INTO materials (name, unit, rate, category)
-                VALUES (?, ?, ?, ?)
-            """, (name, unit, rate, category))
+                INSERT INTO materials (name, unit, rate, category, image_url)
+                VALUES (?, ?, ?, ?, ?)
+            """, (name, unit, rate, category, "/uploads/materials/fittings.jpg"))
             conn.commit()
         except sqlite3.IntegrityError:
             conn.close()
@@ -1673,12 +1661,14 @@ def add_material():
 
 @app.route("/api/materials/<int:mat_id>/edit", methods=["POST"])
 def edit_material(mat_id):
+    if not _is_master_owner():
+        flash("❌ Only authorized owner can edit materials.", "error")
+        return redirect(url_for("site_stock"))
     try:
         data = request.form
         name = data.get("name", "").strip()
         unit = data.get("unit", "NOS").strip() or "NOS"
-        raw_rate = str(data.get("rate", "")).strip()
-        rate = float(raw_rate) if raw_rate else 0.0
+        rate = _safe_float(str(data.get("rate", "")).strip(), 0.0)
         category = data.get("category", "General").strip() or "General"
 
         conn = database.get_db()

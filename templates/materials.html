@@ -60,7 +60,7 @@
                     <tr class="hover:bg-slate-50/80 transition mat-row" data-name="{{ m.name|lower }}" data-cat="{{ m.category|lower }}">
                         <td class="py-2.5 px-3 text-center text-slate-400 font-mono">{{ loop.index }}</td>
                         <td class="py-2 px-3 text-center">
-                            <div class="relative group/img inline-block cursor-pointer" onclick='openPhotoModal({{ m|tojson }})' title="Photo badlein ya online dekhein">
+                            <div class="relative group/img inline-block cursor-pointer" onclick="openPhotoModal({{ m|tojson|forceescape }})" title="Photo badlein ya online dekhein">
                                 <img src="{{ m.image_url or '/uploads/materials/fittings.jpg' }}" 
                                      id="tbl-img-{{ m.id }}"
                                      class="w-10 h-10 rounded-lg object-cover mx-auto border border-slate-200 group-hover/img:opacity-80 transition"
@@ -82,10 +82,10 @@
                         {% endif %}
                         <td class="py-2.5 px-3 text-center">
                             <div class="inline-flex items-center gap-1.5">
-                                <button onclick='openPhotoModal({{ m|tojson }})' class="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium text-[11px] transition flex items-center gap-1" title="Photo Badlein">
+                                <button onclick="openPhotoModal({{ m|tojson|forceescape }})" class="px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium text-[11px] transition flex items-center gap-1" title="Photo Badlein">
                                     <i class="fa-solid fa-camera text-xs"></i> Photo
                                 </button>
-                                <button onclick='openEditModal({{ m|tojson }})' class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium text-[11px] transition flex items-center gap-1">
+                                <button onclick="openEditModal({{ m|tojson|forceescape }})" class="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium text-[11px] transition flex items-center gap-1">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i> Edit
                                 </button>
                             </div>
@@ -146,7 +146,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Rate (₹)</label>
-                    <input type="number" step="any" min="0" id="editRate" name="rate" required class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
+                    <input type="number" step="any" min="0" id="editRate" name="rate" placeholder="0.00" class="w-full rounded-xl border border-slate-300 py-2 px-3 text-xs text-slate-800 focus:border-blue-500">
                 </div>
             </div>
             <div>

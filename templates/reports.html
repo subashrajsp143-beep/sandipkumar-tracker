@@ -679,20 +679,17 @@ function shareMonthlyWhatsAppUnified() {
 
 // Delete Entry Handler for Office Work in Unified Hub
 async function deleteEntryUnified(entryId) {
-    if (!localStorage.getItem('sandip_is_owner')) {
+    if (!isOwnerLoggedIn()) {
         alert('Only authorized Office Work users can delete entries. Please log in to Office Work first.');
         return;
     }
-    const pin = prompt('Enter Office Work Password to delete entry:');
-    if (!pin) return;
-
     if (!confirm('Are you sure you want to delete this entry?')) return;
 
     try {
         const res = await fetch(`/api/entries/${entryId}/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pin: pin })
+            body: JSON.stringify({})
         });
         const data = await res.json();
         if (data.success) {

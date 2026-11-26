@@ -1,14 +1,11 @@
 // Service Worker for M/S Sandip Kumar Material Tracker
-const CACHE_NAME = 'sandip-tracker-v59';
+const CACHE_NAME = 'sandip-tracker-v60';
 const STATIC_ASSETS = [
-  '/',
   '/static/css/theme.css',
   '/static/manifest.json',
   '/static/translations.js',
   '/static/icons/icon-192.png',
-  '/static/icons/icon-512.png',
-  'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+  '/static/icons/icon-512.png'
 ];
 
 // Install: Cache critical shell assets
@@ -69,7 +66,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static images/uploads/icons: Cache First, fallback to network (CSS and JS are Network-First)
+  // Static images/uploads/icons: Cache First, fallback to network
   const isImageOrIcon = url.pathname.startsWith('/uploads/') || 
                         url.pathname.startsWith('/static/icons/') || 
                         /\.(png|jpg|jpeg|svg|ico|webp|gif)$/i.test(url.pathname);
@@ -83,36 +80,24 @@ self.addEventListener('fetch', (event) => {
             caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           }
           return res;
-        }).catch(() => cached);
+        }).catch(() => cached || Response.error());
       })
     );
     return;
   }
 
-  // HTML Pages & APIs: Network First, fallback to cached version when offline
-  event.respondWith(
-    fetch(req)
-      .then((networkRes) => {
-        if (networkRes && networkRes.status === 200) {
-          const copy = networkRes.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-        }
-        return networkRes;
-      })
-      .catch(async () => {
-        const cached = await caches.match(req);
-        if (cached) return cached;
-        // Fallback to cached root page if available
-        if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
-          return caches.match('/');
-        }
-        return new Response('Offline mode: Internet connection not available', {
+  // Always fetch live HTML pages & APIs directly from server so new fixes/signout/edit buttons never go stale
+  if (req.headers.get('accept') && req.headers.get('accept').includes('text/html')) {
+    event.respondWith(
+      fetch(req).catch(() =>
+        new Response('Offline: Please check your internet connection and refresh.', {
           status: 503,
           statusText: 'Offline',
           headers: new Headers({ 'Content-Type': 'text/plain' })
-        });
-      })
-  );
+        })
+      )
+    );
+  }
 });
 
 
