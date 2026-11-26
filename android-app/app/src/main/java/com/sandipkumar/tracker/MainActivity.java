@@ -529,10 +529,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (Exception ignored) {}
 
                     if (broadcastActive && latestVersionCode > currentVersionCode && !apkUrl.isEmpty()) {
-                        runOnUiThread(() -> {
-                            showUpdateDialog(latestVersionName, changelog, apkUrl);
-                            showUpdateNotification(latestVersionName, changelog, apkUrl);
-                        });
+                        runOnUiThread(() -> showUpdateDialog(latestVersionName, changelog, apkUrl));
                     }
                 }
             } catch (Exception ignored) {
