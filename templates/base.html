@@ -1681,18 +1681,41 @@
     <!-- APP UPDATE & NOTIFICATION SYSTEM JAVASCRIPT -->
     <script>
     (function() {
-        // Default base client version is 7 (v1.6.0)
-        let clientVersionCode = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+        // Read installed APK version from User-Agent when running inside Android app, otherwise stored web version
+        const apkMatch = navigator.userAgent.match(/SandipTrackerAPK\/(\d+)/);
+        const apkVer = apkMatch ? parseInt(apkMatch[1], 10) : 0;
+        let storedVer = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+        if (apkVer > storedVer) {
+            storedVer = apkVer;
+            localStorage.setItem('sandip_client_version_code', String(apkVer));
+        }
+        let clientVersionCode = storedVer;
         let latestVersionData = null;
+
+        window.acknowledgeAppUpdate = function() {
+            if (latestVersionData && latestVersionData.version_code) {
+                const sc = String(latestVersionData.version_code);
+                clientVersionCode = parseInt(sc, 10);
+                localStorage.setItem('sandip_client_version_code', sc);
+                localStorage.setItem('sandip_dismissed_version', sc);
+                localStorage.setItem('sandip_notified_version', sc);
+            }
+            const b = document.getElementById('appUpdateBanner');
+            if (b) b.classList.add('hidden');
+            closeAppUpdateModal(false);
+        };
 
         window.openAppUpdateModal = function() {
             const m = document.getElementById('appUpdateModal');
             if (m) m.classList.remove('hidden');
         };
 
-        window.closeAppUpdateModal = function() {
+        window.closeAppUpdateModal = function(markDismissed) {
             const m = document.getElementById('appUpdateModal');
             if (m) m.classList.add('hidden');
+            if (markDismissed !== false && latestVersionData && latestVersionData.version_code) {
+                localStorage.setItem('sandip_dismissed_version', String(latestVersionData.version_code));
+            }
         };
 
         window.dismissAppUpdateBanner = function() {
@@ -1906,10 +1929,16 @@
 
                     if (bVer) bVer.textContent = 'v' + data.version_name;
                     if (bLog) bLog.textContent = data.changelog || 'Naye features aur fast performance updates.';
-                    if (bBtn) bBtn.href = data.apk_url || '/download-apk';
+                    if (bBtn) {
+                        bBtn.href = data.apk_url || '/download-apk';
+                        bBtn.onclick = acknowledgeAppUpdate;
+                    }
                     if (mBadge) mBadge.textContent = 'v' + data.version_name;
                     if (mLog) mLog.textContent = data.changelog || 'Naye features aur bug fixes.';
-                    if (mBtn) mBtn.href = data.apk_url || '/download-apk';
+                    if (mBtn) {
+                        mBtn.href = data.apk_url || '/download-apk';
+                        mBtn.onclick = acknowledgeAppUpdate;
+                    }
                     if (sideBadge) sideBadge.classList.remove('hidden');
 
                     // 2. Show Banner if not dismissed
@@ -1925,10 +1954,15 @@
                         triggerPhoneNotification(data);
                     }
 
-                    // 4. Force modal if marked force_update
-                    if (data.force_update) {
+                    // 4. Force modal if marked force_update (only if not yet dismissed/downloaded for this version)
+                    if (data.force_update && (forceCheck || dismissed !== String(serverCode))) {
                         openAppUpdateModal();
                     }
+                } else {
+                    const banner = document.getElementById('appUpdateBanner');
+                    if (banner) banner.classList.add('hidden');
+                    const sideBadge = document.getElementById('sidebarUpdateBadge');
+                    if (sideBadge) sideBadge.classList.add('hidden');
                 }
             } catch(err) {
                 console.log('[AppUpdateCheck] Silent error:', err);

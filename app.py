@@ -1708,10 +1708,7 @@ def pwa_sw():
 
 @app.route("/download-apk")
 def download_apk():
-    """Serves or redirects to the latest released Android APK."""
-    local_apk = os.path.join(os.path.dirname(__file__), "SandipKumarTracker.apk")
-    if os.path.exists(local_apk) and os.path.getsize(local_apk) > 1000000:
-        return send_file(local_apk, as_attachment=True, download_name="SandipKumarTracker.apk", mimetype="application/vnd.android.package-archive")
+    """Redirects to the latest released Android APK built by GitHub Actions."""
     return redirect("https://github.com/subashrajsp143-beep/sandipkumar-tracker/releases/download/v1.0-apk/SandipKumarTracker.apk")
 
 

@@ -365,7 +365,14 @@
     <!-- APP UPDATE CHECK & PHONE NOTIFICATION -->
     <script>
     (function() {
-        let clientVersionCode = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+        const apkMatch = navigator.userAgent.match(/SandipTrackerAPK\/(\d+)/);
+        const apkVer = apkMatch ? parseInt(apkMatch[1], 10) : 0;
+        let storedVer = parseInt(localStorage.getItem('sandip_client_version_code') || '7', 10);
+        if (apkVer > storedVer) {
+            storedVer = apkVer;
+            localStorage.setItem('sandip_client_version_code', String(apkVer));
+        }
+        let clientVersionCode = storedVer;
 
         function triggerPhoneNotification(data) {
             try {
@@ -401,7 +408,7 @@
 
         async function checkUpdates() {
             try {
-                const res = await fetch('/api/app-version?t=' + Date.now());
+                const res = await fetch('/api/app-version?t=' + Date.now(), { cache: 'no-store' });
                 if (!res.ok) return;
                 const data = await res.json();
 
@@ -413,14 +420,24 @@
                 }
 
                 const serverCode = parseInt(data.version_code, 10);
-                if (serverCode > clientVersionCode) {
+                const dismissed = localStorage.getItem('sandip_dismissed_version');
+                if (serverCode > clientVersionCode && dismissed !== String(serverCode)) {
                     const b = document.getElementById('appUpdateBanner');
                     const bVer = document.getElementById('bannerVersionName');
                     const bLog = document.getElementById('bannerChangelog');
                     const bBtn = document.getElementById('bannerDownloadBtn');
                     if (bVer) bVer.textContent = 'v' + data.version_name;
                     if (bLog) bLog.textContent = data.changelog || 'Naya version ready hai.';
-                    if (bBtn) bBtn.href = data.apk_url || '/download-apk';
+                    if (bBtn) {
+                        bBtn.href = data.apk_url || '/download-apk';
+                        bBtn.onclick = function() {
+                            const sc = String(serverCode);
+                            localStorage.setItem('sandip_client_version_code', sc);
+                            localStorage.setItem('sandip_dismissed_version', sc);
+                            localStorage.setItem('sandip_notified_version', sc);
+                            if (b) b.classList.add('hidden');
+                        };
+                    }
                     if (b) b.classList.remove('hidden');
 
                     const notified = localStorage.getItem('sandip_notified_version');
